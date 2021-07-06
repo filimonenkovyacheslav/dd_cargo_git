@@ -1,0 +1,690 @@
+// Table
+$(document).ready(function() {
+    $('#bootstrap-data-table-export').DataTable();
+
+    if(location.href.indexOf('china') == -1 || location.href.indexOf('phil-ind') == -1){
+        $('#bootstrap-data-table_length > label > select > option:nth-child(4)').text('Все');
+    
+        if ($('.dataTables_empty').text() == 'No data available in table') {
+            $('.dataTables_empty').text('Нет данных');
+        } 
+    }
+
+    let btnMove = $('a.btn-move');
+    btnMove.detach();
+    if (location.href.indexOf('new-worksheet') == -1 && location.href.indexOf('phil-ind-worksheet') == -1 && location.href.indexOf('draft-worksheet') == -1) {
+        $('#bootstrap-data-table_length').after(btnMove.get(0));
+        $('#bootstrap-data-table_length').after(btnMove.get(2));
+        $('#bootstrap-data-table_length').after(btnMove.get(1));
+    }
+    else{ 
+        $('.btn-move-wrapper').prepend(btnMove.get(0));
+        $('.btn-move-wrapper').prepend(btnMove.get(2));
+        $('.btn-move-wrapper').prepend(btnMove.get(1));            
+    }
+    btnMove.css('display','block');
+
+});
+
+
+// Worksheet update
+$('form.worksheet-update-form button').click((e)=>{
+    e.preventDefault();
+
+    const phone = document.querySelector('[name="standard_phone"]'); 
+    if (phone.value.length < 10 || phone.value.length > 13) {
+        alert('Кол-во знаков в телефоне должно быть от 10 до 13 !');
+        return false;
+    }
+   
+    const form = $(e.target).parent();
+    $('form.worksheet-update-form input').each((k,el)=>{
+        let inputVal = '';
+        let inputName = '';
+        if ($(el).attr('type') !== 'hidden') {
+            inputVal = $(el).val();
+            inputName = $(el).attr('name');
+            form.find('[name="'+inputName+'"]').each((j,elem)=>{
+                if ($(elem).attr('type') === 'hidden') {$(elem).val(inputVal)}
+            })
+        }                   
+    });
+    $('form.worksheet-update-form select').each((k,el)=>{
+        let inputVal = $(el).val();
+        let inputName = $(el).attr('name');
+        form.find('[name="'+inputName+'"]').each((j,elem)=>{
+            if ($(elem).attr('type') === 'hidden') {$(elem).val(inputVal)}
+        })                  
+    });
+    form.submit();        
+})
+
+
+// Philippines India Worksheet update
+$('form.phil-ind-update-form button').click((e)=>{
+    e.preventDefault();
+
+    const phone = document.querySelector('[name="standard_phone"]'); 
+    if (phone.value.length < 10 || phone.value.length > 13) {
+        alert('The number of characters in the phone must be from 10 to 13 !');
+        return false;
+    }
+    
+    const form = $(e.target).parent();
+    $('form.phil-ind-update-form input').each((k,el)=>{
+        let inputVal = '';
+        let inputName = '';
+        if ($(el).attr('type') !== 'hidden') {
+            inputVal = $(el).val();
+            inputName = $(el).attr('name');
+            form.find('[name="'+inputName+'"]').each((j,elem)=>{
+                if ($(elem).attr('type') === 'hidden') {$(elem).val(inputVal)}
+            })
+        }                   
+    });
+    $('form.phil-ind-update-form select').each((k,el)=>{
+        let inputVal = $(el).val();
+        let inputName = $(el).attr('name');
+        form.find('[name="'+inputName+'"]').each((j,elem)=>{
+            if ($(elem).attr('type') === 'hidden') {$(elem).val(inputVal)}
+        })                  
+    });
+    form.submit();        
+})
+
+
+// Worksheet status
+const enArr = {
+    "Доставляется на склад в стране отправителя": "Forwarding to the warehouse in the sender country",
+    "На складе в стране отправителя": "At the warehouse in the sender country",
+    "На таможне в стране отправителя": "At the customs in the sender country",
+    "Доставляется в страну получателя": "Forwarding to the receiver country",
+    "На таможне в стране получателя": "At the customs in the receiver country",
+    "Доставляется получателю": "Forwarding to the receiver",
+    "Доставлено": "Delivered"
+};
+const heArr = {
+    "Доставляется на склад в стране отправителя": "נשלח למחסן במדינת השולח",
+    "На складе в стране отправителя": "במחסן במדינת השולח",
+    "На таможне в стране отправителя": " במכס במדינת השולח",
+    "Доставляется в страну получателя": " נשלח למדינת המקבל",
+    "На таможне в стране получателя": " במכס במדינת המקבל",
+    "Доставляется получателю": " נמסר למקבל",
+    "Доставлено": " נמסר"
+};
+const uaArr = {
+    "Доставляется на склад в стране отправителя": "Доставляється до складу в країні відправника",
+    "На складе в стране отправителя": "На складі в країні відправника",
+    "На таможне в стране отправителя": "На митниці в країні відправника",
+    "Доставляется в страну получателя": "Доставляється в країну відправника",
+    "На таможне в стране получателя": "На митниці в країні отримувача",
+    "Доставляется получателю": "Доставляється отримувачу",
+    "Доставлено": "Доставлено"
+};
+const ruArrChina = {
+    "Forwarding to the warehouse in the sender country": "Доставляется на склад в стране отправителя",
+    "At the warehouse in the sender country": "На складе в стране отправителя",
+    "At the customs in the sender country": "На таможне в стране отправителя",
+    "Forwarding to the receiver country": "Доставляется в страну получателя",
+    "At the customs in the receiver country": "На таможне в стране получателя",
+    "Forwarding to the receiver": "Доставляется получателю",
+    "Delivered": "Доставлено"
+};
+const heArrChina = {
+    "Forwarding to the warehouse in the sender country": "נשלח למחסן במדינת השולח",
+    "At the warehouse in the sender country": "במחסן במדינת השולח",
+    "At the customs in the sender country": " במכס במדינת השולח",
+    "Forwarding to the receiver country": " נשלח למדינת המקבל",
+    "At the customs in the receiver country": " במכס במדינת המקבל",
+    "Forwarding to the receiver": " נמסר למקבל",
+    "Delivered": " נמסר"
+};
+
+$('form.worksheet-add-form select[name="status"]').change((e)=>{
+    const key = $(e.target).val();
+
+    $('form.worksheet-add-form [name="status_en"]').val(enArr[key]);
+    $('form.worksheet-add-form [name="status_en_disabled"]').val(enArr[key]);
+    $('form.worksheet-add-form [name="status_he"]').val(heArr[key]);
+    $('form.worksheet-add-form [name="status_he_disabled"]').val(heArr[key]);
+    $('form.worksheet-add-form [name="status_ua"]').val(uaArr[key]);
+    $('form.worksheet-add-form [name="status_ua_disabled"]').val(uaArr[key]);
+})
+
+$('form.worksheet-update-form select[name="status"]').change((e)=>{
+    const key = $(e.target).val();
+    
+    $('form.worksheet-update-form [name="status_en"]').val(enArr[key]);
+    $('form.worksheet-update-form [name="status_en_disabled"]').val(enArr[key]);
+    $('form.worksheet-update-form [name="status_he"]').val(heArr[key]);
+    $('form.worksheet-update-form [name="status_he_disabled"]').val(heArr[key]);
+    $('form.worksheet-update-form [name="status_ua"]').val(uaArr[key]);
+    $('form.worksheet-update-form [name="status_ua_disabled"]').val(uaArr[key]);
+})
+
+$('form.old-worksheet-update-form select[name="status"]').change((e)=>{
+    const key = $(e.target).val();
+    
+    $('form.old-worksheet-update-form [name="guarantee_text_en"]').val(enArr[key]);
+    $('form.old-worksheet-update-form [name="status_en_disabled"]').val(enArr[key]);
+    $('form.old-worksheet-update-form [name="guarantee_text_he"]').val(heArr[key]);
+    $('form.old-worksheet-update-form [name="status_he_disabled"]').val(heArr[key]);
+    $('form.old-worksheet-update-form [name="guarantee_text_ua"]').val(uaArr[key]);
+    $('form.old-worksheet-update-form [name="status_ua_disabled"]').val(uaArr[key]);
+})
+
+$('form.china-worksheet-form select[name="status"]').change((e)=>{
+    const key = $(e.target).val();
+    
+    $('form.china-worksheet-form [name="status_he"]').val(heArrChina[key]);
+    $('form.china-worksheet-form [name="status_he_disabled"]').val(heArrChina[key]);
+    $('form.china-worksheet-form [name="status_ru"]').val(ruArrChina[key]);
+    $('form.china-worksheet-form [name="status_ru_disabled"]').val(ruArrChina[key]);
+})
+
+
+// Filter
+$(document).ready(function() {   
+    if(location.href.indexOf('china') !== -1){ 
+        $('.card-body.new-worksheet #bootstrap-data-table_filter').prepend(`
+        <label class="table-columns">Change column:
+            <select class="form-control" id="table-columns" name="table-columns">
+                <option value="" selected="selected"></option>
+                <option value="0">Date</option>
+                <option value="1">Tracking number main</option>
+                <option value="2">Local tracking number</option>
+                <option value="3">Status</option>
+                <option value="4">Customer name</option>
+                <option value="5">Customer address</option>
+                <option value="6">Customer phone number</option>
+                <option value="7">Customer email</option>
+                <option value="8">Supplier name</option>
+                <option value="9">Supplier address</option>
+                <option value="10">Supplier phone number</option>
+                <option value="11">Supplier email</option>
+                <option value="12">Shipment description</option>
+                <option value="13">Shipment weight</option>
+                <option value="14">Shipment length</option>
+                <option value="15">Shipment width</option>
+                <option value="16">Shipment height</option>
+                <option value="17">Lot number</option>
+                <option value="18">Status He</option>
+                <option value="19">Status Ru</option>                     
+            </select>
+        </label>
+        `);              
+    }
+    else if (location.href.indexOf('packing-sea') !== -1) {
+        $('.card-body.packing-sea #bootstrap-data-table_filter').prepend(`
+        <label class="table-columns">Change column:
+            <select class="form-control" id="table-columns" name="table-columns">
+                <option value="" selected="selected"></option>
+                <option value="0">Плательщик</option>
+                <option value="1">Contract Nr.</option>
+                <option value="2">Type</option>
+                <option value="3">Trek-KOD</option>
+                <option value="4">ФИО Отправителя</option>
+                <option value="5">ФИО получателя</option>
+                <option value="6">Код Страны</option>
+                <option value="7">Индекс</option>
+                <option value="8">Регион</option>
+                <option value="9">Район</option>
+                <option value="10">Город доставки</option>
+                <option value="11">улица</option>
+                <option value="12">дом</option>
+                <option value="13">корпус</option>
+                <option value="14">квартира</option>
+                <option value="15">Телефон(+7ххххх)</option>
+                <option value="16">Tarif €</option>
+                <option value="17">Tarif €-cent</option>
+                <option value="18">weight kg</option>
+                <option value="19">weight g</option>
+                <option value="20">код услуги</option>
+                <option value="21">Amount of COD Rbl</option>
+                <option value="22">Amount of COD kop</option>
+                <option value="23">номер вложения</option>
+                <option value="24">Наименования вложения</option>
+                <option value="25">Количество вложений</option>
+                <option value="26">weight of enclosures kg</option>
+                <option value="27">weight of enclosures g</option>
+                <option value="28">стоимость евро</option>
+                <option value="29">стоимость евроценты</option>                                
+            </select>
+        </label>
+        `); 
+    }
+    else if (location.href.indexOf('packing-eng') !== -1) {
+        $('.card-body.packing-eng #bootstrap-data-table_filter').prepend(`
+        <label class="table-columns">Change column:
+            <select class="form-control" id="table-columns" name="table-columns">
+                <option value="" selected="selected"></option>
+                <option value="0">Tracking Number</option>
+                <option value="1">Destination Country</option>
+                <option value="2">Shipper name</option>
+                <option value="3">Shipper address</option>
+                <option value="4">Shipper phone no</option>
+                <option value="5">Shipper ID no</option>
+                <option value="6">Consignee name</option>
+                <option value="7">Consignee address</option>
+                <option value="8">Consignee phone no</option>
+                <option value="9">Consignee ID no</option>
+                <option value="10">Dimensions (length)</option>
+                <option value="11">Dimensions (width)</option>
+                <option value="12">Dimensions (height)</option>
+                <option value="13">Weight</option>
+                <option value="14">Items enclosed</option> 
+                <option value="15">Declared Value</option>                                               
+            </select>
+        </label>
+        `); 
+    }  
+})
+
+
+$(document).ready(function() {
+    $('.card-body.worksheet #bootstrap-data-table_filter').prepend(`
+    <label class="table-columns">Выберите колонку:
+        <select class="form-control" id="table-columns" name="table-columns">
+            <option value="" selected="selected"></option>
+            <option value="0">Номер</option>
+            <option value="1">Дата</option>
+            <option value="2">Направление</option>
+            <option value="3">Статус</option>
+            <option value="4">Локальный</option>
+            <option value="5">Трекинг</option>
+            <option value="6">Коммент менеджера</option>
+            <option value="7">Коммент</option>
+            <option value="8">Комментарии</option>
+            <option value="9">Отправитель</option>
+            <option value="10">Данные отправителя</option>
+            <option value="11">Получатель</option>
+            <option value="12">Данные получателя</option>
+            <option value="13">E-mail получателя</option>
+            <option value="14">Декларируемая стоимость посылки, $</option>
+            <option value="15">Упаковка</option>
+            <option value="16">Оплачивает посылку</option>
+            <option value="17">Трекинг номер и вес посылки</option>
+            <option value="18">Ширина</option>
+            <option value="19">Высота</option>
+            <option value="20">Длина</option>
+            <option value="21">Номер партии</option>
+            <option value="22">Тип отправления</option>
+            <option value="23">Описание содержимого посылки</option>
+            <option value="24">1. позиция</option>
+            <option value="25">2. позиция</option>
+            <option value="26">3. позиция</option>
+            <option value="27">4. позиция</option>
+            <option value="28">5. позиция</option>
+            <option value="29">6. позиция</option>
+            <option value="30">7. позиция</option>
+            <option value="31">ENG</option>
+            <option value="32">RU</option>
+            <option value="33">HE</option>
+            <option value="34">UA</option>
+            <option value="35">Оплата</option>
+            <option value="36">Физ. вес</option>
+            <option value="37">Объем. вес</option>
+            <option value="38">К-во ед</option>
+            <option value="39">Комментарии</option>       
+        </select>
+    </label>
+    `);
+})
+
+
+$('#bootstrap-data-table_filter input').on('input',(e)=>{
+    $('#bootstrap-data-table_info').hide();
+    const column = $('#table-columns').val();
+    const thisVal = $(e.target).val();
+    if (column !== '' && thisVal.length > 2) {
+        $('#bootstrap-data-table tbody tr').each((k,elem)=>{
+            $(elem).children('td:not(.td-button, .td-checkbox)').each((i,el)=>{
+                if (i == column && $(el).text().indexOf(thisVal) == -1) {
+                    $(elem).remove();
+                }
+            })
+        })
+    }   
+})
+
+
+$('#bootstrap-data-table_paginate').on('click',(e)=>{
+    $('#bootstrap-data-table_info').hide();
+    const column = $('#table-columns').val();
+    const thisVal = $('#bootstrap-data-table_filter input').val();
+    if (column !== '' && thisVal.length > 2) {
+        $('#bootstrap-data-table tbody tr').each((k,elem)=>{
+            $(elem).children('td:not(.td-button, .td-checkbox)').each((i,el)=>{
+                if (i == column && $(el).text().indexOf(thisVal) == -1) {
+                    $(elem).remove();
+                }
+            })
+        })
+    }   
+})
+
+
+$('#table_filter_button').on('click',(e)=>{
+    const column = $('#table_columns').val();
+    const thisVal = $('[name="table_filter_value"]').val();
+    if (thisVal.length > 2) {
+        $('#form-worksheet-table-filter').submit()
+    }   
+})
+
+
+/* Tracking filter checkbox*/
+var checkboxArr = [];
+
+
+function handleCheckbox(element) {
+    checkboxArr.push(element.value)
+}
+
+
+function handleCencel() {
+    const checkbox = document.querySelectorAll('#checkbox-group [type="checkbox"]');
+    checkbox.forEach(function(item) {
+        item.checked = false;           
+    })
+    checkboxArr = [];
+}
+
+
+document.onselectionchange = function() {
+    let selection = document.getSelection();
+
+    const checkbox = document.querySelectorAll('#checkbox-group [type="checkbox"]');
+    checkbox.forEach(function(item) {
+        if (selection.toString().indexOf(item.value) != -1) {
+            item.checked = true;
+        }
+        else if (checkboxArr.indexOf(item.value) != -1){
+            item.checked = true;
+        }
+        else {
+            item.checked = false;
+        }
+    })
+};
+
+const checkboxGroup = document.getElementById('checkbox-group');
+if (checkboxGroup) {
+    checkboxGroup.addEventListener('mouseup', function (event) {
+        const checkbox = document.querySelectorAll('#checkbox-group [type="checkbox"]');
+        checkbox.forEach(function(item) {
+            if (item.checked === true) {
+                checkboxArr.push(item.value)
+            }           
+        })
+    });
+}
+
+
+// new worksheet
+$('#tracking-columns').change((e)=>{
+    const thisVal = $(e.target).val();
+    if (thisVal === 'status') {
+        $('[name="value-by-tracking"]').remove()
+        $('#site_name').remove()
+        $('#tariff').remove()
+        $('#partner').remove()
+        $('.value-by-tracking').append(`
+            <div id="status-value">
+                <select class="form-control" id="status" name="status">
+                   <option value="" selected="selected"></option>
+                   <option value="Доставляется на склад в стране отправителя">Доставляется на склад в стране отправителя</option>
+                   <option value="На складе в стране отправителя">На складе в стране отправителя</option>
+                   <option value="На таможне в стране отправителя">На таможне в стране отправителя</option>
+                   <option value="Доставляется в страну получателя">Доставляется в страну получателя</option>
+                   <option value="На таможне в стране получателя">На таможне в стране получателя</option>
+                   <option value="Доставляется получателю">Доставляется получателю</option>
+                   <option value="Доставлено">Доставлено</option>
+                   <option value="Возврат">Возврат</option>
+                   <option value="Коробка">Коробка</option>
+                   <option value="Забрать">Забрать</option>
+                   <option value="Уточнить">Уточнить</option>
+                   <option value="Думают">Думают</option>
+                   <option value="Отмена">Отмена</option>
+                </select>                
+            </div>
+            `)
+    }
+    else if(thisVal === 'site_name'){
+        $('[name="value-by-tracking"]').remove()
+        $('#status-value').remove()
+        $('#tariff').remove()
+        $('#partner').remove()
+        $('.value-by-tracking').append(`
+            <select class="form-control" id="site_name" name="site_name">
+               <option value="DD-C">DD-C</option>
+               <option value="For">For</option>
+            </select>
+            `)
+    }
+    else if(thisVal === 'tariff'){
+        $('[name="value-by-tracking"]').remove()
+        $('#status-value').remove()
+        $('#site_name').remove()
+        $('#partner').remove()
+        $('.value-by-tracking').append(`
+            <select class="form-control" id="tariff" name="tariff">
+               <option value="" selected="selected"></option>
+               <option value="Море">Море</option>
+               <option value="Авиа">Авиа</option>
+            </select>
+            `)
+    }
+    else if(thisVal === 'partner'){
+        $('[name="value-by-tracking"]').remove()
+        $('#status-value').remove()
+        $('#site_name').remove()
+        $('#tariff').remove()
+        $('.value-by-tracking').append(`
+            <select class="form-control" id="partner" name="partner">
+               <option value="" selected="selected"></option>
+               <option value="viewer_1">viewer_1</option>
+               <option value="viewer_2">viewer_2</option>
+               <option value="viewer_3">viewer_3</option>
+               <option value="viewer_4">viewer_4</option>
+               <option value="viewer_5">viewer_5</option>
+            </select>
+            `)
+    }
+    else {
+        $('#status-value').remove()
+        $('#site_name').remove()
+        $('#tariff').remove()
+        $('#partner').remove()
+        $('[name="value-by-tracking"]').remove()
+        $('.value-by-tracking').append(`
+            <input class="form-control" type="text" name="value-by-tracking">
+            `)
+    }
+})
+
+
+$(document).delegate('#status-value select[name="status"]', 'change',(e)=>{
+    const key = $(e.target).val();
+    $('.value-by-tracking [name="status_en"]').val(enArr[key]);
+    $('.value-by-tracking [name="status_he"]').val(heArr[key]);
+    $('.value-by-tracking [name="status_ua"]').val(uaArr[key]);
+})
+
+// phil-ind worksheet
+$('#phil-ind-tracking-columns').change((e)=>{
+    const thisVal = $(e.target).val();
+    if (thisVal === 'status') {
+        $('[name="value-by-tracking"]').remove()
+        $('.phil-ind-value-by-tracking').append(`
+            <div id="phil-ind-status-value">
+                <select class="form-control" id="status" name="status">
+                   <option value="" selected="selected"></option>
+                   <option value="Pending">Pending</option>
+                   <option value="Forwarding to the warehouse in the sender country">Forwarding to the warehouse in the sender country</option>
+                   <option value="At the warehouse in the sender country">At the warehouse in the sender country</option>
+                   <option value="At the customs in the sender country">At the customs in the sender country</option>
+                   <option value="Forwarding to the receiver country">Forwarding to the receiver country</option>
+                   <option value="At the customs in the receiver country">At the customs in the receiver country</option>
+                   <option value="Forwarding to the receiver">Forwarding to the receiver</option>
+                   <option value="Delivered">Delivered</option>
+                   <option value="Return">Return</option>
+                   <option value="Box">Box</option>
+                   <option value="Pick up">Pick up</option>
+                   <option value="Specify">Specify</option>
+                   <option value="Think">Think</option>
+                   <option value="Canceled">Canceled</option>
+                </select>                
+            </div>
+            `)
+    }
+    else {
+        $('#status-value').remove()
+        $('[name="value-by-tracking"]').remove()
+        $('.phil-ind-value-by-tracking').append(`
+            <input class="form-control" type="text" name="value-by-tracking">
+            `)
+    }
+})
+
+
+$(document).delegate('#phil-ind-status-value select[name="status"]', 'change',(e)=>{
+    const key = $(e.target).val();
+    $('.phil-ind-value-by-tracking [name="status_ru"]').val(ruArrChina[key]);
+    $('.phil-ind-value-by-tracking [name="status_he"]').val(heArrChina[key]);
+})
+
+
+/* ID filter checkbox*/
+$('[name="checkbox_operations_select"]').change((e)=>{
+    const thisVal = $(e.target).val();
+    if (thisVal === 'delete') {
+        $('.checkbox-operations-change').hide()
+        $('.checkbox-operations-delete').show()
+    }
+    else if (thisVal === 'change'){
+        $('.checkbox-operations-change').show()
+        $('.checkbox-operations-delete').hide()
+    }
+    else{
+        $('.checkbox-operations-change').hide()
+        $('.checkbox-operations-delete').hide()
+    }
+})
+
+$('[name="row_id[]"]').change((e)=>{
+    if (e.target.checked === true) {
+        console.log($(e.target).val())
+        const thisVal = $(e.target).val();
+        $('.checkbox-operations form').append(`
+            <input type="hidden" name="row_id[]" value="`+$(e.target).val()+`" data-id="`+$(e.target).val()+`">
+            `)
+    }
+    else{
+        $('.checkbox-operations form input[data-id="'+$(e.target).val()+'"]').remove()
+    }
+})
+
+$('.checkbox-operations form').submit((e)=>{
+    if (!$('.checkbox-operations form [name="row_id[]"]').length) {
+        if (location.href.indexOf('new-worksheet') == -1) {
+            alert('Select rows!')
+        }
+        else{
+            alert('Выберите строчки!')
+        }
+        return false
+    }
+})
+
+
+/* Phone mask */
+let count_error = 0;
+
+$('.standard-phone').on('input', function() {
+    $('div.error-phone').remove();
+    if ($(this).val()[0] !== '+' && $(this).val().length == 1) {
+        $(this).val('+972');
+    }
+    else if($(this).val().length > 16){
+        if ($(this).val().length == 17) {
+            $(this).val($(this).val().slice(0, -1));
+        }
+        else{
+            $(this).val('+972');
+        }
+    }
+    else if($(this).val().length < 5){
+        $(this).val('+972');
+    }
+    else{
+        var regexp = /^\+972[0-9]+$/i;
+        if (!regexp.test($(this).val()) && count_error == 0) {
+            for (var i = $(this).val().length - 1; i >= 0; i--) {
+                if (!regexp.test($(this).val())) {
+                    $(this).val($(this).val().slice(0, -1));
+                }
+                else break;
+            }           
+            count_error = 1; 
+            if (location.href.indexOf('phil-ind') == -1) {
+                $(this).before(`
+                <div class="error-phone admin">
+                    Пожалуйста, заполните поле "Номер телефона отправителя (основной)" в 
+                    международном формате, например: "+972531111111".
+                </div>`);
+            }
+            else{
+                $(this).before(`
+                <div class="error-phone admin">
+                    Please fill the box "Shipper\'s phone number (standard)" in the 
+                    international format, i.e. "+972531111111".
+                </div>`);
+            }        
+        } else if (!regexp.test($(this).val()) && count_error == 1 && $(this).val().length > 1) {
+            for (var i = $(this).val().length - 1; i >= 0; i--) {
+                if (!regexp.test($(this).val())) {
+                    $(this).val($(this).val().slice(0, -1));
+                }
+                else break;
+            }
+            if (location.href.indexOf('phil-ind') == -1) {
+                $(this).before(`
+                <div class="error-phone admin">
+                    Пожалуйста, заполните поле "Номер телефона отправителя (основной)" в 
+                    международном формате, например: "+972531111111".
+                </div>`);
+            }
+            else{
+                $(this).before(`
+                <div class="error-phone admin">
+                    Please fill the box "Shipper\'s phone number (standard)" in the 
+                    international format, i.e. "+972531111111".
+                </div>`);
+            }
+        } else if ($(this).val().length < 5 || regexp.test($(this).val())) {
+            count_error = 0;
+        }
+    }            
+});
+
+
+/* Table scroll */
+$(".table-container").scroll(function() {
+    if ($(".table-container").scrollLeft()) {
+        $(".table-container table tbody td:first-child input").css({
+            'position':'absolute',
+            'margin-top':'-15px'
+        })
+    }
+    else{
+        $(".table-container table tbody td:first-child input").css({
+            'position':'inherit'
+        })
+    }
+    if ($(".table-container").scrollTop()) {
+        $(".table-container table tbody td:first-child input").css({
+            'position':'inherit'
+        })
+    }
+});

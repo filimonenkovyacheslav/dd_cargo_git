@@ -46,8 +46,6 @@
 					@php
 						session(['this_previous_url' => url()->full()]);
 					@endphp
-
-					<a class="btn btn-primary btn-move" href="{{ route('showAddPackingEng') }}">Add row</a>	
 					
 					<div class="card-body packing-eng">
 						<div class="table-container">
@@ -70,7 +68,6 @@
 										<th>Weight</th>
 										<th>Items enclosed</th>	
 										<th>Declared Value</th>			
-										<th>Change</th>
 									</tr>
 								</thead>
 								<tbody>
@@ -127,16 +124,6 @@
 										<td title="{{$row->shipment_val}}">
 											<div class="div-3">{{$row->shipment_val}}</div>
 										</td>
-
-										<td class="td-button">
-											<a class="btn btn-primary" href="{{ url('/admin/packing-eng/'.$row->id) }}">Change</a>
-											
-											{!! Form::open(['url'=>route('destroyPackingEng'),'onsubmit' => 'return ConfirmDelete()', 'class'=>'form-horizontal','method' => 'POST']) !!}
-											{!! Form::hidden('action',$row->id) !!}
-											{!! Form::button('Delete',['class'=>'btn btn-danger','type'=>'submit']) !!}
-											{!! Form::close() !!}
-
-										</td> 
                                                                
 									</tr>
 

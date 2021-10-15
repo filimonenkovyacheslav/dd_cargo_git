@@ -12,7 +12,7 @@ $(document).ready(function() {
 
     let btnMove = $('a.btn-move');
     btnMove.detach();
-    if (location.href.indexOf('new-worksheet') == -1 && location.href.indexOf('phil-ind-worksheet') == -1 && location.href.indexOf('draft-worksheet') == -1) {
+    if (location.href.indexOf('packing-eng-new') == -1 && location.href.indexOf('receipts') == -1 && location.href.indexOf('new-worksheet') == -1 && location.href.indexOf('phil-ind-worksheet') == -1 && location.href.indexOf('draft-worksheet') == -1 && location.href.indexOf('new-packing') == -1 && location.href.indexOf('invoice') == -1 && location.href.indexOf('manifest') == -1) {
         $('#bootstrap-data-table_length').after(btnMove.get(0));
         $('#bootstrap-data-table_length').after(btnMove.get(2));
         $('#bootstrap-data-table_length').after(btnMove.get(1));
@@ -89,6 +89,27 @@ $('form.phil-ind-update-form button').click((e)=>{
             if ($(elem).attr('type') === 'hidden') {$(elem).val(inputVal)}
         })                  
     });
+    form.submit();        
+})
+
+
+// Receipt update
+$('form.receipt-update-form button').click((e)=>{
+    e.preventDefault();
+   
+    const form = $(e.target).parent();
+    $('form.receipt-update-form input').each((k,el)=>{
+        let inputVal = '';
+        let inputName = '';
+        if ($(el).attr('type') !== 'hidden') {
+            inputVal = $(el).val();
+            inputName = $(el).attr('name');
+            form.find('[name="'+inputName+'"]').each((j,elem)=>{
+                if ($(elem).attr('type') === 'hidden') {$(elem).val(inputVal)}
+            })
+        }                   
+    });
+
     form.submit();        
 })
 
@@ -553,6 +574,7 @@ $(document).delegate('#phil-ind-status-value select[name="status"]', 'change',(e
     $('.phil-ind-value-by-tracking [name="status_ru"]').val(ruArrChina[key]);
     $('.phil-ind-value-by-tracking [name="status_he"]').val(heArrChina[key]);
 })
+/* End Tracking filter checkbox*/
 
 
 /* ID filter checkbox*/

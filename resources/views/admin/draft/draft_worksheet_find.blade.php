@@ -23,12 +23,21 @@
 	<div class="animated fadeIn">
 		<div class="row">
 			<div class="col-md-12">
+				<a href="{{ route('exportExcelDraft') }}" style="margin-bottom: 20px;" class="btn btn-success btn-move">Экспорт в Excel</a>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-md-12">
 				<div class="card">
 					<div class="card-header">
 						<strong class="card-title">{{ $title }}</strong>
 					</div>
 
-					@if (session('status'))
+					@if (session('status-error'))
+					<div class="alert alert-danger">
+						{{ session('status-error') }}
+					</div>
+					@elseif (session('status'))
 					<div class="alert alert-success">
 						{{ session('status') }}
 					</div>
@@ -37,8 +46,6 @@
 					@php
 						session(['this_previous_url' => url()->full()]);
 					@endphp
-					
-					<a class="btn btn-primary btn-move" href="{{ route('showDraftWorksheet') }}">Добавить строку</a>
 
 					<div class="btn-move-wrapper" style="display:flex">
 						<form action="{{ route('draftWorksheetFilter') }}" method="GET" id="form-worksheet-table-filter" enctype="multipart/form-data">
@@ -68,10 +75,13 @@
 									<option value="sender_passport">Номер паспорта отправителя</option>
 									<option value="recipient_name">Получатель</option>
 									<option value="recipient_country">Страна получателя</option>
+									<option value="region">Регион</option>
+									<option value="district">Район</option>
 									<option value="recipient_city">Город получателя</option>
 									<option value="recipient_postcode">Индекс получателя</option>
 									<option value="recipient_street">Улица получателя</option>
 									<option value="recipient_house">№ дома пол-ля</option>
+									<option value="body">корпус</option>
 									<option value="recipient_room">№ кв. пол-ля</option>
 									<option value="recipient_phone">Телефон получателя</option>
 									<option value="recipient_passport">Номер паспорта получателя</option>
@@ -130,10 +140,13 @@
 										<th>Номер паспорта отправителя</th>
 										<th>Получатель</th>
 										<th>Страна получателя</th>
+										<th>Регион</th>
+										<th>Район</th>
 										<th>Город получателя</th>
 										<th>Индекс получателя</th>
 										<th>Улица получателя</th>
 										<th>№ дома пол-ля</th>
+										<th>корпус</th>
 										<th>№ кв. пол- ля</th>
 										<th>Телефон получателя</th>
 										<th>Номер паспорта получателя</th>
@@ -188,10 +201,18 @@
 											<input type="checkbox" name="row_id[]" value="{{ $row->id }}">
 										</td>
 										<td class="td-button">
-
+											
+											@can('editDraft')
+											
 											<a class="btn btn-primary" href="{{ url('/admin/draft-worksheet/'.$row->id) }}">Изменить</a>
 
-											<a class="btn btn-success" onclick="ConfirmActivate(event)" href="{{ url('/admin/draft-activate/'.$row->id) }}">Активировать</a>
+											@endcan
+
+											@can('activateDraft')
+
+											<a class="btn btn-success" data-id="{{ $row->id }}" onclick="ConfirmActivate(event)" href="{{ url('/admin/draft-check-activate/'.$row->id) }}">Активировать</a>
+
+											@endcan
 
 											@can('editPost')
 
@@ -271,6 +292,12 @@
 										<td title="{{$row->recipient_country}}">
 											<div class="div-18">{{$row->recipient_country}}</div>
 										</td>
+										<td title="{{$row->region}}">
+											<div class="div-18">{{$row->region}}</div>
+										</td>
+										<td title="{{$row->district}}">
+											<div class="div-18">{{$row->district}}</div>
+										</td>
 										<td title="{{$row->recipient_city}}">
 											<div class="div-19">{{$row->recipient_city}}</div>
 										</td>
@@ -282,6 +309,9 @@
 										</td>
 										<td title="{{$row->recipient_house}}">
 											<div class="div-22">{{$row->recipient_house}}</div>
+										</td>
+										<td title="{{$row->body}}">
+											<div class="div-22">{{$row->body}}</div>
 										</td>
 										<td title="{{$row->recipient_room}}">
 											<div class="div-23">{{$row->recipient_room}}</div>
@@ -379,10 +409,18 @@
 											<input type="checkbox" name="row_id[]" value="{{ $row->id }}">
 										</td>
 										<td class="td-button">
-
+											
+											@can('editDraft')
+											
 											<a class="btn btn-primary" href="{{ url('/admin/draft-worksheet/'.$row->id) }}">Изменить</a>
 
-											<a class="btn btn-success" onclick="ConfirmActivate(event)" href="{{ url('/admin/draft-activate/'.$row->id) }}">Активировать</a>
+											@endcan
+
+											@can('activateDraft')
+
+											<a class="btn btn-success" data-id="{{ $row->id }}" onclick="ConfirmActivate(event)" href="{{ url('/admin/draft-check-activate/'.$row->id) }}">Активировать</a>
+
+											@endcan
 
 											@can('editPost')
 
@@ -462,6 +500,12 @@
 										<td title="{{$row->recipient_country}}">
 											<div class="div-18">{{$row->recipient_country}}</div>
 										</td>
+										<td title="{{$row->region}}">
+											<div class="div-18">{{$row->region}}</div>
+										</td>
+										<td title="{{$row->district}}">
+											<div class="div-18">{{$row->district}}</div>
+										</td>
 										<td title="{{$row->recipient_city}}">
 											<div class="div-19">{{$row->recipient_city}}</div>
 										</td>
@@ -473,6 +517,9 @@
 										</td>
 										<td title="{{$row->recipient_house}}">
 											<div class="div-22">{{$row->recipient_house}}</div>
+										</td>
+										<td title="{{$row->body}}">
+											<div class="div-22">{{$row->body}}</div>
 										</td>
 										<td title="{{$row->recipient_room}}">
 											<div class="div-23">{{$row->recipient_room}}</div>
@@ -572,17 +619,21 @@
 							</table>
 							
 							<div class="checkbox-operations">
+
+								@can('editDraft')
 								
 								{!! Form::open(['url'=>route('addDraftDataById'), 'class'=>'worksheet-add-form','method' => 'POST']) !!}
 									
 									<label>Выберите действие с выбранными строчками:
 										<select class="form-control" name="checkbox_operations_select">
 											<option value=""></option>
-											
-											@can('editPost')
-											<option value="delete">Удалить</option>
-											@endcan
 
+											@can('editPost')				
+											
+											<option value="delete">Удалить</option>
+
+											@endcan
+											
 											<option value="change">Изменить</option>
 										</select>
 									</label>
@@ -609,10 +660,13 @@
 											<option value="sender_passport">Номер паспорта отправителя</option>
 											<option value="recipient_name">Получатель</option>
 											<option value="recipient_country">Страна получателя</option>
+											<option value="region">Регион</option>
+											<option value="district">Район</option>
 											<option value="recipient_city">Город получателя</option>
 											<option value="recipient_postcode">Индекс получателя</option>
 											<option value="recipient_street">Улица получателя</option>
 											<option value="recipient_house">№ дома пол-ля</option>
+											<option value="body">корпус</option>
 											<option value="recipient_room">№ кв. пол-ля</option>
 											<option value="recipient_phone">Телефон получателя</option>
 											<option value="recipient_passport">Номер паспорта получателя</option>
@@ -641,8 +695,6 @@
 
 								{!! Form::button('Сохранить',['class'=>'btn btn-primary checkbox-operations-change','type'=>'submit']) !!}
 								{!! Form::close() !!}
-
-								@can('editPost')
 
 								{!! Form::open(['url'=>route('deleteDraftWorksheetById'),'onsubmit' => 'return ConfirmDelete()','method' => 'POST']) !!}
 								{!! Form::button('Удалить',['class'=>'btn btn-danger  checkbox-operations-delete','type'=>'submit']) !!}
@@ -674,11 +726,36 @@
 
 	function ConfirmActivate(event)
 	{
+		$('.alert.alert-danger').remove();
 		var x = confirm("Вы уверены, что хотите активировать?");
-		if (x)
-			return true;
-		else
-			event.preventDefault();
+		event.preventDefault();
+		const href = $(event.target).attr('href');
+		const rowId = $(event.target).attr('data-id');
+		if (x){
+			$.ajax({
+				url: href,
+				type: "GET",
+				headers: {
+					'X-CSRF-Token': $('meta[name="csrf-token"]').attr('content')
+				},
+				success: function (data) {
+					console.log(data);
+					if (data.error) {
+						$('.card-header').after(`
+							<div class="alert alert-danger">
+								`+data.error+`										
+							</div>`);
+						return 0;
+					}
+					else {
+						location.href = '/admin/draft-activate/'+rowId;
+					}
+				},
+				error: function (msg) {
+					alert('Ошибка admin');
+				}
+			});
+		}	
 	}
 
 </script>

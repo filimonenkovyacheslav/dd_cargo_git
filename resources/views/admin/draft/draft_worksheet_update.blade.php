@@ -1,7 +1,7 @@
 @extends('layouts.admin')
 @section('content')
 
-@can('update-post')
+@can('editDraft')
 <!-- <div class="breadcrumbs">
 	<div class="col-sm-4">
 		<div class="page-header float-left">
@@ -64,12 +64,6 @@
 							{!! Form::label('partner','Партнер',['class' => 'col-md-2 control-label'])   !!}
 							<div class="col-md-8">
 								{!! Form::select('partner', array('' => '', 'viewer_1' => 'viewer_1', 'viewer_2' => 'viewer_2', 'viewer_3' => 'viewer_3', 'viewer_4' => 'viewer_4', 'viewer_5' => 'viewer_5'), $draft_worksheet->partner,['class' => 'form-control']) !!}
-							</div>
-						</div>
-						<div class="form-group">
-							{!! Form::label('tracking_main','Трекинг Основной',['class' => 'col-md-2 control-label'])   !!}
-							<div class="col-md-8">
-								{!! Form::text('tracking_main',$draft_worksheet->tracking_main,['class' => 'form-control'])!!}
 							</div>
 						</div>
 						<div class="form-group">
@@ -167,6 +161,18 @@
 							</div>
 						</div>
 						<div class="form-group">
+							{!! Form::label('region','Регион',['class' => 'col-md-2 control-label'])   !!}
+							<div class="col-md-8">
+								{!! Form::text('region',$draft_worksheet->region,['class' => 'form-control'])!!}
+							</div>
+						</div>
+						<div class="form-group">
+							{!! Form::label('district','Район',['class' => 'col-md-2 control-label'])   !!}
+							<div class="col-md-8">
+								{!! Form::text('district',$draft_worksheet->district,['class' => 'form-control'])!!}
+							</div>
+						</div>
+						<div class="form-group">
 							{!! Form::label('recipient_city','Город получателя',['class' => 'col-md-2 control-label'])   !!}
 							<div class="col-md-8">
 								{!! Form::text('recipient_city',$draft_worksheet->recipient_city,['class' => 'form-control'])!!}
@@ -188,6 +194,12 @@
 							{!! Form::label('recipient_house','Номер дома получателя',['class' => 'col-md-2 control-label'])   !!}
 							<div class="col-md-8">
 								{!! Form::text('recipient_house',$draft_worksheet->recipient_house,['class' => 'form-control'])!!}
+							</div>
+						</div>
+						<div class="form-group">
+							{!! Form::label('body','корпус',['class' => 'col-md-2 control-label'])   !!}
+							<div class="col-md-8">
+								{!! Form::text('body',$draft_worksheet->body,['class' => 'form-control'])!!}
 							</div>
 						</div>
 						<div class="form-group">
@@ -421,6 +433,10 @@
 
 							{!! Form::hidden('recipient_country',$draft_worksheet->recipient_country,['class' => 'form-control'])!!}
 
+							{!! Form::hidden('region',$draft_worksheet->region)!!}
+
+							{!! Form::hidden('district',$draft_worksheet->district)!!}
+
 							{!! Form::hidden('recipient_city',$draft_worksheet->recipient_city,['class' => 'form-control'])!!}
 
 							{!! Form::hidden('recipient_postcode',$draft_worksheet->recipient_postcode,['class' => 'form-control'])!!}
@@ -428,6 +444,8 @@
 							{!! Form::hidden('recipient_street',$draft_worksheet->recipient_street,['class' => 'form-control'])!!}
 
 							{!! Form::hidden('recipient_house',$draft_worksheet->recipient_house,['class' => 'form-control'])!!}
+
+							{!! Form::hidden('body',$draft_worksheet->body)!!}
 
 							{!! Form::hidden('recipient_room',$draft_worksheet->recipient_room,['class' => 'form-control'])!!}
 

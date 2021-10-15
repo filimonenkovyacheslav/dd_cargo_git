@@ -35,13 +35,9 @@
 						<strong class="card-title">{{ $title }}</strong>
 					</div>
 
-					@if (session('status') === 'Column added successfully!')
-					<div class="alert alert-success">
-						{{ session('status') }}
-					</div>
-					@elseif (session('status') === 'The quantity of columns is limited!')
+					@if (session('status-error'))
 					<div class="alert alert-danger">
-						{{ session('status') }}
+						{{ session('status-error') }}
 					</div>
 					@elseif (session('status'))
 					<div class="alert alert-success">
@@ -51,33 +47,40 @@
 
 					@php
 						session(['this_previous_url' => url()->full()]);
-					@endphp
-					
-					@can('eng-update-post')
+					@endphp	
+										
+					@can('editPost')
 					<a class="btn btn-success btn-move" href="{{ route('philIndWorksheetAddColumn') }}">Add column</a>
-					<!-- <a class="btn btn-primary btn-move" href="{{ route('showPhilIndWorksheet') }}">Add row</a> -->
-					@endcan
+					@endcan			
 
 					<div class="btn-move-wrapper" style="display:flex">
 						<form action="{{ route('philIndWorksheetFilter') }}" method="GET" id="form-worksheet-table-filter" enctype="multipart/form-data">
 							@csrf
-							<label class="table_columns" style="margin: 0 15px">Change column:
+							<label class="table_columns" style="margin: 0 15px">Choose column:
 								<select class="form-control" id="table_columns" name="table_columns">
 									<option value="" selected="selected"></option>
 									<option value="date">Date</option>
 									<option value="direction">Direction</option>
 									<option value="status">Status</option>
+									<option value="status_date">Status Date</option>
 									<option value="tracking_main">Main Tracking number</option>
 									<option value="tracking_local">Local tracking number</option>
 									<option value="pallet_number">Pallet number</option>
 									<option value="comments_1">Comments 1</option>
 									<option value="comments_2">Comments 2</option>
 									<option value="shipper_name">Shipper\'s name</option>
+									<option value="shipper_city">Shipper\'s city/village</option>
+									<option value="passport_number">GSTN/Passport number</option>
+									<option value="return_date">Estimated return to India date</option>
 									<option value="shipper_address">Shipper\'s address</option>
 									<option value="standard_phone">Shipper\'s phone (standard)</option>
 									<option value="shipper_phone">Shipper\'s phone (additionally)</option>
 									<option value="shipper_id">Shipper\'s ID number</option>
 									<option value="consignee_name">Consignee\'s name</option>
+									<option value="house_name">House name</option>
+									<option value="post_office">Local post office</option>
+									<option value="district">District/City</option>
+									<option value="state_pincode">State pincode</option>
 									<option value="consignee_address">Consignee\'s address</option>
 									<option value="consignee_phone">Consignee\'s phone number</option>
 									<option value="consignee_id">Consignee\'s ID number</option>
@@ -114,14 +117,15 @@
 										<th>V</th>
 										<th>Change</th>
 										<th>Date<hr>
-											@can('eng-update-post')
+											@can('editPost')
 											<a class="btn btn-primary" target="_blank" href="{{ route('showPhilIndStatusDate') }}">Change</a>
 											@endcan
 										</th>
 										<th>Direction</th>
 										<th>Status</th>
+										<th>Status Date</th>
 										<th>Main Tracking number<hr>
-											@can('eng-update-post')
+											@can('editPost')
 											<a class="btn btn-primary" target="_blank" href="{{ route('showPhilIndData') }}">Change</a>
 											@endcan
 										</th> 
@@ -131,11 +135,18 @@
 										<th>Comments 1</th>
 										<th>Comments 2</th>
 										<th>Shipper's name</th>
+										<th>Shipper\'s city/village</th>
+										<th>GSTN/Passport number</th>
+										<th>Estimated return to India date</th>
 										<th>Shipper's address</th>
 										<th>Shipper's phone number (standard)</th>
 										<th>Shipper's phone number (additionally)</th>
 										<th>Shipper's ID number</th>
 										<th>Consignee's name</th>
+										<th>House name</th>
+										<th>Local post office</th>
+										<th>District/City</th>
+										<th>State pincode</th>
 										<th>Consignee's address</th>
 										<th>Consignee's phone number</th>
 										<th>Consignee's ID number</th>
@@ -150,7 +161,7 @@
 										<th>Length</th>
 										<th>Volume weight</th>										
 										<th>Lot<hr>
-											@can('eng-update-post')
+											@can('editPost')
 											<a class="btn btn-primary" target="_blank" href="{{ route('changePhilIndStatus') }}">Change</a>
 											@endcan
 										</th>
@@ -161,7 +172,7 @@
 																			
 										@if($new_column_1)
 										<th>{{$new_column_1}}<hr>
-											@can('update-user')
+											@can('editPost')
 
 											{!! Form::open(['url'=>route('philIndWorksheetDeleteColumn'),'onsubmit' => 'return ConfirmDelete()', 'class'=>'form-horizontal','method' => 'POST']) !!}
 											{!! Form::hidden('name_column','new_column_1') !!}
@@ -173,7 +184,7 @@
 										@endif
 										@if($new_column_2)
 										<th>{{$new_column_2}}<hr>
-											@can('update-user')
+											@can('editPost')
 
 											{!! Form::open(['url'=>route('philIndWorksheetDeleteColumn'),'onsubmit' => 'return ConfirmDelete()', 'class'=>'form-horizontal','method' => 'POST']) !!}
 											{!! Form::hidden('name_column','new_column_2') !!}
@@ -185,7 +196,7 @@
 										@endif
 										@if($new_column_3)
 										<th>{{$new_column_3}}<hr>
-											@can('update-user')
+											@can('editPost')
 
 											{!! Form::open(['url'=>route('philIndWorksheetDeleteColumn'),'onsubmit' => 'return ConfirmDelete()', 'class'=>'form-horizontal','method' => 'POST']) !!}
 											{!! Form::hidden('name_column','new_column_3') !!}
@@ -197,7 +208,7 @@
 										@endif
 										@if($new_column_4)
 										<th>{{$new_column_4}}<hr>
-											@can('update-user')
+											@can('editPost')
 
 											{!! Form::open(['url'=>route('philIndWorksheetDeleteColumn'),'onsubmit' => 'return ConfirmDelete()', 'class'=>'form-horizontal','method' => 'POST']) !!}
 											{!! Form::hidden('name_column','new_column_4') !!}
@@ -209,7 +220,7 @@
 										@endif
 										@if($new_column_5)
 										<th>{{$new_column_5}}<hr>
-											@can('update-user')
+											@can('editPost')
 
 											{!! Form::open(['url'=>route('philIndWorksheetDeleteColumn'),'onsubmit' => 'return ConfirmDelete()', 'class'=>'form-horizontal','method' => 'POST']) !!}
 											{!! Form::hidden('name_column','new_column_5') !!}
@@ -252,7 +263,7 @@
 											<a class="btn btn-primary" href="{{ url('/admin/phil-ind-worksheet/'.$row->id) }}">Change</a>
 											@endcan
 
-											@can('update-user')
+											@can('editPost')
 
 											{!! Form::open(['url'=>route('deletePhilIndWorksheet'),'onsubmit' => 'return ConfirmDelete()', 'class'=>'form-horizontal','method' => 'POST']) !!}
 											{!! Form::hidden('action',$row->id) !!}
@@ -269,6 +280,9 @@
 										</td>
 										<td title="{{$row->status}}">
 											<div class="div-3">{{$row->status}}</div>
+										</td>
+										<td title="{{$row->status_date}}">
+											<div class="div-1">{{$row->status_date}}</div>
 										</td>
 										<td title="{{$row->tracking_main}}">
 											<div class="div-3">{{$row->tracking_main}}</div>
@@ -291,6 +305,15 @@
 										<td title="{{$row->shipper_name}}">
 											<div class="div-3">{{$row->shipper_name}}</div>
 										</td>
+										<td title="{{$row->shipper_city}}">
+											<div class="div-3">{{$row->shipper_city}}</div>
+										</td>
+										<td title="{{$row->passport_number}}">
+											<div class="div-3">{{$row->passport_number}}</div>
+										</td>
+										<td title="{{$row->return_date}}">
+											<div class="div-3">{{$row->return_date}}</div>
+										</td>
 										<td title="{{$row->shipper_address}}">
 											<div class="div-3">{{$row->shipper_address}}</div>
 										</td>
@@ -305,6 +328,18 @@
 										</td>
 										<td title="{{$row->consignee_name}}">
 											<div class="div-3">{{$row->consignee_name}}</div>
+										</td>
+										<td title="{{$row->house_name}}">
+											<div class="div-3">{{$row->house_name}}</div>
+										</td>
+										<td title="{{$row->post_office}}">
+											<div class="div-3">{{$row->post_office}}</div>
+										</td>
+										<td title="{{$row->district}}">
+											<div class="div-3">{{$row->district}}</div>
+										</td>
+										<td title="{{$row->state_pincode}}">
+											<div class="div-3">{{$row->state_pincode}}</div>
 										</td>
 										<td title="{{$row->consignee_address}}">
 											<div class="div-3">{{$row->consignee_address}}</div>
@@ -409,7 +444,7 @@
 								</tbody>
 							</table>
 
-							@can('eng-update-post')
+							@can('editPost')
 
 							<div class="checkbox-operations">
 								
@@ -418,13 +453,7 @@
 								<label>Select action with selected rows:
 									<select class="form-control" name="checkbox_operations_select">
 										<option value=""></option>
-										@endcan
-
-										@can('update-user')
 										<option value="delete">Delete</option>
-										@endcan
-
-										@can('eng-update-post')
 										<option value="change">Change</option>
 									</select>
 								</label>
@@ -439,10 +468,17 @@
 										<option value="comments_1">Comments 1</option>
 										<option value="comments_2">Comments 2</option>
 										<option value="shipper_name">Shipper's name</option>
+										<option value="shipper_city">Shipper\'s city/village</option>
+										<option value="passport_number">GSTN/Passport number</option>
+										<option value="return_date">Estimated return to India date</option>
 										<option value="shipper_address">Shipper's address</option>
 										<option value="shipper_phone">Shipper's phone number</option>
 										<option value="shipper_id">Shipper's ID number</option>
 										<option value="consignee_name">Consignee's name</option>
+										<option value="house_name">House name</option>
+										<option value="post_office">Local post office</option>
+										<option value="district">District/City</option>
+										<option value="state_pincode">State pincode</option>
 										<option value="consignee_address">Consignee's address</option>
 										<option value="consignee_phone">Consignee's phone number</option>
 										<option value="consignee_id">Consignee's ID number</option>
@@ -471,17 +507,9 @@
 								{!! Form::button('Save',['class'=>'btn btn-primary checkbox-operations-change','type'=>'submit']) !!}
 								{!! Form::close() !!}
 
-								@endcan
-
-								@can('update-user')
-
 								{!! Form::open(['url'=>route('deletePhilIndWorksheetById'),'onsubmit' => 'return ConfirmDelete()','method' => 'POST']) !!}
 								{!! Form::button('Delete',['class'=>'btn btn-danger  checkbox-operations-delete','type'=>'submit']) !!}
 								{!! Form::close() !!}
-
-								@endcan
-
-								@can('eng-update-post')
 
 							</div>
 							

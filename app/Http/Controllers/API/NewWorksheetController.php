@@ -7,6 +7,7 @@ use App\Http\Controllers\API\BaseController as BaseController;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
 use Illuminate\Support\Facades\Hash;
 use App\NewWorksheet;
+use App\DraftWorksheet;
 use Validator;
 use Illuminate\Support\Facades\Storage;
 
@@ -242,6 +243,18 @@ class NewWorksheetController extends BaseController
             }
 
             if ($input['tracking_main']) {
+                
+                $check_tracking = NewWorksheet::where([
+                    ['tracking_main', '=', $input['tracking_main']]
+                ])
+                ->orWhere([
+                    ['tracking_main', 'like', '%'.', '.$input['tracking_main']]
+                ])
+                ->orWhere([
+                    ['tracking_main', 'like', '%'.$input['tracking_main'].', '.'%']
+                ])->first();
+                if($check_tracking) return $this->sendError('Main tracking number already exist.', ['tracking_main' => $input['tracking_main']]);
+                
                 $row = NewWorksheet::where([
                     ['tracking_transit', '=', $tracking]
                 ])
@@ -257,7 +270,7 @@ class NewWorksheetController extends BaseController
                         $sheet->status_ua = $this->ua_arr[$this->ru_arr[0]];
                     }
                     else{
-                        return $this->sendError(['tracking_main' => $sheet->tracking_main], 'Main tracking number already exist.');
+                        return $this->sendError('Main tracking number already exist.', ['tracking_main' => $sheet->tracking_main]);
                     }                     
                     
                     if ($sheet->save()) {
@@ -335,6 +348,17 @@ class NewWorksheetController extends BaseController
                 return $this->sendError('Validation Error.', $validator->errors());       
             }
 
+            $check_tracking = NewWorksheet::where([
+                ['tracking_main', '=', $input['tracking_main']]
+            ])
+            ->orWhere([
+                ['tracking_main', 'like', '%'.', '.$input['tracking_main']]
+            ])
+            ->orWhere([
+                ['tracking_main', 'like', '%'.$input['tracking_main'].', '.'%']
+            ])->first();
+            if($check_tracking) return $this->sendError('Main tracking number already exist.', ['tracking_main' => $input['tracking_main']]);
+
             $standard_phone = ltrim(urldecode($input['standard_phone']), " \+");
 
             $this_tracking = NewWorksheet::where([
@@ -390,31 +414,20 @@ class NewWorksheetController extends BaseController
                 $empty_tracking->last()->update(['status_en'=> $this->en_arr[$this->ru_arr[0]]]);
                 $empty_tracking->last()->update(['status_he'=> $this->he_arr[$this->ru_arr[0]]]);
                 $empty_tracking->last()->update(['status_ua'=> $this->ua_arr[$this->ru_arr[0]]]);
-                
-                return $this->sendResponse($empty_tracking->last()->toArray(), 'Row updated successfully.');
+
+                $message = 'Row updated successfully.';
+                $date_result = (strtotime('2021-09-20') <= strtotime(str_replace('.', '-', $empty_tracking->last()->date)));
+                if ($date_result) {
+                    $check_result = $this->checkReceipt($empty_tracking->last()->id, null, 'ru', $input['tracking_main']);                    
+                    if ($check_result) {
+                        $message .= ' '.$check_result;
+                    }
+                }
+                                
+                return $this->sendResponse($empty_tracking->last()->toArray(), $message);
             }
             else{
-                $data = NewWorksheet::where('standard_phone', '+'.$standard_phone)->get()->last();
-
-                $new_worksheet = new NewWorksheet();
-                $new_worksheet->site_name = $input['site_name'];
-                $new_worksheet->date = date('Y.m.d');
-                $new_worksheet->status = $this->ru_arr[0];
-                $new_worksheet->tracking_main = $input['tracking_main'];
-                $new_worksheet->sender_name = $data->sender_name;
-                $new_worksheet->sender_country = $data->sender_country;
-                $new_worksheet->sender_city = $data->sender_city;
-                $new_worksheet->sender_postcode = $data->sender_postcode;
-                $new_worksheet->sender_address = $data->sender_address;
-                $new_worksheet->standard_phone = $input['standard_phone'];
-                $new_worksheet->sender_passport = $data->sender_passport;
-                $new_worksheet->order_number = (int)($data->order_number) + 1;
-                $new_worksheet->status_en = $this->en_arr[$this->ru_arr[0]];
-                $new_worksheet->status_he = $this->he_arr[$this->ru_arr[0]];
-                $new_worksheet->status_ua = $this->ua_arr[$this->ru_arr[0]];
-                $new_worksheet->save();
-
-                return $this->sendResponse($new_worksheet->toArray(), 'Row created successfully.');
+                return $this->sendError('Main tracking number by this phone already exist.', ['tracking_main' => $input['tracking_main']]);
             } 
         }
         else{
@@ -443,6 +456,17 @@ class NewWorksheetController extends BaseController
                 return $this->sendError('Validation Error.', $validator->errors());       
             }
 
+            $check_tracking = NewWorksheet::where([
+                ['tracking_main', '=', $input['tracking_main']]
+            ])
+            ->orWhere([
+                ['tracking_main', 'like', '%'.', '.$input['tracking_main']]
+            ])
+            ->orWhere([
+                ['tracking_main', 'like', '%'.$input['tracking_main'].', '.'%']
+            ])->first();
+            if($check_tracking) return $this->sendError('Main tracking number already exist.', ['tracking_main' => $input['tracking_main']]);
+
             $standard_phone = ltrim(urldecode($input['standard_phone']), " \+");
 
             $data = NewWorksheet::where([
@@ -450,13 +474,26 @@ class NewWorksheetController extends BaseController
                 ['order_number', $input['order_number']]
             ])->get()->first();
 
+            if ($data->tracking_main) {
+                return $this->sendError('Main tracking number by this phone already exist.', ['tracking_main' => $input['tracking_main']]);
+            }
+
             $data->update(['tracking_main'=> $input['tracking_main']]);
             $data->update(['status'=> $this->ru_arr[0]]);
             $data->update(['status_en'=> $this->en_arr[$this->ru_arr[0]]]);
             $data->update(['status_he'=> $this->he_arr[$this->ru_arr[0]]]);
             $data->update(['status_ua'=> $this->ua_arr[$this->ru_arr[0]]]);
+
+            $message = 'Row updated successfully.';
+            $date_result = (strtotime('2021-09-20') <= strtotime(str_replace('.', '-', $data->date)));
+            if ($date_result) {
+                $check_result = $this->checkReceipt($data->id, null, 'ru', $input['tracking_main']);                
+                if ($check_result) {
+                    $message .= ' '.$check_result;
+                }
+            }                       
             
-            return $this->sendResponse($data->toArray(), 'Row updated successfully.');
+            return $this->sendResponse($data->toArray(), $message);
         }
         else{
             return $this->sendError('Token error.');
@@ -470,7 +507,7 @@ class NewWorksheetController extends BaseController
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function addNewShipment(Request $request)
+    /*public function addNewShipment(Request $request)
     {
         if ($this->checkToken($request->token) && $request->token){    
 
@@ -549,7 +586,7 @@ class NewWorksheetController extends BaseController
         else{
             return $this->sendError('Token error.');
         } 
-    }
+    }*/
 
 
     /**
@@ -684,242 +721,6 @@ class NewWorksheetController extends BaseController
      */
     public function store(Request $request)
     {
-        /*$new_worksheet = new NewWorksheet();
-        $fields = ['site_name', 'date', 'direction', 'tariff', 'status', 'tracking_main', 'tracking_local', 'tracking_transit', 'comment_1', 'comment_2', 'comments', 'sender_name', 'sender_country', 'sender_city', 'sender_postcode', 'sender_address', 'sender_phone', 'sender_passport', 'recipient_name', 'recipient_country', 'recipient_city', 'recipient_postcode', 'recipient_street', 'recipient_house', 'recipient_room', 'recipient_phone', 'recipient_passport', 'recipient_email', 'package_content', 'package_cost', 'courier', 'pick_up_date', 'weight', 'width', 'height', 'length', 'volume_weight', 'quantity_things', 'batch_number', 'pay_date', 'pay_sum', 'status_en', 'status_he', 'status_ua'];        
-
-        foreach($fields as $field){
-            if ($field === 'sender_name') {
-                $new_worksheet->$field = $request->input('first_name').' '.$request->input('last_name');
-            }
-            else if($field === 'site_name'){
-                $new_worksheet->$field = 'DD-C';
-            }
-            else if($field === 'recipient_name'){
-                $new_worksheet->$field = $request->input('recipient_first_name').' '.$request->input('recipient_last_name');
-            }
-            else if($field === 'package_content'){
-                $content = '';
-                if ($request->input('clothing_quantity')) {
-                    $content .= 'Одежда: '.$request->input('clothing_quantity').'; ';
-                }
-                if ($request->input('shoes_quantity')) {
-                    $content .= 'Обувь: '.$request->input('shoes_quantity').'; ';
-                }               
-                if ($request->input('other_content_1')) {
-                    $content .= $request->input('other_content_1').': '.$request->input('other_quantity_1').'; ';
-                }
-                if ($request->input('other_content_2')) {
-                    $content .= $request->input('other_content_2').': '.$request->input('other_quantity_2').'; ';
-                }
-                if ($request->input('other_content_3')) {
-                    $content .= $request->input('other_content_3').': '.$request->input('other_quantity_3').'; ';
-                }
-                if ($request->input('other_content_4')) {
-                    $content .= $request->input('other_content_4').': '.$request->input('other_quantity_4').'; ';
-                }
-                if ($request->input('other_content_5')) {
-                    $content .= $request->input('other_content_5').': '.$request->input('other_quantity_5').'; ';
-                }
-                if ($request->input('other_content_6')) {
-                    $content .= $request->input('other_content_6').': '.$request->input('other_quantity_6').'; ';
-                }
-                if ($request->input('other_content_7')) {
-                    $content .= $request->input('other_content_7').': '.$request->input('other_quantity_7').'; ';
-                }
-                if ($request->input('other_content_8')) {
-                    $content .= $request->input('other_content_8').': '.$request->input('other_quantity_8').'; ';
-                }
-                
-                $new_worksheet->$field = trim($content);
-            }
-            else if($field === 'comment_2'){
-                $new_worksheet->$field = $request->input('need_box');
-            }
-            else{
-                $new_worksheet->$field = $request->input($field);
-            }           
-        }
-
-        $new_worksheet->save();
-        $work_sheet_id = $new_worksheet->id;
-
         
-        // Packing
-        $fields_packing = ['payer', 'contract', 'type', 'track_code', 'full_shipper', 'full_consignee', 'country_code', 'postcode', 'region', 'district', 'city', 'street', 'house', 'body', 'room', 'phone', 'tariff', 'tariff_cent', 'weight_kg', 'weight_g', 'service_code', 'amount_1', 'amount_2', 'attachment_number', 'attachment_name', 'amount_3', 'weight_enclosures_kg', 'weight_enclosures_g', 'value_euro', 'value_cent', 'work_sheet_id'];
-        $j=1;
-        
-        if ($request->input('clothing_quantity')) {
-            $packing_sea = new PackingSea();
-            foreach($fields_packing as $field){
-                if ($field === 'type') {
-                    $packing_sea->$field = $request->input('tariff');
-                }
-                else if ($field === 'full_shipper') {
-                    $packing_sea->$field = $request->input('first_name').' '.$request->input('last_name');
-                }
-                else if ($field === 'full_consignee') {
-                    $packing_sea->$field = $request->input('recipient_first_name').' '.$request->input('recipient_last_name');
-                }
-                else if ($field === 'country_code') {
-                    $packing_sea->$field = $request->input('recipient_country');
-                }
-                else if ($field === 'postcode') {
-                    $packing_sea->$field = $request->input('recipient_postcode');
-                }
-                else if ($field === 'city') {
-                    $packing_sea->$field = $request->input('recipient_city');
-                }
-                else if ($field === 'street') {
-                    $packing_sea->$field = $request->input('recipient_street');
-                }
-                else if ($field === 'house') {
-                    $packing_sea->$field = $request->input('recipient_house');
-                }
-                else if ($field === 'room') {
-                    $packing_sea->$field = $request->input('recipient_room');
-                }
-                else if ($field === 'phone') {
-                    $packing_sea->$field = $request->input('recipient_phone');
-                }
-                else if ($field === 'tariff') {
-                    $packing_sea->$field = null;
-                }
-                else if ($field === 'work_sheet_id') {
-                    $packing_sea->$field = $work_sheet_id;
-                }
-                else if ($field === 'attachment_number') {
-                    $packing_sea->$field = $j;
-                }
-                else if ($field === 'attachment_name') {
-                    $packing_sea->$field = 'Одежда';
-                }
-                else if ($field === 'amount_3') {
-                    $packing_sea->$field = $request->input('clothing_quantity');
-                }
-                else{
-                    $packing_sea->$field = $request->input($field);
-                }
-            }
-            $j++;
-            $packing_sea->save();
-        }
-        
-        if ($request->input('shoes_quantity')) {
-            $packing_sea = new PackingSea();
-            foreach($fields_packing as $field){
-                if ($field === 'type') {
-                    $packing_sea->$field = $request->input('tariff');
-                }
-                else if ($field === 'full_shipper') {
-                    $packing_sea->$field = $request->input('first_name').' '.$request->input('last_name');
-                }
-                else if ($field === 'full_consignee') {
-                    $packing_sea->$field = $request->input('recipient_first_name').' '.$request->input('recipient_last_name');
-                }
-                else if ($field === 'country_code') {
-                    $packing_sea->$field = $request->input('recipient_country');
-                }
-                else if ($field === 'postcode') {
-                    $packing_sea->$field = $request->input('recipient_postcode');
-                }
-                else if ($field === 'city') {
-                    $packing_sea->$field = $request->input('recipient_city');
-                }
-                else if ($field === 'street') {
-                    $packing_sea->$field = $request->input('recipient_street');
-                }
-                else if ($field === 'house') {
-                    $packing_sea->$field = $request->input('recipient_house');
-                }
-                else if ($field === 'room') {
-                    $packing_sea->$field = $request->input('recipient_room');
-                }
-                else if ($field === 'phone') {
-                    $packing_sea->$field = $request->input('recipient_phone');
-                }
-                else if ($field === 'tariff') {
-                    $packing_sea->$field = null;
-                }
-                else if ($field === 'work_sheet_id') {
-                    $packing_sea->$field = $work_sheet_id;
-                }
-                else if ($field === 'attachment_number') {
-                    $packing_sea->$field = $j;
-                }
-                else if ($field === 'attachment_name') {
-                    $packing_sea->$field = 'Обувь';
-                }
-                else if ($field === 'amount_3') {
-                    $packing_sea->$field = $request->input('shoes_quantity');
-                }
-                else{
-                    $packing_sea->$field = $request->input($field);
-                }
-            }
-            $j++;
-            $packing_sea->save();
-        }
-        
-        for ($i=1; $i < 9; $i++) { 
-            if ($request->input('other_content_'.$i)) {
-                $packing_sea = new PackingSea();
-                foreach($fields_packing as $field){
-                    if ($field === 'type') {
-                        $packing_sea->$field = $request->input('tariff');
-                    }
-                    else if ($field === 'full_shipper') {
-                        $packing_sea->$field = $request->input('first_name').' '.$request->input('last_name');
-                    }
-                    else if ($field === 'full_consignee') {
-                        $packing_sea->$field = $request->input('recipient_first_name').' '.$request->input('recipient_last_name');
-                    }
-                    else if ($field === 'country_code') {
-                        $packing_sea->$field = $request->input('recipient_country');
-                    }
-                    else if ($field === 'postcode') {
-                        $packing_sea->$field = $request->input('recipient_postcode');
-                    }
-                    else if ($field === 'city') {
-                        $packing_sea->$field = $request->input('recipient_city');
-                    }
-                    else if ($field === 'street') {
-                        $packing_sea->$field = $request->input('recipient_street');
-                    }
-                    else if ($field === 'house') {
-                        $packing_sea->$field = $request->input('recipient_house');
-                    }
-                    else if ($field === 'room') {
-                        $packing_sea->$field = $request->input('recipient_room');
-                    }
-                    else if ($field === 'phone') {
-                        $packing_sea->$field = $request->input('recipient_phone');
-                    }
-                    else if ($field === 'tariff') {
-                        $packing_sea->$field = null;
-                    }
-                    else if ($field === 'work_sheet_id') {
-                        $packing_sea->$field = $work_sheet_id;
-                    }
-                    else if ($field === 'attachment_number') {
-                        $packing_sea->$field = $j;
-                    }
-                    else if ($field === 'attachment_name') {
-                        $packing_sea->$field = $request->input('other_content_'.$i);
-                    }
-                    else if ($field === 'amount_3') {
-                        $packing_sea->$field = $request->input('other_quantity_'.$i);
-                    }
-                    else{
-                        $packing_sea->$field = $request->input($field);
-                    }
-                }
-                $j++;
-                $packing_sea->save();
-            }
-        }
-
-        $message = 'Заказ посылки успешно создан !';
-        
-        return redirect()->route('parcelForm')->with('status', $message);*/
     }
 }

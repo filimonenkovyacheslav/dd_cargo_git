@@ -6,7 +6,14 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Admin\AdminController;
 use App\DraftWorksheet;
 use App\NewWorksheet;
+use App\NewPacking;
+use App\PackingSea;
+use App\Invoice;
+use App\Manifest;
 use Auth;
+use \Dejurin\GoogleTranslateForFree;
+use Excel;
+use App\Exports\DraftWorksheetExport;
 
 
 class DraftWorksheetController extends AdminController
@@ -19,34 +26,6 @@ class DraftWorksheetController extends AdminController
         
         return view('admin.draft.draft_worksheet', ['title' => $title,'draft_worksheet_obj' => $draft_worksheet_obj, 'user' => $user, 'viewer_arr' => $viewer_arr]);
     }
-
-
-    public function showAdd()
-	{
-		$title = 'Добавление строки';
-		return view('admin.draft.draft_worksheet_add', ['title' => $title]);
-	}
-
-
-	public function add(Request $request)
-	{
-		$draft_worksheet = new DraftWorksheet();
-		$fields = $this->getTableColumns('draft_worksheet');		
-
-		foreach($fields as $field){
-			if ($field !== 'created_at') {
-				$draft_worksheet->$field = $request->input($field);
-			}			
-		}
-
-		if (!$draft_worksheet->status) {
-			$draft_worksheet->status = 'Забрать';
-		}
-		
-		$draft_worksheet->save();		
-		
-		return redirect()->to(session('this_previous_url'))->with('status', 'Строка успешно добавлена!');
-	}
 
 
 	public function show($id)
@@ -63,15 +42,98 @@ class DraftWorksheetController extends AdminController
 		$draft_worksheet = DraftWorksheet::find($id);
 		$fields = $this->getTableColumns('draft_worksheet');
 
-		foreach($fields as $field){			
+		foreach($fields as $field){						
 			if ($field !== 'created_at') {
 				$draft_worksheet->$field = $request->input($field);
 			}
 		}
-		
-		$draft_worksheet->save();	
-		
-		return redirect()->to(session('this_previous_url'))->with('status', 'Строка успешно обновлена!');
+
+		$temp = rtrim($request->input('package_content'), ";");
+		$content_arr = explode(";",$temp);
+
+		if ($content_arr[0]) {
+			
+			// Update Packing Sea
+			PackingSea::where('work_sheet_id', $id)
+			->update([
+				'track_code' => $request->input('tracking_main'),
+				'type' => $request->input('tariff'),
+				'full_shipper' => $request->input('sender_name'),
+				'full_consignee' => $request->input('recipient_name'),
+				'country_code' => $request->input('recipient_country'),
+				'region' => $request->input('region'),
+				'district' => $request->input('district'),
+				'postcode' => $request->input('recipient_postcode'),
+				'city' => $request->input('recipient_city'),
+				'street' => $request->input('recipient_street'),
+				'house' => $request->input('recipient_house'),
+				'body' => $request->input('body'),
+				'room' => $request->input('recipient_room'),
+				'phone' => $request->input('recipient_phone')
+			]);
+
+			if ($request->input('package_content')) {
+				
+				$old_packing = PackingSea::where('work_sheet_id', $id)->get();
+				$qty = 1;
+
+				for ($i=0; $i < count($content_arr); $i++) { 
+					$qty = $i+1;
+					$content = explode(':', $content_arr[$i]);
+
+					if (count($content) == 2) {
+						if ($qty <= count($old_packing)) {
+							PackingSea::where([
+								['work_sheet_id', $id],
+								['attachment_number', $qty]
+							])
+							->update([
+								'attachment_name' => trim($content[0]),
+								'amount_3' => trim($content[1])
+							]);
+						}
+						else{
+							$new_packing = new PackingSea();
+							$new_packing->work_sheet_id = $id;
+							$new_packing->track_code = $request->input('tracking_main');
+							$new_packing->type = $request->input('tariff');
+							$new_packing->full_shipper = $request->input('sender_name');
+							$new_packing->full_consignee = $request->input('recipient_name');
+							$new_packing->country_code = $request->input('recipient_country');
+							$new_packing->postcode = $request->input('recipient_postcode');
+							$new_packing->region = $request->input('region');
+							$new_packing->district = $request->input('district');
+							$new_packing->city = $request->input('recipient_city');
+							$new_packing->street = $request->input('recipient_street');
+							$new_packing->house = $request->input('recipient_house');
+							$new_packing->body = $request->input('body');
+							$new_packing->room = $request->input('recipient_room');
+							$new_packing->phone = $request->input('recipient_phone');
+							$new_packing->attachment_number = $qty;
+							$new_packing->attachment_name = trim($content[0]);
+							$new_packing->amount_3 = trim($content[1]);
+							$new_packing->save();
+						}
+					}
+					else{
+						return redirect()->to(session('this_previous_url'))->with('status-error', 'Ошибка колонки Содержание!');
+					}
+				}
+				PackingSea::where([
+					['work_sheet_id', $id],
+					['attachment_number','>',$qty]
+				])->delete();
+			}
+			else{
+				PackingSea::where('work_sheet_id', $id)->delete();
+			}
+			// End Update Packing Sea
+			$draft_worksheet->save();
+			return redirect()->to(session('this_previous_url'))->with('status', 'Строка успешно обновлена!');
+		}	
+		else{
+			return redirect('/admin/draft-worksheet')->with('status-error', 'Ошибка колонки Содержание!');
+		}		
 	}
 
 
@@ -79,8 +141,8 @@ class DraftWorksheetController extends AdminController
 	{
 		$id = $request->input('action');
 
-		DraftWorksheet::where('id', $id)
-		->delete();
+		DraftWorksheet::where('id', $id)->delete();
+		PackingSea::where('work_sheet_id', $id)->delete();
 
 		return redirect()->to(session('this_previous_url'))->with('status', 'Строка успешно удалена!');
 	}
@@ -135,8 +197,8 @@ class DraftWorksheetController extends AdminController
 	{
 		$row_arr = $request->input('row_id');
 
-		DraftWorksheet::whereIn('id', $row_arr)
-		->delete();
+		DraftWorksheet::whereIn('id', $row_arr)->delete();
+		PackingSea::whereIn('work_sheet_id', $row_arr)->delete();
 
 		return redirect()->to(session('this_previous_url'))->with('status', 'Строки успешно удалены!');
 	}
@@ -182,7 +244,30 @@ class DraftWorksheetController extends AdminController
         
         $data = $request->all();             
         
-        return view('admin.draft.draft_worksheet_filter', ['title' => $title,'data' => $data,'draft_worksheet_obj' => $draft_worksheet_obj, 'user' => $user, 'viewer_arr' => $viewer_arr]);
+        return view('admin.draft.draft_worksheet', ['title' => $title,'data' => $data,'draft_worksheet_obj' => $draft_worksheet_obj, 'user' => $user, 'viewer_arr' => $viewer_arr]);
+    }
+
+
+    public function draftCheckActivate($id)
+    {
+    	$draft_worksheet = DraftWorksheet::find($id);
+		$error_message = 'Заполните обязателные поля: ';
+
+		if (!$draft_worksheet->sender_name) $error_message .= 'Отправитель,';
+		if (!$draft_worksheet->standard_phone) $error_message .= 'Телефон (стандарт),';
+		if (!$draft_worksheet->recipient_name) $error_message .= 'Получатель,';
+		if (!$draft_worksheet->recipient_city) $error_message .= 'Город получателя,';
+		if (!$draft_worksheet->recipient_street) $error_message .= 'Улица получателя,';
+		if (!$draft_worksheet->recipient_house) $error_message .= '№ дома пол-ля,';
+		if (!$draft_worksheet->recipient_room) $error_message .= '№ кв. пол-ля,';
+		if (!$draft_worksheet->recipient_phone) $error_message .= 'Телефон получателя,';
+
+		if ($error_message !== 'Заполните обязателные поля: ') {
+			return response()->json(['error' => $error_message]);
+		}
+		else{
+			return response()->json(['success' => 'success']);
+		}			
     }
 
 
@@ -196,9 +281,22 @@ class DraftWorksheetController extends AdminController
 			if ($field !== 'created_at' && $field !== 'id') {
 				$new_worksheet->$field = $draft_worksheet->$field;
 			}			
-		}
-		
-		if ($new_worksheet->save())	{
+		}		
+
+		$temp = rtrim($draft_worksheet->package_content, ";");
+		$content_arr = explode(";",$temp);
+				
+		if ($content_arr[0]) {
+			
+			$new_worksheet->save();
+			$work_sheet_id = $new_worksheet->id;
+			$tr = new GoogleTranslateForFree();
+			$packing = PackingSea::where('work_sheet_id', $id)->get();
+			
+			$this->createNewPacking($new_worksheet, $work_sheet_id, $packing);
+			$this->createInvoice($new_worksheet, $tr, $work_sheet_id, $packing);
+			$this->createManifest($new_worksheet, $tr, $work_sheet_id, $packing);
+			PackingSea::where('work_sheet_id', $id)->delete();
 
 			// Adding order number
             if ($new_worksheet->standard_phone) {
@@ -233,14 +331,159 @@ class DraftWorksheetController extends AdminController
                         }               
                     });
                 }
-            }
-			
+            }						
 			DraftWorksheet::where('id', $id)->delete();
 			return redirect()->to(session('this_previous_url'))->with('status', 'Строка успешно активирована!');
 		}
 		else{
-			return redirect()->to(session('this_previous_url'))->with('status', 'Ошибка активации!');
+			return redirect()->to(session('this_previous_url'))->with('status-error', 'Ошибка активации!');
 		}				
+	}
+
+
+	private function createNewPacking($new_worksheet, $work_sheet_id, $packing){			
+		$packing_fields = $this->getTableColumns('new_packing');					
+
+		$packing->each(function ($item, $key) use($work_sheet_id, $packing_fields, $new_worksheet) {
+			$new_packing = new NewPacking();
+			for ($i=0; $i < count($packing_fields); $i++) { 
+				if ($packing_fields[$i] !== 'work_sheet_id' && $packing_fields[$i] !== 'id') {
+					$new_packing[$packing_fields[$i]] = $item[$packing_fields[$i]];
+				}
+				else{
+					$new_packing->work_sheet_id = $work_sheet_id;
+				}					
+			}
+			$new_packing->weight_kg = $new_worksheet->weight;
+			$new_packing->save();
+		});
+
+		return true;
+	}
+
+
+	private function createInvoice($new_worksheet, $tr, $work_sheet_id, $packing){
+		$invoice_num = 1;
+		$result = Invoice::latest()->first();
+		if ($result) {
+			$invoice_num = (int)$result->number + 1;
+		}			
+		$address = '';
+		for ($i=0; $i < 8; $i++) { 
+			if ($i == 0 && $packing[0]->postcode) {
+				$address .= $packing[0]->postcode.', ';
+			}
+			if ($i == 1 && $packing[0]->region) {
+				$address .= $this->translit($packing[0]->region).', ';
+			}
+			if ($i == 2 && $packing[0]->district) {
+				$address .= $this->translit($packing[0]->district).', ';
+			}
+			if ($i == 3 && $packing[0]->city) {
+				$address .= $this->translit($packing[0]->city).', ';
+			}
+			if ($i == 4 && $packing[0]->street) {
+				$address .= $this->translit($packing[0]->street).', ';
+			}
+			if ($i == 5 && $packing[0]->house) {
+				$address .= $packing[0]->house;
+			}
+			if ($i == 6 && $packing[0]->body) {
+				$address .= '/'.$packing[0]->body;
+			}
+			if ($i == 7 && $packing[0]->room) {
+				$address .= ', '.$packing[0]->room;
+			}
+		}
+
+		$invoice = new Invoice();
+		$invoice->number = $invoice_num;
+		$invoice->tracking = $new_worksheet->tracking_main;
+		$invoice->box = 1;
+		$invoice->shipper_name = $this->translit($packing[0]->full_shipper);
+		$invoice->shipper_address_phone = $this->translit($new_worksheet->sender_city.', '.$new_worksheet->sender_address).'; '.$new_worksheet->standard_phone;
+		$invoice->consignee_name = $this->translit($packing[0]->full_consignee);
+		$invoice->consignee_address = $address;
+		$invoice->shipped_items = $tr->translate('ru', 'en', $new_worksheet->package_content, 5);
+		$invoice->weight = $new_worksheet->weight;
+		$invoice->height = $new_worksheet->height;
+		$invoice->length = $new_worksheet->length;
+		$invoice->width = $new_worksheet->width;
+		$invoice->declared_value = $new_worksheet->package_cost;
+		$invoice->work_sheet_id = $work_sheet_id;
+		$invoice->save();
+
+		return true;
+	}
+
+
+	private function createManifest($new_worksheet, $tr, $work_sheet_id, $packing){
+		$manifest_num = 1;
+		$result = Manifest::where('number','<>', null)->latest()->first();
+		if ($result) {
+			$manifest_num = (int)$result->number + 1;
+		}
+
+		$address = '';
+		for ($i=0; $i < 8; $i++) { 
+			if ($i == 0 && $packing[0]->postcode) {
+				$address .= $packing[0]->postcode.', ';
+			}
+			if ($i == 1 && $packing[0]->region) {
+				$address .= $this->translit($packing[0]->region).', ';
+			}
+			if ($i == 2 && $packing[0]->district) {
+				$address .= $this->translit($packing[0]->district).', ';
+			}
+			if ($i == 3 && $packing[0]->city) {
+				$address .= $this->translit($packing[0]->city).', ';
+			}
+			if ($i == 4 && $packing[0]->street) {
+				$address .= $this->translit($packing[0]->street).', ';
+			}
+			if ($i == 5 && $packing[0]->house) {
+				$address .= $packing[0]->house;
+			}
+			if ($i == 6 && $packing[0]->body) {
+				$address .= '/'.$packing[0]->body;
+			}
+			if ($i == 7 && $packing[0]->room) {
+				$address .= ', '.$packing[0]->room;
+			}
+		}
+
+		for ($i=0; $i < count($packing); $i++) { 
+			$manifest = new Manifest();
+			if ($i == 0) {
+				$manifest->number = $manifest_num;
+			}
+			else{
+				$manifest->number = null;
+			}
+			$manifest->tracking = $new_worksheet->tracking_main;
+			$manifest->sender_country = $tr->translate('ru', 'en', $new_worksheet->sender_country, 5);
+			$manifest->sender_name = $this->translit($new_worksheet->sender_name);
+			$manifest->recipient_name = $this->translit($new_worksheet->recipient_name);
+			$manifest->recipient_city = $this->translit($new_worksheet->recipient_city);
+			$manifest->recipient_address = $address;
+			$manifest->content = $tr->translate('ru', 'en', $packing[$i]->attachment_name, 5);
+			$manifest->quantity = $packing[$i]->amount_3;
+			$manifest->weight = $new_worksheet->weight;
+			$manifest->cost = $new_worksheet->package_cost;
+			$manifest->attachment_number = $packing[$i]->attachment_number;
+			$manifest->work_sheet_id = $work_sheet_id;
+			$manifest->save();
+		}
+
+		return true;
+	}
+
+
+	public function exportExcel()
+	{
+
+		return Excel::download(new DraftWorksheetExport, 'DraftWorksheetExport.xlsx');
+
 	}
 
 }

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\API;
 use Illuminate\Http\Request;
 use App\Http\Controllers\API\BaseController as BaseController;
 use App\PhilIndWorksheet;
+use App\EngDraftWorksheet;
 use Validator;
 
 
@@ -219,6 +220,18 @@ class PhilIndWorksheetController extends BaseController
             }
 
             if ($input['tracking_main']) {
+
+                $check_tracking = PhilIndWorksheet::where([
+                    ['tracking_main', '=', $input['tracking_main']]
+                ])
+                ->orWhere([
+                    ['tracking_main', 'like', '%'.', '.$input['tracking_main']]
+                ])
+                ->orWhere([
+                    ['tracking_main', 'like', '%'.$input['tracking_main'].', '.'%']
+                ])->first();
+                if($check_tracking) return $this->sendError('Main tracking number already exist.', ['tracking_main' => $input['tracking_main']]);
+                
                 $row = PhilIndWorksheet::where([
                     ['tracking_local', '=', $tracking]
                 ])
@@ -233,7 +246,7 @@ class PhilIndWorksheetController extends BaseController
                         $sheet->status_he = $this->he_arr[$this->en_arr[0]];
                     }
                     else{
-                        return $this->sendError(['tracking_main' => $sheet->tracking_main], 'Main tracking number already exist.');
+                        return $this->sendError('Main tracking number already exist.', ['tracking_main' => $sheet->tracking_main]);
                     }                     
                     
                     if ($sheet->save()) {
@@ -284,6 +297,17 @@ class PhilIndWorksheetController extends BaseController
             if($validator->fails()){
                 return $this->sendError('Validation Error.', $validator->errors());       
             }
+
+            $check_tracking = PhilIndWorksheet::where([
+                ['tracking_main', '=', $input['tracking_main']]
+            ])
+            ->orWhere([
+                ['tracking_main', 'like', '%'.', '.$input['tracking_main']]
+            ])
+            ->orWhere([
+                ['tracking_main', 'like', '%'.$input['tracking_main'].', '.'%']
+            ])->first();
+            if($check_tracking) return $this->sendError('Main tracking number already exist.', ['tracking_main' => $input['tracking_main']]);
 
             $standard_phone = ltrim(urldecode($input['standard_phone']), " \+");
 
@@ -338,26 +362,20 @@ class PhilIndWorksheetController extends BaseController
                 $empty_tracking->last()->update(['status'=> $this->en_arr[0]]);
                 $empty_tracking->last()->update(['status_ru'=> $this->ru_arr[$this->en_arr[0]]]);
                 $empty_tracking->last()->update(['status_he'=> $this->he_arr[$this->en_arr[0]]]);
+
+                $message = 'Row updated successfully.';
+                $date_result = (strtotime('2021-09-20') <= strtotime(str_replace('.', '-', $empty_tracking->last()->date)));
+                if ($date_result) {
+                    $check_result = $this->checkReceipt($empty_tracking->last()->id, null, 'en', $input['tracking_main']);
+                    if ($check_result) {
+                        $message .= ' '.$check_result;
+                    }
+                }                
                 
-                return $this->sendResponse($empty_tracking->last()->toArray(), 'Row updated successfully.');
+                return $this->sendResponse($empty_tracking->last()->toArray(), $message);
             }
             else{
-                $data = PhilIndWorksheet::where('standard_phone', '+'.$standard_phone)->get()->last();
-
-                $new_worksheet = new PhilIndWorksheet();
-                $new_worksheet->date = date('Y.m.d');
-                $new_worksheet->status = $this->en_arr[0];
-                $new_worksheet->tracking_main = $input['tracking_main'];
-                $new_worksheet->shipper_name = $data->shipper_name;
-                $new_worksheet->shipper_address = $data->shipper_address;
-                $new_worksheet->standard_phone = $input['standard_phone'];
-                $new_worksheet->shipper_id = $data->shipper_id;
-                $new_worksheet->order_number = (int)$data->order_number + 1;
-                $new_worksheet->status_ru = $this->ru_arr[$this->en_arr[0]];
-                $new_worksheet->status_he = $this->he_arr[$this->en_arr[0]];
-                $new_worksheet->save();
-
-                return $this->sendResponse($new_worksheet->toArray(), 'Row created successfully.');
+                return $this->sendError('Main tracking number by this phone already exist.', ['tracking_main' => $input['tracking_main']]);
             } 
         }
         else{
@@ -386,6 +404,17 @@ class PhilIndWorksheetController extends BaseController
                 return $this->sendError('Validation Error.', $validator->errors());       
             }
 
+            $check_tracking = PhilIndWorksheet::where([
+                ['tracking_main', '=', $input['tracking_main']]
+            ])
+            ->orWhere([
+                ['tracking_main', 'like', '%'.', '.$input['tracking_main']]
+            ])
+            ->orWhere([
+                ['tracking_main', 'like', '%'.$input['tracking_main'].', '.'%']
+            ])->first();
+            if($check_tracking) return $this->sendError('Main tracking number already exist.', ['tracking_main' => $input['tracking_main']]);
+
             $standard_phone = ltrim(urldecode($input['standard_phone']), " \+");
 
             $data = PhilIndWorksheet::where([
@@ -393,12 +422,25 @@ class PhilIndWorksheetController extends BaseController
                 ['order_number', $input['order_number']]
             ])->get()->first();
 
+            if ($data->tracking_main) {
+                return $this->sendError('Main tracking number by this phone already exist.', ['tracking_main' => $input['tracking_main']]);
+            }
+
             $data->update(['tracking_main'=> $input['tracking_main']]);
             $data->update(['status'=> $this->en_arr[0]]);
             $data->update(['status_ru'=> $this->ru_arr[$this->en_arr[0]]]);
             $data->update(['status_he'=> $this->he_arr[$this->en_arr[0]]]);
 
-            return $this->sendResponse($data->toArray(), 'Row updated successfully.');
+            $message = 'Row updated successfully.';
+            $date_result = (strtotime('2021-09-20') <= strtotime(str_replace('.', '-', $data->date)));
+            if ($date_result) {
+                $check_result = $this->checkReceipt($data->id, null, 'en', $input['tracking_main']);
+                if ($check_result) {
+                    $message .= ' '.$check_result;
+                }
+            }            
+
+            return $this->sendResponse($data->toArray(), $message);
         }
         else{
             return $this->sendError('Token error.');
@@ -412,7 +454,7 @@ class PhilIndWorksheetController extends BaseController
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function addNewShipmentEng(Request $request)
+/*    public function addNewShipmentEng(Request $request)
     {
         if ($this->checkToken($request->token) && $request->token){    
 
@@ -485,7 +527,7 @@ class PhilIndWorksheetController extends BaseController
         else{
             return $this->sendError('Token error.');
         } 
-    }
+    }*/
 
 
     /**

@@ -75,6 +75,12 @@
                         <a href="{{route('adminChinaWorksheet')}}"><i class="menu-icon fa fa-archive "></i> Work sheet </a>
                     </li>
 
+                    @can('editPost')
+                    <li>
+                        <a href="{{route('adminReceipts')}}"><i class="menu-icon fa fa-book "></i> Квитанции (Receipts) </a>
+                    </li>
+                    @endcan
+
                     @can('view-post')
                     <li>
                         <a href="{{route('adminIndex')}}"><i class="menu-icon fa fa-book "></i> Russian admin </a>

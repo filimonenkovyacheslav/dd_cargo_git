@@ -37,6 +37,163 @@
 
 						{!! Form::open(['url'=>route('newWorksheetUpdate', ['id'=>$new_worksheet->id]), 'class'=>'form-horizontal worksheet-update-form','method' => 'POST']) !!}
 
+						@if($user->role === 'office_ru')
+						<table class="table table-striped table-bordered">
+							<thead>
+								<tr>
+									<th>Поле</th>
+									<th>Данные</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr>
+									<td><div style="width:200px">Сайт</div></td>
+									<td><div style="width:900px">{{$new_worksheet->site_name}}</div></td>
+								</tr>
+								<tr>
+									<td><div style="width:200px">Направление</div></td>
+									<td><div style="width:900px">{{$new_worksheet->direction}}</div></td>
+								</tr>
+								<tr>
+									<td><div style="width:200px">Тариф</div></td>
+									<td><div style="width:900px">{{$new_worksheet->tariff}}</div></td>
+								</tr>
+								<tr>
+									<td><div style="width:200px">Статус</div></td>
+									<td><div style="width:900px">{{$new_worksheet->status}}</div></td>
+								</tr>
+								<tr>
+									<td><div style="width:200px">Трекинг Основной</div></td>
+									<td><div style="width:900px">{{$new_worksheet->tracking_main}}</div></td>
+								</tr>
+								<tr>
+									<td><div style="width:200px">Трекинг Локальные</div></td>
+									<td><div style="width:900px">{{$new_worksheet->tracking_local}}</div></td>
+								</tr>
+								<tr>
+									<td><div style="width:200px">Номер паллеты</div></td>
+									<td><div style="width:900px">{{$new_worksheet->pallet_number}}</div></td>
+								</tr>
+								<tr>
+									<td><div style="width:200px">OFF Коммент</div></td>
+									<td><div style="width:900px">{{$new_worksheet->comment_2}}</div></td>
+								</tr>
+								<tr>
+									<td><div style="width:200px">DIR Комментарии</div></td>
+									<td><div style="width:900px">{{$new_worksheet->comments}}</div></td>
+								</tr>
+								<tr>
+									<td><div style="width:200px">Отправитель</div></td>
+									<td><div style="width:900px">{{$new_worksheet->sender_name}}</div></td>
+								</tr>
+								<tr>
+									<td><div style="width:200px">Страна отправителя</div></td>
+									<td><div style="width:900px">{{$new_worksheet->sender_country}}</div></td>
+								</tr>
+								<tr>
+									<td><div style="width:200px">Город отправителя</div></td>
+									<td><div style="width:900px">{{$new_worksheet->sender_city}}</div></td>
+								</tr>
+								<tr>
+									<td><div style="width:200px">Индекс отправителя</div></td>
+									<td><div style="width:900px">{{$new_worksheet->sender_postcode}}</div></td>
+								</tr>
+								<tr>
+									<td><div style="width:200px">Адрес отправителя</div></td>
+									<td><div style="width:900px">{{$new_worksheet->sender_address}}</div></td>
+								</tr>
+								<tr>
+									<td><div style="width:200px">Телефон отправителя (стандарт)</div></td>
+									<td><div style="width:900px">{{$new_worksheet->standard_phone}}</div></td>
+								</tr>
+								<tr>
+									<td><div style="width:200px">Телефон отправителя (дополнительно)</div></td>
+									<td><div style="width:900px">{{$new_worksheet->sender_phone}}</div></td>
+								</tr>
+								<tr>
+									<td><div style="width:200px">Номер паспорта отправителя</div></td>
+									<td><div style="width:900px">{{$new_worksheet->sender_passport}}</div></td>
+								</tr>
+								<tr>
+									<td><div style="width:200px">Получатель</div></td>
+									<td><div style="width:900px">{{$new_worksheet->recipient_name}}</div></td>
+								</tr>
+								<tr>
+									<td><div style="width:200px">Страна получателя</div></td>
+									<td><div style="width:900px">{{$new_worksheet->recipient_country}}</div></td>
+								</tr>
+								<tr>
+									<td><div style="width:200px">Регион</div></td>
+									<td><div style="width:900px">{{$new_worksheet->region}}</div></td>
+								</tr>
+								<tr>
+									<td><div style="width:200px">Район</div></td>
+									<td><div style="width:900px">{{$new_worksheet->district}}</div></td>
+								</tr>
+								<tr>
+									<td><div style="width:200px">Город получателя</div></td>
+									<td><div style="width:900px">{{$new_worksheet->recipient_city}}</div></td>
+								</tr>
+								<tr>
+									<td><div style="width:200px">Индекс получателя</div></td>
+									<td><div style="width:900px">{{$new_worksheet->recipient_postcode}}</div></td>
+								</tr>
+								<tr>
+									<td><div style="width:200px">Улица получателя</div></td>
+									<td><div style="width:900px">{{$new_worksheet->recipient_street}}</div></td>
+								</tr>
+								<tr>
+									<td><div style="width:200px">Номер дома получателя</div></td>
+									<td><div style="width:900px">{{$new_worksheet->recipient_house}}</div></td>
+								</tr>
+								<tr>
+									<td><div style="width:200px">корпус</div></td>
+									<td><div style="width:900px">{{$new_worksheet->body}}</div></td>
+								</tr>
+								<tr>
+									<td><div style="width:200px">Номер квартиры получателя</div></td>
+									<td><div style="width:900px">{{$new_worksheet->recipient_room}}</div></td>
+								</tr>
+								<tr>
+									<td><div style="width:200px">Телефон получателя</div></td>
+									<td><div style="width:900px">{{$new_worksheet->recipient_phone}}</div></td>
+								</tr>
+								<tr>
+									<td><div style="width:200px">Номер паспорта получателя</div></td>
+									<td><div style="width:900px">{{$new_worksheet->recipient_passport}}</div></td>
+								</tr>
+								<tr>
+									<td><div style="width:200px">E-mail получателя</div></td>
+									<td><div style="width:900px">{{$new_worksheet->recipient_email}}</div></td>
+								</tr>
+								<tr>
+									<td><div style="width:200px">Содержимое посылки</div></td>
+									<td><div style="width:900px">{{$new_worksheet->package_content}}</div></td>
+								</tr>
+								<tr>
+									<td><div style="width:200px">Декларируемая стоимость посылки</div></td>
+									<td><div style="width:900px">{{$new_worksheet->package_cost}}</div></td>
+								</tr>
+								<tr>
+									<td><div style="width:200px">Курьер</div></td>
+									<td><div style="width:900px">{{$new_worksheet->courier}}</div></td>
+								</tr>
+								<tr>
+									<td><div style="width:200px">Дата забора и комментарии</div></td>
+									<td><div style="width:900px">{{$new_worksheet->pick_up_date}}</div></td>
+								</tr>
+								<tr>
+									<td><div style="width:200px">Дата оплаты и комментарии</div></td>
+									<td><div style="width:900px">{{$new_worksheet->pay_date}}</div></td>
+								</tr>
+								<tr>
+									<td><div style="width:200px">Сумма оплаты</div></td>
+									<td><div style="width:900px">{{$new_worksheet->pay_sum}}</div></td>
+								</tr>
+							</tbody>
+						</table>
+						@endif
+
 						@can('editPost')
 
 						<div class="form-group">
@@ -81,18 +238,14 @@
 								{!! Form::text('tracking_local',$new_worksheet->tracking_local,['class' => 'form-control'])!!}
 							</div>
 						</div>
-
-						@endcan
-
-						@can('editColumns-1')
-						
+												
 						<div class="form-group">
 							{!! Form::label('tracking_transit','Трекинг Транзитные',['class' => 'col-md-2 control-label'])   !!}
 							<div class="col-md-8">
 								{!! Form::text('tracking_transit',$new_worksheet->tracking_transit,['class' => 'form-control'])!!}
 							</div>
 						</div>
-						
+
 						@endcan
 
 						@can('editColumns-3')
@@ -103,6 +256,11 @@
 								{!! Form::text('pallet_number',$new_worksheet->pallet_number,['class' => 'form-control'])!!}
 							</div>
 						</div>
+
+						@endcan
+
+						@can('editColumns-1')
+						
 						<div class="form-group">
 							{!! Form::label('comment_2','OFF Коммент',['class' => 'col-md-2 control-label'])   !!}
 							<div class="col-md-8">
@@ -112,7 +270,7 @@
 						
 						@endcan
 
-						@can('update-user')
+						@can('editColumns-4')
 
 						<div class="form-group">
 							{!! Form::label('comments','DIR Комментарии',['class' => 'col-md-2 control-label'])   !!}
@@ -186,6 +344,18 @@
 							</div>
 						</div>
 						<div class="form-group">
+							{!! Form::label('region','Регион',['class' => 'col-md-2 control-label'])   !!}
+							<div class="col-md-8">
+								{!! Form::text('region',$new_worksheet->region,['class' => 'form-control'])!!}
+							</div>
+						</div>
+						<div class="form-group">
+							{!! Form::label('district','Район',['class' => 'col-md-2 control-label'])   !!}
+							<div class="col-md-8">
+								{!! Form::text('district',$new_worksheet->district,['class' => 'form-control'])!!}
+							</div>
+						</div>
+						<div class="form-group">
 							{!! Form::label('recipient_city','Город получателя',['class' => 'col-md-2 control-label'])   !!}
 							<div class="col-md-8">
 								{!! Form::text('recipient_city',$new_worksheet->recipient_city,['class' => 'form-control'])!!}
@@ -207,6 +377,12 @@
 							{!! Form::label('recipient_house','Номер дома получателя',['class' => 'col-md-2 control-label'])   !!}
 							<div class="col-md-8">
 								{!! Form::text('recipient_house',$new_worksheet->recipient_house,['class' => 'form-control'])!!}
+							</div>
+						</div>
+						<div class="form-group">
+							{!! Form::label('body','корпус',['class' => 'col-md-2 control-label'])   !!}
+							<div class="col-md-8">
+								{!! Form::text('body',$new_worksheet->body,['class' => 'form-control'])!!}
 							</div>
 						</div>
 						<div class="form-group">
@@ -260,11 +436,7 @@
 							<div class="col-md-8">
 								{!! Form::text('courier',$new_worksheet->courier,['class' => 'form-control'])!!}
 							</div>
-						</div>
-
-						@endcan
-
-						@can('editColumns-1')
+						</div>						
 						
 						<div class="form-group">
 							{!! Form::label('pick_up_date','Дата забора и комментарии',['class' => 'col-md-2 control-label'])   !!}
@@ -462,6 +634,8 @@
 
 							{!! Form::hidden('id',$new_worksheet->id)!!}
 
+							{!! Form::hidden('status_date',$new_worksheet->status_date)!!}
+
 							{!! Form::hidden('site_name',$new_worksheet->site_name,['class' => 'form-control'])!!}
 
 							{!! Form::hidden('date',$new_worksheet->date,['class' => 'form-control'])!!}
@@ -508,6 +682,10 @@
 
 							{!! Form::hidden('recipient_country',$new_worksheet->recipient_country,['class' => 'form-control'])!!}
 
+							{!! Form::hidden('region',$new_worksheet->region)!!}
+
+							{!! Form::hidden('district',$new_worksheet->district)!!}
+
 							{!! Form::hidden('recipient_city',$new_worksheet->recipient_city,['class' => 'form-control'])!!}
 
 							{!! Form::hidden('recipient_postcode',$new_worksheet->recipient_postcode,['class' => 'form-control'])!!}
@@ -515,6 +693,8 @@
 							{!! Form::hidden('recipient_street',$new_worksheet->recipient_street,['class' => 'form-control'])!!}
 
 							{!! Form::hidden('recipient_house',$new_worksheet->recipient_house,['class' => 'form-control'])!!}
+
+							{!! Form::hidden('body',$new_worksheet->body)!!}
 
 							{!! Form::hidden('recipient_room',$new_worksheet->recipient_room,['class' => 'form-control'])!!}
 

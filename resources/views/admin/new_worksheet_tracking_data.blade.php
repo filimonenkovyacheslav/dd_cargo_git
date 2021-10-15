@@ -73,10 +73,13 @@
 								<option value="sender_passport">Номер паспорта отправителя</option>
 								<option value="recipient_name">Получатель</option>
 								<option value="recipient_country">Страна получателя</option>
+								<option value="region">Регион</option>
+								<option value="district">Район</option>
 								<option value="recipient_city">Город получателя</option>
 								<option value="recipient_postcode">Индекс получателя</option>
 								<option value="recipient_street">Улица получателя</option>
 								<option value="recipient_house">№ дома пол-ля</option>
+								<option value="body">корпус</option>
 								<option value="recipient_room">№ кв. пол-ля</option>
 								<option value="recipient_phone">Телефон получателя</option>
 								<option value="recipient_passport">Номер паспорта получателя</option>

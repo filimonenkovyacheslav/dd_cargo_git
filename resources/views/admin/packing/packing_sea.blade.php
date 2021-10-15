@@ -46,8 +46,6 @@
 					@php
 						session(['this_previous_url' => url()->full()]);
 					@endphp
-
-					<a class="btn btn-primary btn-move" href="{{ route('showAddPackingSea') }}">Добавить строку</a>	
 					
 					<div class="card-body packing-sea">
 						<div class="table-container">
@@ -84,7 +82,6 @@
 										<th>weight of enclosures g</th>
 										<th>стоимость евро</th>
 										<th>стоимость евроценты</th>			
-										<th>Change</th>
 									</tr>
 								</thead>
 								<tbody>
@@ -183,16 +180,6 @@
 										<td title="{{$row->value_cent}}">
 											<div class="div-3">{{$row->value_cent}}</div>
 										</td>										
-
-										<td class="td-button">
-											<a class="btn btn-primary" href="{{ url('/admin/packing-sea/'.$row->id) }}">Изменить</a>
-											
-											{!! Form::open(['url'=>route('destroyPackingSea'),'onsubmit' => 'return ConfirmDelete()', 'class'=>'form-horizontal','method' => 'POST']) !!}
-											{!! Form::hidden('action',$row->id) !!}
-											{!! Form::button('Удалить',['class'=>'btn btn-danger','type'=>'submit']) !!}
-											{!! Form::close() !!}
-
-										</td> 
                                                                
 									</tr>
 

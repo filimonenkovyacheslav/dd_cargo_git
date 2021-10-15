@@ -219,7 +219,8 @@ class RuPostalTrackingController extends Controller
 						])
 						->update([
 							'status' => $new_status,
-							'update_status_date' => date('Y-m-d')
+							'update_status_date' => date('Y-m-d'),
+							'status_date' => date('Y-m-d')
 						]);
 
 						if ($new_status === 'Доставляется в почтовое отделение' || $new_status === 'В почтовом отделении получателя') {
@@ -271,7 +272,8 @@ class RuPostalTrackingController extends Controller
 							'status_en' => $this->status_en[$this->status_new[$new_status]],
 							'status_he' => $this->status_he[$this->status_new[$new_status]],
 							'status_ua' => $this->status_ua[$this->status_new[$new_status]],
-							'update_status_date' => date('Y-m-d')
+							'update_status_date' => date('Y-m-d'),
+							'status_date' => date('Y-m-d')
 						]);
 					}
 				}
@@ -331,7 +333,8 @@ class RuPostalTrackingController extends Controller
 						])
 						->update([
 							'status' => $new_status,
-							'update_status_date' => date('Y-m-d')
+							'update_status_date' => date('Y-m-d'),
+							'status_date' => date('Y-m-d')
 						]);
 
 						if ($new_status === 'Доставляется в почтовое отделение' || $new_status === 'В почтовом отделении получателя') {
@@ -383,7 +386,8 @@ class RuPostalTrackingController extends Controller
 							'status_en' => $this->status_en[$this->status_new[$new_status]],
 							'status_he' => $this->status_he[$this->status_new[$new_status]],
 							'status_ua' => $this->status_ua[$this->status_new[$new_status]],
-							'update_status_date' => date('Y-m-d')
+							'update_status_date' => date('Y-m-d'),
+							'status_date' => date('Y-m-d')
 						]);
 					}
 				}

@@ -6,7 +6,11 @@
         <div class="container">                       
             <div class="parcel-form">
 
-                @if (session('status'))
+                @if (session('status') === 'The phone number is exist in Draft!')
+                    <div class="alert alert-danger">
+                        {{ session('status') }}
+                    </div>
+                @elseif (session('status'))
                     <div class="alert alert-success">
                         {{ session('status') }}
                     </div>
@@ -31,6 +35,30 @@
                     <label class="control-label">This is not my first order</label>
                     <input type="checkbox" name="not_first_order">
                 </div>
+
+                <div class="form-group">
+                    <label class="control-label">I need empty box/boxes</label>
+                    <input onclick="clickRadio(this)" type="radio" name="need_box" value="need">
+                    <h6>please specify the boxes types and quantity</h6>
+                    <h6>TYPE - QUANTITY</h6>
+                    <ul class="box-group">
+                        <li style="width: 120px;">
+                            <label class="control-label">Large</label>
+                            <input type="number" name="large" style="width: 40px;float: right;" min="0">
+                        </li>
+                        <li style="width: 120px;">
+                            <label class="control-label">Medium</label>
+                            <input type="number" name="medium" style="width: 40px;float: right;" min="0">
+                        </li>
+                        <li style="width: 120px;">
+                            <label class="control-label">Small</label>
+                            <input type="number" name="small" style="width: 40px;float: right;" min="0">
+                        </li>
+                    </ul>
+                    
+                    <label class="control-label">I send in my own box</label>
+                    <input onclick="clickRadio(this)" type="radio" name="need_box" value="not_need" checked>
+                </div>                
 
                 <div class="container">
                     <!-- Modal -->
@@ -86,6 +114,9 @@
 
                 {!! Form::open(['url'=>route('philIndParcelAdd'),'onsubmit' => 'сonfirmSigned(event)', 'class'=>'form-horizontal form-send-parcel','method' => 'POST']) !!}
 
+                {!! Form::hidden('status_box','')!!}
+                {!! Form::hidden('comments_2','')!!}
+
                 <div class="form-group">
                     <div class="row">
                         <div class="col-md-6">
@@ -111,10 +142,29 @@
                 <div class="form-group">
                     <div class="row">
                         <div class="col-md-6">
+                            {!! Form::text('shipper_city',isset($data_parcel->shipper_city) ? $data_parcel->shipper_city : old('shipper_city'),['class' => 'form-control', 'placeholder' => 'Shipper\'s city/village'])!!}
+                        </div>
+                        <div class="col-md-6">
                             {!! Form::text('shipper_address',isset($data_parcel->shipper_address) ? $data_parcel->shipper_address : old('shipper_address'),['class' => 'form-control', 'placeholder' => 'Shipper\'s address*', 'required'])!!}
                         </div>
                     </div>
                 </div>
+
+                <h3>Shipper’s Personal Data</h3>
+                <h6>*For citizens of India only</h6>
+
+                <div class="form-group">
+                    <div class="row">
+                        <div class="col-md-6">
+                            {!! Form::text('passport_number',isset($data_parcel->passport_number) ? $data_parcel->passport_number : old('passport_number'),['class' => 'form-control', 'placeholder' => 'GSTN/Passport number'])!!}
+                        </div>
+                        <div class="col-md-6">
+                            {!! Form::text('return_date',isset($data_parcel->return_date) ? $data_parcel->return_date : old('return_date'),['class' => 'form-control', 'placeholder' => 'Estimated return to India date'])!!}
+                        </div>
+                    </div>
+                </div>
+
+                <h3>Consignee’s Data</h3>
 
                 <div class="form-group">
                     <div class="row">
@@ -123,6 +173,28 @@
                         </div>
                         <div class="col-md-6">
                             {!! Form::text('consignee_last_name',isset($data_parcel->consignee_last_name) ? $data_parcel->consignee_last_name : old('consignee_last_name'),['class' => 'form-control', 'placeholder' => 'Consignee\'s last name*', 'required'])!!}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="row">
+                        <div class="col-md-6">
+                            {!! Form::text('house_name',isset($data_parcel->house_name) ? $data_parcel->house_name : old('house_name'),['class' => 'form-control', 'placeholder' => 'House name'])!!}
+                        </div>
+                        <div class="col-md-6">
+                            {!! Form::text('post_office',isset($data_parcel->post_office) ? $data_parcel->post_office : old('post_office'),['class' => 'form-control', 'placeholder' => 'Local post office'])!!}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="row">
+                        <div class="col-md-6">
+                            {!! Form::text('district',isset($data_parcel->district) ? $data_parcel->district : old('district'),['class' => 'form-control', 'placeholder' => 'District/City'])!!}
+                        </div>
+                        <div class="col-md-6">
+                            {!! Form::text('state_pincode',isset($data_parcel->state_pincode) ? $data_parcel->state_pincode : old('state_pincode'),['class' => 'form-control', 'placeholder' => 'State pincode'])!!}
                         </div>
                     </div>
                 </div>
@@ -160,7 +232,7 @@
                 <div class="form-group">
                     <div class="row">
                         <div class="col-9">
-                            {!! Form::text('item_1',old('item_1'),['class' => 'form-control', 'placeholder' => 'item 1', 'required', 'data-item' => '1'])!!}
+                            {!! Form::text('item_1',old('item_1'),['class' => 'form-control', 'placeholder' => 'item 1', 'data-item' => '1'])!!}
                         </div>
                         <div class="col-3">
                             {!! Form::text('q_item_1',old('q_item_1'),['class' => 'form-control'])!!}
@@ -269,6 +341,17 @@
 
                 <div class="form-group">
                     <div class="row">
+                        <div class="col-9">
+                            <h3>Parcels qty</h3>
+                        </div>
+                        <div class="col-3">
+                            {!! Form::number('parcels_qty',old('parcels_qty'),['class' => 'form-control', 'min' => '1'])!!}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="row">
                         <div class="col-md-6">
                             {!! Form::text('weight',old('weight'),['class' => 'form-control', 'placeholder' => 'Shipment weight, kg'])!!}
                         </div>
@@ -293,6 +376,9 @@
                     <div class="row">
                         <div class="col-md-6">
                             {!! Form::text('shipment_val',old('shipment_val'),['class' => 'form-control', 'placeholder' => 'Shipment\'s declared value*', 'required'])!!}
+                        </div>
+                        <div class="col-md-6">
+                            {!! Form::text('operator',old('operator'),['class' => 'form-control', 'placeholder' => 'Operator'])!!}
                         </div>
                     </div>
                 </div>
@@ -324,43 +410,93 @@
     </section><!-- /.app-content -->
 
     <script>
-
-    function сonfirmSigned(event)
-    {
-        event.preventDefault();
-        const form = event.target;
-
-        const phone = document.querySelector('[name="standard_phone"]'); 
-        if (phone.value.length < 10 || phone.value.length > 13) {
-            alert('The number of characters in the phone must be from 10 to 13 !');
-            return false;
-        }
+        const boxGroup = document.querySelectorAll('.box-group input');
+        boxGroup.forEach(function(item) {
+            item.disabled = true;
+        })
         
-        let trueInput = false;
-        const input = document.querySelectorAll('.form-send-parcel input');
-        input.forEach(function(item) {
-            if (item.hasAttribute('data-item')) {
-                const num = item.getAttribute('data-item');
-                const content = document.querySelector('[name="item_'+num+'"]');
-                const quantity = document.querySelector('[name="q_item_'+num+'"]');
-                if (content.value && !(quantity.value)) {
-                    /*trueInput = true;
-                    alert('Fill in the quantity !');
-                    return false;*/
+        function clickRadio(elem){    
+            const boxGroup = document.querySelectorAll('.box-group input');       
+            if (elem.value === 'need') {                
+                boxGroup.forEach(function(item) {
+                    item.disabled = false;
+                })               
+            }
+            else{
+                boxGroup.forEach(function(item) {
+                    item.disabled = true;
+                })
+            }
+        }
+
+
+        function сonfirmSigned(event)
+        {
+            event.preventDefault();
+            const form = event.target;
+
+            const phone = document.querySelector('[name="standard_phone"]'); 
+            if (phone.value.length < 10 || phone.value.length > 13) {
+                alert('The number of characters in the phone must be from 10 to 13 !');
+                return false;
+            }
+
+            /*Parcel content items*/
+            const input = document.querySelectorAll('.form-send-parcel input');
+            const parcelsQty = document.querySelector('[name="parcels_qty"]');
+
+            if (!parcelsQty.value) parcelsQty.value = 1;
+            let contentFull = false;
+            for (let item of input) {
+                if (item.hasAttribute('data-item')) {
+                    const num = item.getAttribute('data-item');
+                    const content = document.querySelector('[name="item_'+num+'"]');
+                    const quantity = document.querySelector('[name="q_item_'+num+'"]');
+                    if (content.value && !(quantity.value)) {
+                        alert('Fill in the quantity !');
+                        return false;
+                    }
+                    else if(!(content.value) && quantity.value){
+                        alert('Fill in the description !');
+                        return false;
+                    }
+                    else if(content.value && quantity.value){
+                        contentFull = true;
+                    }
                 }
-                else if(!(content.value) && quantity.value){
-                    trueInput = true;
-                    alert('Fill in the description !');
+            } 
+
+            if(!contentFull){
+                document.querySelector('[name="item_1"]').value = "Empty";
+                document.querySelector('[name="q_item_1"]').value = "0";
+            } 
+
+            /*Boxes info*/
+            const needBox = $('[name="need_box"]:checked').val();        
+            if (needBox === 'need') {
+                $('[name="status_box"]').val('true');
+                let boxString = '';
+                let boxVal = 0;
+                $('.box-group input').each((k,el)=>{
+                    boxVal += parseInt($(el).val());
+                })
+                if (boxVal < 1) {
+                    alert('PLEASE SPECIFY THE TYPE OF AT LEAST ONE BOX !');
                     return false;
                 }
+                else{
+                    $('.box-group input').each((k,el)=>{
+                        if(parseInt($(el).val())){
+                            boxString += $(el).attr('name') +': '+ $(el).val() + '; ';
+                        }                   
+                    })
+                    $('[name="comments_2"]').val(boxString);
+                }            
             }
-        })
+            
+            form.submit();
+        }
 
-        if (trueInput) return false;
-        
-        form.submit();
-    }
-
-</script>
+    </script>
 
 @endsection

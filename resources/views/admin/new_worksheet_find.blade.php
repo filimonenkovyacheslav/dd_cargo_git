@@ -33,13 +33,9 @@
 						<strong class="card-title">{{ $title }}</strong>
 					</div>
 
-					@if (session('status') === 'Колонка успешно добавлена!')
-					<div class="alert alert-success">
-						{{ session('status') }}
-					</div>
-					@elseif (session('status') === 'Лимит колонок исчерпан!')
+					@if (session('status-error'))
 					<div class="alert alert-danger">
-						{{ session('status') }}
+						{{ session('status-error') }}
 					</div>
 					@elseif (session('status'))
 					<div class="alert alert-success">
@@ -53,7 +49,6 @@
 					
 					@can('editPost')
 					<a class="btn btn-success btn-move" href="{{ route('newWorksheetAddColumn') }}">Добавить колонку</a>
-					<!-- <a class="btn btn-primary btn-move" href="{{ route('showNewWorksheet') }}">Добавить строку</a> -->
 					@endcan
 
 					<div class="btn-move-wrapper" style="display:flex">
@@ -67,6 +62,7 @@
 									<option value="direction">Направление</option>
 									<option value="tariff">Тариф</option>
 									<option value="status">Статус</option>
+									<option value="status_date">Дата Статуса</option>
 									<option value="partner">Партнер</option>
 									<option value="tracking_main">Основной</option>
 									<option value="tracking_local">Локальный</option>
@@ -84,10 +80,13 @@
 									<option value="sender_passport">Номер паспорта отправителя</option>
 									<option value="recipient_name">Получатель</option>
 									<option value="recipient_country">Страна получателя</option>
+									<option value="region">Регион</option>
+									<option value="district">Район</option>
 									<option value="recipient_city">Город получателя</option>
 									<option value="recipient_postcode">Индекс получателя</option>
 									<option value="recipient_street">Улица получателя</option>
 									<option value="recipient_house">№ дома пол-ля</option>
+									<option value="body">корпус</option>
 									<option value="recipient_room">№ кв. пол-ля</option>
 									<option value="recipient_phone">Телефон получателя</option>
 									<option value="recipient_passport">Номер паспорта получателя</option>
@@ -132,6 +131,7 @@
 										<th>Off<hr>Направ- ление</th>
 										<th>Тариф</th>
 										<th>Статус</th>
+										<th>Дата Статуса</th>
 										<th>Партнер</th>
 										<th>Трекинг<hr>Основной<hr>
 											@can('editPost')
@@ -154,10 +154,13 @@
 										<th>Номер паспорта отправителя</th>
 										<th>Получатель</th>
 										<th>Страна получателя</th>
+										<th>Регион</th>
+										<th>Район</th>
 										<th>Город получателя</th>
 										<th>Индекс получателя</th>
 										<th>Улица получателя</th>
 										<th>№ дома пол-ля</th>
+										<th>корпус</th>
 										<th>№ кв. пол- ля</th>
 										<th>Телефон получателя</th>
 										<th>Номер паспорта получателя</th>
@@ -280,7 +283,7 @@
 											<a class="btn btn-primary" href="{{ url('/admin/new-worksheet/'.$row->id) }}">Изменить</a>
 											@endcan
 
-											@can('update-user')
+											@can('editPost')
 
 											{!! Form::open(['url'=>route('deleteNewWorksheet'),'onsubmit' => 'return ConfirmDelete()', 'class'=>'form-horizontal','method' => 'POST']) !!}
 											{!! Form::hidden('action',$row->id) !!}
@@ -303,6 +306,9 @@
 										</td>
 										<td title="{{$row->status}}">
 											<div class="div-3">{{$row->status}}</div>
+										</td>
+										<td title="{{$row->status_date}}">
+											<div class="div-1">{{$row->status_date}}</div>
 										</td>
 										<td title="{{$row->partner}}">
 											<div class="div-3">{{$row->partner}}</div>
@@ -358,6 +364,12 @@
 										<td title="{{$row->recipient_country}}">
 											<div class="div-18">{{$row->recipient_country}}</div>
 										</td>
+										<td title="{{$row->region}}">
+											<div class="div-18">{{$row->region}}</div>
+										</td>
+										<td title="{{$row->district}}">
+											<div class="div-18">{{$row->district}}</div>
+										</td>
 										<td title="{{$row->recipient_city}}">
 											<div class="div-19">{{$row->recipient_city}}</div>
 										</td>
@@ -369,6 +381,9 @@
 										</td>
 										<td title="{{$row->recipient_house}}">
 											<div class="div-22">{{$row->recipient_house}}</div>
+										</td>
+										<td title="{{$row->body}}">
+											<div class="div-22">{{$row->body}}</div>
 										</td>
 										<td title="{{$row->recipient_room}}">
 											<div class="div-23">{{$row->recipient_room}}</div>
@@ -496,7 +511,7 @@
 											<a class="btn btn-primary" href="{{ url('/admin/new-worksheet/'.$row->id) }}">Изменить</a>
 											@endcan
 
-											@can('update-user')
+											@can('editPost')
 
 											{!! Form::open(['url'=>route('deleteNewWorksheet'),'onsubmit' => 'return ConfirmDelete()', 'class'=>'form-horizontal','method' => 'POST']) !!}
 											{!! Form::hidden('action',$row->id) !!}
@@ -519,6 +534,9 @@
 										</td>
 										<td title="{{$row->status}}">
 											<div class="div-3">{{$row->status}}</div>
+										</td>
+										<td title="{{$row->status_date}}">
+											<div class="div-1">{{$row->status_date}}</div>
 										</td>
 										<td title="{{$row->partner}}">
 											<div class="div-3">{{$row->partner}}</div>
@@ -574,6 +592,12 @@
 										<td title="{{$row->recipient_country}}">
 											<div class="div-18">{{$row->recipient_country}}</div>
 										</td>
+										<td title="{{$row->region}}">
+											<div class="div-18">{{$row->region}}</div>
+										</td>
+										<td title="{{$row->district}}">
+											<div class="div-18">{{$row->district}}</div>
+										</td>
 										<td title="{{$row->recipient_city}}">
 											<div class="div-19">{{$row->recipient_city}}</div>
 										</td>
@@ -585,6 +609,9 @@
 										</td>
 										<td title="{{$row->recipient_house}}">
 											<div class="div-22">{{$row->recipient_house}}</div>
+										</td>
+										<td title="{{$row->body}}">
+											<div class="div-22">{{$row->body}}</div>
 										</td>
 										<td title="{{$row->recipient_room}}">
 											<div class="div-23">{{$row->recipient_room}}</div>
@@ -751,10 +778,13 @@
 											<option value="sender_passport">Номер паспорта отправителя</option>
 											<option value="recipient_name">Получатель</option>
 											<option value="recipient_country">Страна получателя</option>
+											<option value="region">Регион</option>
+											<option value="district">Район</option>
 											<option value="recipient_city">Город получателя</option>
 											<option value="recipient_postcode">Индекс получателя</option>
 											<option value="recipient_street">Улица получателя</option>
 											<option value="recipient_house">№ дома пол-ля</option>
+											<option value="body">корпус</option>
 											<option value="recipient_room">№ кв. пол-ля</option>
 											<option value="recipient_phone">Телефон получателя</option>
 											<option value="recipient_passport">Номер паспорта получателя</option>
@@ -784,17 +814,9 @@
 								{!! Form::button('Сохранить',['class'=>'btn btn-primary checkbox-operations-change','type'=>'submit']) !!}
 								{!! Form::close() !!}
 
-								@endcan
-
-								@can('update-user')
-
 								{!! Form::open(['url'=>route('deleteNewWorksheetById'),'onsubmit' => 'return ConfirmDelete()','method' => 'POST']) !!}
 								{!! Form::button('Удалить',['class'=>'btn btn-danger  checkbox-operations-delete','type'=>'submit']) !!}
 								{!! Form::close() !!}
-
-								@endcan
-
-								@can('editPost')
 
 							</div>
 

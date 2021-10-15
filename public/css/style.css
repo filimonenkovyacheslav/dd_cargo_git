@@ -602,13 +602,19 @@ footer .fa-facebook-square:hover{
 .div1,.div-9,.div-10,.div-11,.div-15,.div-16,.div-17,.div-24,.div-25,.div-26,.div-29,.div-37 {  
   width:120px;  
 }
+.div-invoice{
+  width:300px;
+}
+.div-number{
+  width:30px;
+  text-align: center;
+}
 
 #bootstrap-data-table_wrapper > .row:first-child > div{
   display: flex;
 }
 a.btn-move{
   display: none;
-  width: 170px;
   height: 40px;
   margin-left: 10px;
   margin-top: 20px;
@@ -662,4 +668,16 @@ div.error-phone.admin{
 }
 .checkbox-operations-change, .checkbox-operations-delete{
   display: none;
+}
+
+/* 
+Parcel form
+*/
+.form-send-parcel .col-md-12.control-label{
+  display: flex;
+}
+input[name="signed_form"], input[name="need_box"]{
+  width: 20px;
+  height: 20px;
+  margin-right: 10px;
 }

@@ -348,56 +348,58 @@
                 <h5>Упаковка</h5>
 
                 <div class="form-group">
-                    <div class="row">                       
-                        <div class="col-md-2">
+                    <div class="row">
+                        <div class="col-md-12 control-label">
                             {!! Form::radio('need_box','Мне нужна коробка на 30 кг', false)!!}
-                        </div>
-                        <span class="col-md-10 control-label">Мне нужна коробка на 30 кг</span>                        
+                            <span>Мне нужна коробка на 30 кг</span>
+                        </div>                                            
                     </div>
                 </div>
 
                 <div class="form-group">
-                    <div class="row">                       
-                        <div class="col-md-2">
+                    <div class="row"> 
+                        <div class="col-md-12 control-label">
                             {!! Form::radio('need_box','Мне нужна коробка на 20 кг', false)!!}
-                        </div>
-                        <span class="col-md-10 control-label">Мне нужна коробка на 20 кг</span> 
+                            <span>Мне нужна коробка на 20 кг</span>
+                        </div>                       
                     </div>
                 </div>
 
                 <div class="form-group">
-                    <div class="row">                       
-                        <div class="col-md-2">
+                    <div class="row">
+                        <div class="col-md-12 control-label">
                             {!! Form::radio('need_box','Мне нужна коробка на 10 кг', false)!!}
-                        </div>
-                        <span class="col-md-10 control-label">Мне нужна коробка на 10 кг</span> 
+                            <span>Мне нужна коробка на 10 кг</span>
+                        </div>                   
                     </div>
                 </div>
 
                 <div class="form-group">
-                    <div class="row">                       
-                        <div class="col-md-2">
+                    <div class="row">
+                        <div class="col-md-12 control-label">
                             {!! Form::radio('need_box','Мне не нужна коробка', true)!!}
-                        </div>
-                        <span class="col-md-10 control-label">Мне не нужна коробка</span> 
+                            <span>Мне не нужна коробка</span>
+                        </div>                       
                     </div>
                 </div>
 
                 <div class="form-group">
                     <div class="row">                       
-                        <div class="col-md-2">
+                        <div class="col-md-12 control-label">
                             {!! Form::radio('need_box','Мне нужно несколько коробок', false)!!}
+                            <span>Мне нужно несколько коробок</span>
                         </div>
-                        <span class="col-md-10 control-label">Мне нужно несколько коробок</span>
                     </div>
                 </div>
 
                 <div class="form-group">
                     <div class="row">                       
-                        <div class="col-md-2">
+                        <div class="col-md-12">
                             {!! Form::checkbox('signed_form','', false)!!}
+                            <span>
+                                <strong>Подписывая эту форму гарантирую следующее:*</strong> описание содержимого посылки и ее заявленной стоимости являются полными и правдивыми. Я ознакомился/лась со списками предметов, запрещенных ко ввозу и имеющих ограничения на ввоз в страну назначения, и моя посылка либо не содержит эти предметы, либо соответствует таможенным правилам. В случае нарушения этих гарантий я согласен/на оплатить расходы, возникшие по моей вине, в частности, дополнительные таможенные проверки и/или возврат моей посылки в страну отправления.
+                            </span>
                         </div>
-                        <div class="col-md-10"><strong>Подписывая эту форму гарантирую следующее:*</strong> описание содержимого посылки и ее заявленной стоимости являются полными и правдивыми. Я ознакомился/лась со списками предметов, запрещенных ко ввозу и имеющих ограничения на ввоз в страну назначения, и моя посылка либо не содержит эти предметы, либо соответствует таможенным правилам. В случае нарушения этих гарантий я согласен/на оплатить расходы, возникшие по моей вине, в частности, дополнительные таможенные проверки и/или возврат моей посылки в страну отправления.</div>
                     </div>
                 </div>
 

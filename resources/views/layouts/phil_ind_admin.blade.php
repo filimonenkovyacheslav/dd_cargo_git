@@ -29,20 +29,27 @@
     <!-- <script type="text/javascript" src="https://cdn.jsdelivr.net/html5shiv/3.7.3/html5shiv.min.js"></script> -->
 
     <style type="text/css">
-    #farms .dropdown-submenu, .category_arr .dropdown-submenu{
-        left: -25%;
-    }
-    #farms .dropdown-submenu>.dropdown-menu, .category_arr .dropdown-submenu>.dropdown-menu{
-        position: relative;
-        left: 10%;
-        background-color: #212529;
-    }  
-    #farms .dropdown-submenu:hover>.dropdown-menu, .category_arr .dropdown-submenu:hover>.dropdown-menu{
-        display: block;
-    }
-    #farms ul.sub-menu.children.dropdown-menu, .menu-item-has-children.dropdown ul.sub-menu.children.dropdown-menu{
-        max-height: max-content;
-    }
+        #farms .dropdown-submenu, .category_arr .dropdown-submenu{
+            left: -25%;
+        }
+        #farms .dropdown-submenu>.dropdown-menu, .category_arr .dropdown-submenu>.dropdown-menu{
+            position: relative;
+            left: 10%;
+            background-color: #212529;
+        }  
+        #farms .dropdown-submenu:hover>.dropdown-menu, .category_arr .dropdown-submenu:hover>.dropdown-menu{
+            display: block;
+        }
+        #farms ul.sub-menu.children.dropdown-menu, .menu-item-has-children.dropdown ul.sub-menu.children.dropdown-menu{
+            max-height: max-content;
+        }
+
+        #main-menu .dropdown .btn-dropdown, #main-menu .dropdown ul.dropdown-menu{
+            background-color: #212529;
+        }
+        .navbar .navbar-nav li > a.btn-dropdown {
+           width: auto; 
+        }
     </style>
 
 </head>
@@ -77,13 +84,44 @@
                     </li>
 
                     <li>
+                        <a href="{{route('adminCourierEngDraftWorksheet')}}"><i class="menu-icon fa fa-archive "></i> Courier Draft </a>
+                    </li>
+
+                    <li>
                         <a href="{{route('adminPhilIndWorksheet')}}"><i class="menu-icon fa fa-archive "></i> Work sheet </a>
                     </li>
 
+                    @can('editPost')
+                    <li class="dropdown">
+                        <a class="btn btn-dropdown dropdown-toggle" type="button" data-toggle="dropdown">Receipts
+                            <span class="caret"></span>
+                            <i class="menu-icon fa fa-book "></i>
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a href="{{url('/admin/receipts/dd')}}"> Квитанции ДД (Receipts DD) </a></li>
+                            <li><a href="{{url('/admin/receipts/ul')}}"> Квитанции ЮЛ (Receipts UL) </a></li>
+                            <li><a href="{{route('adminReceiptsArchive')}}"></i> Notifications </a></li>
+                        </ul>
+                    </li>                     
+                    @endcan
+
                     @can('editColumns-eng')
+                    <li class="dropdown">
+                        <a class="btn btn-dropdown dropdown-toggle" type="button" data-toggle="dropdown">Packing Lists
+                            <span class="caret"></span>
+                            <i class="menu-icon fa fa-book "></i>
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a href="{{route('indexPackingEngNew')}}"> New Packing List </a></li>
+                            <li><a href="{{route('indexPackingEng')}}"> Old Packing List </a></li>
+                        </ul>
+                    </li> 
+                    @endcan 
+                    
+                    @can('editColumns-2')
                     <li>
-                        <a href="{{route('indexPackingEng')}}"><i class="menu-icon fa fa-book "></i> Packing List </a>
-                    </li>
+                        <a href="{{route('adminWarehouse')}}"><i class="menu-icon fa fa-book "></i> Warehouse </a>
+                    </li> 
                     @endcan 
 
                     @can('view-post')

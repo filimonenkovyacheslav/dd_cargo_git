@@ -11,13 +11,23 @@ use App\PackingSea;
 use DB;
 use Excel;
 use App\Exports\NewWorksheetExport;
-use App\Exports\PackingAirExport;
 use App\Exports\PackingSeaExport;
 use Auth;
+use App\NewPacking;
+use App\Invoice;
+use App\Manifest;
+use App\ReceiptArchive;
+use \Dejurin\GoogleTranslateForFree;
+//use App\Warehouse;
 
 
 class NewWorksheetController extends AdminController
 {
+	
+	private $status_arr = ["Доставляется на склад в стране отправителя", "Возврат", "Коробка", "Забрать", "Уточнить", "Думают", "Отмена"];
+	private $status_arr_2 = ["На таможне в стране отправителя", "На складе в стране отправителя", "Доставляется на склад в стране отправителя", "Возврат", "Коробка", "Забрать", "Уточнить", "Думают", "Отмена"];
+    
+
     public function index(){
         $title = 'Новый рабочий лист';
         $new_worksheet_obj = NewWorksheet::paginate(10);     
@@ -33,113 +43,156 @@ class NewWorksheetController extends AdminController
     }
 
 
-    public function showAdd()
-	{
-		return '<h1>Действие не доступно !</h1>';
-		
-		$arr_columns = parent::new_columns();
-		$title = 'Добавление строки';
-		return view('admin.new_worksheet_add', ['title' => $title,'new_column_1' => $arr_columns[0],'new_column_2' => $arr_columns[1],'new_column_3' => $arr_columns[2],'new_column_4' => $arr_columns[3],'new_column_5' => $arr_columns[4]]);
-	}
-
-
-	public function add(Request $request)
-	{				
-		$new_worksheet = new NewWorksheet();
-		$arr_columns = parent::new_columns();
-		$fields = $this->getTableColumns('new_worksheet');
-		
-		for ($i=0; $i < count($arr_columns); $i++) { 
-			if ($arr_columns[$i]) {
-				$fields[] = 'new_column_'.($i+1);
-			}
-		}
-
-		foreach($fields as $field){
-			if ($field !== 'created_at') {
-				$new_worksheet->$field = $request->input($field);
-			}			
-		}
-
-		if (!$new_worksheet->status) {
-			$new_worksheet->status = 'Забрать';
-		}
-		
-		if ($new_worksheet->save()) {
-			
-			// Adding order number
-			if ($new_worksheet->standard_phone) {
-
-				$standard_phone = ltrim($new_worksheet->standard_phone, " \+");
-
-				$data = NewWorksheet::where('standard_phone', '+'.$standard_phone)
-				->get();
-
-				if (!$data->first()->order_number) {
-					$data->transform(function ($item, $key) {
-						return $item->update(['order_number'=> ((int)$key+1)]);             
-					});
-				}
-				else{
-					$data->transform(function ($item, $key) use($standard_phone) {
-						if (!$item->order_number) {
-
-							$i = (int)(NewWorksheet::where([
-								['standard_phone', '+'.$standard_phone],
-								['order_number', '<>', null]
-							])->get()->last()->order_number);
-
-							$i++;
-							return $item->update(['order_number'=> $i]);
-						}               
-					});
-				}
-			}
-		}		
-		
-		return redirect()->to(session('this_previous_url'))->with('status', 'Строка успешно добавлена!');
-	}
-
-
 	public function show($id)
 	{
 		$arr_columns = parent::new_columns();
 		$new_worksheet = NewWorksheet::find($id);
 		$title = 'Изменение строки '.$new_worksheet->id;
+		$user = Auth::user();
 
-		return view('admin.new_worksheet_update', ['title' => $title,'new_worksheet' => $new_worksheet,'new_column_1' => $arr_columns[0],'new_column_2' => $arr_columns[1],'new_column_3' => $arr_columns[2],'new_column_4' => $arr_columns[3],'new_column_5' => $arr_columns[4]]);
+		return view('admin.new_worksheet_update', ['title' => $title,'new_worksheet' => $new_worksheet, 'user' => $user,'new_column_1' => $arr_columns[0],'new_column_2' => $arr_columns[1],'new_column_3' => $arr_columns[2],'new_column_4' => $arr_columns[3],'new_column_5' => $arr_columns[4]]);
+	}
+
+
+	private function validateUpdate($request, $id, $new_worksheet){
+		$status_error = '';
+		if (!$request->input('status')) return 'ERROR STATUS!';
+		
+		if ($request->input('tracking_main')) {
+			$check_tracking = NewWorksheet::where([
+				['tracking_main', '=', $request->input('tracking_main')],
+				['id', '<>', $id]
+			])
+			->orWhere([
+				['tracking_main', 'like', '%'.', '.$request->input('tracking_main')],
+				['id', '<>', $id]
+			])
+			->orWhere([
+				['tracking_main', 'like', '%'.$request->input('tracking_main').', '.'%'],
+				['id', '<>', $id]
+			])->first();
+			if($check_tracking) $status_error = 'ВНИМАНИЕ! В СИСТЕМЕ УЖЕ СУЩЕСТВУЕТ ТАКОЙ ТРЕКИНГ-НОМЕР. ИСПРАВЬТЕ ОШИБОЧНУЮ ЗАПИСЬ ИЛИ ВНЕСИТЕ ДРУГОЙ НОМЕР!';
+			if($status_error) return $status_error;
+		}
+		
+		if ($request->input('pay_sum')){
+			if (in_array($request->input('status'), $this->status_arr)){
+				$status_error = "ВНИМАНИЕ! ПРИ ПОЛУЧЕНИИ ОПЛАТЫ СТАТУС НЕ МОЖЕТ БЫТЬ - '".$request->input('status')."'. ДОБАВЬТЕ ЗАПИСЬ ОБ ОПЛАТЕ В ПРАВИЛЬНУЮ СТРОКУ ИЛИ ИЗМЕНИТЕ СТАТУС";
+				return $status_error;
+			}
+		}
+		
+		if ($request->input('pallet_number')){
+			if (in_array($request->input('status'), $this->status_arr)){
+				$status_error = "ВНИМАНИЕ! ПРИ ДОБАВЛЕНИИ НОМЕРА ПАЛЛЕТЫ СТАТУС НЕ МОЖЕТ БЫТЬ - '".$request->input('status')."'. ДОБАВЬТЕ ЗАПИСЬ О НОМЕРЕ ПАЛЛЕТЫ В ПРАВИЛЬНУЮ СТРОКУ ИЛИ ИЗМЕНИТЕ СТАТУС";
+				return $status_error;
+			}			
+		}
+
+		return $status_error;		
 	}
 
 
 	public function update(Request $request, $id)
 	{
 		$new_worksheet = NewWorksheet::find($id);
+		$old_tracking = $new_worksheet->tracking_main;
+		$old_pallet = $new_worksheet->pallet_number;
+		$old_batch_number = $new_worksheet->batch_number;
+		$old_status = $new_worksheet->status;
 		$arr_columns = parent::new_columns();
 		$fields = $this->getTableColumns('new_worksheet');
+		$status_error = '';
+		$status = 'Строка успешно обновлена!';
+		$check_result = '';
 
 		for ($i=0; $i < count($arr_columns); $i++) { 
 			if ($arr_columns[$i]) {
 				$fields[] = 'new_column_'.($i+1);
 			}
-		}
+		}	
 
-		foreach($fields as $field){
-			if ($field === 'tracking_main') {
-				if ($request->input('tracking_main')) {
-					DB::table('packing_sea')
-					->where('work_sheet_id', $id)
-					->update([
-						'track_code' => $request->input('tracking_main')
-					]);
-				}
-			}			
+		$status_error = $this->validateUpdate($request, $id, $new_worksheet);
+		if($status_error) return redirect()->to(session('this_previous_url'))->with('status-error', $status_error);	
+
+		foreach($fields as $field){	
 			if ($field !== 'created_at') {
 				$new_worksheet->$field = $request->input($field);
 			}
 		}
+
+		if ($request->input('tracking_main')){
+
+			if (in_array($new_worksheet->status, $this->status_arr)){
+				$status_error = "ВНИМАНИЕ! ПРИ ДОБАВЛЕНИИ ТРЕКИНГ-НОМЕРА СТАТУС НЕ МОЖЕТ БЫТЬ - '$new_worksheet->status'. СТАТУС БУДЕТ ИЗМЕНЕН АВТОМАТИЧЕСКИ!";
+				$new_worksheet->status = "На складе в стране отправителя";
+				$new_worksheet->status_en = "At the warehouse in the sender country";
+				$new_worksheet->status_he = "במחסן במדינת השולח";
+				$new_worksheet->status_ua = "На складі в країні відправника";
+			}
+
+			if ($old_batch_number !== $new_worksheet->batch_number) {
+				if (in_array($old_status, $this->status_arr_2)){
+					$new_worksheet->status = "Доставляется в страну получателя";
+					$new_worksheet->status_en = "Forwarding to the receiver country";
+					$new_worksheet->status_he = " נשלח למדינת המקבל";
+					$new_worksheet->status_ua = "Доставляється в країну відправника";
+				}
+			}			
+
+			$date_result = (strtotime('2021-09-20') <= strtotime(str_replace('.', '-', $new_worksheet->date)));
+			if ($date_result) {
+				
+				if ($old_tracking && $request->input('tracking_main')) {
+					ReceiptArchive::where('tracking_main', $old_tracking)->delete();
+				}
+				
+				$notification = ReceiptArchive::where('tracking_main', $request->input('tracking_main'))->first();
+				if (!$notification) {
+					$check_result = $this->checkReceipt($id, null, 'ru', $request->input('tracking_main'));
+				}
+				
+				if ($status_error) {
+					if ($check_result) {
+						$status_error .= ' '.$check_result;
+					}
+				}
+				else{
+					if ($check_result) {
+						$status .= ' '.$check_result;
+					}
+				}
+			}
+
+			// Update Warehouse
+			/*if ($old_pallet !== $request->input('pallet_number')) {
+				if ($old_tracking !== $request->input('tracking_main')) {
+					$this->updateWarehouse($old_pallet, $request->input('pallet_number'), $old_tracking, $request->input('tracking_main'));
+				}
+				else{
+					$this->updateWarehouse($old_pallet, $request->input('pallet_number'), $old_tracking);
+				}				
+			}*/			
+		}	
+
+		if ($old_status !== $new_worksheet->status) {
+			NewWorksheet::where('id', $id)
+			->update([
+				'status_date' => date('Y-m-d')
+			]);
+		}	
+
+		$temp = rtrim($request->input('package_content'), ";");
+		$content_arr = explode(";",$temp);		
 		
-		if ($new_worksheet->save()) {
-			
+		if ($content_arr[0]) {
+
+			$tr = new GoogleTranslateForFree();
+
+			$this->updateInvoice($request, $id, $tr);
+			$this->updateNewPacking($request, $id, $tr, $content_arr);			
+			$this->updateManifest($request, $id, $tr, $content_arr);
+						
 			// Adding order number
 			if ($new_worksheet->standard_phone) {
 
@@ -168,19 +221,326 @@ class NewWorksheetController extends AdminController
 					});
 				}
 			}
+			// End Adding order number
+			
+			$new_worksheet->save();
+			if ($status_error) {
+				return redirect()->to(session('this_previous_url'))->with('status-error', $status_error);
+			}
+			else{
+				return redirect()->to(session('this_previous_url'))->with('status', $status);
+			}			
 		}		
+		else{
+			return redirect('/admin/new-worksheet')->with('status-error', 'Ошибка колонки Содержание!');
+		}		
+	}
+
+
+	private function updateInvoice($request, $id, $tr){
+		$invoice_num = 1;
+		$result = Invoice::where('number','<>', null)->latest()->first();
+		if ($result) {
+			$invoice_num = (int)$result->number + 1;
+		}
+		$address = '';
+		if ($request->input('recipient_postcode')) {
+			$address .= $request->input('recipient_postcode').', ';
+		}
+		if ($request->input('region')) {
+			$address .= $this->translit($request->input('region')).', ';
+		}
+		if ($request->input('district')) {
+			$address .= $this->translit($request->input('district')).', ';
+		}
+		if ($request->input('recipient_city')) {
+			$address .= $this->translit($request->input('recipient_city')).', ';
+		}
+		if ($request->input('recipient_street')) {
+			$address .= $this->translit($request->input('recipient_street')).', ';
+		}
+		if ($request->input('recipient_house')) {
+			$address .= $request->input('recipient_house');
+		}	
+		if ($request->input('body')) {
+			$address .= '/'.$this->translit($request->input('body'));
+		}
+		if ($request->input('recipient_room')) {
+			$address .= ', '.$request->input('recipient_room');					
+		}
+
+		$has_post = Invoice::where('work_sheet_id', $id)->first();
+		if ($has_post) {
+			if ($has_post->number){
+				Invoice::where('work_sheet_id', $id)
+				->update([
+					'tracking' => $request->input('tracking_main'),
+					'tracking' => $request->input('tracking_main'),
+					'shipper_name' => $this->translit($request->input('sender_name')),
+					'shipper_address_phone' => $this->translit($request->input('sender_city').', '.$request->input('sender_address')).'; '.$request->input('standard_phone'),
+					'consignee_name' => $this->translit($request->input('recipient_name')),
+					'consignee_address' => $address,
+					'shipped_items' => $tr->translate('ru', 'en', $request->input('package_content'), 5),
+					'weight' => $request->input('weight'),
+					'height' => $request->input('height'),
+					'length' => $request->input('length'),
+					'width' => $request->input('width'),
+					'batch_number' => $request->input('batch_number'),
+					'declared_value' => $request->input('package_cost')
+				]);
+			}
+			else{
+				Invoice::where('work_sheet_id', $id)
+				->update([
+					'number' => $invoice_num,
+					'tracking' => $request->input('tracking_main'),
+					'shipper_name' => $this->translit($request->input('sender_name')),
+					'shipper_address_phone' => $this->translit($request->input('sender_city').', '.$request->input('sender_address')).'; '.$request->input('standard_phone'),
+					'consignee_name' => $this->translit($request->input('recipient_name')),
+					'consignee_address' => $address,
+					'shipped_items' => $tr->translate('ru', 'en', $request->input('package_content'), 5),
+					'weight' => $request->input('weight'),
+					'height' => $request->input('height'),
+					'length' => $request->input('length'),
+					'width' => $request->input('width'),
+					'batch_number' => $request->input('batch_number'),
+					'declared_value' => $request->input('package_cost')
+				]);
+			}
+		}
+		else{
+			$invoice = new Invoice();
+			$invoice->number = $invoice_num;
+			$invoice->work_sheet_id = $id;
+			$invoice->tracking = $request->input('tracking_main');
+			$invoice->shipper_name = $this->translit($request->input('sender_name'));
+			$invoice->shipper_address_phone = $this->translit($request->input('sender_city').', '.$request->input('sender_address')).'; '.$request->input('standard_phone');
+			$invoice->consignee_name = $this->translit($request->input('recipient_name'));
+			$invoice->consignee_address = $address;
+			$invoice->shipped_items = $tr->translate('ru', 'en', $request->input('package_content'), 5);
+			$invoice->weight = $request->input('weight');
+			$invoice->height = $request->input('height');
+			$invoice->length = $request->input('length');
+			$invoice->width = $request->input('width');
+			$invoice->batch_number = $request->input('batch_number');
+			$invoice->declared_value = $request->input('package_cost');
+			$invoice->save();
+		}
 		
-		return redirect()->to(session('this_previous_url'))->with('status', 'Строка успешно обновлена!');
+		return true;
+	}
+
+
+	private function updateNewPacking($request, $id, $tr, $content_arr){
+		NewPacking::where('work_sheet_id', $id)
+		->update([
+			'track_code' => $request->input('tracking_main'),
+			'type' => $request->input('tariff'),
+			'full_shipper' => $request->input('sender_name'),
+			'full_consignee' => $request->input('recipient_name'),
+			'country_code' => $request->input('recipient_country'),
+			'postcode' => $request->input('recipient_postcode'),
+			'region' => $request->input('region'),
+			'district' => $request->input('district'),
+			'city' => $request->input('recipient_city'),
+			'street' => $request->input('recipient_street'),
+			'house' => $request->input('recipient_house'),
+			'body' => $request->input('body'),
+			'room' => $request->input('recipient_room'),
+			'phone' => $request->input('recipient_phone'),
+			'batch_number' => $request->input('batch_number'),
+			'weight_kg' => $request->input('weight')
+		]);
+
+		if ($request->input('package_content')) {				
+			$old_packing = NewPacking::where('work_sheet_id', $id)->get();
+			$qty = 1;
+
+			for ($i=0; $i < count($content_arr); $i++) { 
+				$qty = $i+1;
+				$content = explode(':', $content_arr[$i]);
+
+				if (count($content) == 2) {
+					if ($qty <= count($old_packing)) {
+						NewPacking::where([
+							['work_sheet_id', $id],
+							['attachment_number', $qty]
+						])
+						->update([
+							'attachment_name' => trim($content[0]),
+							'amount_3' => trim($content[1])
+						]);
+					}
+					else{
+						$new_packing = new NewPacking();
+						$new_packing->work_sheet_id = $id;
+						$new_packing->track_code = $request->input('tracking_main');
+						$new_packing->type = $request->input('tariff');
+						$new_packing->full_shipper = $request->input('sender_name');
+						$new_packing->full_consignee = $request->input('recipient_name');
+						$new_packing->country_code = $request->input('recipient_country');
+						$new_packing->postcode = $request->input('recipient_postcode');
+						$new_packing->region = $request->input('region');
+						$new_packing->district = $request->input('district');
+						$new_packing->city = $request->input('recipient_city');
+						$new_packing->street = $request->input('recipient_street');
+						$new_packing->house = $request->input('recipient_house');
+						$new_packing->body = $request->input('body');
+						$new_packing->room = $request->input('recipient_room');
+						$new_packing->phone = $request->input('recipient_phone');
+						$new_packing->attachment_number = $qty;
+						$new_packing->attachment_name = trim($content[0]);
+						$new_packing->amount_3 = trim($content[1]);
+						$new_packing->weight_kg = $request->input('weight');
+						$new_packing->batch_number = $request->input('batch_number');
+						$new_packing->save();
+					}
+				}
+				else{
+					return redirect()->to(session('this_previous_url'))->with('status-error', 'Ошибка колонки Содержание!');
+				}
+			}
+			NewPacking::where([
+				['work_sheet_id', $id],
+				['attachment_number','>',$qty]
+			])->delete();
+		}
+		else{
+			NewPacking::where('work_sheet_id', $id)->delete();
+		}
+
+		return true;
+	}
+
+
+	private function updateManifest($request, $id, $tr, $content_arr){	
+		$result = Manifest::where('number','<>', null)->latest()->first();
+		$manifest_num = 1;
+		if ($result) {
+			$manifest_num = (int)$result->number + 1;
+		}	
+		
+		$address = '';
+		if ($request->input('recipient_postcode')) {
+			$address .= $request->input('recipient_postcode').', ';
+		}
+		if ($request->input('region')) {
+			$address .= $this->translit($request->input('region')).', ';
+		}
+		if ($request->input('district')) {
+			$address .= $this->translit($request->input('district')).', ';
+		}
+		if ($request->input('recipient_city')) {
+			$address .= $this->translit($request->input('recipient_city')).', ';
+		}
+		if ($request->input('recipient_street')) {
+			$address .= $this->translit($request->input('recipient_street')).', ';
+		}
+		if ($request->input('recipient_house')) {
+			$address .= $request->input('recipient_house');
+		}	
+		if ($request->input('body')) {
+			$address .= '/'.$this->translit($request->input('body'));
+		}
+		if ($request->input('recipient_room')) {
+			$address .= ', '.$request->input('recipient_room');					
+		}
+
+		$has_post = Manifest::where('work_sheet_id', $id)->first();
+		Manifest::where('work_sheet_id', $id)
+		->update([
+			'tracking' => $request->input('tracking_main'),
+			'sender_country' => $tr->translate('ru', 'en', $request->input('sender_country'), 5),
+			'sender_name' => $this->translit($request->input('sender_name')),
+			'recipient_name' => $this->translit($request->input('recipient_name')),
+			'recipient_city' => $this->translit($request->input('recipient_city')),
+			'recipient_address' => $address,
+			'weight' => $request->input('weight'),
+			'batch_number' => $request->input('batch_number'),
+			'cost' => $request->input('package_cost')
+		]);
+
+		if ($request->input('package_content')) {
+
+			$old_packing = Manifest::where('work_sheet_id', $id)->get();
+			$qty = 1;
+
+			for ($i=0; $i < count($content_arr); $i++) { 
+				$qty = $i+1;
+				$content = explode(':', $content_arr[$i]);
+
+				if (count($content) == 2) {
+					if ($qty <= count($old_packing)) {
+						if ($i != 0) $manifest_num = null;
+						if ($has_post) {
+							if ($has_post->number && $i == 0) {
+								Manifest::where([
+									['work_sheet_id', $id],
+									['attachment_number', $qty]
+								])
+								->update([
+									'content' => $tr->translate('ru', 'en', trim($content[0]), 5),
+									'quantity' => trim($content[1])
+								]);
+							}
+							elseif (!$has_post->number && $i == 0) {
+								Manifest::where([
+									['work_sheet_id', $id],
+									['attachment_number', $qty]
+								])
+								->update([
+									'content' => $tr->translate('ru', 'en', trim($content[0]), 5),
+									'quantity' => trim($content[1]),
+									'number' => $manifest_num
+								]);
+							}
+						}						
+					}
+					else{
+						if ($i != 0) $manifest_num = null;
+						$new_packing = new Manifest();
+						$new_packing->number = $manifest_num;
+						$new_packing->work_sheet_id = $id;
+						$new_packing->tracking = $request->input('tracking_main');
+						$new_packing->sender_country = $tr->translate('ru', 'en', $request->input('sender_country'), 5);
+						$new_packing->sender_name = $this->translit($request->input('sender_name'));
+						$new_packing->recipient_name = $this->translit($request->input('recipient_name'));
+						$new_packing->recipient_city = $this->translit($request->input('recipient_city'));
+						$new_packing->recipient_address = $address;
+						$new_packing->weight = $request->input('weight');
+						$new_packing->cost = $request->input('package_cost');
+						$new_packing->batch_number = $request->input('batch_number');
+						$new_packing->attachment_number = $qty;
+						$new_packing->content = $tr->translate('ru', 'en', trim($content[0]), 5);
+						$new_packing->quantity = trim($content[1]);
+						$new_packing->save();
+					}
+				}
+				else{
+					return redirect()->to(session('this_previous_url'))->with('status-error', 'Ошибка колонки Содержание!');
+				}
+			}
+			Manifest::where([
+				['work_sheet_id', $id],
+				['attachment_number','>',$qty]
+			])->delete();
+		}
+		else{
+			Manifest::where('work_sheet_id', $id)->delete();
+		}
+
+		return true;
 	}
 
 
 	public function destroy(Request $request)
 	{
 		$id = $request->input('action');
-
-		DB::table('new_worksheet')
-		->where('id', '=', $id)
-		->delete();
+		NewWorksheet::where('id', $id)->delete();
+		NewPacking::where('work_sheet_id', $id)->delete();
+		Invoice::where('work_sheet_id', $id)->delete();
+		Manifest::where('work_sheet_id', $id)->delete();
+		ReceiptArchive::where('worksheet_id', $id)->delete();
 
 		return redirect()->to(session('this_previous_url'))->with('status', 'Строка успешно удалена!');
 	}
@@ -227,7 +587,7 @@ class NewWorksheetController extends AdminController
 		}
 		else
 		{
-			$message = 'Лимит колонок исчерпан!';
+			return redirect()->to(session('this_previous_url'))->with('status-error', 'Лимит колонок исчерпан!');
 		}
 
 		return redirect()->to(session('this_previous_url'))->with('status', $message);
@@ -294,7 +654,8 @@ class NewWorksheetController extends AdminController
           		'status' => $request->input('status'), 
           		'status_en' => $request->input('status_en'),
           		'status_ua' => $request->input('status_ua'),
-          		'status_he' => $request->input('status_he')
+          		'status_he' => $request->input('status_he'),
+          		'status_date' => date('Y-m-d')
           	]);
         }
         return redirect()->to(session('this_previous_url'));
@@ -322,7 +683,8 @@ class NewWorksheetController extends AdminController
           		'status' => $request->input('status'), 
           		'status_en' => $request->input('status_en'),
           		'status_ua' => $request->input('status_ua'),
-          		'status_he' => $request->input('status_he')
+          		'status_he' => $request->input('status_he'),
+          		'status_date' => date('Y-m-d')
           	]);
         }
         return redirect()->to(session('this_previous_url'));
@@ -357,13 +719,22 @@ class NewWorksheetController extends AdminController
     	$track_arr = $request->input('tracking');
     	$value_by = $request->input('value-by-tracking');
     	$column = $request->input('tracking-columns');
-    	//echo '<pre>'.print_r($request->input('status_en'),true).'</pre>';
+    	$status_error = '';
+    	$check_column = 'tracking_main';
+    	
     	if ($track_arr) {
     		if ($value_by && $column) {
+
+				$status_error = $this->checkColumns($track_arr, $value_by, $column, $check_column);   				
+				if($status_error) return redirect()->to(session('this_previous_url'))->with('status-error', $status_error);
+    			
     			NewWorksheet::whereIn('tracking_main', $track_arr)
     			->update([
     				$column => $value_by
-    			]);       	
+    			]); 
+				
+				$this->updateAllPackingByTracking($track_arr, $value_by, $column);
+
     		}
     		else if ($request->input('status')){
     			NewWorksheet::whereIn('tracking_main', $track_arr)
@@ -371,7 +742,8 @@ class NewWorksheetController extends AdminController
     				'status' => $request->input('status'), 
     				'status_en' => $request->input('status_en'),
     				'status_ua' => $request->input('status_ua'),
-    				'status_he' => $request->input('status_he')
+    				'status_he' => $request->input('status_he'),
+    				'status_date' => date('Y-m-d')
     			]);
     		}
     		else if ($request->input('site_name')) {
@@ -392,9 +764,172 @@ class NewWorksheetController extends AdminController
     				'partner' => $request->input('partner')
     			]);       	
     		}
+
+    		if ($column === 'batch_number') {
+    			NewWorksheet::whereIn('tracking_main', $track_arr)
+    			->whereIn('status',$this->status_arr_2)
+    			->update([
+    				'status' => "Доставляется в страну получателя",
+    				'status_en' => "Forwarding to the receiver country",
+    				'status_he' => " נשלח למדינת המקבל",
+    				'status_ua' => "Forwarding to the receiver country",
+    				'status_date' => date('Y-m-d')
+    			]);
+    		}
     	}
         
-        return redirect()->to(session('this_previous_url'));
+        if($status_error){
+        	return redirect()->to(session('this_previous_url'))->with('status-error', $status_error);
+        }
+        else{
+        	return redirect()->to(session('this_previous_url'))->with('status', 'Строки успешно изменены!');
+        }       
+    }
+
+
+    private function updateAllPackingByTracking($track_arr, $value_by, $column){
+    	// Update Invoice 
+    	$tr = new GoogleTranslateForFree();  
+
+    	$invoice_arr = ['weight' => 'weight', 'height' => 'height', 'length' => 'length', 'width' => 'width', 'package_cost' => 'declared_value', 'batch_number' => 'batch_number']; 
+    	if (array_key_exists($column, $invoice_arr)) {
+    		Invoice::whereIn('tracking', $track_arr)
+    		->update([
+    			$invoice_arr[$column] => $value_by
+    		]);
+    	}    	
+
+    	if ($column === 'package_content') {
+    		Invoice::whereIn('tracking', $track_arr)
+    		->update([
+    			'shipped_items' => $tr->translate('ru', 'en', $value_by, 5)
+    		]);
+    	} 
+    	if ($column === 'sender_name') {
+    		Invoice::whereIn('tracking', $track_arr)
+    		->update([
+    			'shipper_name' => $this->translit($value_by)
+    		]);
+    	} 
+    	if ($column === 'recipient_name') {
+    		Invoice::whereIn('tracking', $track_arr)
+    		->update([
+    			'consignee_name' => $this->translit($value_by)
+    		]);
+    	} 
+    	if ($column === 'package_content') {
+    		Invoice::whereIn('tracking', $track_arr)
+    		->update([
+    			'shipped_items' => $tr->translate('ru', 'en', $value_by, 5)
+    		]);
+    	} 
+    	// End Update Invoice
+
+		// Update New Packing	
+    	$new_packing_arr = ['tariff' => 'type', 'sender_name' => 'full_shipper', 'recipient_name' => 'full_consignee', 'recipient_country' => 'country_code', 'recipient_postcode' => 'postcode', 'region' => 'region', 'district' => 'district', 'recipient_city' => 'city', 'recipient_street' => 'street', 'recipient_house' => 'house', 'body' => 'body', 'recipient_room' => 'room', 'recipient_phone' => 'phone', 'weight' => 'weight_kg', 'batch_number' => 'batch_number']; 
+    	if (array_key_exists($column, $new_packing_arr)){
+    		NewPacking::whereIn('track_code', $track_arr)
+    		->update([
+    			$new_packing_arr[$column] => $value_by
+    		]);
+    	}   	
+		// End Update New Packing
+
+		// Update Manifest
+    	$manifest_arr = ['weight' => 'weight', 'package_cost' => 'cost', 'sender_name' => 'sender_name', 'recipient_name' => 'recipient_name', 'batch_number' => 'batch_number']; 
+    	if (array_key_exists($column, $manifest_arr)){
+    		Manifest::whereIn('tracking', $track_arr)
+    		->update([
+    			$manifest_arr[$column] => $this->translit($value_by)
+    		]);
+    	}    	
+		// End Update Manifest
+
+		return true;
+    }
+
+
+    private function updateAllPackingById($row_arr, $value_by, $column){
+    	// Update Invoice 
+    	$tr = new GoogleTranslateForFree();  
+
+    	$invoice_arr = ['weight' => 'weight', 'height' => 'height', 'length' => 'length', 'width' => 'width', 'package_cost' => 'declared_value', 'batch_number' => 'batch_number']; 
+
+    	if (array_key_exists($column, $invoice_arr)) {
+    		Invoice::whereIn('work_sheet_id', $row_arr)
+    		->update([
+    			$invoice_arr[$column] => $value_by
+    		]);
+    	}
+
+    	if ($column === 'package_content') {
+    		Invoice::whereIn('work_sheet_id', $row_arr)
+    		->update([
+    			'shipped_items' => $tr->translate('ru', 'en', $value_by, 5)
+    		]);
+    	} 
+    	if ($column === 'sender_name') {
+    		Invoice::whereIn('work_sheet_id', $row_arr)
+    		->update([
+    			'shipper_name' => $this->translit($value_by)
+    		]);
+    	} 
+    	if ($column === 'recipient_name') {
+    		Invoice::whereIn('work_sheet_id', $row_arr)
+    		->update([
+    			'consignee_name' => $this->translit($value_by)
+    		]);
+    	} 
+    	if ($column === 'package_content') {
+    		Invoice::whereIn('work_sheet_id', $row_arr)
+    		->update([
+    			'shipped_items' => $tr->translate('ru', 'en', $value_by, 5)
+    		]);
+    	} 
+		// End Update Invoice
+
+		// Update New Packing	
+    	$new_packing_arr = ['tariff' => 'type', 'sender_name' => 'full_shipper', 'recipient_name' => 'full_consignee', 'recipient_country' => 'country_code', 'recipient_postcode' => 'postcode', 'region' => 'region', 'district' => 'district', 'recipient_city' => 'city', 'recipient_street' => 'street', 'recipient_house' => 'house', 'body' => 'body', 'recipient_room' => 'room', 'recipient_phone' => 'phone', 'weight' => 'weight_kg', 'batch_number' => 'batch_number']; 
+
+    	if (array_key_exists($column, $new_packing_arr)){
+    		NewPacking::whereIn('work_sheet_id', $row_arr)
+    		->update([
+    			$new_packing_arr[$column] => $value_by
+    		]);
+    	}   	
+		// End Update New Packing
+
+		// Update Manifest
+    	$manifest_arr = ['weight' => 'weight', 'package_cost' => 'cost', 'sender_name' => 'sender_name', 'recipient_name' => 'recipient_name', 'batch_number' => 'batch_number']; 
+    	if (array_key_exists($column, $manifest_arr)){
+    		Manifest::whereIn('work_sheet_id', $row_arr)
+    		->update([
+    			$manifest_arr[$column] => $this->translit($value_by)
+    		]);
+    	}				
+		// End Update Manifest 
+
+		return true;
+    }
+
+
+    private function checkColumns($arr, $value_by, $column, $check_column){
+    	$status_error = '';
+    	$check_sheet = NewWorksheet::whereIn($check_column, $arr)->whereIn('status',$this->status_arr)->first();
+    	if ($check_sheet) {
+    		if ($column === 'pay_sum')
+    		{
+    			$status_error = "ВНИМАНИЕ! ПРИ ПОЛУЧЕНИИ ОПЛАТЫ СТАТУС НЕ МОЖЕТ БЫТЬ НИЖЕ - 'На складе в стране отправителя'. ДОБАВЬТЕ ЗАПИСЬ ОБ ОПЛАТЕ В ПРАВИЛЬНУЮ СТРОКУ ИЛИ ИЗМЕНИТЕ СТАТУС";
+    			return $status_error;
+    		}
+
+    		if ($column === 'pallet_number')
+    		{
+    			$status_error = "ВНИМАНИЕ! ПРИ ДОБАВЛЕНИИ НОМЕРА ПАЛЛЕТЫ СТАТУС НЕ МОЖЕТ БЫТЬ НИЖЕ - 'На складе в стране отправителя'. ДОБАВЬТЕ ЗАПИСЬ О НОМЕРЕ ПАЛЛЕТЫ В ПРАВИЛЬНУЮ СТРОКУ ИЛИ ИЗМЕНИТЕ СТАТУС";
+    			return $status_error;
+    		}
+    	}
+    	return $status_error;
     }
 
 
@@ -402,13 +937,21 @@ class NewWorksheetController extends AdminController
     	$row_arr = $request->input('row_id');
     	$value_by = $request->input('value-by-tracking');
     	$column = $request->input('tracking-columns');
+    	$status_error = '';
+    	$check_column = 'id';
 
     	if ($row_arr) {
     		if ($value_by && $column) {
+
+    			$status_error = $this->checkColumns($row_arr, $value_by, $column, $check_column);
+    			if($status_error) return redirect()->to(session('this_previous_url'))->with('status-error', $status_error);
+    			
     			NewWorksheet::whereIn('id', $row_arr)
     			->update([
     				$column => $value_by
-    			]);       	
+    			]);  
+
+    			$this->updateAllPackingById($row_arr, $value_by, $column);    	
     		}
     		else if ($request->input('status')){
     			NewWorksheet::whereIn('id', $row_arr)
@@ -416,7 +959,8 @@ class NewWorksheetController extends AdminController
     				'status' => $request->input('status'), 
     				'status_en' => $request->input('status_en'),
     				'status_ua' => $request->input('status_ua'),
-    				'status_he' => $request->input('status_he')
+    				'status_he' => $request->input('status_he'),
+    				'status_date' => date('Y-m-d')
     			]);
     		}
     		else if ($request->input('site_name')) {
@@ -437,9 +981,26 @@ class NewWorksheetController extends AdminController
     				'partner' => $request->input('partner')
     			]);       	
     		}
+
+    		if ($column === 'batch_number') {
+    			NewWorksheet::whereIn('id', $row_arr)
+    			->whereIn('status',$this->status_arr_2)
+    			->update([
+    				'status' => "Доставляется в страну получателя",
+    				'status_en' => "Forwarding to the receiver country",
+    				'status_he' => " נשלח למדינת המקבל",
+    				'status_ua' => "Forwarding to the receiver country",
+    				'status_date' => date('Y-m-d')
+    			]);
+    		}   		
     	}
-        
-        return redirect()->to(session('this_previous_url'))->with('status', 'Строки успешно изменены!');
+
+    	if($status_error){
+        	return redirect()->to(session('this_previous_url'))->with('status-error', $status_error);
+        }
+        else{
+        	return redirect()->to(session('this_previous_url'))->with('status', 'Строки успешно изменены!');
+        }
     }
 
 
@@ -447,8 +1008,11 @@ class NewWorksheetController extends AdminController
 	{
 		$row_arr = $request->input('row_id');
 
-		NewWorksheet::whereIn('id', $row_arr)
-		->delete();
+		NewWorksheet::whereIn('id', $row_arr)->delete();
+		NewPacking::whereIn('work_sheet_id', $row_arr)->delete();
+		Invoice::whereIn('work_sheet_id', $row_arr)->delete();
+		Manifest::whereIn('work_sheet_id', $row_arr)->delete();
+		ReceiptArchive::whereIn('worksheet_id', $row_arr)->delete();
 
 		return redirect()->to(session('this_previous_url'))->with('status', 'Строки успешно удалены!');
 	}
@@ -463,70 +1027,11 @@ class NewWorksheetController extends AdminController
 
 
 	public function indexPackingSea(){
-        $title = 'Пакинг лист море';
+        $title = 'Старый пакинг лист';
         $packing_sea_obj = PackingSea::all();       
         
         return view('admin.packing.packing_sea', ['title' => $title,'packing_sea_obj' => $packing_sea_obj]);
     }
-
-
-    public function showAddPackingSea()
-	{
-		$title = 'Добавление строки';
-		return view('admin.packing.packing_sea_add', ['title' => $title]);
-	}
-
-
-	public function addPackingSea(Request $request)
-	{
-		$packing_sea = new PackingSea();
-
-		$fields = ['payer', 'contract', 'type', 'track_code', 'full_shipper', 'full_consignee', 'country_code', 'postcode', 'region', 'district', 'city', 'street', 'house', 'body', 'room', 'phone', 'tariff', 'tariff_cent', 'weight_kg', 'weight_g', 'service_code', 'amount_1', 'amount_2', 'attachment_number', 'attachment_name', 'amount_3', 'weight_enclosures_kg', 'weight_enclosures_g', 'value_euro', 'value_cent', 'work_sheet_id'];
-
-		foreach($fields as $field){
-			$packing_sea->$field = $request->input($field);
-		}
-
-		$packing_sea->save();
-
-		return redirect()->to(session('this_previous_url'))->with('status', 'Строка успешно добавлена!');
-	}
-
-
-	public function showPackingSea($id)
-	{
-		$packing_sea = PackingSea::find($id);
-		$title = 'Изменение строки '.$packing_sea->id;
-
-		return view('admin.packing.packing_sea_update', ['title' => $title,'packing_sea' => $packing_sea]);
-	}
-
-
-	public function updatePackingSea(Request $request, $id)
-	{
-		$packing_sea = PackingSea::find($id);
-
-		$fields = ['payer', 'contract', 'type', 'track_code', 'full_shipper', 'full_consignee', 'country_code', 'postcode', 'region', 'district', 'city', 'street', 'house', 'body', 'room', 'phone', 'tariff', 'tariff_cent', 'weight_kg', 'weight_g', 'service_code', 'amount_1', 'amount_2', 'attachment_number', 'attachment_name', 'amount_3', 'weight_enclosures_kg', 'weight_enclosures_g', 'value_euro', 'value_cent', 'work_sheet_id'];
-
-		foreach($fields as $field){
-			$packing_sea->$field = $request->input($field);
-		}
-		
-		$packing_sea->save();
-		return redirect()->to(session('this_previous_url'))->with('status', 'Строка успешно обновлена!');
-	}
-
-
-	public function destroyPackingSea(Request $request)
-	{
-		$id = $request->input('action');
-
-		DB::table('packing_sea')
-		->where('id', '=', $id)
-		->delete();
-
-		return redirect()->to(session('this_previous_url'))->with('status', 'Строка успешно удалена!');
-	}
 
 
 	public function exportExcelPackingSea()
@@ -575,9 +1080,10 @@ class NewWorksheetController extends AdminController
         	return view('admin.new_worksheet_find', ['title' => $title,'new_worksheet_arr' => $new_worksheet_arr,'new_column_1' => $arr_columns[0],'new_column_2' => $arr_columns[1],'new_column_3' => $arr_columns[2],'new_column_4' => $arr_columns[3],'new_column_5' => $arr_columns[4], 'user' => $user, 'viewer_arr' => $viewer_arr]);      	
         }
         
-        $data = $request->all();             
+        $data = $request->all();    
+        $update_all_statuses = NewWorksheet::where('update_status_date','=', date('Y-m-d'))->get()->count();
         
-        return view('admin.new_worksheet_filter', ['title' => $title,'data' => $data,'new_worksheet_obj' => $new_worksheet_obj,'new_column_1' => $arr_columns[0],'new_column_2' => $arr_columns[1],'new_column_3' => $arr_columns[2],'new_column_4' => $arr_columns[3],'new_column_5' => $arr_columns[4], 'user' => $user, 'viewer_arr' => $viewer_arr]);
+        return view('admin.new_worksheet', ['title' => $title,'data' => $data,'new_worksheet_obj' => $new_worksheet_obj,'new_column_1' => $arr_columns[0],'new_column_2' => $arr_columns[1],'new_column_3' => $arr_columns[2],'new_column_4' => $arr_columns[3],'new_column_5' => $arr_columns[4], 'user' => $user, 'viewer_arr' => $viewer_arr, 'update_all_statuses' => $update_all_statuses]);
     }
 
 }

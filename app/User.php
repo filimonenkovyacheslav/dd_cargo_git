@@ -29,7 +29,17 @@ class User extends Authenticatable
 
 
     public function isAdmin(){
-        if($this->role === 'admin' || $this->role === 'office_1' || $this->role === 'office_2' || $this->role === 'warehouse')
+        if($this->role === 'admin' || $this->role === 'office_1' || $this->role === 'office_ru' || $this->role === 'warehouse' || $this->role === 'office_agent_ru')
+        {
+            return true;
+        } else{
+            return false;
+        }
+    }
+
+
+    public function isOffice_1(){
+        if($this->role === 'admin' || $this->role === 'office_1')
         {
             return true;
         } else{
@@ -49,7 +59,7 @@ class User extends Authenticatable
 
 
     public function isPhilIndAdmin(){
-        if($this->role === 'admin' || $this->role === 'office_1' || $this->role === 'office_eng' || $this->role === 'warehouse' || $this->role === 'viewer_eng')
+        if($this->role === 'admin' || $this->role === 'office_1' || $this->role === 'office_eng' || $this->role === 'warehouse' || $this->role === 'viewer_eng' || $this->role === 'viewer' || $this->role === 'office_ind')
         {
             return true;
         } else{

@@ -25,7 +25,7 @@ class CreateDraftWorksheetTable extends Migration
             $table->string('order_number')->nullable();
             $table->string('tracking_local')->nullable();
             $table->string('tracking_transit')->nullable();
-            $table->text('pallet_number')->nullable();
+            $table->string('pallet_number')->nullable();
             $table->text('comment_2')->nullable();
             $table->text('comments')->nullable();
             $table->text('sender_name')->nullable();
@@ -38,10 +38,13 @@ class CreateDraftWorksheetTable extends Migration
             $table->string('sender_passport')->nullable();
             $table->string('recipient_name')->nullable();
             $table->string('recipient_country')->nullable();
+            $table->string('region')->nullable();
+            $table->string('district')->nullable();
             $table->string('recipient_city')->nullable();
             $table->string('recipient_postcode')->nullable();
             $table->string('recipient_street')->nullable();
             $table->string('recipient_house')->nullable();
+            $table->string('body')->nullable();
             $table->string('recipient_room')->nullable();
             $table->string('recipient_phone')->nullable();
             $table->string('recipient_passport')->nullable();

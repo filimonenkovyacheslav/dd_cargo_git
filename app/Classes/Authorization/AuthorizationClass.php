@@ -20,8 +20,8 @@ class AuthorizationClass extends Authorization
                     'description' => 'Редактирование пользователей',
                 ],   
 			'editPost' => [
-					'description' => 'Edit any posts',   // optional property
-					'next' => 'editOwnPost',            // used for making chain (hierarchy) of permissions
+					'description' => 'Edit any posts',
+					'next' => 'editOwnPost',           
 				],
 			'editColumns-1' => [
 					'description' => 'Edit own columns',
@@ -31,6 +31,15 @@ class AuthorizationClass extends Authorization
 				],
 			'editColumns-3' => [
 					'description' => 'Edit own columns',
+				],
+			'editColumns-4' => [
+					'description' => 'Edit own columns',
+				],
+			'editDraft' => [
+					'description' => 'Edit Draft',
+				],
+			'activateDraft' => [
+					'description' => 'Activate Draft',
 				],
 			'view-post' => [
 					'description' => 'View post',
@@ -45,13 +54,22 @@ class AuthorizationClass extends Authorization
 					'description' => 'View post',
 				],
 			'eng-update-post' => [
-					'description' => 'Update post',
+					'description' => 'Update eng-post',
 				],
 			'editColumns-eng' => [
 					'description' => 'Edit own columns',
 				],
 			'editColumns-eng-2' => [
 					'description' => 'Edit own columns',
+				],
+			'editComments-eng' => [
+					'description' => 'Edit Comments in eng-admin',
+				],
+			'editEngDraft' => [
+					'description' => 'Edit Eng Draft',
+				],
+			'activateEngDraft' => [
+					'description' => 'Activate Eng Draft',
 				],
 			'editOwnPost' => [
 					'description' => 'Edit own post',
@@ -62,67 +80,92 @@ class AuthorizationClass extends Authorization
 	public function getRoles() {
 		return [
 			'warehouse' => [
-					'view-post',
-					'update-post',
-					'editColumns-2',
-					'editColumns-3',
-					'editColumns-eng-2',
-					'eng-view-post',
-					'eng-update-post'
-				],
+				'view-post',
+				'update-post',
+				'editColumns-2',
+				'editColumns-3',
+				'editColumns-eng-2',
+				'eng-view-post',
+				'editComments-eng',
+				'eng-update-post',
+				'editColumns-1'
+			],
 			'office_1' => [
-					'view-post',
-					'update-post',
-					'editPost',
-					'editColumns-3',
-					'china-update-post',
-					'china-view-post',
-					'eng-update-post',
-					'editColumns-eng',
-					'eng-view-post',
-					'editColumns-1'
-				],
-			'office_2' => [
-					'view-post',
-					'update-post',
-					'editColumns-1'					
-				],
+				'view-post',
+				'update-post',
+				'editPost',
+				'editColumns-2',
+				'editColumns-eng-2',
+				'editColumns-3',
+				'china-update-post',
+				'china-view-post',
+				'eng-update-post',
+				'editColumns-eng',
+				'eng-view-post',
+				'editComments-eng',
+				'editColumns-1',
+				'editColumns-4',
+				'editDraft',
+				'editEngDraft'
+			],
+			'office_ru' => [
+				'view-post',
+				'update-post',
+				'editColumns-1',
+				'editDraft',
+				'activateDraft'					
+			],
+			'office_agent_ru' => [
+				'view-post',
+				'update-post',
+				'editColumns-4'				
+			],
 			'viewer' => [
-					'view-post'
-				],
+				'view-post',
+				'eng-view-post'
+			],
 			'viewer_1' => [
-					'view-post'
-				],
+				'view-post'
+			],
 			'viewer_2' => [
-					'view-post'
-				],
+				'view-post'
+			],
 			'viewer_3' => [
-					'view-post'
-				],
+				'view-post'
+			],
 			'viewer_4' => [
-					'view-post'
-				],
+				'view-post'
+			],
 			'viewer_5' => [
-					'view-post'
-				],
+				'view-post'
+			],
 			'china_admin' => [
-					'china-view-post',
-					'china-update-post'
-				],
+				'china-view-post',
+				'china-update-post'
+			],
 			'china_viewer' => [
-					'china-view-post',
-				],
+				'china-view-post',
+			],
 			'office_eng' => [
-					'eng-view-post',
-					'eng-update-post',
-					'editColumns-eng'					
-				],
+				'view-post',
+				'eng-view-post',
+				'eng-update-post',
+				'editComments-eng',
+				'editEngDraft',
+				'activateEngDraft'					
+			],
+			'office_ind' => [
+				'view-post',
+				'eng-view-post',
+				'eng-update-post',
+				'editColumns-eng'					
+			],
 			'viewer_eng' => [
-					'eng-view-post',
-				],			
+				'eng-view-post',
+			],			
 			'user' => [
-					'editOwnPost',
-				],
+				'editOwnPost',
+			],
 		];
 	}
 

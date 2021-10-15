@@ -1,7 +1,7 @@
 @extends('layouts.phil_ind_admin')
 @section('content')
 
-@can('eng-update-post')
+@can('editEngDraft')
 
 <!-- <div class="breadcrumbs">
 	<div class="col-sm-4">
@@ -52,9 +52,9 @@
 						</div>
 						
 						<div class="form-group">
-							{!! Form::label('tracking_main','Tracking number main',['class' => 'col-md-2 control-label'])   !!}
+							{!! Form::label('parcels_qty','Parcels qty',['class' => 'col-md-2 control-label'])   !!}
 							<div class="col-md-8">
-								{!! Form::text('tracking_main',$eng_draft_worksheet->tracking_main,['class' => 'form-control'])!!}
+								{!! Form::number('parcels_qty',$eng_draft_worksheet->parcels_qty,['class' => 'form-control', 'min' => '1'])!!}
 							</div>
 						</div>
 						
@@ -94,6 +94,27 @@
 						</div>
 						
 						<div class="form-group">
+							{!! Form::label('shipper_city','Shipper\'s city/village',['class' => 'col-md-2 control-label'])   !!}
+							<div class="col-md-8">
+								{!! Form::text('shipper_city',$eng_draft_worksheet->shipper_city,['class' => 'form-control'])!!}
+							</div>
+						</div>
+
+						<div class="form-group">
+							{!! Form::label('passport_number','GSTN/Passport number',['class' => 'col-md-2 control-label'])   !!}
+							<div class="col-md-8">
+								{!! Form::text('passport_number',$eng_draft_worksheet->passport_number,['class' => 'form-control'])!!}
+							</div>
+						</div>
+
+						<div class="form-group">
+							{!! Form::label('return_date','Estimated return to India date',['class' => 'col-md-2 control-label'])   !!}
+							<div class="col-md-8">
+								{!! Form::text('return_date',$eng_draft_worksheet->return_date,['class' => 'form-control'])!!}
+							</div>
+						</div>
+						
+						<div class="form-group">
 							{!! Form::label('shipper_address','Shipper\'s address',['class' => 'col-md-2 control-label'])   !!}
 							<div class="col-md-8">
 								{!! Form::text('shipper_address',$eng_draft_worksheet->shipper_address,['class' => 'form-control'])!!}
@@ -125,6 +146,34 @@
 							{!! Form::label('consignee_name','Consignee\'s name',['class' => 'col-md-2 control-label'])   !!}
 							<div class="col-md-8">
 								{!! Form::text('consignee_name',$eng_draft_worksheet->consignee_name,['class' => 'form-control'])!!}
+							</div>
+						</div>
+
+						<div class="form-group">
+							{!! Form::label('house_name','House name',['class' => 'col-md-2 control-label'])   !!}
+							<div class="col-md-8">
+								{!! Form::text('house_name',$eng_draft_worksheet->house_name,['class' => 'form-control'])!!}
+							</div>
+						</div>
+
+						<div class="form-group">
+							{!! Form::label('post_office','Local post office',['class' => 'col-md-2 control-label'])   !!}
+							<div class="col-md-8">
+								{!! Form::text('post_office',$eng_draft_worksheet->post_office,['class' => 'form-control'])!!}
+							</div>
+						</div>
+
+						<div class="form-group">
+							{!! Form::label('district','District/City',['class' => 'col-md-2 control-label'])   !!}
+							<div class="col-md-8">
+								{!! Form::text('district',$eng_draft_worksheet->district,['class' => 'form-control'])!!}
+							</div>
+						</div>
+
+						<div class="form-group">
+							{!! Form::label('state_pincode','State pincode',['class' => 'col-md-2 control-label'])   !!}
+							<div class="col-md-8">
+								{!! Form::text('state_pincode',$eng_draft_worksheet->state_pincode,['class' => 'form-control'])!!}
 							</div>
 						</div>
 						
@@ -163,12 +212,16 @@
 							</div>
 						</div>
 
+						@can('editPost')
+
 						<div class="form-group">
 							{!! Form::label('operator','Operator',['class' => 'col-md-2 control-label'])   !!}
 							<div class="col-md-8">
 								{!! Form::text('operator',$eng_draft_worksheet->operator,['class' => 'form-control'])!!}
 							</div>
 						</div>
+
+						@endcan
 
 						<div class="form-group">
 							{!! Form::label('courier','Courier',['class' => 'col-md-2 control-label'])   !!}
@@ -293,6 +346,8 @@
 							{!! Form::hidden('status',$eng_draft_worksheet->status,['class' => 'form-control'])!!}
 
 							{!! Form::hidden('tracking_main',$eng_draft_worksheet->tracking_main,['class' => 'form-control'])!!}
+
+							{!! Form::hidden('parcels_qty',$eng_draft_worksheet->parcels_qty,['class' => 'form-control'])!!}
 
 							{!! Form::hidden('order_number',$eng_draft_worksheet->order_number)!!}
 

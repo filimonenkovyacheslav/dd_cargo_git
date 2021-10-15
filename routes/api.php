@@ -32,14 +32,18 @@ Route::post('/add-tracking-by-phone-eng', 'API\PhilIndWorksheetController@addTra
 Route::post('/add-tracking-by-phone-with-order', 'API\NewWorksheetController@addTrackingByPhoneWithOrder')->name('addTrackingByPhoneWithOrder');
 Route::post('/add-tracking-by-phone-with-order-eng', 'API\PhilIndWorksheetController@addTrackingByPhoneWithOrderEng')->name('addTrackingByPhoneWithOrderEng');
 // add new shipment
-Route::post('/add-new-shipment', 'API\NewWorksheetController@addNewShipment')->name('addNewShipment');
-Route::post('/add-new-shipment-eng', 'API\PhilIndWorksheetController@addNewShipmentEng')->name('addNewShipmentEng');
+/*Route::post('/add-new-shipment', 'API\NewWorksheetController@addNewShipment')->name('addNewShipment');
+Route::post('/add-new-shipment-eng', 'API\PhilIndWorksheetController@addNewShipmentEng')->name('addNewShipmentEng');*/
 // add batch number
 Route::post('/add-batch-number', 'API\NewWorksheetController@addBatchNumber')->name('addBatchNumber');
 Route::post('/add-batch-number-eng', 'API\PhilIndWorksheetController@addBatchNumberEng')->name('addBatchNumberEng');
 // add pallet number
 Route::post('/add-pallet-number', 'API\NewWorksheetController@addPalletNumber')->name('addPalletNumber');
 Route::post('/add-pallet-number-eng', 'API\PhilIndWorksheetController@addPalletNumberEng')->name('addPalletNumberEng');
+// add to courier draft
+Route::post('/add-courier-data', 'API\BaseController@addCourierData')->name('addCourierData');
+// get shipment qty by batch number
+Route::get('/get-shipment-qty-by-batch-number', 'API\BaseController@getShipmentQtyByBatchNumber')->name('getShipmentQtyByBatchNumber');
 
 // https://union-il.com/
 Route::get('/forward-parcel-form', 'FrontController@forwardParcelAdd')->name('forwardParcelAdd');

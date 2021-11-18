@@ -337,6 +337,17 @@
                 </div>
 
                 <div class="form-group">
+                    <div class="row">
+                        <div class="col-9">
+                            <h3>Количество посылок</h3>
+                        </div>
+                        <div class="col-3">
+                            {!! Form::number('parcels_qty',old('parcels_qty'),['class' => 'form-control', 'min' => '1'])!!}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
                     <div class="row">                       
                         <div class="col-md-3">
                             {!! Form::number('package_cost',old('package_cost'),['class' => 'form-control', 'required'])!!}
@@ -394,11 +405,9 @@
 
                 <div class="form-group">
                     <div class="row">                       
-                        <div class="col-md-12">
-                            {!! Form::checkbox('signed_form','', false)!!}
-                            <span>
-                                <strong>Подписывая эту форму гарантирую следующее:*</strong> описание содержимого посылки и ее заявленной стоимости являются полными и правдивыми. Я ознакомился/лась со списками предметов, запрещенных ко ввозу и имеющих ограничения на ввоз в страну назначения, и моя посылка либо не содержит эти предметы, либо соответствует таможенным правилам. В случае нарушения этих гарантий я согласен/на оплатить расходы, возникшие по моей вине, в частности, дополнительные таможенные проверки и/или возврат моей посылки в страну отправления.
-                            </span>
+                        <div class="col-md-12 control-label">
+                            {!! Form::radio('need_box','Мне нужен вакуумный мешок', false)!!}
+                            <span>Мне нужен вакуумный мешок</span>
                         </div>
                     </div>
                 </div>
@@ -446,6 +455,9 @@
         }
         
         const input = document.querySelectorAll('.parcel-form input');
+        const parcelsQty = document.querySelector('[name="parcels_qty"]');
+        if (!parcelsQty.value) parcelsQty.value = 1;
+        
         input.forEach(function(item) {           
             if (item.hasAttribute('data-item')) {
                 const num = item.getAttribute('data-item');
@@ -466,14 +478,8 @@
         })
 
         if (trueInput) return false;
-        
-        var x = document.querySelector('[name="signed_form"]').checked;
-        if (x)
-            form.submit();
-        else{
-            alert('Подпишите форму !');
-            return false;
-        }
+
+        form.submit();
     }
 
 </script>

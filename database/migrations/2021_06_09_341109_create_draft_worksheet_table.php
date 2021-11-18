@@ -22,6 +22,7 @@ class CreateDraftWorksheetTable extends Migration
             $table->text('status')->nullable();
             $table->string('partner')->nullable();
             $table->string('tracking_main')->nullable();
+            $table->string('parcels_qty')->nullable();
             $table->string('order_number')->nullable();
             $table->string('tracking_local')->nullable();
             $table->string('tracking_transit')->nullable();

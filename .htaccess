@@ -1,11 +1,18 @@
+php_value memory_limit 256M
+
 <IfModule mod_rewrite.c>
-    <IfModule mod_negotiation.c>
-        Options -MultiViews
-    </IfModule>
 
-    RewriteEngine On
-
-    RewriteCond %{REQUEST_FILENAME} -d [OR]
+  # Turn Off mod_dir Redirect For Existing Directories
+  DirectorySlash Off
+  
+  # Rewrite For Public Folder
+  RewriteEngine on
+  
+  RewriteCond %{SERVER_PORT} 80
+  RewriteCond %{HTTP_HOST} ^(www\.)?ddcargos\.com
+  RewriteRule ^(.*)$ https://www.ddcargos.com/$1 [R,L]
+  
+  RewriteCond %{REQUEST_FILENAME} -d [OR]
     RewriteCond %{REQUEST_FILENAME} -f
     RewriteRule ^ ^$1 [N]
 

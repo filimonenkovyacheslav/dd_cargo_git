@@ -22,6 +22,7 @@ class CreateWarehouseTable extends Migration
             $table->string('left')->nullable();
             $table->string('lot')->nullable();
             $table->text('notifications')->nullable();
+            $table->string('which_admin')->nullable();
             $table->timestamps();
         });
     }

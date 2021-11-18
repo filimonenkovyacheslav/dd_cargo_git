@@ -12,6 +12,7 @@ use Auth;
 use Excel;
 use App\Exports\CourierEngDraftWorksheetExport;
 use App\ReceiptArchive;
+use App\Receipt;
 
 
 class CourierEngDraftController extends AdminController
@@ -45,7 +46,11 @@ class CourierEngDraftController extends AdminController
 		$check_result = '';
 		$fields = $this->getTableColumns('courier_eng_draft_worksheet');
 		$operator_change = true;
-		$user = Auth::user();		
+		$user = Auth::user();	
+
+		if ($request->input('tracking_main')) {
+			if (!$this->trackingValidate($request->input('tracking_main'))) return redirect()->to(session('this_previous_url'))->with('status-error', 'Tracking number is not correct.');
+		}	
 
 		if ($courier_eng_draft_worksheet->operator) $operator_change = false;
 
@@ -59,7 +64,10 @@ class CourierEngDraftController extends AdminController
 		}
 
 		if ($old_tracking && $request->input('tracking_main')) {
-			ReceiptArchive::where('tracking_main', $old_tracking)->delete();
+			ReceiptArchive::where([
+				['tracking_main', $old_tracking],
+				['worksheet_id','<>',null]
+			])->delete();
 		}
 		$notification = ReceiptArchive::where('tracking_main', $request->input('tracking_main'))->first();
 		if (!$notification) $check_result = $this->checkReceipt($id, null, 'en', $request->input('tracking_main'));
@@ -289,10 +297,12 @@ class CourierEngDraftController extends AdminController
 	}
 
 
-	public function courierEngDraftActivate($id)
+	public function courierEngDraftActivate($id, Request $request)
 	{
 		$courier_eng_draft_worksheet = CourierEngDraftWorksheet::find($id);				
-		$fields = $this->getTableColumns('courier_eng_draft_worksheet');	
+		$fields = $this->getTableColumns('courier_eng_draft_worksheet');
+		$message = '';	
+		$user = Auth::user();
 
 		$check_tracking	= PhilIndWorksheet::where('tracking_main', $courier_eng_draft_worksheet->tracking_main)->first();
 		if ($check_tracking) return redirect()->to(session('this_previous_url'))->with('status-error', 'Tracking number exists!');					
@@ -304,11 +314,31 @@ class CourierEngDraftController extends AdminController
 				$worksheet->$field = $courier_eng_draft_worksheet->$field;
 			}			
 		}
+
+		if ($user->role === 'office_1' || $request->input('color')) {
+			$worksheet->background = 'tr-orange';
+		}
+
+		$worksheet->status_date = date('Y-m-d');
 		
 		if ($worksheet->save())	{
 
 			$work_sheet_id = $worksheet->id;
 
+			// Notification of Warehouse
+			ReceiptArchive::where([
+				['tracking_main', $worksheet->tracking_main],
+				['worksheet_id', null],
+				['receipt_id', null]
+			])->delete();
+			$result = Receipt::where('tracking_main', $worksheet->tracking_main)->first();
+			if (!$result) {
+				$message = $this->checkReceipt($work_sheet_id, null, 'en', $worksheet->tracking_main);
+			}
+			
+			$this->checkForMissingTracking($worksheet->tracking_main);
+			// End Notification of Warehouse
+			
 			ReceiptArchive::where('worksheet_id', $id)->update(['worksheet_id' => $work_sheet_id]);
 
 			// New Packing Eng		
@@ -365,10 +395,10 @@ class CourierEngDraftController extends AdminController
 			}
 			
 			CourierEngDraftWorksheet::where('id', $id)->delete();
-			return redirect()->to(session('this_previous_url'))->with('status', 'Row activated successfully!');
+			return redirect()->to(session('this_previous_url'))->with('status', 'Row activated successfully!'.$message);
 		}
 		else{
-			return redirect()->to(session('this_previous_url'))->with('status-error', 'Activate error!');
+			return redirect()->to(session('this_previous_url'))->with('status-error', 'Activate error!'.$message);
 		}			
 	}
 

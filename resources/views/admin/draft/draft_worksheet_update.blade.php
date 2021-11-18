@@ -57,7 +57,13 @@
 						<div class="form-group">
 							{!! Form::label('status','Статус',['class' => 'col-md-2 control-label'])   !!}
 							<div class="col-md-8">
-								{!! Form::select('status', array('' => '', 'Доставляется на склад в стране отправителя' => 'Доставляется на склад в стране отправителя', 'На складе в стране отправителя' => 'На складе в стране отправителя', 'На таможне в стране отправителя' => 'На таможне в стране отправителя', 'Доставляется в страну получателя' => 'Доставляется в страну получателя', 'На таможне в стране получателя' => 'На таможне в стране получателя', 'Доставляется получателю' => 'Доставляется получателю', 'Доставлено' => 'Доставлено', 'Возврат' => 'Возврат', 'Коробка' => 'Коробка', 'Забрать' => 'Забрать', 'Уточнить' => 'Уточнить', 'Думают' => 'Думают', 'Отмена' => 'Отмена'), $draft_worksheet->status,['class' => 'form-control']) !!}
+								{!! Form::select('status', array('' => '', 'Подготовка' => 'Подготовка', 'Возврат' => 'Возврат', 'Коробка' => 'Коробка', 'Забрать' => 'Забрать', 'Уточнить' => 'Уточнить', 'Думают' => 'Думают', 'Отмена' => 'Отмена'), $draft_worksheet->status,['class' => 'form-control']) !!}
+							</div>
+						</div>
+						<div class="form-group">
+							{!! Form::label('parcels_qty','Кол-во посылок',['class' => 'col-md-2 control-label'])   !!}
+							<div class="col-md-8">
+								{!! Form::text('parcels_qty',$draft_worksheet->parcels_qty,['class' => 'form-control'])!!}
 							</div>
 						</div>
 						<div class="form-group">
@@ -80,12 +86,6 @@
 							</div>
 						</div>
 
-						<div class="form-group">
-							{!! Form::label('pallet_number','Номер паллеты',['class' => 'col-md-2 control-label'])   !!}
-							<div class="col-md-8">
-								{!! Form::text('pallet_number',$draft_worksheet->pallet_number,['class' => 'form-control'])!!}
-							</div>
-						</div>
 						<div class="form-group">
 							{!! Form::label('comment_2','OFF Коммент',['class' => 'col-md-2 control-label'])   !!}
 							<div class="col-md-8">
@@ -290,13 +290,6 @@
 								{!! Form::text('quantity_things',$draft_worksheet->quantity_things,['class' => 'form-control'])!!}
 							</div>
 						</div>
-
-						<div class="form-group">
-							{!! Form::label('batch_number','Партия',['class' => 'col-md-2 control-label'])   !!}
-							<div class="col-md-8">
-								{!! Form::text('batch_number',$draft_worksheet->batch_number,['class' => 'form-control'])!!}
-							</div>
-						</div>
 						<div class="form-group">
 							{!! Form::label('pay_date','Дата оплаты и комментарии',['class' => 'col-md-2 control-label'])   !!}
 							<div class="col-md-8">
@@ -396,6 +389,8 @@
 							{!! Form::hidden('tariff',$draft_worksheet->tariff,['class' => 'form-control'])!!}
 
 							{!! Form::hidden('status',$draft_worksheet->status,['class' => 'form-control'])!!}
+
+							{!! Form::hidden('parcels_qty',$draft_worksheet->parcels_qty)!!}
 
 							{!! Form::hidden('partner',$draft_worksheet->partner,['class' => 'form-control'])!!}
 

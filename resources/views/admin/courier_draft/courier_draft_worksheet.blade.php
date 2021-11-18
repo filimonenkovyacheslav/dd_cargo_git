@@ -643,7 +643,6 @@
 											<option value="partner">Партнер</option>
 											<option value="tracking_local">Локальный</option>
 											<option value="tracking_transit">Транзитный</option>
-											<option value="pallet_number">Номер паллеты</option>
 											<option value="comment_2">Коммент</option>
 											<option value="comments">Комментарии</option>
 											<option value="sender_name">Отправитель</option>
@@ -675,7 +674,6 @@
 											<option value="length">Длина</option>
 											<option value="volume_weight">Объемный вес</option>
 											<option value="quantity_things">Кол-во предметов</option>
-											<!-- <option value="batch_number">Партия</option> -->
 											<option value="pay_date">Дата оплаты и комментарии</option>
 											<option value="pay_sum">Сумма оплаты</option>  
 										</select>
@@ -737,11 +735,12 @@
 				success: function (data) {
 					console.log(data);
 					if (data.error) {
-						$('.card-header').after(`
+						/*$('.card-header').after(`
 							<div class="alert alert-danger">
 								`+data.error+`										
 							</div>`)
-						return 0;
+						return 0;*/
+						location.href = '/admin/courier-draft-activate/'+rowId+'/?color=orange';
 					}
 					else{
 						location.href = '/admin/courier-draft-activate/'+rowId;

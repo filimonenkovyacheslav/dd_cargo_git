@@ -298,6 +298,8 @@ class PhilIndWorksheetController extends BaseController
                 return $this->sendError('Validation Error.', $validator->errors());       
             }
 
+            if (!$this->trackingValidate($input['tracking_main'])) return $this->sendError('Tracking number is not correct.');
+
             $check_tracking = PhilIndWorksheet::where([
                 ['tracking_main', '=', $input['tracking_main']]
             ])
@@ -403,6 +405,8 @@ class PhilIndWorksheetController extends BaseController
             if($validator->fails()){
                 return $this->sendError('Validation Error.', $validator->errors());       
             }
+
+            if (!$this->trackingValidate($input['tracking_main'])) return $this->sendError('Tracking number is not correct.');
 
             $check_tracking = PhilIndWorksheet::where([
                 ['tracking_main', '=', $input['tracking_main']]

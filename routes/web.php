@@ -42,6 +42,12 @@ Route::group(['prefix' => App\Http\Middleware\LocaleMiddleware::getLocale()], fu
 	Route::get('/phil-ind-parcel-form', 'FrontController@philIndParcelForm')->name('philIndParcelForm');
 
 	Route::post('/phil-ind-parcel-form', 'FrontController@philIndParcelAdd')->name('philIndParcelAdd');
+
+	Route::get('/add-form-en', 'FrontController@showFormEng')->name('showFormEng');
+
+	Route::post('/add-form-en', 'FrontController@addFormEng')->name('addFormEng');
+
+	Route::post('/check-tracking-phone-eng',['uses' => 'FrontController@engCheckTrackingPhone','as' => 'engCheckTrackingPhone']);
 });
 
 
@@ -107,20 +113,43 @@ Route::get('/home', 'HomeController@index')->name('home');
 */
 Route::group(['prefix' => 'admin','middleware' => 'auth'],function() {	
 
+	// Check row color
+	Route::post('/check-row-color',['uses' => 'Admin\AdminController@checkRowColor']);
+
 	// Warehouse
+	Route::get('/warehouse-import-worksheet',['uses' => 'Admin\WarehouseController@importWorksheet']);
+
 	Route::get('/warehouse',['uses' => 'Admin\WarehouseController@index','as' => 'adminWarehouse']);
-
-	Route::get('/warehouse/{id}', ['uses' => 'Admin\WarehouseController@show','as' => 'adminWarehouseShow']);
-
-	Route::post('/warehouse/{id}',['uses'=>'Admin\WarehouseController@update','as'=>'warehouseUpdate']);
 
 	Route::post('/warehouse',['uses' => 'Admin\WarehouseController@destroy','as' => 'deleteWarehouse']);
 
+	Route::get('/warehouse-open/{id}', ['uses' => 'Admin\WarehouseController@warehouseOpen','as' => 'warehouseOpen']);
+
+	Route::post('/warehouse-delete-tracking',['uses' => 'Admin\WarehouseController@deleteTrackingFromPallet','as' => 'deleteTrackingFromPallet']);
+
+	Route::get('/warehouse-tracking-move/{tracking}', ['uses' => 'Admin\WarehouseController@warehouseTrackingMoveShow']);
+
+	Route::post('/warehouse-tracking-move/{tracking}',['uses' => 'Admin\WarehouseController@warehouseTrackingMove','as' => 'warehouseTrackingMove']);
+
 	Route::get('/warehouse-filter',['uses' => 'Admin\WarehouseController@warehouseFilter','as' => 'warehouseFilter']);
 
-	//Route::get('/warehouse-open/{id}', ['uses' => 'Admin\WarehouseController@warehouseOpenShow']);
+	Route::get('/warehouse-edit/{id}', ['uses' => 'Admin\WarehouseController@warehouseEditShow']);
 
-	Route::post('/warehouse-open/{id}', ['uses' => 'Admin\WarehouseController@warehouseOpen','as' => 'warehouseOpen']);
+	Route::post('/warehouse-edit/{id}', ['uses' => 'Admin\WarehouseController@warehouseEdit','as' => 'warehouseEdit']);
+
+	Route::get('/warehouse-add-tracking/{id}', ['uses' => 'Admin\WarehouseController@warehouseAddTrackingShow']);
+
+	Route::post('/warehouse-add-tracking/{id}', ['uses' => 'Admin\WarehouseController@warehouseAddTracking','as' => 'warehouseAddTracking']);
+
+	Route::post('/warehouse-add-data-id', ['uses' => 'Admin\WarehouseController@addWarehouseDataById','as' => 'addWarehouseDataById']);
+
+	Route::post('/warehouse-delete-data-id', ['uses' => 'Admin\WarehouseController@deleteWarehouseById','as' => 'deleteWarehouseById']);
+
+	Route::get('/warehouse-show-pallets', ['uses' => 'Admin\WarehouseController@palletsShow','as' => 'palletsShow']);
+
+	Route::post('/warehouse-add-data-pallets', ['uses' => 'Admin\WarehouseController@addWarehouseDataByPallet','as' => 'addWarehouseDataByPallet']);
+
+	Route::get('/pallets-sum',['uses' => 'Admin\WarehouseController@palletsSum','as' => 'palletsSum']);
 
 	// Receipt
 	Route::get('/receipts/{legal_entity}',['uses' => 'Admin\AdminController@adminReceipts','as' => 'adminReceipts']);

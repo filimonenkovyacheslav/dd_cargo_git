@@ -244,8 +244,9 @@
 									@if(isset($phil_ind_worksheet_obj))
 									@foreach($phil_ind_worksheet_obj as $row)
 
-									<tr>
+									<tr class="{{$row->background}}">
 										<td class="td-checkbox">
+											<input type="hidden" name="old_color[]" value="{{$row->background}}">
 											<input type="checkbox" name="row_id[]" value="{{ $row->id }}">
 										</td>
 										<td class="td-button">
@@ -442,11 +443,21 @@
 
 							<div class="checkbox-operations">
 								
-								{!! Form::open(['url'=>route('addPhilIndDataById'), 'class'=>'worksheet-add-form','method' => 'POST']) !!}
+								{!! Form::open(['url'=>route('addPhilIndDataById'), 'onsubmit' => 'return CheckColor(event)', 'class'=>'worksheet-add-form','method' => 'POST']) !!}
+
+								<input type="hidden" name="which_admin" value="en">
 
 								<label>Select action with selected rows:
 									<select class="form-control" name="checkbox_operations_select">
 										<option value=""></option>
+										@endcan
+
+										@can('changeColor')
+										<option value="color">Change color</option>
+										@endcan
+
+										@can('editPost')
+										
 										<option value="delete">Delete</option>
 										<option value="change">Change</option>
 									</select>
@@ -490,7 +501,18 @@
 										<option value="payment_date_comments">Payment date and comments</option>
 										<option value="amount_payment">Amount of payment</option>   
 									</select>
-								</label>	
+								</label>
+
+								<label class="checkbox-operations-color">Choose color:
+									<select class="form-control" name="tr_color">
+										<option value="" selected="selected"></option>
+										<option value="transparent">No color</option>
+										<option value="tr-orange">Orange</option>
+										<option value="tr-yellow">Yellow</option>
+										<option value="tr-green">Green</option>
+										<option value="tr-blue">Blue</option>
+									</select>
+								</label>
 
 								<label class="phil-ind-value-by-tracking checkbox-operations-change">Input value:
 									<input class="form-control" type="text" name="value-by-tracking">
@@ -527,6 +549,41 @@
 			return true;
 		else
 			return false;
+	}
+
+	function CheckColor(event){
+		
+		$('.alert.alert-danger').remove();
+		const form = event.target;
+		const color = document.querySelector('[name="tr_color"]').value;
+
+		if (color) {
+			event.preventDefault();
+			$.ajax({
+				url: '/admin/check-row-color/',
+				type: "POST",
+				data: $(form).serialize(),
+				headers: {
+					'X-CSRF-Token': $('meta[name="csrf-token"]').attr('content')
+				},
+				success: function (data) {
+					console.log(data);
+					if (data.error) {
+						$('.card-header').after(`
+							<div class="alert alert-danger">
+							`+data.error+`										
+							</div>`)
+						return 0;
+					}
+					else{
+						form.submit();
+					}
+				},
+				error: function (msg) {
+					alert('Admin error');
+				}
+			});
+		}		
 	}
 
 </script>

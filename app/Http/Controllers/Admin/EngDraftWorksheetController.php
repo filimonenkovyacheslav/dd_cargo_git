@@ -286,10 +286,11 @@ class EngDraftWorksheetController extends AdminController
     }
 
 
-    public function engDraftActivate($id)
+    public function engDraftActivate($id, Request $request)
 	{
 		$eng_draft_worksheet = EngDraftWorksheet::find($id);				
-		$fields = $this->getTableColumns('eng_draft_worksheet');						
+		$fields = $this->getTableColumns('eng_draft_worksheet');	
+		$user = Auth::user();					
 
 		if ($eng_draft_worksheet->parcels_qty && (int)$eng_draft_worksheet->parcels_qty > 1) {
 			
@@ -301,6 +302,12 @@ class EngDraftWorksheetController extends AdminController
 						$worksheet->$field = $eng_draft_worksheet->$field;
 					}			
 				}
+				
+				if ($user->role === 'office_1' || $request->input('color')) {
+					$worksheet->background = 'tr-orange';
+				}
+				
+				$worksheet->status_date = date('Y-m-d');
 				
 				if ($worksheet->save())	{
 	
@@ -372,6 +379,12 @@ class EngDraftWorksheetController extends AdminController
 					$worksheet->$field = $eng_draft_worksheet->$field;
 				}			
 			}
+			
+			if ($user->role === 'office_1' || $request->input('color')) {
+				$worksheet->background = 'tr-orange';
+			}
+			
+			$worksheet->status_date = date('Y-m-d');
 			
 			if ($worksheet->save())	{
 

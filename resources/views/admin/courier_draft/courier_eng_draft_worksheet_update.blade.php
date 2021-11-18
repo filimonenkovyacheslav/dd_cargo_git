@@ -66,13 +66,6 @@
 						</div>
 
 						<div class="form-group">
-							{!! Form::label('pallet_number','Pallet number',['class' => 'col-md-2 control-label'])   !!}
-							<div class="col-md-8">
-								{!! Form::text('pallet_number',$courier_eng_draft_worksheet->pallet_number,['class' => 'form-control'])!!}
-							</div>
-						</div>
-
-						<div class="form-group">
 							{!! Form::label('comments_1','Comments 1',['class' => 'col-md-2 control-label'])   !!}
 							<div class="col-md-8">
 								{!! Form::text('comments_1',$courier_eng_draft_worksheet->comments_1,['class' => 'form-control'])!!}
@@ -271,13 +264,6 @@
 								{!! Form::text('volume_weight',$courier_eng_draft_worksheet->volume_weight,['class' => 'form-control'])!!}
 							</div>
 						</div>
-												
-						<!-- <div class="form-group">
-							{!! Form::label('lot','Lot',['class' => 'col-md-2 control-label'])   !!}
-							<div class="col-md-8">
-								{!! Form::text('lot',$courier_eng_draft_worksheet->lot,['class' => 'form-control'])!!}
-							</div>
-						</div> -->
 
 						<div class="form-group">
 							{!! Form::label('payment_date_comments','Payment date and comments',['class' => 'col-md-2 control-label'])   !!}

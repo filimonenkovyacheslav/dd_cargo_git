@@ -366,12 +366,11 @@
 								</label>
 
 								<label class="checkbox-operations-change">Choose column:
-									<select class="form-control" id="phil-ind-tracking-columns" name="phil-ind-tracking-columns">
+									<select class="form-control" id="eng-draft-columns" name="phil-ind-tracking-columns">
 										<option value="" selected="selected"></option>
 										<option value="direction">Direction</option>
 										<option value="status">Status</option>
 										<option value="tracking_local">Local tracking number</option>
-										<option value="pallet_number">Pallet number</option>
 										<option value="comments_1">Comments 1</option>
 										<option value="comments_2">Comments 2</option>
 										<option value="shipper_name">Shipper's name</option>
@@ -399,7 +398,6 @@
 										<option value="height">Height</option>
 										<option value="length">Length</option>
 										<option value="volume_weight">Volume weight</option>
-										<option value="lot">Lot</option>
 										<option value="payment_date_comments">Payment date and comments</option>
 										<option value="amount_payment">Amount of payment</option>   
 									</select>
@@ -463,11 +461,12 @@
 				success: function (data) {
 					console.log(data);
 					if (data.error) {
-						$('.card-header').after(`
+						/*$('.card-header').after(`
 							<div class="alert alert-danger">
 								`+data.error+`										
 							</div>`)
-						return 0;
+						return 0;*/
+						location.href = '/admin/eng-draft-activate/'+rowId+'/?color=orange';
 					}
 					else if (data.phone_exist) {
 						let phone = confirm("A record with the same phone number was added to the database recently. Are you sure you want to add the record/records?");

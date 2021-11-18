@@ -42,17 +42,21 @@
                     <h6>please specify the boxes types and quantity</h6>
                     <h6>TYPE - QUANTITY</h6>
                     <ul class="box-group">
-                        <li style="width: 120px;">
+                        <li style="width: 130px;">
                             <label class="control-label">Large</label>
                             <input type="number" name="large" style="width: 40px;float: right;" min="0">
                         </li>
-                        <li style="width: 120px;">
+                        <li style="width: 130px;">
                             <label class="control-label">Medium</label>
                             <input type="number" name="medium" style="width: 40px;float: right;" min="0">
                         </li>
-                        <li style="width: 120px;">
+                        <li style="width: 130px;">
                             <label class="control-label">Small</label>
                             <input type="number" name="small" style="width: 40px;float: right;" min="0">
+                        </li>
+                        <li style="width: 130px;">
+                            <label class="control-label">Vacuum Bag</label>
+                            <input type="number" name="vacuum" style="width: 40px;float: right;" min="0">
                         </li>
                     </ul>
                     
@@ -444,9 +448,9 @@
             /*Parcel content items*/
             const input = document.querySelectorAll('.form-send-parcel input');
             const parcelsQty = document.querySelector('[name="parcels_qty"]');
-
             if (!parcelsQty.value) parcelsQty.value = 1;
             let contentFull = false;
+            
             for (let item of input) {
                 if (item.hasAttribute('data-item')) {
                     const num = item.getAttribute('data-item');

@@ -47,7 +47,7 @@
 						<div class="form-group">
 							{!! Form::label('status','Status',['class' => 'col-md-2 control-label'])   !!}
 							<div class="col-md-8">
-								{!! Form::select('status', array('' => '', 'Pending' => 'Pending', 'Forwarding to the warehouse in the sender country' => 'Forwarding to the warehouse in the sender country', 'At the warehouse in the sender country' => 'At the warehouse in the sender country', 'At the customs in the sender country' => 'At the customs in the sender country', 'Forwarding to the receiver country' => 'Forwarding to the receiver country', 'At the customs in the receiver country' => 'At the customs in the receiver country', 'Forwarding to the receiver' => 'Forwarding to the receiver', 'Delivered' => 'Delivered', 'Return' => 'Return', 'Box' => 'Box', 'Pick up' => 'Pick up', 'Specify' => 'Specify', 'Think' => 'Think', 'Canceled' => 'Canceled'), $eng_draft_worksheet->status,['class' => 'form-control']) !!}
+								{!! Form::select('status', array('' => '', 'Pending' => 'Pending', 'Return' => 'Return', 'Box' => 'Box', 'Pick up' => 'Pick up', 'Specify' => 'Specify', 'Think' => 'Think', 'Canceled' => 'Canceled'), $eng_draft_worksheet->status,['class' => 'form-control']) !!}
 							</div>
 						</div>
 						
@@ -62,13 +62,6 @@
 							{!! Form::label('tracking_local','Local tracking number',['class' => 'col-md-2 control-label'])   !!}
 							<div class="col-md-8">
 								{!! Form::text('tracking_local',$eng_draft_worksheet->tracking_local,['class' => 'form-control'])!!}
-							</div>
-						</div>
-
-						<div class="form-group">
-							{!! Form::label('pallet_number','Pallet number',['class' => 'col-md-2 control-label'])   !!}
-							<div class="col-md-8">
-								{!! Form::text('pallet_number',$eng_draft_worksheet->pallet_number,['class' => 'form-control'])!!}
 							</div>
 						</div>
 
@@ -269,13 +262,6 @@
 							{!! Form::label('volume_weight','Volume weight',['class' => 'col-md-2 control-label'])   !!}
 							<div class="col-md-8">
 								{!! Form::text('volume_weight',$eng_draft_worksheet->volume_weight,['class' => 'form-control'])!!}
-							</div>
-						</div>
-												
-						<div class="form-group">
-							{!! Form::label('lot','Lot',['class' => 'col-md-2 control-label'])   !!}
-							<div class="col-md-8">
-								{!! Form::text('lot',$eng_draft_worksheet->lot,['class' => 'form-control'])!!}
 							</div>
 						</div>
 

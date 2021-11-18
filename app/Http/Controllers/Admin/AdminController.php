@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\NewWorksheet;
 use App\PhilIndWorksheet;
+use App\PackingEngNew;
 use App\CourierDraftWorksheet;
 use App\CourierEngDraftWorksheet;
 use App\Receipt;
@@ -20,6 +21,106 @@ class AdminController extends Controller
 {
 	const ROLES_ARR = array('admin' => 'admin', 'user' => 'user', 'warehouse' => 'warehouse', 'office_1' => 'office_1','office_ru' => 'office_ru', 'office_agent_ru' => 'office_agent_ru', 'viewer' => 'viewer', 'china_admin' => 'china_admin', 'china_viewer' => 'china_viewer', 'office_eng' => 'office_eng', 'office_ind' => 'office_ind', 'viewer_eng' => 'viewer_eng', 'viewer_1' => 'viewer_1', 'viewer_2' => 'viewer_2', 'viewer_3' => 'viewer_3', 'viewer_4' => 'viewer_4', 'viewer_5' => 'viewer_5');
 	const VIEWER_ARR = array('viewer_1', 'viewer_2', 'viewer_3', 'viewer_4', 'viewer_5');
+	private $ru_status_arr = ["Возврат", "Коробка", "Забрать", "Уточнить", "Думают", "Отмена", "Подготовка"];
+	private $en_status_arr = ["Pending", "Return", "Box", "Pick up", "Specify", "Think", "Canceled"];
+
+
+    protected function checkRowColor(Request $request)
+    {
+        $which_admin = $request->input('which_admin');
+        $row_arr = $request->input('row_id');
+        $old_color_arr = $request->input('old_color');
+
+        for ($i=0; $i < count($row_arr); $i++) { 
+            if ($which_admin === 'ru') {
+            	if ($old_color_arr[$i] === 'tr-orange') {
+                	
+                	$worksheet = NewWorksheet::find($row_arr[$i]);             
+                    $error_message = 'Заполните обязателные поля в строке с телефоном отправителя '.$worksheet->standard_phone.': ';
+
+                    if (!$worksheet->sender_name) $error_message .= 'Отправитель,';
+                    if (!$worksheet->standard_phone) $error_message .= 'Телефон (стандарт),';
+                    if (!$worksheet->recipient_name) $error_message .= 'Получатель,';
+                    if (!$worksheet->recipient_city) $error_message .= 'Город получателя,';
+                    if (!$worksheet->recipient_street) $error_message .= 'Улица получателя,';
+                    if (!$worksheet->recipient_house) $error_message .= '№ дома пол-ля,';
+                    if (!$worksheet->recipient_room) $error_message .= '№ кв. пол-ля,';
+                    if (!$worksheet->recipient_phone) $error_message .= 'Телефон получателя,';
+
+                    if ($error_message !== 'Заполните обязателные поля в строке с телефоном отправителя '.$worksheet->standard_phone.': ') {
+                    	return response()->json(['error' => $error_message]);
+                    }
+                }             
+            }
+            elseif ($which_admin === 'en') {
+            	if ($old_color_arr[$i] === 'tr-orange') {
+            		
+            		$worksheet = PhilIndWorksheet::find($row_arr[$i]);
+            		$packing = PackingEngNew::where('work_sheet_id',$row_arr[$i])->first();
+            		$country = '';
+            		$error_message = 'Fill in required fields with shipper phone '.$worksheet->standard_phone.': ';
+
+            		if ($packing) $country = $packing->country;
+            		if (!$country) {
+            			$tracking = $worksheet->tracking_main;
+            			if (stripos($tracking, 'IN') !== false) $country = 'India';
+            			if (stripos($tracking, 'NE') !== false) $country = 'Nepal';
+            		}
+
+            		if ($country && $country === 'India') {
+            			if (!$worksheet->shipper_name) $error_message .= 'Shipper\'s name,';
+            			if (!$worksheet->shipper_address) $error_message .= 'Shipper\'s address,';
+            			if (!$worksheet->standard_phone) $error_message .= 'Shipper\'s phone (standard),';
+            			if (!$worksheet->consignee_name) $error_message .= 'Consignee\'s name,';
+            			if (!$worksheet->consignee_address) $error_message .= 'Consignee\'s address,';
+            			if (!$worksheet->consignee_phone) $error_message .= 'Consignee\'s phone number,';
+            			if (!$worksheet->house_name) $error_message .= 'House name,';
+            			if (!$worksheet->state_pincode) $error_message .= 'State pincode,';
+            			if (!$worksheet->post_office) $error_message .= 'Local post office,';
+            			if (!$worksheet->district) $error_message .= 'District/City,';
+
+            			if ($error_message !== 'Fill in required fields with shipper phone '.$worksheet->standard_phone.': ') {
+            				return response()->json(['error' => $error_message]);
+            			}			
+            		}
+            		elseif ($country && $country !== 'India') {
+            			if (!$worksheet->shipper_name) $error_message .= 'Shipper\'s name,';
+            			if (!$worksheet->shipper_address) $error_message .= 'Shipper\'s address,';
+            			if (!$worksheet->standard_phone) $error_message .= 'Shipper\'s phone (standard),';
+            			if (!$worksheet->consignee_name) $error_message .= 'Consignee\'s name,';
+            			if (!$worksheet->consignee_address) $error_message .= 'Consignee\'s address,';
+            			if (!$worksheet->consignee_phone) $error_message .= 'Consignee\'s phone number,';
+
+            			if ($error_message !== 'Fill in required fields with shipper phone '.$worksheet->standard_phone.': ') {
+            				return response()->json(['error' => $error_message]);
+            			}
+            		}
+            	}           	
+            }
+        }
+        
+        return response()->json(['success' => 'success']);
+    }
+	
+	
+	protected function checkStatus($which_admin, $id, $status)
+	{
+		if ($which_admin === 'ru') {
+			$worksheet = NewWorksheet::find($id);
+			if (!$worksheet->tracking_main && !in_array($status, $this->ru_status_arr)) {
+				return 'STATUS ERROR!';
+			}
+			else return '';
+		}
+		elseif ($which_admin === 'en') {
+			$worksheet = PhilIndWorksheet::find($id);
+			if (!$worksheet->tracking_main && !in_array($status, $this->en_status_arr)) {
+				return 'STATUS ERROR!';
+			}
+			else return '';
+		}	
+	}
+	
 	
 	protected function new_columns(){
 
@@ -150,12 +251,6 @@ class AdminController extends Controller
 	}
 
 
-	protected function getTableColumns($table)
-	{		
-		return Schema::getColumnListing($table);
-	}
-
-
 	protected function translit($s) {
 		$s = (string) $s; // преобразуем в строковое значение
 		$s = strip_tags($s); // убираем HTML-теги
@@ -274,6 +369,8 @@ class AdminController extends Controller
 			}								
 
 			if ($data['tracking_main']) {
+				if (!$this->trackingValidate($data['tracking_main'])) return redirect()->to(session('this_previous_url'))->with('status-error', 'Tracking number is not correct.');
+				
 				if ($receipt->tracking_main) {
 					ReceiptArchive::where('tracking_main', $receipt->tracking_main)->delete();
 				}
@@ -290,6 +387,8 @@ class AdminController extends Controller
 				$message = 'Нельзя сохранить строку с пустым: Номер посылки (You cannot save a line with empty one: Tracking number)!';
 				return redirect()->to(session('this_previous_url'))->with('status-error', $message);
 			}
+
+			if (!$this->trackingValidate($data['tracking_main'])) return redirect()->to(session('this_previous_url'))->with('status-error', 'Tracking number is not correct.');
 
 			$origin = Receipt::where([
 				['receipt_number',$number],

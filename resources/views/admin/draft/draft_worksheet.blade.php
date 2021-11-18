@@ -124,6 +124,7 @@
 										<th>Статус</th>
 										<th>Партнер</th>
 										<th>Трекинг<hr>Основной</th> 
+										<th>Кол-во посылок</th>
 										<th>№ заказа</th>
 										<th>Трекинг<hr>Локальный</th>
 										<th>Трекинг<hr>Транзитный</th>
@@ -233,6 +234,9 @@
 										</td>										
 										<td title="{{$row->tracking_main}}">
 											<div class="div-4">{{$row->tracking_main}}</div>
+										</td>
+										<td title="{{$row->parcels_qty}}">
+											<div class="div-22">{{$row->parcels_qty}}</div>
 										</td>
 										<td class="td-button" title="{{$row->order_number}}">
 											<div class="div-22">{{$row->order_number}}</div>
@@ -442,6 +446,9 @@
 										<td title="{{$row->tracking_main}}">
 											<div class="div-4">{{$row->tracking_main}}</div>
 										</td>
+										<td title="{{$row->parcels_qty}}">
+											<div class="div-22">{{$row->parcels_qty}}</div>
+										</td>
 										<td class="td-button" title="{{$row->order_number}}">
 											<div class="div-22">{{$row->order_number}}</div>
 										</td>
@@ -634,7 +641,7 @@
 									</label>
 									
 									<label class="checkbox-operations-change">Выберите колонку:
-										<select class="form-control" id="tracking-columns" name="tracking-columns">
+										<select class="form-control" id="draft-columns" name="tracking-columns">
 											<option value="" selected="selected"></option>
 											<option value="site_name">Сайт</option>
 											<option value="direction">Направление</option>
@@ -643,7 +650,6 @@
 											<option value="partner">Партнер</option>
 											<option value="tracking_local">Локальный</option>
 											<option value="tracking_transit">Транзитный</option>
-											<option value="pallet_number">Номер паллеты</option>
 											<option value="comment_2">Коммент</option>
 											<option value="comments">Комментарии</option>
 											<option value="sender_name">Отправитель</option>
@@ -675,7 +681,6 @@
 											<option value="length">Длина</option>
 											<option value="volume_weight">Объемный вес</option>
 											<option value="quantity_things">Кол-во предметов</option>
-											<option value="batch_number">Партия</option>
 											<option value="pay_date">Дата оплаты и комментарии</option>
 											<option value="pay_sum">Сумма оплаты</option>  
 										</select>
@@ -690,6 +695,10 @@
 
 								{!! Form::button('Сохранить',['class'=>'btn btn-primary checkbox-operations-change','type'=>'submit']) !!}
 								{!! Form::close() !!}
+
+								@endcan
+
+								@can('editPost')
 
 								{!! Form::open(['url'=>route('deleteDraftWorksheetById'),'onsubmit' => 'return ConfirmDelete()','method' => 'POST']) !!}
 								{!! Form::button('Удалить',['class'=>'btn btn-danger  checkbox-operations-delete','type'=>'submit']) !!}
@@ -737,11 +746,16 @@
 				success: function (data) {
 					console.log(data);
 					if (data.error) {
-						$('.card-header').after(`
+						/*$('.card-header').after(`
 							<div class="alert alert-danger">
 								`+data.error+`										
 							</div>`);
-						return 0;
+						return 0;*/
+						location.href = '/admin/draft-activate/'+rowId+'/?color=orange';
+					}
+					else if (data.phone_exist) {
+						let phone = confirm("Запись с таким же номером телефона недавно была добавлена в базу данных. Вы уверены, что хотите добавить запись / записи?");
+						if (phone) location.href = '/admin/draft-activate/'+rowId;						
 					}
 					else {
 						location.href = '/admin/draft-activate/'+rowId;

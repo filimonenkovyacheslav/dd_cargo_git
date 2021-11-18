@@ -553,6 +553,8 @@
 
 							{!! Form::hidden('id',$phil_ind_worksheet->id)!!}
 
+							{!! Form::hidden('background',$phil_ind_worksheet->background)!!}
+
 							{!! Form::hidden('status_date',$phil_ind_worksheet->status_date)!!}
 
 							{!! Form::hidden('shipper_city',$phil_ind_worksheet->shipper_city)!!}

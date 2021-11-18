@@ -666,7 +666,7 @@ div.error-phone.admin{
   vertical-align: bottom;
   padding: 5px;
 }
-.checkbox-operations-change, .checkbox-operations-delete{
+.checkbox-operations-change, .checkbox-operations-delete, .add-form-eng, .checkbox-operations-color{
   display: none;
 }
 
@@ -676,8 +676,24 @@ Parcel form
 .form-send-parcel .col-md-12.control-label{
   display: flex;
 }
-input[name="signed_form"], input[name="need_box"]{
+input[name="signed_form"], input[name="need_box"], input[name="has_tracking"]{
   width: 20px;
   height: 20px;
   margin-right: 10px;
+}
+
+/* 
+Table tr colors
+*/
+.table-striped tbody tr:nth-of-type(odd).tr-orange, .table-striped tbody tr.tr-orange{
+    background-color: rgba(245,100,10,.8);
+}
+.table-striped tbody tr:nth-of-type(odd).tr-yellow, .table-striped tbody tr.tr-yellow{
+    background-color: rgba(245,245,10,.7);
+}
+.table-striped tbody tr:nth-of-type(odd).tr-blue, .table-striped tbody tr.tr-blue{
+    background-color: rgba(10,100,245,.6);
+}
+.table-striped tbody tr:nth-of-type(odd).tr-green, .table-striped tbody tr.tr-green{
+    background-color: rgba(10,245,10,.7);
 }

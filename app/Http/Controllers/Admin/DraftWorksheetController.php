@@ -18,6 +18,8 @@ use App\Exports\DraftWorksheetExport;
 
 class DraftWorksheetController extends AdminController
 {
+	private $status_arr = ["Доставляется на склад в стране отправителя", "Возврат", "Коробка", "Забрать", "Уточнить", "Думают", "Отмена", "Подготовка", "На складе в стране отправителя"];   
+
     public function index(){
         $title = 'Черновой лист';
         $draft_worksheet_obj = DraftWorksheet::paginate(10);     
@@ -261,84 +263,178 @@ class DraftWorksheetController extends AdminController
 		if (!$draft_worksheet->recipient_house) $error_message .= '№ дома пол-ля,';
 		if (!$draft_worksheet->recipient_room) $error_message .= '№ кв. пол-ля,';
 		if (!$draft_worksheet->recipient_phone) $error_message .= 'Телефон получателя,';
+		if ($draft_worksheet->status !== 'Забрать') $error_message .= 'Статус должен быть - Забрать';
 
 		if ($error_message !== 'Заполните обязателные поля: ') {
 			return response()->json(['error' => $error_message]);
+		}	
+
+		$phone_exist = NewWorksheet::where('standard_phone',$draft_worksheet->standard_phone)->get()->last();
+
+		if ($phone_exist) {
+			if (in_array($phone_exist->status, $this->status_arr)) {
+				return response()->json(['phone_exist' => $id]);
+			}
+			else{
+				return response()->json(['phone_exist' => '']);
+			}
 		}
 		else{
-			return response()->json(['success' => 'success']);
-		}			
+			return response()->json(['phone_exist' => '']);
+		}		
     }
 
 
-    public function draftActivate($id)
-	{
-		$draft_worksheet = DraftWorksheet::find($id);		
-		$new_worksheet = new NewWorksheet();
-		$fields = $this->getTableColumns('draft_worksheet');		
+    public function draftActivate($id, Request $request)
+    {
+    	$draft_worksheet = DraftWorksheet::find($id);				
+    	$fields = $this->getTableColumns('draft_worksheet');
+    	$user = Auth::user();	
 
-		foreach($fields as $field){
-			if ($field !== 'created_at' && $field !== 'id') {
-				$new_worksheet->$field = $draft_worksheet->$field;
-			}			
-		}		
+    	if ($draft_worksheet->parcels_qty && (int)$draft_worksheet->parcels_qty > 1){
 
-		$temp = rtrim($draft_worksheet->package_content, ";");
-		$content_arr = explode(";",$temp);
-				
-		if ($content_arr[0]) {
-			
-			$new_worksheet->save();
-			$work_sheet_id = $new_worksheet->id;
-			$tr = new GoogleTranslateForFree();
-			$packing = PackingSea::where('work_sheet_id', $id)->get();
-			
-			$this->createNewPacking($new_worksheet, $work_sheet_id, $packing);
-			$this->createInvoice($new_worksheet, $tr, $work_sheet_id, $packing);
-			$this->createManifest($new_worksheet, $tr, $work_sheet_id, $packing);
-			PackingSea::where('work_sheet_id', $id)->delete();
+    		for ($i=0; $i < (int)$draft_worksheet->parcels_qty; $i++){
+    			$new_worksheet = new NewWorksheet();
 
-			// Adding order number
-            if ($new_worksheet->standard_phone) {
+    			foreach($fields as $field){
+    				if ($field !== 'created_at' && $field !== 'id' && $field !== 'parcels_qty') {
+    					$new_worksheet->$field = $draft_worksheet->$field;
+    				}			
+    			}
 
-                $standard_phone = ltrim($new_worksheet->standard_phone, " \+");
+    			if ($user->role === 'office_1' || $request->input('color')) {
+    				$new_worksheet->background = 'tr-orange';
+    			}		
 
-                $data = NewWorksheet::where('sender_phone', 'like', '%'.$standard_phone.'%')
-                ->orWhere('standard_phone', '+'.$standard_phone)
-                ->get();
+    			$temp = rtrim($draft_worksheet->package_content, ";");
+    			$content_arr = explode(";",$temp);
+    			$new_worksheet->status_date = date('Y-m-d');
 
-                if (!$data->first()->order_number) {
-                    $data->transform(function ($item, $key) {
-                        return $item->update(['order_number'=> ((int)$key+1)]);             
-                    });
-                }
-                else{
-                    $data->transform(function ($item, $key) use($standard_phone) {
-                        if (!$item->order_number) {
+    			if ($content_arr[0]) {
 
-                            $i = (int)(NewWorksheet::where([
-                                ['sender_phone', 'like', '%'.$standard_phone.'%'],
-                                ['order_number', '<>', null]
-                            ])
-                            ->orWhere([
-                                ['standard_phone', '+'.$standard_phone],
-                                ['order_number', '<>', null]
-                            ])
-                            ->get()->last()->order_number);
+    				$new_worksheet->save();
+    				$work_sheet_id = $new_worksheet->id;
+    				$tr = new GoogleTranslateForFree();
+    				$packing = PackingSea::where('work_sheet_id', $id)->get();
 
-                            $i++;
-                            return $item->update(['order_number'=> $i]);
-                        }               
-                    });
-                }
-            }						
-			DraftWorksheet::where('id', $id)->delete();
-			return redirect()->to(session('this_previous_url'))->with('status', 'Строка успешно активирована!');
-		}
-		else{
-			return redirect()->to(session('this_previous_url'))->with('status-error', 'Ошибка активации!');
-		}				
-	}
+    				$this->createNewPacking($new_worksheet, $work_sheet_id, $packing);
+    				$this->createInvoice($new_worksheet, $tr, $work_sheet_id, $packing);
+    				$this->createManifest($new_worksheet, $tr, $work_sheet_id, $packing);    				
+
+					// Adding order number
+    				if ($new_worksheet->standard_phone) {
+
+    					$standard_phone = ltrim($new_worksheet->standard_phone, " \+");
+
+    					$data = NewWorksheet::where('sender_phone', 'like', '%'.$standard_phone.'%')
+    					->orWhere('standard_phone', '+'.$standard_phone)
+    					->get();
+
+    					if (!$data->first()->order_number) {
+    						$data->transform(function ($item, $key) {
+    							return $item->update(['order_number'=> ((int)$key+1)]);             
+    						});
+    					}
+    					else{
+    						$data->transform(function ($item, $key) use($standard_phone) {
+    							if (!$item->order_number) {
+
+    								$i = (int)(NewWorksheet::where([
+    									['sender_phone', 'like', '%'.$standard_phone.'%'],
+    									['order_number', '<>', null]
+    								])
+    								->orWhere([
+    									['standard_phone', '+'.$standard_phone],
+    									['order_number', '<>', null]
+    								])
+    								->get()->last()->order_number);
+
+    								$i++;
+    								return $item->update(['order_number'=> $i]);
+    							}               
+    						});
+    					}
+    				}						   				
+    			}
+    			else{
+    				return redirect()->to(session('this_previous_url'))->with('status-error', 'Ошибка активации!');
+    			}
+    		}
+    		PackingSea::where('work_sheet_id', $id)->delete();
+    		DraftWorksheet::where('id', $id)->delete();
+    		return redirect()->to(session('this_previous_url'))->with('status', 'Строка успешно активирована!');
+    	}
+    	else{
+    		$new_worksheet = new NewWorksheet();
+    		
+    		foreach($fields as $field){
+    			if ($field !== 'created_at' && $field !== 'id' && $field !== 'parcels_qty') {
+    				$new_worksheet->$field = $draft_worksheet->$field;
+    			}			
+    		}
+
+    		if ($user->role === 'office_1' || $request->input('color')) {
+    			$new_worksheet->background = 'tr-orange';
+    		}				
+
+    		$temp = rtrim($draft_worksheet->package_content, ";");
+    		$content_arr = explode(";",$temp);
+    		$new_worksheet->status_date = date('Y-m-d');
+
+    		if ($content_arr[0]) {
+
+    			$new_worksheet->save();
+    			$work_sheet_id = $new_worksheet->id;
+    			$tr = new GoogleTranslateForFree();
+    			$packing = PackingSea::where('work_sheet_id', $id)->get();
+
+    			$this->createNewPacking($new_worksheet, $work_sheet_id, $packing);
+    			$this->createInvoice($new_worksheet, $tr, $work_sheet_id, $packing);
+    			$this->createManifest($new_worksheet, $tr, $work_sheet_id, $packing);
+    			PackingSea::where('work_sheet_id', $id)->delete();
+
+				// Adding order number
+    			if ($new_worksheet->standard_phone) {
+
+    				$standard_phone = ltrim($new_worksheet->standard_phone, " \+");
+
+    				$data = NewWorksheet::where('sender_phone', 'like', '%'.$standard_phone.'%')
+    				->orWhere('standard_phone', '+'.$standard_phone)
+    				->get();
+
+    				if (!$data->first()->order_number) {
+    					$data->transform(function ($item, $key) {
+    						return $item->update(['order_number'=> ((int)$key+1)]);             
+    					});
+    				}
+    				else{
+    					$data->transform(function ($item, $key) use($standard_phone) {
+    						if (!$item->order_number) {
+
+    							$i = (int)(NewWorksheet::where([
+    								['sender_phone', 'like', '%'.$standard_phone.'%'],
+    								['order_number', '<>', null]
+    							])
+    							->orWhere([
+    								['standard_phone', '+'.$standard_phone],
+    								['order_number', '<>', null]
+    							])
+    							->get()->last()->order_number);
+
+    							$i++;
+    							return $item->update(['order_number'=> $i]);
+    						}               
+    					});
+    				}
+    			}						
+    			DraftWorksheet::where('id', $id)->delete();
+    			return redirect()->to(session('this_previous_url'))->with('status', 'Строка успешно активирована!');
+    		}
+    		else{
+    			return redirect()->to(session('this_previous_url'))->with('status-error', 'Ошибка активации!');
+    		}
+    	}	
+    }
 
 
 	private function createNewPacking($new_worksheet, $work_sheet_id, $packing){			

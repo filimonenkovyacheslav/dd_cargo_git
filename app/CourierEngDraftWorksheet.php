@@ -7,5 +7,5 @@ use Illuminate\Database\Eloquent\Model;
 class CourierEngDraftWorksheet extends Model
 {   
     protected $table = 'courier_eng_draft_worksheet';
-    protected $fillable = ['order_number', 'tracking_main', 'status', 'status_ru', 'status_he'];
+    protected $fillable = ['order_number', 'tracking_main', 'status', 'status_ru', 'status_he','standard_phone','date','shipped_items'];
 }

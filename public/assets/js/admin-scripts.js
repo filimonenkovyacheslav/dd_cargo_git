@@ -12,7 +12,7 @@ $(document).ready(function() {
 
     let btnMove = $('a.btn-move');
     btnMove.detach();
-    if (location.href.indexOf('packing-eng-new') == -1 && location.href.indexOf('receipts') == -1 && location.href.indexOf('new-worksheet') == -1 && location.href.indexOf('phil-ind-worksheet') == -1 && location.href.indexOf('draft-worksheet') == -1 && location.href.indexOf('new-packing') == -1 && location.href.indexOf('invoice') == -1 && location.href.indexOf('manifest') == -1) {
+    if (location.href.indexOf('warehouse') == -1 && location.href.indexOf('packing-eng-new') == -1 && location.href.indexOf('receipts') == -1 && location.href.indexOf('new-worksheet') == -1 && location.href.indexOf('phil-ind-worksheet') == -1 && location.href.indexOf('draft-worksheet') == -1 && location.href.indexOf('new-packing') == -1 && location.href.indexOf('invoice') == -1 && location.href.indexOf('manifest') == -1) {
         $('#bootstrap-data-table_length').after(btnMove.get(0));
         $('#bootstrap-data-table_length').after(btnMove.get(2));
         $('#bootstrap-data-table_length').after(btnMove.get(1));
@@ -461,6 +461,7 @@ $('#tracking-columns').change((e)=>{
                    <option value="На таможне в стране получателя">На таможне в стране получателя</option>
                    <option value="Доставляется получателю">Доставляется получателю</option>
                    <option value="Доставлено">Доставлено</option>
+                   <option value="Подготовка">Подготовка</option>
                    <option value="Возврат">Возврат</option>
                    <option value="Коробка">Коробка</option>
                    <option value="Забрать">Забрать</option>
@@ -522,7 +523,84 @@ $('#tracking-columns').change((e)=>{
             <input class="form-control" type="text" name="value-by-tracking">
             `)
     }
-})
+});
+
+
+// draft worksheet
+$('#draft-columns').change((e)=>{
+    const thisVal = $(e.target).val();
+    if (thisVal === 'status') {
+        $('[name="value-by-tracking"]').remove()
+        $('#site_name').remove()
+        $('#tariff').remove()
+        $('#partner').remove()
+        $('.value-by-tracking').append(`
+            <div id="status-value">
+                <select class="form-control" id="status" name="status">
+                   <option value="" selected="selected"></option>
+                   <option value="Подготовка">Подготовка</option>
+                   <option value="Возврат">Возврат</option>
+                   <option value="Коробка">Коробка</option>
+                   <option value="Забрать">Забрать</option>
+                   <option value="Уточнить">Уточнить</option>
+                   <option value="Думают">Думают</option>
+                   <option value="Отмена">Отмена</option>
+                </select>                
+            </div>
+            `)
+    }
+    else if(thisVal === 'site_name'){
+        $('[name="value-by-tracking"]').remove()
+        $('#status-value').remove()
+        $('#tariff').remove()
+        $('#partner').remove()
+        $('.value-by-tracking').append(`
+            <select class="form-control" id="site_name" name="site_name">
+               <option value="DD-C">DD-C</option>
+               <option value="For">For</option>
+            </select>
+            `)
+    }
+    else if(thisVal === 'tariff'){
+        $('[name="value-by-tracking"]').remove()
+        $('#status-value').remove()
+        $('#site_name').remove()
+        $('#partner').remove()
+        $('.value-by-tracking').append(`
+            <select class="form-control" id="tariff" name="tariff">
+               <option value="" selected="selected"></option>
+               <option value="Море">Море</option>
+               <option value="Авиа">Авиа</option>
+            </select>
+            `)
+    }
+    else if(thisVal === 'partner'){
+        $('[name="value-by-tracking"]').remove()
+        $('#status-value').remove()
+        $('#site_name').remove()
+        $('#tariff').remove()
+        $('.value-by-tracking').append(`
+            <select class="form-control" id="partner" name="partner">
+               <option value="" selected="selected"></option>
+               <option value="viewer_1">viewer_1</option>
+               <option value="viewer_2">viewer_2</option>
+               <option value="viewer_3">viewer_3</option>
+               <option value="viewer_4">viewer_4</option>
+               <option value="viewer_5">viewer_5</option>
+            </select>
+            `)
+    }
+    else {
+        $('#status-value').remove()
+        $('#site_name').remove()
+        $('#tariff').remove()
+        $('#partner').remove()
+        $('[name="value-by-tracking"]').remove()
+        $('.value-by-tracking').append(`
+            <input class="form-control" type="text" name="value-by-tracking">
+            `)
+    }
+});
 
 
 $(document).delegate('#status-value select[name="status"]', 'change',(e)=>{
@@ -569,6 +647,36 @@ $('#phil-ind-tracking-columns').change((e)=>{
 })
 
 
+// eng-draft worksheet
+$('#eng-draft-columns').change((e)=>{
+    const thisVal = $(e.target).val();
+    if (thisVal === 'status') {
+        $('[name="value-by-tracking"]').remove()
+        $('.phil-ind-value-by-tracking').append(`
+            <div id="phil-ind-status-value">
+                <select class="form-control" id="status" name="status">
+                   <option value="" selected="selected"></option>
+                   <option value="Pending">Pending</option>
+                   <option value="Return">Return</option>
+                   <option value="Box">Box</option>
+                   <option value="Pick up">Pick up</option>
+                   <option value="Specify">Specify</option>
+                   <option value="Think">Think</option>
+                   <option value="Canceled">Canceled</option>
+                </select>                
+            </div>
+            `)
+    }
+    else {
+        $('#status-value').remove()
+        $('[name="value-by-tracking"]').remove()
+        $('.phil-ind-value-by-tracking').append(`
+            <input class="form-control" type="text" name="value-by-tracking">
+            `)
+    }
+})
+
+
 $(document).delegate('#phil-ind-status-value select[name="status"]', 'change',(e)=>{
     const key = $(e.target).val();
     $('.phil-ind-value-by-tracking [name="status_ru"]').val(ruArrChina[key]);
@@ -582,15 +690,24 @@ $('[name="checkbox_operations_select"]').change((e)=>{
     const thisVal = $(e.target).val();
     if (thisVal === 'delete') {
         $('.checkbox-operations-change').hide()
+        $('.checkbox-operations-color').hide()
         $('.checkbox-operations-delete').show()
     }
     else if (thisVal === 'change'){
         $('.checkbox-operations-change').show()
         $('.checkbox-operations-delete').hide()
+        $('.checkbox-operations-color').hide()
+    }
+    else if (thisVal === 'color'){
+        $('.checkbox-operations-change').hide()
+        $('.checkbox-operations-delete').hide()
+        $('.checkbox-operations-color').show()
+        $('button.checkbox-operations-change').show()
     }
     else{
         $('.checkbox-operations-change').hide()
         $('.checkbox-operations-delete').hide()
+        $('.checkbox-operations-color').hide()
     }
 })
 
@@ -600,10 +717,16 @@ $('[name="row_id[]"]').change((e)=>{
         const thisVal = $(e.target).val();
         $('.checkbox-operations form').append(`
             <input type="hidden" name="row_id[]" value="`+$(e.target).val()+`" data-id="`+$(e.target).val()+`">
-            `)
+            `);
+        $('.checkbox-operations form').append(`
+            <input type="hidden" name="old_color[]" 
+            value="`+$(e.target).siblings('[name="old_color[]"]').val()+`" 
+            data-color="`+$(e.target).val()+`">
+            `);
     }
     else{
-        $('.checkbox-operations form input[data-id="'+$(e.target).val()+'"]').remove()
+        $('.checkbox-operations form input[data-id="'+$(e.target).val()+'"]').remove();
+        $('.checkbox-operations form input[data-color="'+$(e.target).val()+'"]').remove();
     }
 })
 
@@ -710,3 +833,63 @@ $(".table-container").scroll(function() {
         })
     }
 });
+
+
+/*ФУНКЦИИ ДЛЯ УДАЛЕНИЯ И ДОБАВЛЕНИЯ ОПРЕДЕЛЁННЫХ GET ПАРАМЕТРОВ */
+function removeURLParameter(url, parameter) {
+    //prefer to use l.search if you have a location/link object
+    var urlparts= url.split('?');   
+    if (urlparts.length>=2) {
+
+        var prefix= encodeURIComponent(parameter)+'=';
+        var pars= urlparts[1].split(/[&;]/g);
+
+        //reverse iteration as may be destructive
+        for (var i= pars.length; i-- > 0;) {    
+            //idiom for string.startsWith
+            if (pars[i].lastIndexOf(prefix, 0) !== -1) {  
+                pars.splice(i, 1);
+            }
+        }
+        
+        if(pars.length > 0) {
+            url= urlparts[0]+'?'+pars.join('&');
+        } else {
+            url= urlparts[0];
+        }
+
+        return url;
+    } else {
+        return url;
+    }
+}
+
+
+function serializeGet(obj) {
+    var str = [];
+    for(var p in obj){
+        if (obj.hasOwnProperty(p)) {
+            str.push(encodeURIComponent(p) + "=" + encodeURIComponent(obj[p]));
+        }
+    }
+
+    return str.join("&");
+}
+
+
+function addGet(url, get) {
+
+    if (typeof(get) === 'object') {
+        get = serializeGet(get);
+    }
+
+    if (url.match(/\?/)) {
+        return url + '&' + get;
+    }
+
+    if (!url.match(/\.\w{3,4}$/) && url.substr(-1, 1) !== '/') {
+        url += '/';
+    }
+    
+    return url + '?' + get;
+}

@@ -89,12 +89,6 @@
 						</div>
 
 						<div class="form-group">
-							{!! Form::label('pallet_number','Номер паллеты',['class' => 'col-md-2 control-label'])   !!}
-							<div class="col-md-8">
-								{!! Form::text('pallet_number',$courier_draft_worksheet->pallet_number,['class' => 'form-control'])!!}
-							</div>
-						</div>
-						<div class="form-group">
 							{!! Form::label('comment_2','OFF Коммент',['class' => 'col-md-2 control-label'])   !!}
 							<div class="col-md-8">
 								{!! Form::text('comment_2',$courier_draft_worksheet->comment_2,['class' => 'form-control'])!!}
@@ -299,12 +293,6 @@
 							</div>
 						</div>
 
-						<!-- <div class="form-group">
-							{!! Form::label('batch_number','Партия',['class' => 'col-md-2 control-label'])   !!}
-							<div class="col-md-8">
-								{!! Form::text('batch_number',$courier_draft_worksheet->batch_number,['class' => 'form-control'])!!}
-							</div>
-						</div> -->
 						<div class="form-group">
 							{!! Form::label('pay_date','Дата оплаты и комментарии',['class' => 'col-md-2 control-label'])   !!}
 							<div class="col-md-8">

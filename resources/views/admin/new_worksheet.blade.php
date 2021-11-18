@@ -268,8 +268,9 @@
 
 									@if(!in_array($user->role, $viewer_arr))
 
-									<tr>
+									<tr class="{{$row->background}}">
 										<td class="td-checkbox">
+											<input type="hidden" name="old_color[]" value="{{$row->background}}">
 											<input type="checkbox" name="row_id[]" value="{{ $row->id }}">
 										</td>
 										<td class="td-button">
@@ -496,8 +497,9 @@
 
 									@elseif($row->partner === $user->role)
 
-									<tr>
+									<tr class="{{$row->background}}">
 										<td class="td-checkbox">
+											<input type="hidden" name="old_color[]" value="{{$row->background}}">
 											<input type="checkbox" name="row_id[]" value="{{ $row->id }}">
 										</td>
 										<td class="td-button">
@@ -739,11 +741,17 @@
 							
 							<div class="checkbox-operations">
 								
-								{!! Form::open(['url'=>route('addNewDataById'), 'class'=>'worksheet-add-form','method' => 'POST']) !!}
+								{!! Form::open(['url'=>route('addNewDataById'), 'onsubmit' => 'return CheckColor(event)', 'class'=>'worksheet-add-form','method' => 'POST']) !!}
+
+								<input type="hidden" name="which_admin" value="ru">
 									
 									<label>Выберите действие с выбранными строчками:
 										<select class="form-control" name="checkbox_operations_select">
 											<option value=""></option>
+											@endcan
+											
+											@can('changeColor')
+											<option value="color">Изменить цвет</option>
 											@endcan
 											
 											@can('update-user')
@@ -804,13 +812,24 @@
 										</select>
 									</label>	
 
+									<label class="checkbox-operations-color">Выберите цвет:
+										<select class="form-control" name="tr_color">
+											<option value="" selected="selected"></option>
+											<option value="transparent">Нет цвета</option>
+											<option value="tr-orange">Оранжевый</option>
+											<option value="tr-yellow">Желтый</option>
+											<option value="tr-green">Зеленый</option>
+											<option value="tr-blue">Синий</option>
+										</select>
+									</label>
+
 									<label class="value-by-tracking checkbox-operations-change">Введите значение:
 										<input class="form-control" type="text" name="value-by-tracking">
 										<input type="hidden" name="status_en">
 										<input type="hidden" name="status_ua">
 										<input type="hidden" name="status_he">
-									</label>									
-
+									</label>
+																										
 								{!! Form::button('Сохранить',['class'=>'btn btn-primary checkbox-operations-change','type'=>'submit']) !!}
 								{!! Form::close() !!}
 
@@ -858,6 +877,41 @@
 				alert('Ошибка admin');
 			}
 		});
+	}
+
+	function CheckColor(event){
+		
+		$('.alert.alert-danger').remove();
+		const form = event.target;
+		const color = document.querySelector('[name="tr_color"]').value;
+
+		if (color) {
+			event.preventDefault();
+			$.ajax({
+				url: '/admin/check-row-color/',
+				type: "POST",
+				data: $(form).serialize(),
+				headers: {
+					'X-CSRF-Token': $('meta[name="csrf-token"]').attr('content')
+				},
+				success: function (data) {
+					console.log(data);
+					if (data.error) {
+						$('.card-header').after(`
+							<div class="alert alert-danger">
+							`+data.error+`										
+							</div>`)
+						return 0;
+					}
+					else{
+						form.submit();
+					}
+				},
+				error: function (msg) {
+					alert('Admin error');
+				}
+			});
+		}		
 	}
 
 </script>

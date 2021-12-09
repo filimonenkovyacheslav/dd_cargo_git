@@ -177,13 +177,6 @@
 						@can('editPost')
 
 						<div class="form-group">
-							{!! Form::label('direction','Direction',['class' => 'col-md-2 control-label'])   !!}
-							<div class="col-md-8">
-								{!! Form::text('direction',$phil_ind_worksheet->direction,['class' => 'form-control'])!!}
-							</div>
-						</div>
-
-						<div class="form-group">
 							{!! Form::label('status','Status',['class' => 'col-md-2 control-label'])   !!}
 							<div class="col-md-8">
 								{!! Form::select('status', array('' => '', 'Pending' => 'Pending', 'Forwarding to the warehouse in the sender country' => 'Forwarding to the warehouse in the sender country', 'At the warehouse in the sender country' => 'At the warehouse in the sender country', 'At the customs in the sender country' => 'At the customs in the sender country', 'Forwarding to the receiver country' => 'Forwarding to the receiver country', 'At the customs in the receiver country' => 'At the customs in the receiver country', 'Forwarding to the receiver' => 'Forwarding to the receiver', 'Delivered' => 'Delivered', 'Return' => 'Return', 'Box' => 'Box', 'Pick up' => 'Pick up', 'Specify' => 'Specify', 'Think' => 'Think', 'Canceled' => 'Canceled'), $phil_ind_worksheet->status,['class' => 'form-control']) !!}
@@ -249,6 +242,13 @@
 						</div>
 
 						<div class="form-group">
+							{!! Form::label('shipper_country','Shipper\'s country',['class' => 'col-md-2 control-label'])   !!}
+							<div class="col-md-8">
+								{!! Form::select('shipper_country', array('Israel' => 'Israel', 'Germany' => 'Germany'), isset($phil_ind_worksheet->shipper_country) ? $phil_ind_worksheet->shipper_country : '',['class' => 'form-control']) !!}
+							</div>
+						</div>
+
+						<div class="form-group">
 							{!! Form::label('shipper_city','Shipper\'s city/village',['class' => 'col-md-2 control-label'])   !!}
 							<div class="col-md-8">
 								{!! Form::text('shipper_city',$phil_ind_worksheet->shipper_city,['class' => 'form-control'])!!}
@@ -301,6 +301,13 @@
 							{!! Form::label('consignee_name','Consignee\'s name',['class' => 'col-md-2 control-label'])   !!}
 							<div class="col-md-8">
 								{!! Form::text('consignee_name',$phil_ind_worksheet->consignee_name,['class' => 'form-control'])!!}
+							</div>
+						</div>
+
+						<div class="form-group">
+							{!! Form::label('consignee_country','Consignee\'s country',['class' => 'col-md-2 control-label'])   !!}
+							<div class="col-md-8">
+								{!! Form::select('consignee_country', array('India' => 'India', 'Nepal' => 'Nepal', 'Nigeria' => 'Nigeria', 'Ghana' => 'Ghana', 'Cote D\'Ivoire' => 'Cote D\'Ivoire', 'South Africa' => 'South Africa'), isset($phil_ind_worksheet->consignee_country) ? $phil_ind_worksheet->consignee_country: '',['class' => 'form-control']) !!}
 							</div>
 						</div>
 
@@ -591,6 +598,8 @@
 
 							{!! Form::hidden('shipper_name',$phil_ind_worksheet->shipper_name,['class' => 'form-control'])!!}
 
+							{!! Form::hidden('shipper_country',$phil_ind_worksheet->shipper_country)!!}
+
 							{!! Form::hidden('shipper_address',$phil_ind_worksheet->shipper_address,['class' => 'form-control'])!!}
 
 							{!! Form::hidden('standard_phone',$phil_ind_worksheet->standard_phone,['class' => 'form-control'])!!}
@@ -600,6 +609,8 @@
 							{!! Form::hidden('shipper_id',$phil_ind_worksheet->shipper_id,['class' => 'form-control'])!!}
 
 							{!! Form::hidden('consignee_name',$phil_ind_worksheet->consignee_name,['class' => 'form-control'])!!}
+
+							{!! Form::hidden('consignee_country',$phil_ind_worksheet->consignee_country)!!}
 
 							{!! Form::hidden('consignee_address',$phil_ind_worksheet->consignee_address,['class' => 'form-control'])!!}
 

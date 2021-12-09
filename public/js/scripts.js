@@ -134,7 +134,10 @@ $(window).resize(()=>{
 **/ 
 
 $('[name="not_first_order"]').change((e)=>{
-	if (e.target.checked === true) $('[data-toggle="modal"]').click()		
+	if (e.target.checked === true) {
+		$('.ru-modal').click();
+		$('.eng-modal').click();
+	}		
 })
 
 var quantityClick = 0;
@@ -210,6 +213,122 @@ function philIndAnswer(elem) {
 				$('#philIndParcel .no').hide();
 				$('#philIndParcel .check-phone').show();
 				$('#philIndParcel').modal(); 
+			}, 500);					
+	}
+}
+
+
+if (phoneExist) {
+	$('.ru-modal-2').click();
+	$('.eng-modal-2').click();
+}
+
+
+function clickAnswer2(elem) {
+	quantityClick++;
+	if ($(elem).hasClass('yes')) quantityYes++;
+	if ($(elem).hasClass('no')) quantityNo++;
+	if ($(elem).hasClass('sender')) {
+		quantitySender++;
+		$('[name="quantity_sender"]').val(quantitySender);
+	}
+	if ($(elem).hasClass('recipient')) {
+		quantityRecipient++;
+		$('[name="quantity_recipient"]').val(quantityRecipient);
+	}
+	
+	if (quantityClick == 1 && quantityYes == 1) {		
+		setTimeout(
+			()=>{ 
+				$('#phoneExist .question').text('Вы хотите отправить тому же получателю?');
+				if ($(elem).hasClass('yes')) {
+					$(elem).removeClass('sender').addClass('recipient');
+				}				
+				$('#phoneExist').modal(); 
+			}, 500);		
+	}
+	else if(quantityClick == 1 && quantityYes == 0) {		
+		setTimeout(
+			()=>{ 
+				$('#phoneExist .question').text('Благодарим за уточнение. Ваш существующий заказ обрабатывается');
+				$('#phoneExist .yes').hide();
+				$('#phoneExist .no').hide();
+				$('#phoneExist').modal(); 
+				quantityClick = 0;
+				quantityYes = 0;
+				quantityNo = 0;
+				quantitySender = 0;
+				quantityRecipient = 0;
+			}, 500);					
+	}
+	else if(quantityClick == 2 && quantityYes == 2) {		
+		setTimeout(
+			()=>{ 
+				$('#phoneExist [name="sender_phone"]').val(phoneNumber);
+				$('#phoneExist .check-phone').submit();				
+			}, 500);					
+	}
+	else if(quantityClick == 2 && quantityYes == 1) {		
+		setTimeout(
+			()=>{ 
+				$('#phoneExist [name="sender_phone"]').val(phoneNumber);
+				$('[name="quantity_recipient"]').val('');
+				$('#phoneExist .check-phone').submit();				
+			}, 500);					
+	}
+}
+
+
+function philIndAnswer2(elem) {
+	quantityClick++;
+	if ($(elem).hasClass('yes')) quantityYes++;
+	if ($(elem).hasClass('no')) quantityNo++;
+	if ($(elem).hasClass('sender')) {
+		quantitySender++;
+		$('[name="quantity_sender"]').val(quantitySender);
+	}
+	if ($(elem).hasClass('recipient')) {
+		quantityRecipient++;
+		$('[name="quantity_recipient"]').val(quantityRecipient);
+	}
+	
+	if (quantityClick == 1 && quantityYes == 1) {		
+		setTimeout(
+			()=>{ 
+				$('#phoneExist .question').text('Do you want to ship to the same consignee?');
+				if ($(elem).hasClass('yes')) {
+					$(elem).removeClass('sender').addClass('recipient');
+				}				
+				$('#phoneExist').modal(); 
+			}, 500);		
+	}
+	else if(quantityClick == 1 && quantityYes == 0) {		
+		setTimeout(
+			()=>{ 
+				$('#phoneExist .question').text('Thank you for your clarification. Your existing order is being processed');
+				$('#phoneExist .yes').hide();
+				$('#phoneExist .no').hide();
+				$('#phoneExist').modal(); 
+				quantityClick = 0;
+				quantityYes = 0;
+				quantityNo = 0;
+				quantitySender = 0;
+				quantityRecipient = 0;
+			}, 500);					
+	}
+	else if(quantityClick == 2 && quantityYes == 2) {		
+		setTimeout(
+			()=>{ 
+				$('#phoneExist [name="shipper_phone"]').val(phoneNumber);
+				$('#phoneExist .check-phone').submit();				
+			}, 500);					
+	}
+	else if(quantityClick == 2 && quantityYes == 1) {		
+		setTimeout(
+			()=>{ 
+				$('#phoneExist [name="shipper_phone"]').val(phoneNumber);
+				$('[name="quantity_recipient"]').val('');
+				$('#phoneExist .check-phone').submit();				
 			}, 500);					
 	}
 }

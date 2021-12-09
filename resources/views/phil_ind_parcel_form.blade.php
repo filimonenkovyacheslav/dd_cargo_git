@@ -54,10 +54,10 @@
                             <label class="control-label">Small</label>
                             <input type="number" name="small" style="width: 40px;float: right;" min="0">
                         </li>
-                        <li style="width: 130px;">
+                        <!-- <li style="width: 130px;">
                             <label class="control-label">Vacuum Bag</label>
                             <input type="number" name="vacuum" style="width: 40px;float: right;" min="0">
-                        </li>
+                        </li> -->
                     </ul>
                     
                     <label class="control-label">I send in my own box</label>
@@ -101,10 +101,49 @@
                             </div>
                         </div>
                     </div>
+
+                    <div class="modal fade" id="phoneExist" role="dialog">
+                        <div class="modal-dialog">
+
+                            <!-- Modal content-->
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                                </div>
+                                <div class="modal-body">
+                                    <p class="question">{{ session('phone_exist') }}</p>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" onclick="philIndAnswer2(this)" class="btn btn-primary pull-left yes sender" data-dismiss="modal">Yes</button>
+                                    <button type="button" onclick="philIndAnswer2(this)" class="btn btn-danger pull-left no" data-dismiss="modal">No</button>
+
+                                        {!! Form::open(['url'=>route('philIndCheckPhone'), 'class'=>'form-horizontal check-phone','method' => 'POST']) !!}
+
+                                        <div class="form-group">
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    {!! Form::text('shipper_phone',old('shipper_phone'),['class' => 'form-control', 'placeholder' => 'Phone*', 'required'])!!}
+                                                    {!! Form::hidden('quantity_sender')!!}
+                                                    {!! Form::hidden('quantity_recipient')!!}
+                                                    {!! Form::hidden('draft','draft')!!}
+                                                </div>
+                                                <div class="col-md-6">
+                                                    {!! Form::button('Send',['class'=>'btn btn-success','type'=>'submit']) !!}
+                                                </div>
+                                            </div>
+                                        </div>                                        
+                                                                                
+                                        {!! Form::close() !!}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                
                 </div> 
 
                 <!-- Link to open the modal -->
-                <p><a href="#philIndParcel" class="btn btn-success" data-toggle="modal">Add shipment</a></p>
+                <p><a href="#philIndParcel" class="btn btn-success eng-modal" data-toggle="modal">Add shipment</a></p>
+                <a href="#phoneExist" class="btn btn-success eng-modal-2" data-toggle="modal"></a>
                 
                 @if (session('add_parcel'))
                     <script type="text/javascript">
@@ -116,10 +155,24 @@
                     </script>
                 @endif
 
+                @if (session('phone_exist'))
+                    <script type="text/javascript">
+                        var phoneExist = '<?=session("phone_exist")?>';
+                        var phoneNumber = '<?=session("phone_number")?>';
+                    </script>
+                @else
+                    <script type="text/javascript">
+                        var phoneExist = ''
+                    </script>
+                @endif 
+
                 {!! Form::open(['url'=>route('philIndParcelAdd'),'onsubmit' => 'сonfirmSigned(event)', 'class'=>'form-horizontal form-send-parcel','method' => 'POST']) !!}
 
+                {!! Form::hidden('phone_exist_checked',isset($data_parcel->phone_exist_checked) ? $data_parcel->phone_exist_checked : '')!!}
                 {!! Form::hidden('status_box','')!!}
                 {!! Form::hidden('comments_2','')!!}
+
+                <h3>Shipper’s Data</h3>
 
                 <div class="form-group">
                     <div class="row">
@@ -150,6 +203,14 @@
                         </div>
                         <div class="col-md-6">
                             {!! Form::text('shipper_address',isset($data_parcel->shipper_address) ? $data_parcel->shipper_address : old('shipper_address'),['class' => 'form-control', 'placeholder' => 'Shipper\'s address*', 'required'])!!}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="row">
+                        <div class="col-md-6">
+                            {!! Form::select('shipper_country', array('Israel' => 'Israel', 'Germany' => 'Germany'), isset($data_parcel->shipper_country) ? $data_parcel->shipper_country : '',['class' => 'form-control']) !!}
                         </div>
                     </div>
                 </div>
@@ -206,7 +267,7 @@
                 <div class="form-group">
                     <div class="row">
                         <div class="col-md-6">
-                            {!! Form::select('consignee_country', array('India' => 'India', 'Nepal' => 'Nepal', 'The Philippines' => 'The Philippines'), '',['class' => 'form-control']) !!}
+                            {!! Form::select('consignee_country', array('India' => 'India', 'Nepal' => 'Nepal', 'Nigeria' => 'Nigeria', 'Ghana' => 'Ghana', 'Cote D\'Ivoire' => 'Cote D\'Ivoire', 'South Africa' => 'South Africa'), isset($data_parcel->consignee_country) ? $data_parcel->consignee_country: '',['class' => 'form-control']) !!}
                         </div>
                         <div class="col-md-6">
                             {!! Form::text('consignee_address',isset($data_parcel->consignee_address) ? $data_parcel->consignee_address : old('consignee_address'),['class' => 'form-control', 'placeholder' => 'Consignee\'s address*', 'required'])!!}
@@ -441,7 +502,23 @@
 
             const phone = document.querySelector('[name="standard_phone"]'); 
             if (phone.value.length < 10 || phone.value.length > 13) {
-                alert('The number of characters in the phone must be from 10 to 13 !');
+                alert('The number of characters in the standard phone must be from 10 to 13 !');
+                return false;
+            }
+
+            const recipientPhone = document.querySelector('[name="consignee_phone"]');
+            const regexp = /[0-9]/g;
+            const phoneDigits = recipientPhone.value.slice(1); 
+            if (recipientPhone.value.length < 6 || recipientPhone.value.length > 24) {
+                alert('The number of characters in the consignee phone must be from 6 to 24 !');
+                return false;
+            }
+            else if (recipientPhone.value[0] !== '+') {
+                alert('The consignee phone must start with "+" !');
+                return false;
+            }
+            else if (!regexp.test(phoneDigits)) {
+                alert('The consignee phone must contain only numbers !');
                 return false;
             }
 

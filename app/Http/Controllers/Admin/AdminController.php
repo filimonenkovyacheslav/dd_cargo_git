@@ -23,6 +23,32 @@ class AdminController extends Controller
 	const VIEWER_ARR = array('viewer_1', 'viewer_2', 'viewer_3', 'viewer_4', 'viewer_5');
 	private $ru_status_arr = ["Возврат", "Коробка", "Забрать", "Уточнить", "Думают", "Отмена", "Подготовка"];
 	private $en_status_arr = ["Pending", "Return", "Box", "Pick up", "Specify", "Think", "Canceled"];
+	private $ru_status_arr_2 = ["Доставляется на склад в стране отправителя", "Возврат", "Коробка", "Забрать", "Уточнить", "Думают", "Отмена", "Подготовка"];
+	private $en_status_arr_2 = ["Forwarding to the warehouse in the sender country", "Pending", "Return", "Box", "Pick up", "Specify", "Think", "Canceled"];
+
+
+	protected function checkExistPhone($request, $table)
+	{
+		$phone = $request->input('standard_phone');
+		switch ($table) {			
+
+			case "courier_draft_worksheet":
+
+			$worksheet = CourierDraftWorksheet::where('standard_phone',$phone)->first();;
+			if ($worksheet) return 'В нашей базе данных уже существует ваш заказ. Вы хотите добавить новый заказ?';
+			else return '';
+		
+			break;
+			
+			case "courier_eng_draft_worksheet":
+
+			$worksheet = CourierEngDraftWorksheet::where('standard_phone',$phone)->first();;
+			if ($worksheet) return 'One of your orders already exists in our database. Would you like to add one more?';
+			else return '';
+
+			break;
+		}
+	}
 
 
     protected function checkRowColor(Request $request)
@@ -61,10 +87,15 @@ class AdminController extends Controller
             		$error_message = 'Fill in required fields with shipper phone '.$worksheet->standard_phone.': ';
 
             		if ($packing) $country = $packing->country;
+            		if (!$country) $country = $worksheet->consignee_country; 
             		if (!$country) {
             			$tracking = $worksheet->tracking_main;
             			if (stripos($tracking, 'IN') !== false) $country = 'India';
             			if (stripos($tracking, 'NE') !== false) $country = 'Nepal';
+            			if (stripos($tracking, 'AN') !== false) $country = 'Nigeria';
+            			if (stripos($tracking, 'AG') !== false) $country = 'Ghana';
+            			if (stripos($tracking, 'AD') !== false) $country = 'Cote D\'Ivoire';
+            			if (stripos($tracking, 'AS') !== false) $country = 'South Africa';
             		}
 
             		if ($country && $country === 'India') {
@@ -83,8 +114,21 @@ class AdminController extends Controller
             				return response()->json(['error' => $error_message]);
             			}			
             		}
-            		elseif ($country && $country !== 'India') {
+            		elseif ($country && $country === 'Nepal') {
             			if (!$worksheet->shipper_name) $error_message .= 'Shipper\'s name,';
+            			if (!$worksheet->shipper_address) $error_message .= 'Shipper\'s address,';
+            			if (!$worksheet->standard_phone) $error_message .= 'Shipper\'s phone (standard),';
+            			if (!$worksheet->consignee_name) $error_message .= 'Consignee\'s name,';
+            			if (!$worksheet->consignee_address) $error_message .= 'Consignee\'s address,';
+            			if (!$worksheet->consignee_phone) $error_message .= 'Consignee\'s phone number,';
+
+            			if ($error_message !== 'Fill in required fields with shipper phone '.$worksheet->standard_phone.': ') {
+            				return response()->json(['error' => $error_message]);
+            			}
+            		}
+            		elseif ($country) {
+            			if (!$worksheet->shipper_name) $error_message .= 'Shipper\'s name,';
+            			if (!$worksheet->shipper_city) $error_message .= 'Shipper\'s city,';
             			if (!$worksheet->shipper_address) $error_message .= 'Shipper\'s address,';
             			if (!$worksheet->standard_phone) $error_message .= 'Shipper\'s phone (standard),';
             			if (!$worksheet->consignee_name) $error_message .= 'Consignee\'s name,';
@@ -103,22 +147,180 @@ class AdminController extends Controller
     }
 	
 	
-	protected function checkStatus($which_admin, $id, $status)
+	protected function checkStatus($table, $id, $status)
 	{
-		if ($which_admin === 'ru') {
+		switch ($table) {
+			
+			case "new_worksheet":
+
 			$worksheet = NewWorksheet::find($id);
 			if (!$worksheet->tracking_main && !in_array($status, $this->ru_status_arr)) {
-				return 'STATUS ERROR!';
+				return 'Status cannot be higher than Pick up without tracking number!';
 			}
 			else return '';
-		}
-		elseif ($which_admin === 'en') {
+		
+			break;
+			
+			case "phil_ind_worksheet":
+
 			$worksheet = PhilIndWorksheet::find($id);
 			if (!$worksheet->tracking_main && !in_array($status, $this->en_status_arr)) {
-				return 'STATUS ERROR!';
+				return 'Status cannot be higher than Pick up without tracking number!';
 			}
 			else return '';
-		}	
+
+			break;
+
+			case "courier_draft_worksheet":
+
+			$worksheet = CourierDraftWorksheet::find($id);
+			if (!$worksheet->tracking_main && !in_array($status, $this->ru_status_arr)) {
+				return 'Status cannot be higher than Pick up without tracking number!';
+			}
+			else return '';
+		
+			break;
+			
+			case "courier_eng_draft_worksheet":
+
+			$worksheet = CourierEngDraftWorksheet::find($id);
+			if (!$worksheet->tracking_main && !in_array($status, $this->en_status_arr)) {
+				return 'Status cannot be higher than Pick up without tracking number!';
+			}
+			else return '';
+
+			break;
+		}
+	}
+
+
+	protected function checkColumns($arr, $value_by, $column, $check_column, $table){
+		$status_error = '';
+
+		switch ($table) {
+			
+			case "new_worksheet":
+
+			if ($column === 'recipient_phone') {
+				$status_error = $this->checkConsigneePhone($value_by, 'ru');
+				if ($status_error) return $status_error;
+			} 
+
+			$check_sheet = NewWorksheet::whereIn($check_column, $arr)->whereIn('status',$this->ru_status_arr_2)->first();
+			if ($check_sheet) {
+				if ($column === 'pay_sum')
+				{
+					$status_error = "ВНИМАНИЕ! ПРИ ПОЛУЧЕНИИ ОПЛАТЫ СТАТУС НЕ МОЖЕТ БЫТЬ НИЖЕ - 'На складе в стране отправителя'. ДОБАВЬТЕ ЗАПИСЬ ОБ ОПЛАТЕ В ПРАВИЛЬНУЮ СТРОКУ ИЛИ ИЗМЕНИТЕ СТАТУС";
+					return $status_error;
+				}
+
+				if ($column === 'pallet_number')
+				{
+					$status_error = "ВНИМАНИЕ! ПРИ ДОБАВЛЕНИИ НОМЕРА ПАЛЛЕТЫ СТАТУС НЕ МОЖЕТ БЫТЬ НИЖЕ - 'На складе в стране отправителя'. ДОБАВЬТЕ ЗАПИСЬ О НОМЕРЕ ПАЛЛЕТЫ В ПРАВИЛЬНУЮ СТРОКУ ИЛИ ИЗМЕНИТЕ СТАТУС";
+					return $status_error;
+				}
+
+				if ($column === 'batch_number')
+				{
+					$status_error = "ВНИМАНИЕ! ПРИ ДОБАВЛЕНИИ НОМЕРА ПАРТИИ СТАТУС НЕ МОЖЕТ БЫТЬ НИЖЕ - 'На складе в стране отправителя'. ДОБАВЬТЕ ЗАПИСЬ О НОМЕРЕ ПАРТИИ В ПРАВИЛЬНУЮ СТРОКУ ИЛИ ИЗМЕНИТЕ СТАТУС";
+					return $status_error;
+				}
+			}
+
+			break;
+			
+			case "phil_ind_worksheet":
+
+			if ($column === 'consignee_phone') {
+				$status_error = $this->checkConsigneePhone($value_by, 'en');
+				if ($status_error) return $status_error;
+			} 
+
+			$check_sheet = PhilIndWorksheet::whereIn($check_column, $arr)->whereIn('status',$this->en_status_arr_2)->first();
+			if ($check_sheet) {
+				if ($column === 'amount_payment')
+				{
+					$status_error = "WARNING! A STATUS CANNOT BE LOWER - 'At the warehouse in the sender country' AFTER PAYMENT. PLEASE ADD THE DATA TO A CORRECT RECORD OR UPDATE THE STATUS";
+					return $status_error;
+				}
+
+				if ($column === 'pallet_number')
+				{
+					$status_error = "WARNING! A STATUS CANNOT BE LOWER - 'At the warehouse in the sender country' AFTER ADDING A PALLET NUMBER. PLEASE ADD THE DATA TO A CORRECT RECORD OR UPDATE THE STATUS";
+					return $status_error;
+				}
+
+				if ($column === 'lot')
+				{
+					$status_error = "WARNING! A STATUS CANNOT BE LOWER - 'At the warehouse in the sender country' BEFORE ADDING A LOT. PLEASE ADD THE DATA TO A CORRECT RECORD OR UPDATE THE STATUS";
+					return $status_error;
+				}
+			}
+
+			break;
+			
+			case "courier_draft_worksheet":
+
+			if ($column === 'recipient_phone') {
+				$status_error = $this->checkConsigneePhone($value_by, 'ru');
+				if ($status_error) return $status_error;
+			} 
+
+			$check_sheet = CourierDraftWorksheet::whereIn($check_column, $arr)->whereIn('status',$this->ru_status_arr_2)->first();
+			if ($check_sheet) {
+				if ($column === 'pay_sum')
+				{
+					$status_error = "ВНИМАНИЕ! ПРИ ПОЛУЧЕНИИ ОПЛАТЫ СТАТУС НЕ МОЖЕТ БЫТЬ НИЖЕ - 'На складе в стране отправителя'. ДОБАВЬТЕ ЗАПИСЬ ОБ ОПЛАТЕ В ПРАВИЛЬНУЮ СТРОКУ ИЛИ ИЗМЕНИТЕ СТАТУС";
+					return $status_error;
+				}
+
+				if ($column === 'pallet_number')
+				{
+					$status_error = "ВНИМАНИЕ! ПРИ ДОБАВЛЕНИИ НОМЕРА ПАЛЛЕТЫ СТАТУС НЕ МОЖЕТ БЫТЬ НИЖЕ - 'На складе в стране отправителя'. ДОБАВЬТЕ ЗАПИСЬ О НОМЕРЕ ПАЛЛЕТЫ В ПРАВИЛЬНУЮ СТРОКУ ИЛИ ИЗМЕНИТЕ СТАТУС";
+					return $status_error;
+				}
+
+				if ($column === 'batch_number')
+				{
+					$status_error = "ВНИМАНИЕ! ПРИ ДОБАВЛЕНИИ НОМЕРА ПАРТИИ СТАТУС НЕ МОЖЕТ БЫТЬ НИЖЕ - 'На складе в стране отправителя'. ДОБАВЬТЕ ЗАПИСЬ О НОМЕРЕ ПАРТИИ В ПРАВИЛЬНУЮ СТРОКУ ИЛИ ИЗМЕНИТЕ СТАТУС";
+					return $status_error;
+				}
+			}
+
+			break;
+
+			case "courier_eng_draft_worksheet":
+			
+			if ($column === 'consignee_phone') {
+				$status_error = $this->checkConsigneePhone($value_by, 'en');
+				if ($status_error) return $status_error;
+			} 
+
+			$check_sheet = CourierEngDraftWorksheet::whereIn($check_column, $arr)->whereIn('status',$this->en_status_arr_2)->first();
+			if ($check_sheet) {
+				if ($column === 'amount_payment')
+				{
+					$status_error = "WARNING! A STATUS CANNOT BE LOWER - 'At the warehouse in the sender country' AFTER PAYMENT. PLEASE ADD THE DATA TO A CORRECT RECORD OR UPDATE THE STATUS";
+					return $status_error;
+				}
+
+				if ($column === 'pallet_number')
+				{
+					$status_error = "WARNING! A STATUS CANNOT BE LOWER - 'At the warehouse in the sender country' AFTER ADDING A PALLET NUMBER. PLEASE ADD THE DATA TO A CORRECT RECORD OR UPDATE THE STATUS";
+					return $status_error;
+				}
+
+				if ($column === 'lot')
+				{
+					$status_error = "WARNING! A STATUS CANNOT BE LOWER - 'At the warehouse in the sender country' BEFORE ADDING A LOT. PLEASE ADD THE DATA TO A CORRECT RECORD OR UPDATE THE STATUS";
+					return $status_error;
+				}
+			}
+
+			break;
+		}
+		
+		return $status_error;
 	}
 	
 	
@@ -248,23 +450,6 @@ class AdminController extends Controller
 		$arr_columns[] = $new_column_5;
 
 		return $arr_columns;
-	}
-
-
-	protected function translit($s) {
-		$s = (string) $s; // преобразуем в строковое значение
-		$s = strip_tags($s); // убираем HTML-теги
-		$s = str_replace(array("\n", "\r"), " ", $s); // убираем перевод каретки
-		$s = preg_replace("/\s+/", ' ', $s); // удаляем повторяющие пробелы
-		$s = trim($s); // убираем пробелы в начале и конце строки
-		//$s = function_exists('mb_strtolower') ? mb_strtolower($s) : strtolower($s); // переводим строку в нижний регистр (иногда надо задать локаль)
-		
-		$s = strtr($s, array('а'=>'a','б'=>'b','в'=>'v','г'=>'g','д'=>'d','е'=>'e','ё'=>'e','ж'=>'j','з'=>'z','и'=>'i','й'=>'y','к'=>'k','л'=>'l','м'=>'m','н'=>'n','о'=>'o','п'=>'p','р'=>'r','с'=>'s','т'=>'t','у'=>'u','ф'=>'f','х'=>'h','ц'=>'c','ч'=>'ch','ш'=>'sh','щ'=>'shch','ы'=>'y','э'=>'e','ю'=>'yu','я'=>'ya','ъ'=>'','ь'=>'','А'=>'A','Б'=>'B','В'=>'V','Г'=>'G','Д'=>'D','Е'=>'E','Ё'=>'E','Ж'=>'J','З'=>'Z','И'=>'I','Й'=>'Y','К'=>'K','Л'=>'L','М'=>'M','Н'=>'N','О'=>'O','П'=>'P','Р'=>'R','С'=>'S','Т'=>'T','У'=>'U','Ф'=>'F','Х'=>'H','Ц'=>'C','Ч'=>'Ch','Ш'=>'Sh','Щ'=>'Shch','Ы'=>'Y','Э'=>'E','Ю'=>'Yu','Я'=>'Ya','Ь'=>'','Ъ'=>''));
-		
-		$s = preg_replace("/[^0-9a-z-_ ]/i", "", $s); // очищаем строку от недопустимых символов
-		//$s = str_replace(" ", "-", $s); // заменяем пробелы знаком минус
-		
-		return $s; // возвращаем результат
 	}
 
 

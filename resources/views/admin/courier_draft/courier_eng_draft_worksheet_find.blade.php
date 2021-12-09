@@ -58,12 +58,14 @@
 									<option value="date">Date</option>
 									<option value="direction">Direction</option>
 									<option value="status">Status</option>
+									<option value="status_date">Status Date</option>
 									<option value="tracking_main">Main Tracking number</option>
 									<option value="tracking_local">Local tracking number</option>
 									<option value="pallet_number">Pallet number</option>
 									<option value="comments_1">Comments 1</option>
 									<option value="comments_2">Comments 2</option>
 									<option value="shipper_name">Shipper\'s name</option>
+									<option value="shipper_country">Shipper\'s country</option>
 									<option value="shipper_city">Shipper\'s city/village</option>
 									<option value="passport_number">GSTN/Passport number</option>
 									<option value="return_date">Estimated return to India date</option>
@@ -72,6 +74,7 @@
 									<option value="shipper_phone">Shipper\'s phone (additionally)</option>
 									<option value="shipper_id">Shipper\'s ID number</option>
 									<option value="consignee_name">Consignee\'s name</option>
+									<option value="consignee_country">Consignee\'s country</option>
 									<option value="house_name">House name</option>
 									<option value="post_office">Local post office</option>
 									<option value="district">District/City</option>
@@ -99,8 +102,16 @@
 							<label>Filter:
 								<input type="search" name="table_filter_value" class="form-control form-control-sm">
 							</label>
+
+							<input type="hidden" name="for_active">
+							
 							<button type="button" id="table_filter_button" style="margin-left:30px" class="btn btn-default">Search</button>
 						</form>
+
+						<label style="margin-top: 30px;margin-left: 30px;">Show only records for activation
+							<input type="checkbox" onclick="forActivation(event)" class="for_active" style="width:20px;height:20px;">
+						</label>
+					
 					</div>
 					
 					<div class="card-body new-worksheet">
@@ -114,6 +125,7 @@
 										<th>Date</th>
 										<th>Direction</th>
 										<th>Status</th>
+										<th>Status Date</th>
 										<th>Main Tracking number</th> 
 										<th>Order number</th>
 										<th>Local tracking number</th>
@@ -121,6 +133,7 @@
 										<th>Comments 1</th>
 										<th>Comments 2</th>
 										<th>Shipper's name</th>
+										<th>Shipper's country</th>
 										<th>Shipper\'s city/village</th>
 										<th>GSTN/Passport number</th>
 										<th>Estimated return to India date</th>
@@ -129,6 +142,7 @@
 										<th>Shipper's phone number (additionally)</th>
 										<th>Shipper's ID number</th>
 										<th>Consignee's name</th>
+										<th>Consignee's country</th>
 										<th>House name</th>
 										<th>Local post office</th>
 										<th>District/City</th>
@@ -210,6 +224,9 @@
 										<td title="{{$row->status}}">
 											<div class="div-3">{{$row->status}}</div>
 										</td>
+										<td title="{{$row->status_date}}">
+											<div class="div-1">{{$row->status_date}}</div>
+										</td>
 										<td title="{{$row->tracking_main}}">
 											<div class="div-3">{{$row->tracking_main}}</div>
 										</td>
@@ -231,6 +248,9 @@
 										<td title="{{$row->shipper_name}}">
 											<div class="div-3">{{$row->shipper_name}}</div>
 										</td>
+										<td title="{{$row->shipper_country}}">
+											<div class="div-3">{{$row->shipper_country}}</div>
+										</td>
 										<td title="{{$row->shipper_city}}">
 											<div class="div-3">{{$row->shipper_city}}</div>
 										</td>
@@ -244,7 +264,7 @@
 											<div class="div-3">{{$row->shipper_address}}</div>
 										</td>
 										<td title="{{$row->standard_phone}}">
-											<div class="div-3">{{$row->standard_phone}}</div>
+											<div class="div-4">{{$row->standard_phone}}</div>
 										</td>
 										<td title="{{$row->shipper_phone}}">
 											<div class="div-3">{{$row->shipper_phone}}</div>
@@ -254,6 +274,9 @@
 										</td>
 										<td title="{{$row->consignee_name}}">
 											<div class="div-3">{{$row->consignee_name}}</div>
+										</td>
+										<td title="{{$row->consignee_country}}">
+											<div class="div-3">{{$row->consignee_country}}</div>
 										</td>
 										<td title="{{$row->house_name}}">
 											<div class="div-3">{{$row->house_name}}</div>
@@ -364,12 +387,13 @@
 								<label class="checkbox-operations-change">Choose column:
 									<select class="form-control" id="phil-ind-tracking-columns" name="phil-ind-tracking-columns">
 										<option value="" selected="selected"></option>
-										<option value="direction">Direction</option>
 										<option value="status">Status</option>
 										<option value="tracking_local">Local tracking number</option>
+										<option value="pallet_number">Pallet number</option>
 										<option value="comments_1">Comments 1</option>
 										<option value="comments_2">Comments 2</option>
 										<option value="shipper_name">Shipper's name</option>
+										<option value="shipper_country">Shipper's country</option>
 										<option value="shipper_city">Shipper\'s city/village</option>
 										<option value="passport_number">GSTN/Passport number</option>
 										<option value="return_date">Estimated return to India date</option>
@@ -377,6 +401,7 @@
 										<option value="shipper_phone">Shipper's phone number</option>
 										<option value="shipper_id">Shipper's ID number</option>
 										<option value="consignee_name">Consignee's name</option>
+										<option value="consignee_country">Consignee's country</option>
 										<option value="house_name">House name</option>
 										<option value="post_office">Local post office</option>
 										<option value="district">District/City</option>
@@ -394,6 +419,7 @@
 										<option value="height">Height</option>
 										<option value="length">Length</option>
 										<option value="volume_weight">Volume weight</option>
+										<option value="lot">Lot</option>
 										<option value="payment_date_comments">Payment date and comments</option>
 										<option value="amount_payment">Amount of payment</option>   
 									</select>
@@ -403,6 +429,8 @@
 									<input class="form-control" type="text" name="value-by-tracking">
 									<input type="hidden" name="status_ru">
 									<input type="hidden" name="status_he">
+									<input type="hidden" name="shipper_country_val">
+									<input type="hidden" name="consignee_country_val">
 								</label>
 
 								{!! Form::button('Save',['class'=>'btn btn-primary checkbox-operations-change','type'=>'submit']) !!}
@@ -431,6 +459,13 @@
 
 <script>
 
+	let href = location.href;
+	if (href.indexOf('for_active') !== -1) {
+		document.querySelector('.for_active').checked = true;
+		document.querySelector('[name="for_active"]').value = 'for_active';
+	}
+
+
 	function ConfirmDelete()
 	{
 		var x = confirm("Are you sure you want to delete?");
@@ -440,7 +475,8 @@
 			return false;
 	}
 
-		function ConfirmActivate(event)
+	
+	function ConfirmActivate(event)
 	{
 		$('.alert.alert-danger').remove();
 		var x = confirm("Are you sure you want to activate?");
@@ -457,12 +493,11 @@
 				success: function (data) {
 					console.log(data);
 					if (data.error) {
-						/*$('.card-header').after(`
+						$('.card-header').after(`
 							<div class="alert alert-danger">
 								`+data.error+`										
 							</div>`)
-						return 0;*/
-						location.href = '/admin/courier-eng-draft-activate/'+rowId+'/?color=orange';
+						return 0;
 					}
 					else if (data.phone_exist) {
 						let phone = confirm("A record with the same phone number was added to the database recently. Are you sure you want to add the record/records?");

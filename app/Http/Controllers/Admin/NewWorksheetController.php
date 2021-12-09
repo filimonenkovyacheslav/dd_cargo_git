@@ -57,7 +57,14 @@ class NewWorksheetController extends AdminController
 	private function validateUpdate($request, $id, $new_worksheet){
 		$status_error = '';
 		if (!$request->input('status')) return 'ERROR STATUS!';
-		$status_error = $this->checkStatus('ru', $id, $request->input('status'));
+		
+		$status_error = $this->checkStatus('new_worksheet', $id, $request->input('status'));
+		if($status_error) return $status_error;
+
+		if ($request->input('recipient_phone')) {
+			$status_error = $this->checkConsigneePhone($request->input('recipient_phone'), 'ru');
+			if($status_error) return $status_error;
+		}
 		
 		if ($request->input('tracking_main')) {
 			
@@ -80,6 +87,10 @@ class NewWorksheetController extends AdminController
 			])->first();
 			if($check_tracking) $status_error = 'ВНИМАНИЕ! В СИСТЕМЕ УЖЕ СУЩЕСТВУЕТ ТАКОЙ ТРЕКИНГ-НОМЕР. ИСПРАВЬТЕ ОШИБОЧНУЮ ЗАПИСЬ ИЛИ ВНЕСИТЕ ДРУГОЙ НОМЕР!';
 			if($status_error) return $status_error;
+		}
+		elseif (!$request->input('tracking_main') && ($request->input('batch_number') || $request->input('pallet_number'))){
+			$status_error = "Нельзя ввести номер партии или паллеты без трекинг-номера";
+			return $status_error;
 		}
 		
 		if ($request->input('pay_sum')){
@@ -194,33 +205,8 @@ class NewWorksheetController extends AdminController
 
 			// Adding order number
 			if ($new_worksheet->standard_phone) {
-
-				$standard_phone = ltrim($new_worksheet->standard_phone, " \+");
-
-				$data = NewWorksheet::where('standard_phone', '+'.$standard_phone)
-				->get();
-
-				if (!$data->first()->order_number) {
-					$data->transform(function ($item, $key) {
-						return $item->update(['order_number'=> ((int)$key+1)]);             
-					});
-				}
-				else{
-					$data->transform(function ($item, $key) use($standard_phone) {
-						if (!$item->order_number) {
-
-							$i = (int)(NewWorksheet::where([
-								['standard_phone', '+'.$standard_phone],
-								['order_number', '<>', null]
-							])->get()->last()->order_number);
-
-							$i++;
-							return $item->update(['order_number'=> $i]);
-						}               
-					});
-				}
+				$this->addingOrderNumber($new_worksheet->standard_phone, 'ru');
 			}
-			// End Adding order number
 
 			if ($request->input('tracking_main')) {
 				// Check for missing tracking
@@ -729,7 +715,7 @@ class NewWorksheetController extends AdminController
         			$date_arr[$row->tracking_main] = $row->tracking_main;
         		}
         	}
-        	if (strripos($temp, 'IN') !== false || strripos($temp, 'PH') !== false || strripos($temp, 'NE') !== false || strripos($temp, 'CD') !== false) {
+        	if ($this->checkWhichAdmin($temp)) {
         		if (!in_array($row->tracking_main, $date_arr)) {
         			$date_arr[$row->tracking_main] = $row->tracking_main;
         		}
@@ -751,7 +737,7 @@ class NewWorksheetController extends AdminController
     	if ($track_arr) {
     		if ($value_by && $column) {
 
-				$status_error = $this->checkColumns($track_arr, $value_by, $column, $check_column);   				
+				$status_error = $this->checkColumns($track_arr, $value_by, $column, $check_column, 'new_worksheet');   				
 				if($status_error) return redirect()->to(session('this_previous_url'))->with('status-error', $status_error);
 
 				if ($column === 'batch_number') {
@@ -972,26 +958,6 @@ class NewWorksheetController extends AdminController
     }
 
 
-    private function checkColumns($arr, $value_by, $column, $check_column){
-    	$status_error = '';
-    	$check_sheet = NewWorksheet::whereIn($check_column, $arr)->whereIn('status',$this->status_arr)->first();
-    	if ($check_sheet) {
-    		if ($column === 'pay_sum')
-    		{
-    			$status_error = "ВНИМАНИЕ! ПРИ ПОЛУЧЕНИИ ОПЛАТЫ СТАТУС НЕ МОЖЕТ БЫТЬ НИЖЕ - 'На складе в стране отправителя'. ДОБАВЬТЕ ЗАПИСЬ ОБ ОПЛАТЕ В ПРАВИЛЬНУЮ СТРОКУ ИЛИ ИЗМЕНИТЕ СТАТУС";
-    			return $status_error;
-    		}
-
-    		if ($column === 'pallet_number')
-    		{
-    			$status_error = "ВНИМАНИЕ! ПРИ ДОБАВЛЕНИИ НОМЕРА ПАЛЛЕТЫ СТАТУС НЕ МОЖЕТ БЫТЬ НИЖЕ - 'На складе в стране отправителя'. ДОБАВЬТЕ ЗАПИСЬ О НОМЕРЕ ПАЛЛЕТЫ В ПРАВИЛЬНУЮ СТРОКУ ИЛИ ИЗМЕНИТЕ СТАТУС";
-    			return $status_error;
-    		}
-    	}
-    	return $status_error;
-    }
-
-
     public function addNewDataById(Request $request){
     	$row_arr = $request->input('row_id');
     	$value_by = $request->input('value-by-tracking');
@@ -1019,7 +985,7 @@ class NewWorksheetController extends AdminController
     		}
     		elseif ($value_by && $column) {
 
-    			$status_error = $this->checkColumns($row_arr, $value_by, $column, $check_column);
+    			$status_error = $this->checkColumns($row_arr, $value_by, $column, $check_column, 'new_worksheet');
     			if($status_error) return redirect()->to(session('this_previous_url'))->with('status-error', $status_error);
 
     			if ($column === 'batch_number') {
@@ -1076,7 +1042,7 @@ class NewWorksheetController extends AdminController
     		}
     		else if ($request->input('status')){
     			for ($i=0; $i < count($row_arr); $i++) { 
-    				$status_error = $this->checkStatus('ru', $row_arr[$i], $request->input('status'));
+    				$status_error = $this->checkStatus('new_worksheet', $row_arr[$i], $request->input('status'));
     				if (!$status_error) {
     					NewWorksheet::where('id', $row_arr[$i])
     					->update([

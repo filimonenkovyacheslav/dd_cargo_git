@@ -21,7 +21,7 @@ class DraftWorksheetController extends AdminController
 	private $status_arr = ["Доставляется на склад в стране отправителя", "Возврат", "Коробка", "Забрать", "Уточнить", "Думают", "Отмена", "Подготовка", "На складе в стране отправителя"];   
 
     public function index(){
-        $title = 'Черновой лист';
+        $title = 'Черновой лист old';
         $draft_worksheet_obj = DraftWorksheet::paginate(10);     
         $user = Auth::user();
         $viewer_arr = parent::VIEWER_ARR;
@@ -43,6 +43,12 @@ class DraftWorksheetController extends AdminController
 	{
 		$draft_worksheet = DraftWorksheet::find($id);
 		$fields = $this->getTableColumns('draft_worksheet');
+		$error_message = '';
+
+		if ($request->input('recipient_phone')) {
+			$error_message = $this->checkConsigneePhone($request->input('recipient_phone'), 'ru');
+			if ($error_message) return redirect()->to(session('this_previous_url'))->with('status-error', $error_message);
+		}
 
 		foreach($fields as $field){						
 			if ($field !== 'created_at') {
@@ -156,6 +162,12 @@ class DraftWorksheetController extends AdminController
     	$column = $request->input('tracking-columns');
 
     	if ($row_arr) {
+    		
+    		if ($column === 'recipient_phone') {
+    			$error_message = $this->checkConsigneePhone($value_by, 'ru');
+    			if ($error_message) return redirect()->to(session('this_previous_url'))->with('status-error', $error_message);
+    		}    		
+    		
     		if ($value_by && $column) {
     			DraftWorksheet::whereIn('id', $row_arr)
     			->update([
@@ -207,7 +219,7 @@ class DraftWorksheetController extends AdminController
 
 
 	public function draftWorksheetFilter(Request $request){
-        $title = 'Фильтр Чернового листа';
+        $title = 'Фильтр Чернового листа old';
         $search = $request->table_filter_value;
         $draft_worksheet_arr = [];
         $attributes = DraftWorksheet::first()->attributesToArray();
@@ -251,9 +263,11 @@ class DraftWorksheetController extends AdminController
 
 
     public function draftCheckActivate($id)
-    {
+    {   	
     	$draft_worksheet = DraftWorksheet::find($id);
 		$error_message = 'Заполните обязателные поля: ';
+		$user = Auth::user();
+		$error_arr = ['error' => '', 'status_error' => ''];
 
 		if (!$draft_worksheet->sender_name) $error_message .= 'Отправитель,';
 		if (!$draft_worksheet->standard_phone) $error_message .= 'Телефон (стандарт),';
@@ -263,10 +277,18 @@ class DraftWorksheetController extends AdminController
 		if (!$draft_worksheet->recipient_house) $error_message .= '№ дома пол-ля,';
 		if (!$draft_worksheet->recipient_room) $error_message .= '№ кв. пол-ля,';
 		if (!$draft_worksheet->recipient_phone) $error_message .= 'Телефон получателя,';
-		if ($draft_worksheet->status !== 'Забрать') $error_message .= 'Статус должен быть - Забрать';
+		$error_arr['error'] = $error_message;		
 
-		if ($error_message !== 'Заполните обязателные поля: ') {
-			return response()->json(['error' => $error_message]);
+		if ($draft_worksheet->status !== 'Забрать') {
+			$error_arr['status_error'] = 'Статус должен быть - Забрать';
+		}
+
+		if ($error_arr['error'] === 'Заполните обязателные поля: ') {
+			$error_arr['error'] = '';
+		}
+
+		if ($error_arr) {
+			return response()->json($error_arr);
 		}	
 
 		$phone_exist = NewWorksheet::where('standard_phone',$draft_worksheet->standard_phone)->get()->last();
@@ -285,301 +307,22 @@ class DraftWorksheetController extends AdminController
     }
 
 
-    public function draftActivate($id, Request $request)
+    public function draftActivate($id)
     {
-    	$draft_worksheet = DraftWorksheet::find($id);				
-    	$fields = $this->getTableColumns('draft_worksheet');
-    	$user = Auth::user();	
-
-    	if ($draft_worksheet->parcels_qty && (int)$draft_worksheet->parcels_qty > 1){
-
-    		for ($i=0; $i < (int)$draft_worksheet->parcels_qty; $i++){
-    			$new_worksheet = new NewWorksheet();
-
-    			foreach($fields as $field){
-    				if ($field !== 'created_at' && $field !== 'id' && $field !== 'parcels_qty') {
-    					$new_worksheet->$field = $draft_worksheet->$field;
-    				}			
-    			}
-
-    			if ($user->role === 'office_1' || $request->input('color')) {
-    				$new_worksheet->background = 'tr-orange';
-    			}		
-
-    			$temp = rtrim($draft_worksheet->package_content, ";");
-    			$content_arr = explode(";",$temp);
-    			$new_worksheet->status_date = date('Y-m-d');
-
-    			if ($content_arr[0]) {
-
-    				$new_worksheet->save();
-    				$work_sheet_id = $new_worksheet->id;
-    				$tr = new GoogleTranslateForFree();
-    				$packing = PackingSea::where('work_sheet_id', $id)->get();
-
-    				$this->createNewPacking($new_worksheet, $work_sheet_id, $packing);
-    				$this->createInvoice($new_worksheet, $tr, $work_sheet_id, $packing);
-    				$this->createManifest($new_worksheet, $tr, $work_sheet_id, $packing);    				
-
-					// Adding order number
-    				if ($new_worksheet->standard_phone) {
-
-    					$standard_phone = ltrim($new_worksheet->standard_phone, " \+");
-
-    					$data = NewWorksheet::where('sender_phone', 'like', '%'.$standard_phone.'%')
-    					->orWhere('standard_phone', '+'.$standard_phone)
-    					->get();
-
-    					if (!$data->first()->order_number) {
-    						$data->transform(function ($item, $key) {
-    							return $item->update(['order_number'=> ((int)$key+1)]);             
-    						});
-    					}
-    					else{
-    						$data->transform(function ($item, $key) use($standard_phone) {
-    							if (!$item->order_number) {
-
-    								$i = (int)(NewWorksheet::where([
-    									['sender_phone', 'like', '%'.$standard_phone.'%'],
-    									['order_number', '<>', null]
-    								])
-    								->orWhere([
-    									['standard_phone', '+'.$standard_phone],
-    									['order_number', '<>', null]
-    								])
-    								->get()->last()->order_number);
-
-    								$i++;
-    								return $item->update(['order_number'=> $i]);
-    							}               
-    						});
-    					}
-    				}						   				
-    			}
-    			else{
-    				return redirect()->to(session('this_previous_url'))->with('status-error', 'Ошибка активации!');
-    			}
-    		}
-    		PackingSea::where('work_sheet_id', $id)->delete();
-    		DraftWorksheet::where('id', $id)->delete();
-    		return redirect()->to(session('this_previous_url'))->with('status', 'Строка успешно активирована!');
+    	$result = $this->mainDraftActivate($id);
+    	if ($result['status']) {
+    		return redirect()->to(session('this_previous_url'))->with('status', $result['status']);
     	}
-    	else{
-    		$new_worksheet = new NewWorksheet();
-    		
-    		foreach($fields as $field){
-    			if ($field !== 'created_at' && $field !== 'id' && $field !== 'parcels_qty') {
-    				$new_worksheet->$field = $draft_worksheet->$field;
-    			}			
-    		}
-
-    		if ($user->role === 'office_1' || $request->input('color')) {
-    			$new_worksheet->background = 'tr-orange';
-    		}				
-
-    		$temp = rtrim($draft_worksheet->package_content, ";");
-    		$content_arr = explode(";",$temp);
-    		$new_worksheet->status_date = date('Y-m-d');
-
-    		if ($content_arr[0]) {
-
-    			$new_worksheet->save();
-    			$work_sheet_id = $new_worksheet->id;
-    			$tr = new GoogleTranslateForFree();
-    			$packing = PackingSea::where('work_sheet_id', $id)->get();
-
-    			$this->createNewPacking($new_worksheet, $work_sheet_id, $packing);
-    			$this->createInvoice($new_worksheet, $tr, $work_sheet_id, $packing);
-    			$this->createManifest($new_worksheet, $tr, $work_sheet_id, $packing);
-    			PackingSea::where('work_sheet_id', $id)->delete();
-
-				// Adding order number
-    			if ($new_worksheet->standard_phone) {
-
-    				$standard_phone = ltrim($new_worksheet->standard_phone, " \+");
-
-    				$data = NewWorksheet::where('sender_phone', 'like', '%'.$standard_phone.'%')
-    				->orWhere('standard_phone', '+'.$standard_phone)
-    				->get();
-
-    				if (!$data->first()->order_number) {
-    					$data->transform(function ($item, $key) {
-    						return $item->update(['order_number'=> ((int)$key+1)]);             
-    					});
-    				}
-    				else{
-    					$data->transform(function ($item, $key) use($standard_phone) {
-    						if (!$item->order_number) {
-
-    							$i = (int)(NewWorksheet::where([
-    								['sender_phone', 'like', '%'.$standard_phone.'%'],
-    								['order_number', '<>', null]
-    							])
-    							->orWhere([
-    								['standard_phone', '+'.$standard_phone],
-    								['order_number', '<>', null]
-    							])
-    							->get()->last()->order_number);
-
-    							$i++;
-    							return $item->update(['order_number'=> $i]);
-    						}               
-    					});
-    				}
-    			}						
-    			DraftWorksheet::where('id', $id)->delete();
-    			return redirect()->to(session('this_previous_url'))->with('status', 'Строка успешно активирована!');
-    		}
-    		else{
-    			return redirect()->to(session('this_previous_url'))->with('status-error', 'Ошибка активации!');
-    		}
-    	}	
+    	elseif ($result['status_error']) {
+    		return redirect()->to(session('this_previous_url'))->with('status-error', $result['status_error']);
+    	}
+    	else return redirect()->to(session('this_previous_url'))->with('status-error', 'Ошибка активации!');
     }
-
-
-	private function createNewPacking($new_worksheet, $work_sheet_id, $packing){			
-		$packing_fields = $this->getTableColumns('new_packing');					
-
-		$packing->each(function ($item, $key) use($work_sheet_id, $packing_fields, $new_worksheet) {
-			$new_packing = new NewPacking();
-			for ($i=0; $i < count($packing_fields); $i++) { 
-				if ($packing_fields[$i] !== 'work_sheet_id' && $packing_fields[$i] !== 'id') {
-					$new_packing[$packing_fields[$i]] = $item[$packing_fields[$i]];
-				}
-				else{
-					$new_packing->work_sheet_id = $work_sheet_id;
-				}					
-			}
-			$new_packing->weight_kg = $new_worksheet->weight;
-			$new_packing->save();
-		});
-
-		return true;
-	}
-
-
-	private function createInvoice($new_worksheet, $tr, $work_sheet_id, $packing){
-		$invoice_num = 1;
-		$result = Invoice::latest()->first();
-		if ($result) {
-			$invoice_num = (int)$result->number + 1;
-		}			
-		$address = '';
-		for ($i=0; $i < 8; $i++) { 
-			if ($i == 0 && $packing[0]->postcode) {
-				$address .= $packing[0]->postcode.', ';
-			}
-			if ($i == 1 && $packing[0]->region) {
-				$address .= $this->translit($packing[0]->region).', ';
-			}
-			if ($i == 2 && $packing[0]->district) {
-				$address .= $this->translit($packing[0]->district).', ';
-			}
-			if ($i == 3 && $packing[0]->city) {
-				$address .= $this->translit($packing[0]->city).', ';
-			}
-			if ($i == 4 && $packing[0]->street) {
-				$address .= $this->translit($packing[0]->street).', ';
-			}
-			if ($i == 5 && $packing[0]->house) {
-				$address .= $packing[0]->house;
-			}
-			if ($i == 6 && $packing[0]->body) {
-				$address .= '/'.$packing[0]->body;
-			}
-			if ($i == 7 && $packing[0]->room) {
-				$address .= ', '.$packing[0]->room;
-			}
-		}
-
-		$invoice = new Invoice();
-		$invoice->number = $invoice_num;
-		$invoice->tracking = $new_worksheet->tracking_main;
-		$invoice->box = 1;
-		$invoice->shipper_name = $this->translit($packing[0]->full_shipper);
-		$invoice->shipper_address_phone = $this->translit($new_worksheet->sender_city.', '.$new_worksheet->sender_address).'; '.$new_worksheet->standard_phone;
-		$invoice->consignee_name = $this->translit($packing[0]->full_consignee);
-		$invoice->consignee_address = $address;
-		$invoice->shipped_items = $tr->translate('ru', 'en', $new_worksheet->package_content, 5);
-		$invoice->weight = $new_worksheet->weight;
-		$invoice->height = $new_worksheet->height;
-		$invoice->length = $new_worksheet->length;
-		$invoice->width = $new_worksheet->width;
-		$invoice->declared_value = $new_worksheet->package_cost;
-		$invoice->work_sheet_id = $work_sheet_id;
-		$invoice->save();
-
-		return true;
-	}
-
-
-	private function createManifest($new_worksheet, $tr, $work_sheet_id, $packing){
-		$manifest_num = 1;
-		$result = Manifest::where('number','<>', null)->latest()->first();
-		if ($result) {
-			$manifest_num = (int)$result->number + 1;
-		}
-
-		$address = '';
-		for ($i=0; $i < 8; $i++) { 
-			if ($i == 0 && $packing[0]->postcode) {
-				$address .= $packing[0]->postcode.', ';
-			}
-			if ($i == 1 && $packing[0]->region) {
-				$address .= $this->translit($packing[0]->region).', ';
-			}
-			if ($i == 2 && $packing[0]->district) {
-				$address .= $this->translit($packing[0]->district).', ';
-			}
-			if ($i == 3 && $packing[0]->city) {
-				$address .= $this->translit($packing[0]->city).', ';
-			}
-			if ($i == 4 && $packing[0]->street) {
-				$address .= $this->translit($packing[0]->street).', ';
-			}
-			if ($i == 5 && $packing[0]->house) {
-				$address .= $packing[0]->house;
-			}
-			if ($i == 6 && $packing[0]->body) {
-				$address .= '/'.$packing[0]->body;
-			}
-			if ($i == 7 && $packing[0]->room) {
-				$address .= ', '.$packing[0]->room;
-			}
-		}
-
-		for ($i=0; $i < count($packing); $i++) { 
-			$manifest = new Manifest();
-			if ($i == 0) {
-				$manifest->number = $manifest_num;
-			}
-			else{
-				$manifest->number = null;
-			}
-			$manifest->tracking = $new_worksheet->tracking_main;
-			$manifest->sender_country = $tr->translate('ru', 'en', $new_worksheet->sender_country, 5);
-			$manifest->sender_name = $this->translit($new_worksheet->sender_name);
-			$manifest->recipient_name = $this->translit($new_worksheet->recipient_name);
-			$manifest->recipient_city = $this->translit($new_worksheet->recipient_city);
-			$manifest->recipient_address = $address;
-			$manifest->content = $tr->translate('ru', 'en', $packing[$i]->attachment_name, 5);
-			$manifest->quantity = $packing[$i]->amount_3;
-			$manifest->weight = $new_worksheet->weight;
-			$manifest->cost = $new_worksheet->package_cost;
-			$manifest->attachment_number = $packing[$i]->attachment_number;
-			$manifest->work_sheet_id = $work_sheet_id;
-			$manifest->save();
-		}
-
-		return true;
-	}
 
 
 	public function exportExcel()
 	{
-
 		return Excel::download(new DraftWorksheetExport, 'DraftWorksheetExport.xlsx');
-
 	}
 
 }

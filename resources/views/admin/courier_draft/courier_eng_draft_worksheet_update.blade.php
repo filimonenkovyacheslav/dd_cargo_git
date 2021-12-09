@@ -38,13 +38,6 @@
 						{!! Form::open(['url'=>route('courierEngDraftWorksheetUpdate', ['id'=>$courier_eng_draft_worksheet->id]), 'class'=>'form-horizontal china-worksheet-form phil-ind-update-form','method' => 'POST']) !!}
 
 						<div class="form-group">
-							{!! Form::label('direction','Direction',['class' => 'col-md-2 control-label'])   !!}
-							<div class="col-md-8">
-								{!! Form::text('direction',$courier_eng_draft_worksheet->direction,['class' => 'form-control'])!!}
-							</div>
-						</div>
-
-						<div class="form-group">
 							{!! Form::label('status','Status',['class' => 'col-md-2 control-label'])   !!}
 							<div class="col-md-8">
 								{!! Form::select('status', array('' => '', 'Pending' => 'Pending', 'Forwarding to the warehouse in the sender country' => 'Forwarding to the warehouse in the sender country', 'At the warehouse in the sender country' => 'At the warehouse in the sender country', 'At the customs in the sender country' => 'At the customs in the sender country', 'Forwarding to the receiver country' => 'Forwarding to the receiver country', 'At the customs in the receiver country' => 'At the customs in the receiver country', 'Forwarding to the receiver' => 'Forwarding to the receiver', 'Delivered' => 'Delivered', 'Return' => 'Return', 'Box' => 'Box', 'Pick up' => 'Pick up', 'Specify' => 'Specify', 'Think' => 'Think', 'Canceled' => 'Canceled'), $courier_eng_draft_worksheet->status,['class' => 'form-control']) !!}
@@ -66,6 +59,13 @@
 						</div>
 
 						<div class="form-group">
+							{!! Form::label('pallet_number','Pallet number',['class' => 'col-md-2 control-label'])   !!}
+							<div class="col-md-8">
+								{!! Form::text('pallet_number',$courier_eng_draft_worksheet->pallet_number,['class' => 'form-control'])!!}
+							</div>
+						</div>
+
+						<div class="form-group">
 							{!! Form::label('comments_1','Comments 1',['class' => 'col-md-2 control-label'])   !!}
 							<div class="col-md-8">
 								{!! Form::text('comments_1',$courier_eng_draft_worksheet->comments_1,['class' => 'form-control'])!!}
@@ -83,6 +83,13 @@
 							{!! Form::label('shipper_name','Shipper\'s name',['class' => 'col-md-2 control-label'])   !!}
 							<div class="col-md-8">
 								{!! Form::text('shipper_name',$courier_eng_draft_worksheet->shipper_name,['class' => 'form-control'])!!}
+							</div>
+						</div>
+
+						<div class="form-group">
+							{!! Form::label('shipper_country','Shipper\'s country',['class' => 'col-md-2 control-label'])   !!}
+							<div class="col-md-8">
+								{!! Form::select('shipper_country', array('Israel' => 'Israel', 'Germany' => 'Germany'), isset($courier_eng_draft_worksheet->shipper_country) ? $courier_eng_draft_worksheet->shipper_country : '',['class' => 'form-control']) !!}
 							</div>
 						</div>
 						
@@ -139,6 +146,13 @@
 							{!! Form::label('consignee_name','Consignee\'s name',['class' => 'col-md-2 control-label'])   !!}
 							<div class="col-md-8">
 								{!! Form::text('consignee_name',$courier_eng_draft_worksheet->consignee_name,['class' => 'form-control'])!!}
+							</div>
+						</div>
+						
+						<div class="form-group">
+							{!! Form::label('consignee_country','Consignee\'s country',['class' => 'col-md-2 control-label'])   !!}
+							<div class="col-md-8">
+								{!! Form::select('consignee_country', array('India' => 'India', 'Nepal' => 'Nepal', 'Nigeria' => 'Nigeria', 'Ghana' => 'Ghana', 'Cote D\'Ivoire' => 'Cote D\'Ivoire', 'South Africa' => 'South Africa'), isset($courier_eng_draft_worksheet->consignee_country) ? $courier_eng_draft_worksheet->consignee_country: '',['class' => 'form-control']) !!}
 							</div>
 						</div>
 
@@ -266,6 +280,13 @@
 						</div>
 
 						<div class="form-group">
+							{!! Form::label('lot','Lot',['class' => 'col-md-2 control-label'])   !!}
+							<div class="col-md-8">
+								{!! Form::text('lot',$courier_eng_draft_worksheet->lot,['class' => 'form-control'])!!}
+							</div>
+						</div>
+
+						<div class="form-group">
 							{!! Form::label('payment_date_comments','Payment date and comments',['class' => 'col-md-2 control-label'])   !!}
 							<div class="col-md-8">
 								{!! Form::text('payment_date_comments',$courier_eng_draft_worksheet->payment_date_comments,['class' => 'form-control'])!!}
@@ -331,6 +352,8 @@
 
 							{!! Form::hidden('status',$courier_eng_draft_worksheet->status,['class' => 'form-control'])!!}
 
+							{!! Form::hidden('status_date',$courier_eng_draft_worksheet->status_date)!!}
+
 							{!! Form::hidden('tracking_main',$courier_eng_draft_worksheet->tracking_main,['class' => 'form-control'])!!}
 
 							{!! Form::hidden('parcels_qty',$courier_eng_draft_worksheet->parcels_qty,['class' => 'form-control'])!!}
@@ -347,6 +370,8 @@
 
 							{!! Form::hidden('shipper_name',$courier_eng_draft_worksheet->shipper_name,['class' => 'form-control'])!!}
 
+							{!! Form::hidden('shipper_country',$courier_eng_draft_worksheet->shipper_country)!!}
+
 							{!! Form::hidden('shipper_address',$courier_eng_draft_worksheet->shipper_address,['class' => 'form-control'])!!}
 
 							{!! Form::hidden('standard_phone',$courier_eng_draft_worksheet->standard_phone,['class' => 'form-control'])!!}
@@ -356,6 +381,8 @@
 							{!! Form::hidden('shipper_id',$courier_eng_draft_worksheet->shipper_id,['class' => 'form-control'])!!}
 
 							{!! Form::hidden('consignee_name',$courier_eng_draft_worksheet->consignee_name,['class' => 'form-control'])!!}
+
+							{!! Form::hidden('consignee_country',$courier_eng_draft_worksheet->consignee_country)!!}
 
 							{!! Form::hidden('consignee_address',$courier_eng_draft_worksheet->consignee_address,['class' => 'form-control'])!!}
 

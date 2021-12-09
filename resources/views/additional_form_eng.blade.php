@@ -381,9 +381,25 @@
             event.preventDefault();
             const form = event.target;
 
-            const phone = document.querySelector('.add-form-eng [name="standard_phone"]'); 
+            const phone = document.querySelector('[name="standard_phone"]'); 
             if (phone.value.length < 10 || phone.value.length > 13) {
-                alert('The number of characters in the phone must be from 10 to 13 !');
+                alert('The number of characters in the standard phone must be from 10 to 13 !');
+                return false;
+            }
+
+            const recipientPhone = document.querySelector('[name="consignee_phone"]');
+            const regexp = /[0-9]/g;
+            const phoneDigits = recipientPhone.value.slice(1); 
+            if (recipientPhone.value.length < 6 || recipientPhone.value.length > 24) {
+                alert('The number of characters in the consignee phone must be from 6 to 24 !');
+                return false;
+            }
+            else if (recipientPhone.value[0] !== '+') {
+                alert('The consignee phone must start with "+" !');
+                return false;
+            }
+            else if (!regexp.test(phoneDigits)) {
+                alert('The consignee phone must contain only numbers !');
                 return false;
             }
 

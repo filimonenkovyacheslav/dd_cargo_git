@@ -893,3 +893,19 @@ function addGet(url, get) {
     
     return url + '?' + get;
 }
+
+
+// Show posts for activation
+function forActivation(event)
+{
+    let href = location.href;
+
+    if (event.target.checked){                      
+        document.querySelector('[name="for_active"]').value = 'for_active';
+        location.href = addGet(href, 'for_active=for_active');
+    }
+    else{
+        document.querySelector('[name="for_active"]').value = '';
+        location.href = removeURLParameter(href, 'for_active');         
+    }
+}

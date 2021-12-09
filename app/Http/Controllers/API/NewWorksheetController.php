@@ -8,6 +8,7 @@ use Illuminate\Foundation\Auth\AuthenticatesUsers;
 use Illuminate\Support\Facades\Hash;
 use App\NewWorksheet;
 use App\DraftWorksheet;
+use App\CourierDraftWorksheet;
 use Validator;
 use Illuminate\Support\Facades\Storage;
 
@@ -198,6 +199,7 @@ class NewWorksheetController extends BaseController
                                 $this->message_arr['he'] = $this->he_arr[$ru_status];
                                 $sheet->status_ua = $this->ua_arr[$ru_status];
                                 $this->message_arr['ua'] = $this->ua_arr[$ru_status];
+                                $sheet->status_date = date('Y-m-d');
                                 if ($sheet->save()) {
                                     return $this->sendResponse($this->message_arr, 'Status updated successfully.');
                                 }
@@ -268,6 +270,7 @@ class NewWorksheetController extends BaseController
                         $sheet->status_en = $this->en_arr[$this->ru_arr[0]];
                         $sheet->status_he = $this->he_arr[$this->ru_arr[0]];
                         $sheet->status_ua = $this->ua_arr[$this->ru_arr[0]];
+                        $sheet->status_date = date('Y-m-d');
                     }
                     else{
                         return $this->sendError('Main tracking number already exist.', ['tracking_main' => $sheet->tracking_main]);
@@ -288,6 +291,7 @@ class NewWorksheetController extends BaseController
                     $sheet->status_en = $this->en_arr[$this->ru_arr[0]];
                     $sheet->status_he = $this->he_arr[$this->ru_arr[0]];
                     $sheet->status_ua = $this->ua_arr[$this->ru_arr[0]];
+                    $sheet->status_date = date('Y-m-d');
                     if ($sheet->save()) {
                         return $this->sendResponse($sheet->toArray(), 'Row created successfully.');
                     }
@@ -359,6 +363,17 @@ class NewWorksheetController extends BaseController
             ->orWhere([
                 ['tracking_main', 'like', '%'.$input['tracking_main'].', '.'%']
             ])->first();
+            if (!$check_tracking) {
+                $check_tracking = CourierDraftWorksheet::where([
+                    ['tracking_main', '=', $input['tracking_main']]
+                ])
+                ->orWhere([
+                    ['tracking_main', 'like', '%'.', '.$input['tracking_main']]
+                ])
+                ->orWhere([
+                    ['tracking_main', 'like', '%'.$input['tracking_main'].', '.'%']
+                ])->first(); 
+            }
             if($check_tracking) return $this->sendError('Main tracking number already exist.', ['tracking_main' => $input['tracking_main']]);
 
             $standard_phone = ltrim(urldecode($input['standard_phone']), " \+");
@@ -367,6 +382,12 @@ class NewWorksheetController extends BaseController
                 ['standard_phone', '+'.$standard_phone],
                 ['tracking_main', $input['tracking_main']]
             ])->get();
+            if (!$this_tracking->count()) {
+                $this_tracking = CourierDraftWorksheet::where([
+                    ['standard_phone', '+'.$standard_phone],
+                    ['tracking_main', $input['tracking_main']]
+                ])->get();
+            } 
 
             if ($this_tracking->count()) {
                 return $this->sendError('This tracking number is exist!');
@@ -374,35 +395,26 @@ class NewWorksheetController extends BaseController
 
             $data = NewWorksheet::where('standard_phone', '+'.$standard_phone)
             ->get();
+            if (!$data->count()) {
+                $data = CourierDraftWorksheet::where('standard_phone', '+'.$standard_phone)
+                ->get();
+            }
 
-            if ($data->count()) {
-                
+            if ($data->count()) {                
                 // Adding order number
-                if (!$data->first()->order_number) {
-                    $data->transform(function ($item, $key) {
-                        return $item->update(['order_number'=> ((int)$key+1)]);             
-                    });
-                }
-                else{
-                    $data->transform(function ($item, $key) use($standard_phone) {
-                        if (!$item->order_number) {
-
-                            $i = (int)(NewWorksheet::where([
-                                ['standard_phone', '+'.$standard_phone],
-                                ['order_number', '<>', null]
-                            ])->get()->last()->order_number);
-
-                            $i++;
-                            return $item->update(['order_number'=> $i]);
-                        }               
-                    });
-                }
+                $this->addingOrderNumber($standard_phone, 'ru');
             }            
 
             $empty_tracking = NewWorksheet::where([
                 ['standard_phone', '+'.$standard_phone],
                 ['tracking_main', null]
             ])->get();
+            if (!$empty_tracking->count()) {
+                $empty_tracking = CourierDraftWorksheet::where([
+                    ['standard_phone', '+'.$standard_phone],
+                    ['tracking_main', null]
+                ])->get();
+            }
 
             $number_of_empty = $empty_tracking->count();
 
@@ -416,6 +428,7 @@ class NewWorksheetController extends BaseController
                 $empty_tracking->last()->update(['status_en'=> $this->en_arr[$this->ru_arr[0]]]);
                 $empty_tracking->last()->update(['status_he'=> $this->he_arr[$this->ru_arr[0]]]);
                 $empty_tracking->last()->update(['status_ua'=> $this->ua_arr[$this->ru_arr[0]]]);
+                $empty_tracking->last()->update(['status_date'=> date('Y-m-d')]);
 
                 $message = 'Row updated successfully.';
                 $date_result = (strtotime('2021-09-20') <= strtotime(str_replace('.', '-', $empty_tracking->last()->date)));
@@ -469,6 +482,17 @@ class NewWorksheetController extends BaseController
             ->orWhere([
                 ['tracking_main', 'like', '%'.$input['tracking_main'].', '.'%']
             ])->first();
+            if (!$check_tracking) {
+                $check_tracking = CourierDraftWorksheet::where([
+                    ['tracking_main', '=', $input['tracking_main']]
+                ])
+                ->orWhere([
+                    ['tracking_main', 'like', '%'.', '.$input['tracking_main']]
+                ])
+                ->orWhere([
+                    ['tracking_main', 'like', '%'.$input['tracking_main'].', '.'%']
+                ])->first(); 
+            }
             if($check_tracking) return $this->sendError('Main tracking number already exist.', ['tracking_main' => $input['tracking_main']]);
 
             $standard_phone = ltrim(urldecode($input['standard_phone']), " \+");
@@ -477,6 +501,12 @@ class NewWorksheetController extends BaseController
                 ['standard_phone', '+'.$standard_phone],
                 ['order_number', $input['order_number']]
             ])->get()->first();
+            if (!$data->count()) {
+                $data = CourierDraftWorksheet::where([
+                    ['standard_phone', '+'.$standard_phone],
+                    ['order_number', $input['order_number']]
+                ])->get()->first();
+            }
 
             if ($data->tracking_main) {
                 return $this->sendError('Main tracking number by this phone already exist.', ['tracking_main' => $input['tracking_main']]);
@@ -487,6 +517,7 @@ class NewWorksheetController extends BaseController
             $data->update(['status_en'=> $this->en_arr[$this->ru_arr[0]]]);
             $data->update(['status_he'=> $this->he_arr[$this->ru_arr[0]]]);
             $data->update(['status_ua'=> $this->ua_arr[$this->ru_arr[0]]]);
+            $data->update(['status_date'=> date('Y-m-d')]);
 
             $message = 'Row updated successfully.';
             $date_result = (strtotime('2021-09-20') <= strtotime(str_replace('.', '-', $data->date)));
@@ -503,94 +534,6 @@ class NewWorksheetController extends BaseController
             return $this->sendError('Token error.');
         } 
     }  
-
-
-    /**
-     * Adding a new shipment.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
-    /*public function addNewShipment(Request $request)
-    {
-        if ($this->checkToken($request->token) && $request->token){    
-
-            $input = $request->all();
-            $validator = Validator::make($input, [
-                'standard_phone' => 'required',
-                'site_name' => 'required'
-            ]);
-
-            if($validator->fails()){
-                return $this->sendError('Validation Error.', $validator->errors());       
-            }
-
-            $standard_phone = ltrim(urldecode($input['standard_phone']), " \+");
-
-            $data = NewWorksheet::where([
-                ['standard_phone', '+'.$standard_phone]
-            ])->get();
-
-            if ($data->count()) {
-
-                // Adding order number
-                if (!$data->first()->order_number) {
-                    $data->transform(function ($item, $key) {
-                        return $item->update(['order_number'=> ((int)$key+1)]);             
-                    });
-                }
-                else{
-                    $data->transform(function ($item, $key) use($standard_phone) {
-                        if (!$item->order_number) {
-
-                            $i = (int)(NewWorksheet::where([
-                                ['standard_phone', '+'.$standard_phone],
-                                ['order_number', '<>', null]
-                            ])->get()->last()->order_number);
-
-                            $i++;
-                            return $item->update(['order_number'=> $i]);
-                        }               
-                    });
-                }
-
-                $last = NewWorksheet::where([
-                    ['standard_phone', '+'.$standard_phone],
-                    ['order_number', '<>', null]
-                ])->get()->last();
-
-                $new_worksheet = new NewWorksheet();
-                $new_worksheet->site_name = $input['site_name'];
-                $new_worksheet->date = date('Y.m.d');
-                $new_worksheet->status = 'Забрать';
-                $new_worksheet->sender_name = $last->sender_name;
-                $new_worksheet->sender_country = $last->sender_country;
-                $new_worksheet->sender_city = $last->sender_city;
-                $new_worksheet->sender_postcode = $last->sender_postcode;
-                $new_worksheet->sender_address = $last->sender_address;
-                $new_worksheet->standard_phone = $input['standard_phone'];
-                $new_worksheet->sender_passport = $last->sender_passport;
-                $new_worksheet->order_number = (int)($last->order_number) + 1;
-                $new_worksheet->save();
-
-                return $this->sendResponse($new_worksheet->toArray(), 'Row created successfully.');
-            } 
-            else{
-                $new_worksheet = new NewWorksheet();
-                $new_worksheet->site_name = $input['site_name'];
-                $new_worksheet->date = date('Y.m.d');
-                $new_worksheet->status = 'Забрать';
-                $new_worksheet->standard_phone = $input['standard_phone'];
-                $new_worksheet->order_number = 1;
-                $new_worksheet->save();
-
-                return $this->sendResponse($new_worksheet->toArray(), 'Row created successfully.');
-            }
-        }
-        else{
-            return $this->sendError('Token error.');
-        } 
-    }*/
 
 
     /**
@@ -613,37 +556,25 @@ class NewWorksheetController extends BaseController
             }
 
             $tracking = $input['tracking_main'];
+            $sheet = NewWorksheet::where('tracking_main', $tracking)->first();
+            if (!$sheet) $sheet = CourierDraftWorksheet::where('tracking_main', $tracking)->first();
 
-            $row = NewWorksheet::where([
-                ['tracking_main', '=', $tracking]
-            ])
-            ->orWhere([
-                ['tracking_main', 'like', '%'.', '.$tracking]
-            ])
-            ->orWhere([
-                ['tracking_main', 'like', '%'.$tracking.', '.'%']
-            ])
-            ->get();
-
-            if ($row->count()) {
-                $sheet = NewWorksheet::find($row[0]->id);
-                foreach ($row as $val) {
-                    if ($val->status) {                      
-                        $ru_status = $this->ru_arr[3];
-                        $sheet->status = $ru_status;
-                        $sheet->batch_number = $input['batch_number'];
-                        $sheet->status_en = $this->en_arr[$ru_status];
-                        $sheet->status_he = $this->he_arr[$ru_status];
-                        $sheet->status_ua = $this->ua_arr[$ru_status];
-                        if ($sheet->save()) {
-                            return $this->sendResponse($sheet->toArray(), 'Status updated successfully. Batch number added.');
-                        }
-                        else{
-                            return $this->sendError('Saving error.');
-                        }
-                        break;
-                    }
+            if ($sheet) {                    
+                $ru_status = $this->ru_arr[3];
+                $sheet->status = $ru_status;
+                $sheet->batch_number = $input['batch_number'];
+                $sheet->status_en = $this->en_arr[$ru_status];
+                $sheet->status_he = $this->he_arr[$ru_status];
+                $sheet->status_ua = $this->ua_arr[$ru_status];
+                $sheet->status_date = date('Y-m-d');
+                if ($sheet->save()) {
+                    // Update Warehouse lot
+                    $this->updateWarehouseLot($sheet->tracking_main, $sheet->batch_number, 'ru');
+                    return $this->sendResponse($sheet->toArray(), 'Status updated successfully. Batch number added.');
                 }
+                else{
+                    return $this->sendError('Saving error.');
+                }              
             }
             else{
                 return $this->sendError('Tracking number not found.');
@@ -675,37 +606,29 @@ class NewWorksheetController extends BaseController
             }
 
             $tracking = $input['tracking_main'];
+            $sheet = NewWorksheet::where('tracking_main', $tracking)->first();
+            if (!$sheet) $sheet = CourierDraftWorksheet::where('tracking_main', $tracking)->first();
 
-            $row = NewWorksheet::where([
-                ['tracking_main', '=', $tracking]
-            ])
-            ->orWhere([
-                ['tracking_main', 'like', '%'.', '.$tracking]
-            ])
-            ->orWhere([
-                ['tracking_main', 'like', '%'.$tracking.', '.'%']
-            ])
-            ->get();
-
-            if ($row->count()) {
-                $sheet = NewWorksheet::find($row[0]->id);
-                foreach ($row as $val) {
-                    if ($val->status) {                      
-                        $ru_status = $this->ru_arr[1];
-                        $sheet->status = $ru_status;
-                        $sheet->pallet_number = $input['pallet_number'];
-                        $sheet->status_en = $this->en_arr[$ru_status];
-                        $sheet->status_he = $this->he_arr[$ru_status];
-                        $sheet->status_ua = $this->ua_arr[$ru_status];
-                        if ($sheet->save()) {
-                            return $this->sendResponse($sheet->toArray(), 'Status updated successfully. Pallet number added.');
-                        }
-                        else{
-                            return $this->sendError('Saving error.');
-                        }
-                        break;
-                    }
+            if ($sheet) {
+                $old_pallet = $sheet->pallet_number;                     
+                $ru_status = $this->ru_arr[1];
+                $sheet->status = $ru_status;
+                $sheet->pallet_number = $input['pallet_number'];
+                $sheet->status_en = $this->en_arr[$ru_status];
+                $sheet->status_he = $this->he_arr[$ru_status];
+                $sheet->status_ua = $this->ua_arr[$ru_status];
+                $sheet->status_date = date('Y-m-d');
+                if ($sheet->save()) {
+                    // Update Warehouse pallet
+                    $message = $this->updateWarehousePallet($sheet->tracking_main, $sheet->tracking_main, $old_pallet, $input['pallet_number'], $sheet->batch_number, $sheet->batch_number, 'ru', $sheet);
+                    if ($message) {
+                        return $this->sendError('Pallet number is not correct');
+                    } 
+                    return $this->sendResponse($sheet->toArray(), 'Status updated successfully. Pallet number added.');
                 }
+                else{
+                    return $this->sendError('Saving error.');
+                }                        
             }
             else{
                 return $this->sendError('Tracking number not found.');

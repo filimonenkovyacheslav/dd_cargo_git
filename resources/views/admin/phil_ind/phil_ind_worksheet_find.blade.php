@@ -69,6 +69,7 @@
 									<option value="comments_1">Comments 1</option>
 									<option value="comments_2">Comments 2</option>
 									<option value="shipper_name">Shipper\'s name</option>
+									<option value="shipper_country">Shipper\'s country</option>
 									<option value="shipper_city">Shipper\'s city/village</option>
 									<option value="passport_number">GSTN/Passport number</option>
 									<option value="return_date">Estimated return to India date</option>
@@ -77,6 +78,7 @@
 									<option value="shipper_phone">Shipper\'s phone (additionally)</option>
 									<option value="shipper_id">Shipper\'s ID number</option>
 									<option value="consignee_name">Consignee\'s name</option>
+									<option value="consignee_country">Consignee\'s country</option>
 									<option value="house_name">House name</option>
 									<option value="post_office">Local post office</option>
 									<option value="district">District/City</option>
@@ -135,6 +137,7 @@
 										<th>Comments 1</th>
 										<th>Comments 2</th>
 										<th>Shipper's name</th>
+										<th>Shipper's country</th>
 										<th>Shipper\'s city/village</th>
 										<th>GSTN/Passport number</th>
 										<th>Estimated return to India date</th>
@@ -143,6 +146,7 @@
 										<th>Shipper's phone number (additionally)</th>
 										<th>Shipper's ID number</th>
 										<th>Consignee's name</th>
+										<th>Consignee's country</th>
 										<th>House name</th>
 										<th>Local post office</th>
 										<th>District/City</th>
@@ -306,6 +310,9 @@
 										<td title="{{$row->shipper_name}}">
 											<div class="div-3">{{$row->shipper_name}}</div>
 										</td>
+										<td title="{{$row->shipper_country}}">
+											<div class="div-3">{{$row->shipper_country}}</div>
+										</td>
 										<td title="{{$row->shipper_city}}">
 											<div class="div-3">{{$row->shipper_city}}</div>
 										</td>
@@ -319,7 +326,7 @@
 											<div class="div-3">{{$row->shipper_address}}</div>
 										</td>
 										<td title="{{$row->standard_phone}}">
-											<div class="div-3">{{$row->standard_phone}}</div>
+											<div class="div-4">{{$row->standard_phone}}</div>
 										</td>
 										<td title="{{$row->shipper_phone}}">
 											<div class="div-3">{{$row->shipper_phone}}</div>
@@ -329,6 +336,9 @@
 										</td>
 										<td title="{{$row->consignee_name}}">
 											<div class="div-3">{{$row->consignee_name}}</div>
+										</td>
+										<td title="{{$row->consignee_country}}">
+											<div class="div-3">{{$row->consignee_country}}</div>
 										</td>
 										<td title="{{$row->house_name}}">
 											<div class="div-3">{{$row->house_name}}</div>
@@ -472,13 +482,13 @@
 								<label class="checkbox-operations-change">Choose column:
 									<select class="form-control" id="phil-ind-tracking-columns" name="phil-ind-tracking-columns">
 										<option value="" selected="selected"></option>
-										<option value="direction">Direction</option>
 										<option value="status">Status</option>
 										<option value="tracking_local">Local tracking number</option>
 										<option value="pallet_number">Pallet number</option>
 										<option value="comments_1">Comments 1</option>
 										<option value="comments_2">Comments 2</option>
 										<option value="shipper_name">Shipper's name</option>
+										<option value="shipper_country">Shipper's country</option>
 										<option value="shipper_city">Shipper\'s city/village</option>
 										<option value="passport_number">GSTN/Passport number</option>
 										<option value="return_date">Estimated return to India date</option>
@@ -486,6 +496,7 @@
 										<option value="shipper_phone">Shipper's phone number</option>
 										<option value="shipper_id">Shipper's ID number</option>
 										<option value="consignee_name">Consignee's name</option>
+										<option value="consignee_country">Consignee's country</option>
 										<option value="house_name">House name</option>
 										<option value="post_office">Local post office</option>
 										<option value="district">District/City</option>
@@ -524,6 +535,8 @@
 									<input class="form-control" type="text" name="value-by-tracking">
 									<input type="hidden" name="status_ru">
 									<input type="hidden" name="status_he">
+									<input type="hidden" name="shipper_country_val">
+									<input type="hidden" name="consignee_country_val">
 								</label>
 
 								{!! Form::button('Save',['class'=>'btn btn-primary checkbox-operations-change','type'=>'submit']) !!}

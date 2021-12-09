@@ -50,6 +50,9 @@ Route::get('/forward-parcel-form', 'FrontController@forwardParcelAdd')->name('fo
 Route::get('/forward-tracking-form', 'FrontController@getForwardTracking')->name('getForwardTracking');
 Route::get('/forward-check-phone', 'FrontController@forwardCheckPhone')->name('forwardCheckPhone');
 
+// Check phone in draft
+Route::post('/parcel-form-check', 'FrontController@checkAvailabilityPhone');
+
 // Ru Post
 Route::get('/ru-postal-tracking', 'RuPostalTrackingController@updateStatus')->name('updateStatus');
 Route::get('/ru-postal-tracking-from-user/{barcode}', 'RuPostalTrackingController@updateStatusFromUser')->name('updateStatusFromUser');

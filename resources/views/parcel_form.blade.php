@@ -76,10 +76,49 @@
                             </div>
                         </div>
                     </div>
+
+                    <div class="modal fade" id="phoneExist" role="dialog">
+                        <div class="modal-dialog">
+
+                            <!-- Modal content-->
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                                </div>
+                                <div class="modal-body">
+                                    <p class="question">{{ session('phone_exist') }}</p>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" onclick="clickAnswer2(this)" class="btn btn-primary pull-left yes sender" data-dismiss="modal">Да</button>
+                                    <button type="button" onclick="clickAnswer2(this)" class="btn btn-danger pull-left no" data-dismiss="modal">Нет</button>
+
+                                        {!! Form::open(['url'=>route('checkPhone'), 'class'=>'form-horizontal check-phone','method' => 'POST']) !!}
+
+                                        <div class="form-group">
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    {!! Form::text('sender_phone',old('sender_phone'),['class' => 'form-control', 'placeholder' => 'Phone*', 'required'])!!}
+                                                    {!! Form::hidden('quantity_sender')!!}
+                                                    {!! Form::hidden('quantity_recipient')!!}
+                                                    {!! Form::hidden('draft','draft')!!}
+                                                </div>
+                                                <div class="col-md-6">
+                                                    {!! Form::button('Отправить',['class'=>'btn btn-success','type'=>'submit']) !!}
+                                                </div>
+                                            </div>
+                                        </div>                                        
+                                                                                
+                                        {!! Form::close() !!}                                   
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div> 
 
                 <!-- Link to open the modal -->
-                <p><a href="#addRuParcel" class="btn btn-success" data-toggle="modal">Добавить посылку</a></p>
+                <p><a href="#addRuParcel" class="btn btn-success ru-modal" data-toggle="modal">Добавить посылку</a>
+                </p>
+                <a href="#phoneExist" class="btn btn-success ru-modal-2" data-toggle="modal"></a>
                 
                 @if (session('add_parcel'))
                     <script type="text/javascript">
@@ -90,9 +129,21 @@
                         var addParcel = ''
                     </script>
                 @endif
-                               
+
+                @if (session('phone_exist'))
+                    <script type="text/javascript">
+                        var phoneExist = '<?=session("phone_exist")?>';
+                        var phoneNumber = '<?=session("phone_number")?>';
+                    </script>
+                @else
+                    <script type="text/javascript">
+                        var phoneExist = ''
+                    </script>
+                @endif             
                 
                 {!! Form::open(['url'=>route('newParcelAdd'),'onsubmit' => 'сonfirmSigned(event)', 'class'=>'form-horizontal form-send-parcel','method' => 'POST']) !!}
+
+                {!! Form::hidden('phone_exist_checked',isset($data_parcel->phone_exist_checked) ? $data_parcel->phone_exist_checked : '')!!}
 
                 <div class="form-group">
                     <div class="row">
@@ -403,14 +454,14 @@
                     </div>
                 </div>
 
-                <div class="form-group">
+                <!-- <div class="form-group">
                     <div class="row">                       
                         <div class="col-md-12 control-label">
                             {!! Form::radio('need_box','Мне нужен вакуумный мешок', false)!!}
                             <span>Мне нужен вакуумный мешок</span>
                         </div>
                     </div>
-                </div>
+                </div> -->
 
                 {!! Form::button('Отправить',['class'=>'btn','type'=>'submit']) !!}
                 {!! Form::close() !!}
@@ -450,7 +501,23 @@
         
         const phone = document.querySelector('[name="standard_phone"]'); 
         if (phone.value.length < 10 || phone.value.length > 13) {
-            alert('Кол-во знаков в телефоне должно быть от 10 до 13 !');
+            alert('Кол-во знаков в телефоне отправителя должно быть от 10 до 13 !');
+            return false;
+        }
+        
+        const recipientPhone = document.querySelector('[name="recipient_phone"]');
+        const regexp = /[0-9]/g;
+        const phoneDigits = recipientPhone.value.slice(1);         
+        if (recipientPhone.value.length < 6 || recipientPhone.value.length > 24) {
+            alert('Кол-во знаков в телефоне получателя должно быть от 6 до 24 !');
+            return false;
+        }
+        else if (recipientPhone.value[0] !== '+') {
+            alert('Телефон получателя должен начинаться с "+" !');
+            return false;
+        }
+        else if (!regexp.test(phoneDigits)) {
+            alert('Телефон получателя должен содержать только цифры !');
             return false;
         }
         

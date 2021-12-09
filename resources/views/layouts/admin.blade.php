@@ -87,14 +87,10 @@
 
                     <li>
                         <a href="{{route('adminWorksheet')}}"><i class="menu-icon fa fa-archive "></i> Рабочий лист </a>
-                    </li> 
+                    </li>                    
 
                     <li>
-                        <a href="{{route('adminDraftWorksheet')}}"><i class="menu-icon fa fa-book "></i> Черновой лист</a>
-                    </li>
-
-                    <li>
-                        <a href="{{route('adminCourierDraftWorksheet')}}"><i class="menu-icon fa fa-book "></i> Черновик курьеров</a>
+                        <a href="{{route('adminCourierDraftWorksheet')}}"><i class="menu-icon fa fa-book "></i> Черновик</a>
                     </li>
 
                     <li>

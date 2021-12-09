@@ -147,39 +147,6 @@ class RuPostalTrackingController extends Controller
 	}
 
 
-	/*private function getRuPostalStatus($barcode){
-		set_time_limit(0);
-		
-		$ch = curl_init();
-		curl_setopt($ch, CURLOPT_URL,"https://gdeposylka.ru/api/v4/tracker/russian-post/".$barcode);
-		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-
-		$headers = [
-			'X-Authorization-Token: bd5d4a75d53ff60e54bcedbb3a8678886957550040ab5c25be2bef13b7908922b83b6f68b5ece857',
-			'Content-Type: application/json'
-		];
-
-		curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-
-		$server_output = curl_exec ($ch);
-
-		curl_close ($ch);
-		$server_output = json_decode($server_output);
-		$results_arr = $server_output->data->checkpoints;
-		$temp = [];
-		for ($i=0; $i < count($results_arr); $i++) { 
-				$temp[] = $results_arr[$i]->status_name;
-		}
-		
-		if ($temp) {
-			return $temp[0];
-		}
-		else{
-			return false;
-		}
-	}*/
-
-
 	public function updateStatus()
 	{
 		set_time_limit(0);

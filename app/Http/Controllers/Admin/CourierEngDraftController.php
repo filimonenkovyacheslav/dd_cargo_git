@@ -18,15 +18,45 @@ use App\Receipt;
 class CourierEngDraftController extends AdminController
 {
 	private $status_arr = ["Forwarding to the warehouse in the sender country", "Pending", "Return", "Box", "Pick up", "Specify", "Think", "Canceled", 'At the warehouse in the sender country'];
+	private $status_arr_2 = ["At the customs in the sender country", "At the warehouse in the sender country", "Forwarding to the warehouse in the sender country", "Pending", "Return", "Box", "Pick up", "Specify", "Think", "Canceled"];
+	private $status_arr_3 = ["Pending", "Return", "Box", "Pick up", "Specify", "Think", "Canceled"];
+	private $status_arr_4 = ["Pending", "Return", "Box", "Specify", "Think", "Canceled"];
     
 
-    public function index(){
-        $title = 'Courier Draft';
-        $courier_eng_draft_worksheet_obj = CourierEngDraftWorksheet::paginate(10);     
+    public function index(Request $request){
+        $title = 'Draft';
+        // Auto-delete operator
+        $delete_date = Date('Y-m-d', strtotime('-2 days'));
+        CourierEngDraftWorksheet::where([
+        	['status_date','<=',$delete_date],
+        	['status_date','<>',null]
+        ])
+        ->orWhere([
+        	['status_date', null],
+        	['created_at','<=',$delete_date]
+        ])
+        ->orWhere([
+        	['status_date', null],
+        	['updated_at','<=',$delete_date]
+        ])
+        ->whereNotIn('status', $this->status_arr_4)
+        ->update([
+        	'operator' => null
+        ]);
+        
+        if ($request->input('for_active')) {
+        	$courier_eng_draft_worksheet_obj = CourierEngDraftWorksheet::where('tracking_main','<>',null)
+        	->orWhere('status','Pick up')
+        	->paginate(10);
+        }
+        else{
+        	$courier_eng_draft_worksheet_obj = CourierEngDraftWorksheet::paginate(10);
+        }    
         $user = Auth::user();
+        $data = $request->all();
         $viewer_arr = parent::VIEWER_ARR;
         
-        return view('admin.courier_draft.courier_eng_draft_worksheet', ['title' => $title,'courier_eng_draft_worksheet_obj' => $courier_eng_draft_worksheet_obj, 'user' => $user, 'viewer_arr' => $viewer_arr]);
+        return view('admin.courier_draft.courier_eng_draft_worksheet', ['title' => $title,'data' => $data,'courier_eng_draft_worksheet_obj' => $courier_eng_draft_worksheet_obj, 'user' => $user, 'viewer_arr' => $viewer_arr]);
     }
 
 
@@ -39,28 +69,66 @@ class CourierEngDraftController extends AdminController
 	}
 
 
+	private function validateUpdate($request)
+	{
+		$error_message = '';
+		if ($request->input('tracking_main')) {
+			if (!$this->trackingValidate($request->input('tracking_main'))) {
+				$error_message = 'Tracking number is not correct.';
+				return $error_message;
+			}
+		}
+		elseif (!$request->input('tracking_main') && !in_array($request->input('status'), $this->status_arr_3)){
+			$error_message = "Status cannot be higher than Pick up without tracking number";
+			return $error_message;
+		}	
+		elseif (!$request->input('tracking_main') && ($request->input('lot') || $request->input('pallet_number'))){
+			$error_message = "You cannot enter a lot or pallet number without a tracking number";
+			return $error_message;
+		}
+
+		if ($request->input('consignee_phone')) {
+			$error_message = $this->checkConsigneePhone($request->input('consignee_phone'), 'en');
+			return $error_message;
+		}
+	}
+
+
 	public function update(Request $request, $id)
 	{
 		$courier_eng_draft_worksheet = CourierEngDraftWorksheet::find($id);
+		$old_status = $courier_eng_draft_worksheet->status;
 		$old_tracking = $courier_eng_draft_worksheet->tracking_main;
+		$old_pallet = $courier_eng_draft_worksheet->pallet_number;
+		$old_lot = $courier_eng_draft_worksheet->lot;
 		$check_result = '';
 		$fields = $this->getTableColumns('courier_eng_draft_worksheet');
 		$operator_change = true;
 		$user = Auth::user();	
+		$status_error = '';			
 
-		if ($request->input('tracking_main')) {
-			if (!$this->trackingValidate($request->input('tracking_main'))) return redirect()->to(session('this_previous_url'))->with('status-error', 'Tracking number is not correct.');
-		}	
+		$status_error = $this->validateUpdate($request);
+		if($status_error) return redirect()->to(session('this_previous_url'))->with('status-error', $status_error);	
 
 		if ($courier_eng_draft_worksheet->operator) $operator_change = false;
 
 		foreach($fields as $field){			
-			if ($field !== 'created_at' && $field !== 'operator' && $field !== 'tracking_main' && stripos($field,'status') === false){
+			if ($field !== 'created_at' && $field !== 'operator' && $field !== 'tracking_main'){
 				$courier_eng_draft_worksheet->$field = $request->input($field);
 			}
 			elseif ($field !== 'created_at' && ($user->role === 'admin' || $user->role === 'office_1')) {
 				$courier_eng_draft_worksheet->$field = $request->input($field);
 			}
+		}
+
+		$courier_eng_draft_worksheet->direction = $this->createDirection($request->input('shipper_country'), $request->input('consignee_country'));
+
+
+		if ($old_status !== $courier_eng_draft_worksheet->status) {
+			CourierEngDraftWorksheet::where('id', $id)
+			->update([
+				'status_date' => date('Y-m-d')
+			]);
 		}
 
 		if ($old_tracking && $request->input('tracking_main')) {
@@ -73,6 +141,9 @@ class CourierEngDraftController extends AdminController
 		if (!$notification) $check_result = $this->checkReceipt($id, null, 'en', $request->input('tracking_main'));
 		
 		if ($courier_eng_draft_worksheet->save()){
+
+			$this->addingOrderNumber($courier_eng_draft_worksheet->standard_phone, 'en');
+			
 			// Update Update Old Packing Eng
 			$address = explode(' ',$request->input('consignee_address'));
 			PackingEng::where('work_sheet_id', $id)
@@ -95,6 +166,24 @@ class CourierEngDraftController extends AdminController
 				'shipment_val' => $request->input('shipment_val')
 			]);			
 			// End Update Old Packing Eng
+
+			if ($request->input('tracking_main')) {
+				// Check for missing tracking
+				$this->checkForMissingTracking($request->input('tracking_main'));
+				
+				// Update Warehouse pallet
+				if ($old_pallet !== $request->input('pallet_number')) {
+					$message = $this->updateWarehousePallet($old_tracking, $request->input('tracking_main'), $old_pallet, $request->input('pallet_number'), $old_lot, $courier_eng_draft_worksheet->lot, 'en', $courier_eng_draft_worksheet);
+					if ($message) {
+						return redirect()->to(session('this_previous_url'))->with('status-error', 'Pallet number is not correct!');
+					}				
+				}
+
+				// Update Warehouse lot
+				if ($old_lot !== $courier_eng_draft_worksheet->lot){
+					$this->updateWarehouseLot($request->input('tracking_main'), $courier_eng_draft_worksheet->lot, 'en');	
+				}
+			}
 		}	
 		
 		return redirect()->to(session('this_previous_url'))->with('status', 'Row updated successfully!'.' '.$check_result);
@@ -104,6 +193,7 @@ class CourierEngDraftController extends AdminController
 	public function destroy(Request $request)
 	{
 		$id = $request->input('action');
+		$this->removeTrackingFromPalletWorksheet($id, 'en',true);
 
 		CourierEngDraftWorksheet::where('id', $id)->delete();
 		PackingEng::where('work_sheet_id', $id)->delete();
@@ -117,8 +207,14 @@ class CourierEngDraftController extends AdminController
     	$row_arr = $request->input('row_id');
     	$value_by = $request->input('value-by-tracking');
     	$column = $request->input('phil-ind-tracking-columns');
+    	$shipper_country_val = $request->input('shipper_country_val');
+    	$consignee_country_val = $request->input('consignee_country_val');
     	$user = Auth::user();
     	$operator_change_row_arr = [];
+    	$old_lot_arr = [];
+    	$old_pallet_arr = [];
+    	$this_column = 'id';
+    	$status_error = '';
 
     	for ($i=0; $i < count($row_arr); $i++) { 
     		$courier_eng_draft_worksheet = CourierEngDraftWorksheet::find($row_arr[$i]);
@@ -128,7 +224,29 @@ class CourierEngDraftController extends AdminController
     	}
 
     	if ($row_arr) {
+
+    		if ($column === 'shipper_country') $value_by = $shipper_country_val;
+    		if ($column === 'consignee_country') $value_by = $consignee_country_val;
+    		
     		if ($value_by && $column) {
+
+    			$status_error = $this->checkColumns($row_arr, $value_by, $column, $this_column, 'courier_eng_draft_worksheet');
+				if($status_error) return redirect()->to(session('this_previous_url'))->with('status-error', $status_error);
+
+    			if ($column === 'lot') {
+    				for ($i=0; $i < count($row_arr); $i++) { 
+    					$worksheet = CourierEngDraftWorksheet::where('id',$row_arr[$i])->first();
+    					$old_lot_arr[] = $worksheet->lot;
+    				}
+    			}
+
+    			if ($column === 'pallet_number') {
+    				for ($i=0; $i < count($row_arr); $i++) { 
+    					$worksheet = CourierEngDraftWorksheet::where('id',$row_arr[$i])->first();
+    					$old_pallet_arr[] = $worksheet->pallet_number;
+    				}
+    			}
+    			
     			if ($column !== 'operator') {
     				CourierEngDraftWorksheet::whereIn('id', $row_arr)
     				->update([
@@ -142,8 +260,37 @@ class CourierEngDraftController extends AdminController
     				]);
     			} 
 
+    			if ($column === 'pallet_number') {
+    				for ($i=0; $i < count($row_arr); $i++) { 
+    					$worksheet = CourierEngDraftWorksheet::where('id',$row_arr[$i])->first();
+    					if ($old_pallet_arr[$i] !== $value_by){
+    						$message = $this->updateWarehousePallet($worksheet->tracking_main, $worksheet->tracking_main, $old_pallet_arr[$i], $value_by, $worksheet->lot, $worksheet->lot, 'en', $worksheet);
+    						if ($message) {
+    							return redirect()->to(session('this_previous_url'))->with('status-error', 'Pallet number is not correct!');
+    						}
+    					}
+    				}
+    			}
 
-    			// Update Update Old Packing Eng
+    			if ($column === 'lot') {
+    				CourierEngDraftWorksheet::whereIn('id', $row_arr)
+    				->whereIn('status',$this->status_arr_2)
+    				->update([
+    					'status' => "Forwarding to the receiver country",
+    					'status_ru' => "Доставляется в страну получателя",
+    					'status_he' => " נשלח למדינת המקבל",
+    					'status_date' => date('Y-m-d')
+    				]);
+
+    				for ($i=0; $i < count($row_arr); $i++) { 
+    					if ($old_lot_arr[$i] !== $value_by){
+    						$worksheet = CourierEngDraftWorksheet::where('id',$row_arr[$i])->first();
+    						$this->updateWarehouseLot($worksheet->tracking_main, $value_by, 'en');
+    					}
+    				}
+    			}
+
+    			// Update Old Packing Eng
     			$params_arr = ['shipper_name','shipper_address','shipper_id','consignee_name','consignee_address','consignee_phone','consignee_id','length','width','height','weight','shipment_val'];
     			if ($column === 'shipped_items') {
     				PackingEng::whereIn('work_sheet_id', $row_arr)
@@ -174,23 +321,38 @@ class CourierEngDraftController extends AdminController
     			// End Update Old Packing Eng     	
     		
     		}
-    		else if ($request->input('status') && ($user->role === 'admin' || $user->role === 'office_1')){
-    			CourierEngDraftWorksheet::whereIn('id', $row_arr)
-    			->update([
-    				'status' => $request->input('status'), 
-    				'status_ru' => $request->input('status_ru'),
-    				'status_he' => $request->input('status_he')
-    			]);
+    		else if ($request->input('status')){
+    			for ($i=0; $i < count($row_arr); $i++) { 
+    				$status_error = $this->checkStatus('courier_eng_draft_worksheet', $row_arr[$i], $request->input('status'));
+    				if (!$status_error) {
+    					CourierEngDraftWorksheet::where('id', $row_arr[$i])
+    					->update([
+    						'status' => $request->input('status'), 
+    						'status_ru' => $request->input('status_ru'),
+    						'status_he' => $request->input('status_he'),
+    						'status_date' => date('Y-m-d')
+    					]);
+    				}
+    			} 
     		}
+    		else $status_error = 'New fields error!';
     	}
         
-        return redirect()->to(session('this_previous_url'))->with('status', 'Rows updated successfully!');
+        if($status_error){
+        	return redirect()->to(session('this_previous_url'))->with('status-error', $status_error);
+        }
+        else{
+        	return redirect()->to(session('this_previous_url'))->with('status', 'Rows updated successfully!');
+        }
     }
 
 
     public function deleteCourierEngDraftWorksheetById(Request $request)
 	{
 		$row_arr = $request->input('row_id');
+		for ($i=0; $i < count($row_arr); $i++) { 
+			$this->removeTrackingFromPalletWorksheet($row_arr[$i], 'en',true);
+		}
 
 		CourierEngDraftWorksheet::whereIn('id', $row_arr)->delete();
 		PackingEng::whereIn('work_sheet_id', $row_arr)->delete();
@@ -201,7 +363,7 @@ class CourierEngDraftController extends AdminController
 
 
 	public function courierEngDraftWorksheetFilter(Request $request){
-        $title = 'Courier Draft Filter';
+        $title = 'Draft Filter';
         $search = $request->table_filter_value;
         $courier_eng_draft_worksheet_arr = [];
         $attributes = CourierEngDraftWorksheet::first()->attributesToArray();
@@ -214,16 +376,54 @@ class CourierEngDraftController extends AdminController
         $new_arr = [];      
 
         if ($request->table_columns) {
-        	$courier_eng_draft_worksheet_obj = CourierEngDraftWorksheet::where($request->table_columns, 'like', '%'.$search.'%')
-        	->paginate(10);
+        	if ($request->input('for_active')) {
+        		$courier_eng_draft_worksheet_obj = CourierEngDraftWorksheet::where([
+        			[$request->table_columns, 'like', '%'.$search.'%'],
+        			['tracking_main','<>',null]
+        		])
+        		->orWhere([
+        			[$request->table_columns, 'like', '%'.$search.'%'],
+        			['status','Pick up']
+        		])->paginate(10);
+        	}
+        	else{
+        		$courier_eng_draft_worksheet_obj = CourierEngDraftWorksheet::where($request->table_columns, 'like', '%'.$search.'%')
+        		->paginate(10);
+        	}
         }
         else{
         	foreach($attributes as $key => $value)
         	{
         		if ($key !== 'created_at' && $key !== 'updated_at') {
-        			$sheet = CourierEngDraftWorksheet::where($key, 'like', '%'.$search.'%')->get()->first();
-        			if ($sheet) {       				
-        				$temp_arr = CourierEngDraftWorksheet::where($key, 'like', '%'.$search.'%')->get();
+        			if ($request->input('for_active')) {
+        				$sheet = CourierEngDraftWorksheet::where([
+        					[$key, 'like', '%'.$search.'%'],
+        					['tracking_main','<>',null]
+        				])
+        				->orWhere([
+        					[$key, 'like', '%'.$search.'%'],
+        					['status','Pick up']
+        				])->first();
+        			}
+        			else{
+        				$sheet = CourierEngDraftWorksheet::where($key, 'like', '%'.$search.'%')->first();
+        			} 
+
+        			if ($sheet) {  
+        				if ($request->input('for_active')) {
+        					$temp_arr = CourierEngDraftWorksheet::where([
+        						[$key, 'like', '%'.$search.'%'],
+        						['tracking_main','<>',null]
+        					])
+        					->orWhere([
+        						[$key, 'like', '%'.$search.'%'],
+        						['status','Pick up']
+        					])->get();
+        				}      				
+        				else{
+        					$temp_arr = CourierEngDraftWorksheet::where($key, 'like', '%'.$search.'%')->get();
+        				}     				
+
         				$new_arr = $temp_arr->filter(function ($item, $k) use($id_arr) {
         					if (!in_array($item->id, $id_arr)) { 
         						$id_arr[] = $item->id;       						  
@@ -249,9 +449,18 @@ class CourierEngDraftController extends AdminController
     	$tracking = $courier_eng_draft_worksheet->tracking_main;
 		$country = '';
 		$error_message = 'Fill in required fields: ';
+		$user = Auth::user();
 
-		if (stripos($tracking, 'IN') !== false) $country = 'India';
-		if (stripos($tracking, 'NE') !== false) $country = 'Nepal';
+		$country = $courier_eng_draft_worksheet->consignee_country;
+		if (!$country) {
+			if (stripos($tracking, 'IN') !== false) $country = 'India';
+			if (stripos($tracking, 'NE') !== false) $country = 'Nepal';
+			if (stripos($tracking, 'AN') !== false) $country = 'Nigeria';
+			if (stripos($tracking, 'AG') !== false) $country = 'Ghana';
+			if (stripos($tracking, 'AD') !== false) $country = 'Cote D\'Ivoire';
+			if (stripos($tracking, 'AS') !== false) $country = 'South Africa';
+		}		
+
 		if ($country && $country === 'India') {
 			if (!$courier_eng_draft_worksheet->shipper_name) $error_message .= 'Shipper\'s name,';
 			if (!$courier_eng_draft_worksheet->shipper_address) $error_message .= 'Shipper\'s address,';
@@ -268,7 +477,7 @@ class CourierEngDraftController extends AdminController
 				return response()->json(['error' => $error_message]);
 			}			
 		}
-		elseif ($country && $country !== 'India') {
+		elseif ($country && $country === 'Nepal') {
 			if (!$courier_eng_draft_worksheet->shipper_name) $error_message .= 'Shipper\'s name,';
 			if (!$courier_eng_draft_worksheet->shipper_address) $error_message .= 'Shipper\'s address,';
 			if (!$courier_eng_draft_worksheet->standard_phone) $error_message .= 'Shipper\'s phone (standard),';
@@ -280,6 +489,23 @@ class CourierEngDraftController extends AdminController
 				return response()->json(['error' => $error_message]);
 			}
 		}
+		elseif ($country) {
+			if (!$courier_eng_draft_worksheet->shipper_name) $error_message .= 'Shipper\'s name,';
+			if (!$courier_eng_draft_worksheet->shipper_city) $error_message .= 'Shipper\'s city,';
+			if (!$courier_eng_draft_worksheet->shipper_address) $error_message .= 'Shipper\'s address,';
+			if (!$courier_eng_draft_worksheet->standard_phone) $error_message .= 'Shipper\'s phone (standard),';
+			if (!$courier_eng_draft_worksheet->consignee_name) $error_message .= 'Consignee\'s name,';
+			if (!$courier_eng_draft_worksheet->consignee_address) $error_message .= 'Consignee\'s address,';
+			if (!$courier_eng_draft_worksheet->consignee_phone) $error_message .= 'Consignee\'s phone number,';
+
+			if ($error_message !== 'Fill in required fields: ') {
+				return response()->json(['error' => $error_message]);
+			}
+		}
+		else{
+			$error_message .= 'Consignee\'s country';
+			return response()->json(['error' => $error_message]);
+		}			
 		
 		$phone_exist = PhilIndWorksheet::where('standard_phone',$courier_eng_draft_worksheet->standard_phone)->get()->last();
 
@@ -304,8 +530,10 @@ class CourierEngDraftController extends AdminController
 		$message = '';	
 		$user = Auth::user();
 
-		$check_tracking	= PhilIndWorksheet::where('tracking_main', $courier_eng_draft_worksheet->tracking_main)->first();
-		if ($check_tracking) return redirect()->to(session('this_previous_url'))->with('status-error', 'Tracking number exists!');					
+		if ($courier_eng_draft_worksheet->tracking_main) {
+			$check_tracking	= PhilIndWorksheet::where('tracking_main', $courier_eng_draft_worksheet->tracking_main)->first();
+			if ($check_tracking) return redirect()->to(session('this_previous_url'))->with('status-error', 'Tracking number exists!');
+		}							
 
 		$worksheet = new PhilIndWorksheet();
 
@@ -315,13 +543,15 @@ class CourierEngDraftController extends AdminController
 			}			
 		}
 
-		if ($user->role === 'office_1' || $request->input('color')) {
+		if ($user->role === 'office_1' || $user->role === 'admin') {
 			$worksheet->background = 'tr-orange';
 		}
-
-		$worksheet->status_date = date('Y-m-d');
 		
 		if ($worksheet->save())	{
+
+			if ($worksheet->pallet_number) {
+				$this->updateWarehouse(null, $worksheet->pallet_number, $worksheet->tracking_main);
+			}
 
 			$work_sheet_id = $worksheet->id;
 
@@ -359,39 +589,9 @@ class CourierEngDraftController extends AdminController
 			});
 			PackingEng::where('work_sheet_id', $id)->delete();
 
-	            // Adding order number
+	        // Adding order number
 			if ($worksheet->standard_phone) {
-
-				$standard_phone = ltrim($worksheet->standard_phone, " \+");
-
-				$data = PhilIndWorksheet::where('shipper_phone', 'like', '%'.$standard_phone.'%')
-				->orWhere('standard_phone', '+'.$standard_phone)
-				->get();
-
-				if (!$data->first()->order_number) {
-					$data->transform(function ($item, $key) {
-						return $item->update(['order_number'=> ((int)$key+1)]);             
-					});
-				}
-				else{
-					$data->transform(function ($item, $key) use($standard_phone) {
-						if (!$item->order_number) {
-
-							$i = (int)(PhilIndWorksheet::where([
-								['shipper_phone', 'like', '%'.$standard_phone.'%'],
-								['order_number', '<>', null]
-							])
-							->orWhere([
-								['standard_phone', '+'.$standard_phone],
-								['order_number', '<>', null]
-							])
-							->get()->last()->order_number);
-
-							$i++;
-							return $item->update(['order_number'=> $i]);
-						}               
-					});
-				}
+				$this->addingOrderNumber($worksheet->standard_phone, 'en');
 			}
 			
 			CourierEngDraftWorksheet::where('id', $id)->delete();

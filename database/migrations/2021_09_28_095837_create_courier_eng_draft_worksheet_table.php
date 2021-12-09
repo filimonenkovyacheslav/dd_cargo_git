@@ -17,7 +17,8 @@ class CreateCourierEngDraftWorksheetTable extends Migration
             $table->increments('id');
             $table->string('date')->nullable(); 
             $table->string('direction')->nullable();
-            $table->string('status')->nullable();          
+            $table->string('status')->nullable();    
+            $table->string('status_date')->nullable();      
             $table->string('tracking_main')->nullable();
             $table->string('order_number')->nullable();
             $table->string('tracking_local')->nullable();
@@ -25,6 +26,7 @@ class CreateCourierEngDraftWorksheetTable extends Migration
             $table->text('comments_1')->nullable();
             $table->text('comments_2')->nullable();          
             $table->string('shipper_name')->nullable();
+            $table->string('shipper_country')->nullable();
             $table->string('shipper_city')->nullable();
             $table->string('passport_number')->nullable();
             $table->string('return_date')->nullable();
@@ -33,6 +35,7 @@ class CreateCourierEngDraftWorksheetTable extends Migration
             $table->string('shipper_phone')->nullable();
             $table->string('shipper_id')->nullable();
             $table->string('consignee_name')->nullable();
+            $table->string('consignee_country')->nullable();
             $table->string('house_name')->nullable();
             $table->string('post_office')->nullable();
             $table->string('district')->nullable();

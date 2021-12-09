@@ -47,7 +47,14 @@ class PhilIndWorksheetController extends AdminController
 	private function validateUpdate($request, $id){
 		$status_error = '';
 		if (!$request->input('status')) return 'ERROR STATUS!';
-		$status_error = $this->checkStatus('en', $id, $request->input('status'));
+		
+		$status_error = $this->checkStatus('phil_ind_worksheet', $id, $request->input('status'));
+		if($status_error) return $status_error;
+		
+		if ($request->input('consignee_phone')) {
+			$status_error = $this->checkConsigneePhone($request->input('consignee_phone'), 'en');
+			if($status_error) return $status_error;
+		}
 
 		if ($request->input('tracking_main')) {
 
@@ -70,6 +77,10 @@ class PhilIndWorksheetController extends AdminController
 			])->first();
 			if($check_tracking) $status_error = 'WARNING! THE TRACKING NUMBER ALREADY EXISTS. FIX THE DEFECT RECORD OR CHANGE THE TRACKING NUMBER';
 			if($status_error) return $status_error;
+		}
+		elseif (!$request->input('tracking_main') && ($request->input('lot') || $request->input('pallet_number'))){
+			$status_error = "You cannot enter a lot or pallet number without a tracking number";
+			return $status_error;
 		}
 
 		if ($request->input('amount_payment')){
@@ -126,6 +137,8 @@ class PhilIndWorksheetController extends AdminController
 				$phil_ind_worksheet->$field = $request->input($field);
 			}
 		}
+
+		$phil_ind_worksheet->direction = $this->createDirection($request->input('shipper_country'), $request->input('consignee_country'));
 
 		if ($request->input('tracking_main')){
 			if (in_array($phil_ind_worksheet->status, $this->status_arr)){
@@ -227,31 +240,7 @@ class PhilIndWorksheetController extends AdminController
 			
 			// Adding order number
 			if ($phil_ind_worksheet->standard_phone) {
-
-				$standard_phone = ltrim($phil_ind_worksheet->standard_phone, " \+");
-
-				$data = PhilIndWorksheet::where('standard_phone', '+'.$standard_phone)
-				->get();
-
-				if (!$data->first()->order_number) {
-					$data->transform(function ($item, $key) {
-						return $item->update(['order_number'=> ((int)$key+1)]);             
-					});
-				}
-				else{
-					$data->transform(function ($item, $key) use($standard_phone) {
-						if (!$item->order_number) {
-
-							$i = (int)(PhilIndWorksheet::where([
-								['standard_phone', '+'.$standard_phone],
-								['order_number', '<>', null]
-							])->get()->last()->order_number);
-
-							$i++;
-							return $item->update(['order_number'=> $i]);
-						}               
-					});
-				}
+				$this->addingOrderNumber($phil_ind_worksheet->standard_phone, 'en');
 			}
 
 			if ($request->input('tracking_main')) {
@@ -280,26 +269,6 @@ class PhilIndWorksheetController extends AdminController
 			return redirect()->to(session('this_previous_url'))->with('status', $status);
 		}		
 	}
-
-
-	private function checkColumns($arr, $value_by, $column, $this_column){
-    	$status_error = '';
-    	$check_sheet = PhilIndWorksheet::whereIn($this_column, $arr)->whereIn('status',$this->status_arr)->first();
-    	if ($check_sheet) {
-    		if ($column === 'amount_payment')
-    		{
-    			$status_error = "WARNING! A STATUS CANNOT BE LOWER - 'At the warehouse in the sender country' AFTER PAYMENT. PLEASE ADD THE DATA TO A CORRECT RECORD OR UPDATE THE STATUS";
-    			return $status_error;
-    		}
-
-    		if ($column === 'pallet_number')
-    		{
-    			$status_error = "WARNING! A STATUS CANNOT BE LOWER - 'At the warehouse in the sender country' AFTER ADDING A PALLET NUMBER. PLEASE ADD THE DATA TO A CORRECT RECORD OR UPDATE THE STATUS";
-    			return $status_error;
-    		}
-    	}
-    	return $status_error;
-    }
 
 
 	public function destroy(Request $request)
@@ -481,7 +450,7 @@ class PhilIndWorksheetController extends AdminController
         			$date_arr[$row->tracking_main] = $row->tracking_main;
         		}
         	}
-        	if (strripos($temp, 'IN') !== false || strripos($temp, 'PH') !== false || strripos($temp, 'NE') !== false || strripos($temp, 'CD') !== false) {
+        	if ($this->checkWhichAdmin($temp)) {
         		if (!in_array($row->tracking_main, $date_arr)) {
         			$date_arr[$row->tracking_main] = $row->tracking_main;
         		}
@@ -513,7 +482,7 @@ class PhilIndWorksheetController extends AdminController
     	if ($track_arr) {
     		if ($value_by && $column) {
 
-    			$status_error = $this->checkColumns($track_arr, $value_by, $column, $this_column);
+    			$status_error = $this->checkColumns($track_arr, $value_by, $column, $this_column, 'phil_ind_worksheet');
     			if($status_error) return redirect()->to(session('this_previous_url'))->with('status-error', $status_error);
 
     			if ($column === 'lot') {
@@ -703,6 +672,8 @@ class PhilIndWorksheetController extends AdminController
     	$row_arr = $request->input('row_id');
     	$value_by = $request->input('value-by-tracking');
     	$column = $request->input('phil-ind-tracking-columns');
+    	$shipper_country_val = $request->input('shipper_country_val');
+    	$consignee_country_val = $request->input('consignee_country_val');
     	$user = Auth::user();
     	$operator_change_row_arr = [];
     	$status_error = '';
@@ -720,6 +691,10 @@ class PhilIndWorksheetController extends AdminController
     	}
 		
     	if ($row_arr) {
+    		
+    		if ($column === 'shipper_country') $value_by = $shipper_country_val;
+    		if ($column === 'consignee_country') $value_by = $consignee_country_val;
+    		
     		if ($color) {
     			if ($color !== 'transparent') {
     				PhilIndWorksheet::whereIn('id', $row_arr)
@@ -736,7 +711,7 @@ class PhilIndWorksheetController extends AdminController
     		}
     		elseif ($value_by && $column) {
 
-				$status_error = $this->checkColumns($row_arr, $value_by, $column, $this_column);
+				$status_error = $this->checkColumns($row_arr, $value_by, $column, $this_column, 'phil_ind_worksheet');
 				if($status_error) return redirect()->to(session('this_previous_url'))->with('status-error', $status_error);
 
 				if ($column === 'lot') {
@@ -800,7 +775,7 @@ class PhilIndWorksheetController extends AdminController
     		}
     		else if ($request->input('status')){
     			for ($i=0; $i < count($row_arr); $i++) { 
-    				$status_error = $this->checkStatus('en', $row_arr[$i], $request->input('status'));
+    				$status_error = $this->checkStatus('phil_ind_worksheet', $row_arr[$i], $request->input('status'));
     				if (!$status_error) {
     					PhilIndWorksheet::where('id', $row_arr[$i])
     					->update([
@@ -812,6 +787,7 @@ class PhilIndWorksheetController extends AdminController
     				}
     			} 
     		}
+    		else $status_error = 'New fields error!';
     	}
         
         if($status_error){

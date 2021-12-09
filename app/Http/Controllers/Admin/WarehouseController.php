@@ -8,6 +8,8 @@ use App\Warehouse;
 use App\PhilIndWorksheet;
 use App\NewWorksheet;
 use App\ReceiptArchive;
+use App\CourierDraftWorksheet;
+use App\CourierEngDraftWorksheet;
 use Auth;
 use Excel;
 use App\Exports\WarehouseExport;
@@ -85,6 +87,7 @@ class WarehouseController extends AdminController
 		$pallet = $request->input('pallet');
 		$tracking = $request->input('action');
 		$this->updateWarehouseWorksheet($pallet, $tracking);
+		$this->updateWarehouseWorksheet($pallet, $tracking, false, true);
 		ReceiptArchive::where([
 				['tracking_main', $tracking],
 				['worksheet_id', null],
@@ -128,15 +131,10 @@ class WarehouseController extends AdminController
 			if (!$this->trackingValidate($request->input('tracking_main'))) return redirect()->to(session('this_previous_url'))->with('status-error', 'Tracking number is not correct.');
 		}
 
-		if ((stripos($tracking, 'CD') !== false) || (stripos($tracking, 'BL') !== false)){
-			$which_admin = 'ru';
-        }
-        else if ((stripos($tracking, 'IN') !== false) || (stripos($tracking, 'NE') !== false)){
-        	$which_admin = 'en';
-        }
-        else{
-        	return redirect()->to(session('this_previous_url'))->with('status-error', 'Tracking number is not correct!');
-        }
+		$which_admin = $this->checkWhichAdmin($tracking);
+		if (!$which_admin) {
+			return redirect()->to(session('this_previous_url'))->with('status-error', 'Tracking number is not correct!');
+		}
 
         $exist_tracking = Warehouse::where('tracking_numbers', 'like', '%'.$tracking.'%')->first();
         if ($exist_tracking) {
@@ -208,12 +206,7 @@ class WarehouseController extends AdminController
 	{
 		if ($request->input('pallet')) {
 
-			if ((stripos($tracking, 'CD') !== false) || (stripos($tracking, 'BL') !== false)){
-				$which_admin = 'ru';
-			}
-			else if ((stripos($tracking, 'IN') !== false) || (stripos($tracking, 'NE') !== false)){
-				$which_admin = 'en';
-			}
+			$which_admin = $this->checkWhichAdmin($tracking);
 			
 			$warehouse_to = Warehouse::where('pallet', $request->input('pallet'))->first();
 			$warehouse = Warehouse::where('tracking_numbers', 'like', '%'.$tracking.'%')->first();
@@ -222,6 +215,7 @@ class WarehouseController extends AdminController
 			}
 			$this->updateWarehouse($warehouse->pallet, $request->input('pallet'), $tracking);			
 			$this->updateWarehouseWorksheet($warehouse->pallet, $tracking, $request->input('pallet'));
+			$this->updateWarehouseWorksheet($warehouse->pallet, $tracking, $request->input('pallet'), true);
 				
 			return redirect()->to(session('this_previous_url'))->with('status', 'Tracking Moved successfully!');
 		}
@@ -243,14 +237,14 @@ class WarehouseController extends AdminController
 	{
 		$warehouse = Warehouse::find($id);
 		$track_arr = json_decode($warehouse->tracking_numbers);
-		if ((stripos($track_arr[0], 'CD') !== false) || (stripos($track_arr[0], 'BL') !== false)){
+		if ($this->checkWhichAdmin($track_arr[0]) === 'ru'){
 			NewWorksheet::whereIn('tracking_main', $track_arr)
 			->update([
 				'pallet_number' => null,
 				'batch_number' => null
 			]);
         }
-        else if ((stripos($track_arr[0], 'IN') !== false) || (stripos($track_arr[0], 'NE') !== false)){
+        else if ($this->checkWhichAdmin($track_arr[0]) === 'en'){
         	PhilIndWorksheet::whereIn('tracking_main', $track_arr)
 			->update([
 				'pallet_number' => null,
@@ -435,14 +429,14 @@ class WarehouseController extends AdminController
 
 	public function importWorksheet()
 	{
-		$ru_arr = NewWorksheet::where([
+		$ru_arr = CourierDraftWorksheet::where([
 			['pallet_number', '<>', null],
 			['batch_number', null],
 			['tracking_main', 'like', 'CD%'],
 			['status', '<>', 'Доставлено']
 		])->get()->toArray();
 
-		$en_arr = PhilIndWorksheet::where([
+		$en_arr = CourierEngDraftWorksheet::where([
 			['pallet_number', '<>', null],
 			['lot', null],
 			['tracking_main', 'like', 'IN%'],

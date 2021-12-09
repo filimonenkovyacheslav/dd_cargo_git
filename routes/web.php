@@ -116,6 +116,9 @@ Route::group(['prefix' => 'admin','middleware' => 'auth'],function() {
 	// Check row color
 	Route::post('/check-row-color',['uses' => 'Admin\AdminController@checkRowColor']);
 
+	// Import Draft
+	Route::get('/courier-import-draft',['uses' => 'Controller@importDraft']);
+
 	// Warehouse
 	Route::get('/warehouse-import-worksheet',['uses' => 'Admin\WarehouseController@importWorksheet']);
 
@@ -222,7 +225,7 @@ Route::group(['prefix' => 'admin','middleware' => 'auth'],function() {
 	Route::post('/delete-worksheet',['uses' => 'Admin\WorksheetController@destroy','as' => 'deleteWorksheet']);
 
 	// Draft worksheet
-	Route::get('/draft-worksheet',['uses' => 'Admin\DraftWorksheetController@index','as' => 'adminDraftWorksheet']);
+	/*Route::get('/draft-worksheet',['uses' => 'Admin\DraftWorksheetController@index','as' => 'adminDraftWorksheet']);
 
 	Route::get('/draft-worksheet/{id}', ['uses' => 'Admin\DraftWorksheetController@show','as' => 'adminDraftWorksheetShow']);
 
@@ -238,7 +241,7 @@ Route::group(['prefix' => 'admin','middleware' => 'auth'],function() {
 
 	Route::get('/draft-check-activate/{id}', ['uses' => 'Admin\DraftWorksheetController@draftCheckActivate','as' => 'draftCheckActivate']);
 
-	Route::get('/draft-activate/{id}', ['uses' => 'Admin\DraftWorksheetController@draftActivate','as' => 'draftActivate']);
+	Route::get('/draft-activate/{id}', ['uses' => 'Admin\DraftWorksheetController@draftActivate','as' => 'draftActivate']);*/
 
 	// Courier Draft worksheet
 	Route::get('/courier-draft-worksheet',['uses' => 'Admin\CourierDraftController@index','as' => 'adminCourierDraftWorksheet']);
@@ -418,7 +421,7 @@ Route::get('/admin/phil-ind-user-add',['uses'=>'Admin\PhilIndRolesController@sho
 Route::post('/admin/phil-ind-user-add',['uses'=>'Admin\PhilIndRolesController@add','as'=>'userPhilIndAdd'])->middleware('can:phil_ind_rights');
 
 // Philippines India Draft
-Route::get('/admin/eng-draft-worksheet', ['uses' => 'Admin\EngDraftWorksheetController@index','as' => 'adminEngDraftWorksheet'])->middleware('can:phil_ind_rights');
+/*Route::get('/admin/eng-draft-worksheet', ['uses' => 'Admin\EngDraftWorksheetController@index','as' => 'adminEngDraftWorksheet'])->middleware('can:phil_ind_rights');
 
 Route::get('/admin/eng-draft-worksheet/{id}', ['uses' => 'Admin\EngDraftWorksheetController@show','as' => 'adminEngDraftWorksheetShow'])->middleware('can:phil_ind_rights');
 
@@ -434,7 +437,7 @@ Route::post('/admin/eng-draft-worksheet-id-data-delete',['uses' => 'Admin\EngDra
 
 Route::get('/admin/eng-draft-check-activate/{id}', ['uses' => 'Admin\EngDraftWorksheetController@engDraftCheckActivate','as' => 'engDraftCheckActivate'])->middleware('can:phil_ind_rights');
 
-Route::get('/admin/eng-draft-activate/{id}', ['uses' => 'Admin\EngDraftWorksheetController@engDraftActivate','as' => 'engDraftActivate'])->middleware('can:phil_ind_rights');
+Route::get('/admin/eng-draft-activate/{id}', ['uses' => 'Admin\EngDraftWorksheetController@engDraftActivate','as' => 'engDraftActivate'])->middleware('can:phil_ind_rights');*/
 
 // Philippines India Courier Draft
 Route::get('/admin/courier-eng-draft-worksheet', ['uses' => 'Admin\CourierEngDraftController@index','as' => 'adminCourierEngDraftWorksheet'])->middleware('can:phil_ind_rights');

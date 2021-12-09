@@ -19,7 +19,7 @@ class EngDraftWorksheetController extends AdminController
     
 
     public function index(){
-        $title = 'Draft';
+        $title = 'Draft old';
         $eng_draft_worksheet_obj = EngDraftWorksheet::paginate(10);     
         $user = Auth::user();
         $viewer_arr = parent::VIEWER_ARR;
@@ -51,6 +51,11 @@ class EngDraftWorksheetController extends AdminController
         if ($phone_exist) return redirect()->to(session('this_previous_url'))->with('status-error', 'The phone number already exists in Draft!');
 
 		if ($eng_draft_worksheet->operator) $operator_change = false;
+
+		if ($request->input('consignee_phone')) {
+			$error_message = $this->checkConsigneePhone($request->input('consignee_phone'), 'en');
+			if ($error_message) return redirect()->to(session('this_previous_url'))->with('status-error', $error_message);
+		}
 
 		foreach($fields as $field){			
 			if ($field !== 'created_at' && $field !== 'operator'){
@@ -119,6 +124,12 @@ class EngDraftWorksheetController extends AdminController
     	}
 
     	if ($row_arr) {
+
+    		if ($column === 'consignee_phone') {
+    			$error_message = $this->checkConsigneePhone($value_by, 'en');
+    			if ($error_message) return redirect()->to(session('this_previous_url'))->with('status-error', $error_message);
+    		}
+    		
     		if ($value_by && $column) {
     			if ($column !== 'operator') {
     				EngDraftWorksheet::whereIn('id', $row_arr)
@@ -191,7 +202,7 @@ class EngDraftWorksheetController extends AdminController
 
 
 	public function engDraftWorksheetFilter(Request $request){
-        $title = 'Draft Filter';
+        $title = 'Draft Filter old';
         $search = $request->table_filter_value;
         $eng_draft_worksheet_arr = [];
         $attributes = EngDraftWorksheet::first()->attributesToArray();
@@ -239,8 +250,11 @@ class EngDraftWorksheetController extends AdminController
 		$packing = PackingEng::where('work_sheet_id',$id)->first();
 		$country = '';
 		$error_message = 'Fill in required fields: ';
+		$user = Auth::user();
+		$error_arr = ['error' => '', 'status_error' => ''];
 
 		if ($packing) $country = $packing->country;
+
 		if ($country && $country === 'India') {
 			if (!$eng_draft_worksheet->shipper_name) $error_message .= 'Shipper\'s name,';
 			if (!$eng_draft_worksheet->shipper_address) $error_message .= 'Shipper\'s address,';
@@ -253,9 +267,7 @@ class EngDraftWorksheetController extends AdminController
 			if (!$eng_draft_worksheet->post_office) $error_message .= 'Local post office,';
 			if (!$eng_draft_worksheet->district) $error_message .= 'District/City,';
 
-			if ($error_message !== 'Fill in required fields: ') {
-				return response()->json(['error' => $error_message]);
-			}			
+			$error_arr['error'] = $error_message;			
 		}
 		elseif ($country && $country !== 'India') {
 			if (!$eng_draft_worksheet->shipper_name) $error_message .= 'Shipper\'s name,';
@@ -265,9 +277,22 @@ class EngDraftWorksheetController extends AdminController
 			if (!$eng_draft_worksheet->consignee_address) $error_message .= 'Consignee\'s address,';
 			if (!$eng_draft_worksheet->consignee_phone) $error_message .= 'Consignee\'s phone number,';
 
-			if ($error_message !== 'Fill in required fields: ') {
-				return response()->json(['error' => $error_message]);
-			}
+			$error_arr['error'] = $error_message;
+		}
+		else{
+			$error_message .= 'Consignee\'s country';
+		}		
+
+		if ($eng_draft_worksheet->status !== 'Pick up') {
+			$error_arr['status_error'] = 'The status should be - Pick up';
+		}
+
+		if ($error_arr['error'] === 'Fill in required fields: ') {
+			$error_arr['error'] = '';
+		}
+
+		if ($error_arr) {
+			return response()->json($error_arr);
 		}
     	
     	$phone_exist = PhilIndWorksheet::where('standard_phone',$eng_draft_worksheet->standard_phone)->get()->last();
@@ -303,7 +328,7 @@ class EngDraftWorksheetController extends AdminController
 					}			
 				}
 				
-				if ($user->role === 'office_1' || $request->input('color')) {
+				if ($user->role === 'office_1' || $user->role === 'admin') {
 					$worksheet->background = 'tr-orange';
 				}
 				
@@ -380,7 +405,7 @@ class EngDraftWorksheetController extends AdminController
 				}			
 			}
 			
-			if ($user->role === 'office_1' || $request->input('color')) {
+			if ($user->role === 'office_1' || $user->role === 'admin') {
 				$worksheet->background = 'tr-orange';
 			}
 			

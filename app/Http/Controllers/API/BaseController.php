@@ -7,6 +7,10 @@ use App\CourierDraftWorksheet;
 use App\CourierEngDraftWorksheet;
 use App\PackingSea;
 use App\PackingEng;
+use App\NewPacking;
+use App\PackingEngNew;
+use App\Invoice;
+use App\Manifest;
 use App\NewWorksheet;
 use App\PhilIndWorksheet;
 use App\DraftWorksheet;
@@ -68,8 +72,58 @@ class BaseController extends Controller
     }
 
 
+    private function checkCollection($worksheet, $field)
+    {
+        $value = $worksheet->first()->$field;
+        $filtered = $worksheet->filter(function ($item) use ($value, $field) {
+            return $item[$field] !== $value;
+        });
+        return $filtered->all();
+    }
+
+
+    private function updateAllPacking($id, $table, $tracking)
+    {
+        switch ($table) {
+            
+            case "new_worksheet":
+
+            NewPacking::where('work_sheet_id',$id)
+            ->update(['track_code' => $tracking]);
+            Invoice::where('work_sheet_id',$id)
+            ->update(['tracking' => $tracking]);
+            Manifest::where('work_sheet_id',$id)
+            ->update(['tracking' => $tracking]);
+        
+            break;
+            
+            case "phil_ind_worksheet":
+
+            PackingEngNew::where('work_sheet_id',$id)
+            ->update(['tracking' => $tracking]);
+
+            break;
+
+            case "courier_draft_worksheet":
+
+            PackingSea::where('work_sheet_id',$id)
+            ->update(['track_code' => $tracking]);
+
+            break;
+            
+            case "courier_eng_draft_worksheet":
+
+            PackingEng::where('work_sheet_id',$id)
+            ->update(['tracking' => $tracking]);
+
+            break;
+        }
+    }
+
+
     private function checkPhoneAndAddData($phone, $input, $which_admin)
     {
+        $response = ['different_recipient' => '', 'added_data' => ''];
         $tracking = $input['tracking_main'];
         
         if ($which_admin === 'ru') {
@@ -78,62 +132,97 @@ class BaseController extends Controller
             $worksheet = NewWorksheet::where([
                 ['standard_phone',$phone],
                 ['tracking_main',null]
-            ])->get();
-            $draft = DraftWorksheet::where('standard_phone',$phone)->get();
-
-            if ($worksheet->count() || $draft->count()) {
-                if ($worksheet->count()) {
-                    // code...
-                }
-                elseif (!$worksheet->count() && $draft->count()) {
-                    
-                    CourierDraftWorksheet::create([
-                        'tracking_main' => $tracking,
-                        'standard_phone' => $phone,
-                        'site_name' => $site_name,
-                        'package_content' => 'Пусто: 0',
-                        'date' => date('Y.m.d'),
-                        'status' => 'Доставляется на склад в стране отправителя',
-                        'status_en'=> 'Forwarding to the warehouse in the sender country',
-                        'status_he'=> "נשלח למחסן במדינת השולח",
-                        'status_ua'=> 'Доставляється до складу в країні відправника'
-                    ]);
-
-                    $draft = $draft->first();
-                    $work_sheet_id = DB::getPdo()->lastInsertId();
-                    $courier = CourierDraftWorksheet::find($work_sheet_id);
-                    $fields = $this->getTableColumns('draft_worksheet');
-                    $full_fields = ['id','update_status_date','updated_at','created_at','tracking_main','standard_phone','site_name','date','status','status_en','status_he','status_ua','parcels_qty'];
-
-                    foreach($fields as $field){                     
-                        if (!in_array($field, $full_fields) && $draft->$field) {
-                            $courier->$field = $draft->$field;
-                        }
-                    }
-                    $courier->save();
-
-/// Добавить еще в пакинг
-                    /*PackingSea::create([
-                        'track_code' => $tracking,
-                        'work_sheet_id' => $work_sheet_id,
-                        'attachment_number' => '1',
-                        'attachment_name' => 'Пусто',
-                        'amount_3' => '0'
-                    ]);*/
-
-                    $notification = ReceiptArchive::where('tracking_main', $tracking)->first();
-                    if (!$notification) $this->checkReceipt($work_sheet_id, null, 'ru', $tracking);
-
-                    return true;
-                }
-                return true;
+            ])->orderBy('order_number')->get();  
+            $draft = CourierDraftWorksheet::where([
+                ['standard_phone',$phone],
+                ['tracking_main',null]
+            ])->orderBy('order_number')->get();  
+            if ($worksheet && $draft) {
+                $worksheet = $worksheet->merge($draft);
             }
-            else return false;
+            elseif (!$worksheet && $draft) {
+                $worksheet = $draft;
+            }                                 
+
+            if ($worksheet->count()) {
+                $different_recipient = $this->checkCollection($worksheet, 'recipient_phone');
+                if (count($different_recipient)) {
+                    $response['different_recipient'] = count($different_recipient);
+                    return $response;
+                }
+
+                $table = "new_worksheet";
+                $worksheet = $worksheet->first();
+                $order_number = $worksheet->order_number;               
+                $min_number = NewWorksheet::where([
+                    ['standard_phone',$phone],
+                    ['order_number',$order_number],
+                    ['tracking_main',null]
+                ])->orderBy('order_number')->first(); 
+                if (!$min_number) {                    
+                    $table = "courier_draft_worksheet";
+                } 
+                
+                $worksheet->update([
+                    'tracking_main' => $tracking,
+                    'status' => 'Доставляется на склад в стране отправителя',
+                    'status_en'=> 'Forwarding to the warehouse in the sender country',
+                    'status_he'=> "נשלח למחסן במדינת השולח",
+                    'status_ua'=> 'Доставляється до складу в країні відправника',
+                    'status_date' => date('Y-m-d')
+                ]);
+                $response['added_data'] = 'Трекинг-номер добавлен в существующую запись';
+                $this->updateAllPacking($worksheet->id, $table, $tracking);               
+            }
+            return $response;
         }
         elseif ($which_admin === 'en') {
-            // code...
-        }
-        
+            $worksheet = PhilIndWorksheet::where([
+                ['standard_phone',$phone],
+                ['tracking_main',null]
+            ])->orderBy('order_number')->get();  
+            $draft = CourierEngDraftWorksheet::where([
+                ['standard_phone',$phone],
+                ['tracking_main',null]
+            ])->orderBy('order_number')->get();  
+            if ($worksheet && $draft) {
+                $worksheet = $worksheet->merge($draft);
+            }
+            elseif (!$worksheet && $draft) {
+                $worksheet = $draft;
+            }                                 
+
+            if ($worksheet->count()) {
+                $different_recipient = $this->checkCollection($worksheet, 'recipient_phone');
+                if (count($different_recipient)) {
+                    $response['different_recipient'] = count($different_recipient);
+                    return $response;
+                }
+
+                $table = "phil_ind_worksheet";
+                $worksheet = $worksheet->first();
+                $order_number = $worksheet->order_number;               
+                $min_number = PhilIndWorksheet::where([
+                    ['standard_phone',$phone],
+                    ['order_number',$order_number],
+                    ['tracking_main',null]
+                ])->orderBy('order_number')->first(); 
+                if (!$min_number) {                    
+                    $table = "courier_eng_draft_worksheet";
+                } 
+                
+                $worksheet->update([
+                    'tracking_main' => $tracking,
+                    'status' => 'Forwarding to the warehouse in the sender country',
+                    'status_ru'=> 'Доставляется на склад в стране отправителя',
+                    'status_he'=> "נשלח למחסן במדינת השולח",
+                    'status_date' => date('Y-m-d')
+                ]);
+                $response['added_data'] = 'Трекинг-номер добавлен в существующую запись';
+                $this->updateAllPacking($worksheet->id, $table, $tracking);               
+            }
+            return $response;
+        }       
     }
 
     
@@ -157,13 +246,20 @@ class BaseController extends Controller
 
             if (!$this->trackingValidate($tracking)) return $this->sendError('Tracking number is not correct.');
 
-            if ((stripos($tracking, 'CD') !== false) || (stripos($tracking, 'BL') !== false)) {
+            if ($this->checkWhichAdmin($tracking) === 'ru') {
                 
                 $has_tracking = CourierDraftWorksheet::where('tracking_main',$tracking)->first();
+                if (!$has_tracking) $has_tracking = NewWorksheet::where('tracking_main',$tracking)->first();
                 if ($has_tracking) return $this->sendError('Tracking number exists.');
 
-                /*$added_data = $this->checkPhoneAndAddData('+'.$standard_phone, $input, 'ru');
-                if ($added_data) return $this->sendResponse(['tracking_main' => $tracking], 'Post added successfully.');*/
+                // Checking draft and worksheet
+                $added_data = $this->checkPhoneAndAddData('+'.$standard_phone, $input, 'ru');
+                if ($added_data['different_recipient']) {
+                    return $this->sendError('У отправителя несколько посылок разным получателям. Трекинг-номер добавлен не будет. Внимательно заполните бумажный пакинг-лист.');
+                }
+                elseif ($added_data['added_data']) {
+                    return $this->sendResponse(['tracking_main' => $tracking], $added_data['added_data']);
+                }
                 
                 CourierDraftWorksheet::create([
                     'tracking_main' => $tracking,
@@ -174,7 +270,8 @@ class BaseController extends Controller
                     'status' => 'Доставляется на склад в стране отправителя',
                     'status_en'=> 'Forwarding to the warehouse in the sender country',
                     'status_he'=> "נשלח למחסן במדינת השולח",
-                    'status_ua'=> 'Доставляється до складу в країні відправника'
+                    'status_ua'=> 'Доставляється до складу в країні відправника',
+                    'status_date' => date('Y-m-d')
                 ]);
                 $work_sheet_id = DB::getPdo()->lastInsertId();
 
@@ -186,13 +283,24 @@ class BaseController extends Controller
                     'amount_3' => '0'
                 ]);
 
+                $this->addingOrderNumber($standard_phone, 'ru');
                 $notification = ReceiptArchive::where('tracking_main', $tracking)->first();
                 if (!$notification) $this->checkReceipt($work_sheet_id, null, 'ru', $tracking);
             }
-            else if ((stripos($tracking, 'IN') !== false) || (stripos($tracking, 'NE') !== false)) {
+            else if ($this->checkWhichAdmin($tracking) === 'en') {
 
                 $has_tracking = CourierEngDraftWorksheet::where('tracking_main',$tracking)->first();
+                if (!$has_tracking) $has_tracking = PhilIndWorksheet::where('tracking_main',$tracking)->first();
                 if ($has_tracking) return $this->sendError('Tracking number exists.');
+
+                // Checking draft and worksheet
+                $added_data = $this->checkPhoneAndAddData('+'.$standard_phone, $input, 'en');
+                if ($added_data['different_recipient']) {
+                    return $this->sendError('У отправителя несколько посылок разным получателям. Трекинг-номер добавлен не будет. Внимательно заполните бумажный пакинг-лист.');
+                }
+                elseif ($added_data['added_data']) {
+                    return $this->sendResponse(['tracking_main' => $tracking], $added_data['added_data']);
+                }
                 
                 CourierEngDraftWorksheet::create([
                     'tracking_main' => $tracking,
@@ -201,7 +309,8 @@ class BaseController extends Controller
                     'shipped_items' => 'Empty: 0',
                     'status' => 'Forwarding to the warehouse in the sender country',
                     'status_ru'=> 'Доставляется на склад в стране отправителя',
-                    'status_he'=> "נשלח למחסן במדינת השולח"
+                    'status_he'=> "נשלח למחסן במדינת השולח",
+                    'status_date' => date('Y-m-d')
                 ]);
                 $work_sheet_id = DB::getPdo()->lastInsertId();
 
@@ -211,6 +320,7 @@ class BaseController extends Controller
                     'shipper_phone' => '+'.$standard_phone
                 ]); 
 
+                $this->addingOrderNumber($standard_phone, 'en');
                 $notification = ReceiptArchive::where('tracking_main', $tracking)->first();
                 if (!$notification) $this->checkReceipt($work_sheet_id, null, 'en', $tracking);
             }

@@ -745,13 +745,12 @@
 				},
 				success: function (data) {
 					console.log(data);
-					if (data.error) {
-						/*$('.card-header').after(`
+					if (data.error || data.status_error) {
+						$('.card-header').after(`
 							<div class="alert alert-danger">
-								`+data.error+`										
+								`+data.error+' '+data.status_error+`										
 							</div>`);
-						return 0;*/
-						location.href = '/admin/draft-activate/'+rowId+'/?color=orange';
+						return 0;						
 					}
 					else if (data.phone_exist) {
 						let phone = confirm("Запись с таким же номером телефона недавно была добавлена в базу данных. Вы уверены, что хотите добавить запись / записи?");

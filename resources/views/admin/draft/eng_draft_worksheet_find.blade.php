@@ -460,13 +460,12 @@
 				},
 				success: function (data) {
 					console.log(data);
-					if (data.error) {
-						/*$('.card-header').after(`
+					if (data.error || data.status_error) {
+						$('.card-header').after(`
 							<div class="alert alert-danger">
-								`+data.error+`										
-							</div>`)
-						return 0;*/
-						location.href = '/admin/eng-draft-activate/'+rowId+'/?color=orange';
+								`+data.error+' '+data.status_error+`										
+							</div>`);
+						return 0;						
 					}
 					else if (data.phone_exist) {
 						let phone = confirm("A record with the same phone number was added to the database recently. Are you sure you want to add the record/records?");

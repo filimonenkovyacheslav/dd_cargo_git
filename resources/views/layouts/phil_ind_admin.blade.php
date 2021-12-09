@@ -80,11 +80,7 @@
                     </li>
 
                     <li>
-                        <a href="{{route('adminEngDraftWorksheet')}}"><i class="menu-icon fa fa-archive "></i> Draft </a>
-                    </li>
-
-                    <li>
-                        <a href="{{route('adminCourierEngDraftWorksheet')}}"><i class="menu-icon fa fa-archive "></i> Courier Draft </a>
+                        <a href="{{route('adminCourierEngDraftWorksheet')}}"><i class="menu-icon fa fa-archive "></i> Draft </a>
                     </li>
 
                     <li>

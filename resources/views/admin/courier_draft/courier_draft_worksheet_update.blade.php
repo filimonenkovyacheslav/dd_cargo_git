@@ -89,6 +89,13 @@
 						</div>
 
 						<div class="form-group">
+							{!! Form::label('pallet_number','№ паллеты',['class' => 'col-md-2 control-label'])   !!}
+							<div class="col-md-8">
+								{!! Form::text('pallet_number',$courier_draft_worksheet->pallet_number,['class' => 'form-control'])!!}
+							</div>
+						</div>
+
+						<div class="form-group">
 							{!! Form::label('comment_2','OFF Коммент',['class' => 'col-md-2 control-label'])   !!}
 							<div class="col-md-8">
 								{!! Form::text('comment_2',$courier_draft_worksheet->comment_2,['class' => 'form-control'])!!}
@@ -292,6 +299,12 @@
 								{!! Form::text('quantity_things',$courier_draft_worksheet->quantity_things,['class' => 'form-control'])!!}
 							</div>
 						</div>
+						<div class="form-group">
+							{!! Form::label('batch_number','Партия',['class' => 'col-md-2 control-label'])   !!}
+							<div class="col-md-8">
+								{!! Form::text('batch_number',$courier_draft_worksheet->batch_number,['class' => 'form-control'])!!}
+							</div>
+						</div>
 
 						<div class="form-group">
 							{!! Form::label('pay_date','Дата оплаты и комментарии',['class' => 'col-md-2 control-label'])   !!}
@@ -392,6 +405,8 @@
 							{!! Form::hidden('tariff',$courier_draft_worksheet->tariff,['class' => 'form-control'])!!}
 
 							{!! Form::hidden('status',$courier_draft_worksheet->status,['class' => 'form-control'])!!}
+
+							{!! Form::hidden('status_date',$courier_draft_worksheet->status_date)!!}
 
 							{!! Form::hidden('partner',$courier_draft_worksheet->partner,['class' => 'form-control'])!!}
 

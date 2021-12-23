@@ -1127,12 +1127,12 @@ class FrontController extends AdminController
             }
         }
         else{
-            $draft_result = EngDraftWorksheet::where('standard_phone', $request->input('standard_phone'))->first();
+            $draft_result = CourierEngDraftWorksheet::where('standard_phone', $request->input('standard_phone'))->first();
 
             if ($draft_result) {
                 $id = $draft_result->id;
                 $data_parcel = $this->fillResponseDataEng($draft_result, $request, true);
-                return redirect()->route('showFormEng')->with('status', $message)->with('id', $id)->with('data_parcel', json_encode($data_parcel))->with('sheet', 'draft');
+                return redirect()->route('showFormEng')->with('status', $message)->with('id', $id)->with('data_parcel', json_encode($data_parcel))->with('sheet', 'courier');
             }
             else{
                 $message = 'The data you entered is not found. Please try again';
@@ -1145,11 +1145,7 @@ class FrontController extends AdminController
     public function addFormEng(Request $request)
     {
         $worksheet = null;
-        if ($request->input('sheet') === 'draft') {
-            $worksheet = EngDraftWorksheet::find($request->input('id'));
-            $fields = $this->getTableColumns('eng_draft_worksheet');
-        }
-        elseif ($request->input('sheet') === 'courier') {
+        if ($request->input('sheet') === 'courier') {
             $worksheet = CourierEngDraftWorksheet::find($request->input('id'));
             $fields = $this->getTableColumns('courier_eng_draft_worksheet');
         }
@@ -1331,6 +1327,7 @@ class FrontController extends AdminController
             $data_parcel['shipper_address'] = $data->shipper_address;
             $data_parcel['standard_phone'] = $data->standard_phone;
             $data_parcel['shipper_phone'] = $data->shipper_phone;
+            $data_parcel['shipper_country'] = $data->shipper_country;
             $data_parcel['shipper_id'] = $data->shipper_id;
         }
         
@@ -1367,6 +1364,7 @@ class FrontController extends AdminController
                     $data_parcel['consignee_last_name'] = '';
                 }
                 $data_parcel['consignee_address'] = $address;
+                $data_parcel['consignee_country'] = $data->consignee_country;
                 $data_parcel['consignee_phone'] = $data->consignee_phone;
                 $data_parcel['consignee_id'] = $data->consignee_id;
             }
@@ -1376,6 +1374,7 @@ class FrontController extends AdminController
                 $data_parcel['consignee_address'] = '';
                 $data_parcel['consignee_phone'] = '';
                 $data_parcel['consignee_id'] = '';
+                $data_parcel['consignee_country'] = '';
             }
         }
 
@@ -1396,10 +1395,10 @@ class FrontController extends AdminController
             $data_parcel['shipper_address'] = $data->shipper_address;
             $data_parcel['standard_phone'] = $data->standard_phone;
             $data_parcel['shipper_phone'] = $data->shipper_phone;
+            $data_parcel['shipper_country'] = $data->shipper_country;
             $data_parcel['shipper_id'] = $data->shipper_id;
 
-            $address = trim(stristr($data->consignee_address, " ")); 
-            $consignee_country = explode(" ", $data->consignee_address)[0];                 
+            $address = trim(stristr($data->consignee_address, " "));               
             $consignee_name = explode(" ", $data->consignee_name);
             if (count($consignee_name) > 1) {
                 $data_parcel['consignee_first_name'] = $consignee_name[0];
@@ -1413,7 +1412,7 @@ class FrontController extends AdminController
                 $data_parcel['consignee_first_name'] = '';
                 $data_parcel['consignee_last_name'] = '';
             }
-            $data_parcel['consignee_country'] = $consignee_country;
+            $data_parcel['consignee_country'] = $data->consignee_country;
             $data_parcel['consignee_address'] = $address;
             $data_parcel['consignee_phone'] = $data->consignee_phone;
             $data_parcel['consignee_id'] = $data->consignee_id;

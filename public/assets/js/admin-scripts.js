@@ -65,8 +65,8 @@ $('form.phil-ind-update-form button').click((e)=>{
     e.preventDefault();
 
     const phone = document.querySelector('[name="standard_phone"]'); 
-    if (phone.value.length < 10 || phone.value.length > 13) {
-        alert('The number of characters in the phone must be from 10 to 13 !');
+    if (phone.value.length < 10 || phone.value.length > 24) {
+        alert('The number of characters in the phone must be from 10 to 24 !');
         return false;
     }
     
@@ -137,7 +137,7 @@ const uaArr = {
     "Доставляется на склад в стране отправителя": "Доставляється до складу в країні відправника",
     "На складе в стране отправителя": "На складі в країні відправника",
     "На таможне в стране отправителя": "На митниці в країні відправника",
-    "Доставляется в страну получателя": "Доставляється в країну відправника",
+    "Доставляется в страну получателя": "Доставляється в країну отримувача",
     "На таможне в стране получателя": "На митниці в країні отримувача",
     "Доставляется получателю": "Доставляється отримувачу",
     "Доставлено": "Доставлено"
@@ -612,9 +612,11 @@ $(document).delegate('#status-value select[name="status"]', 'change',(e)=>{
 
 // phil-ind worksheet
 $('#phil-ind-tracking-columns').change((e)=>{
-    const thisVal = $(e.target).val();
+    const thisVal = $(e.target).val();   
     if (thisVal === 'status') {
         $('[name="value-by-tracking"]').remove()
+        $('#consignee-country-value').remove()
+        $('#shipper-country-value').remove()
         $('.phil-ind-value-by-tracking').append(`
             <div id="phil-ind-status-value">
                 <select class="form-control" id="status" name="status">
@@ -637,38 +639,42 @@ $('#phil-ind-tracking-columns').change((e)=>{
             </div>
             `)
     }
-    else {
-        $('#status-value').remove()
+    else if (thisVal === 'shipper_country') {       
         $('[name="value-by-tracking"]').remove()
+        $('#phil-ind-status-value').remove()
+        $('#consignee-country-value').remove()
         $('.phil-ind-value-by-tracking').append(`
-            <input class="form-control" type="text" name="value-by-tracking">
+            <div id="shipper-country-value">
+                <select class="form-control" id="shipper_country" name="shipper_country">
+                    <option value="" selected="selected"></option>
+                    <option value="Israel">Israel</option>
+                    <option value="Germany">Germany</option>
+                </select>                
+            </div>
             `)
     }
-})
-
-
-// eng-draft worksheet
-$('#eng-draft-columns').change((e)=>{
-    const thisVal = $(e.target).val();
-    if (thisVal === 'status') {
+    else if (thisVal === 'consignee_country') {
         $('[name="value-by-tracking"]').remove()
+        $('#phil-ind-status-value').remove()
+        $('#shipper-country-value').remove()
         $('.phil-ind-value-by-tracking').append(`
-            <div id="phil-ind-status-value">
-                <select class="form-control" id="status" name="status">
-                   <option value="" selected="selected"></option>
-                   <option value="Pending">Pending</option>
-                   <option value="Return">Return</option>
-                   <option value="Box">Box</option>
-                   <option value="Pick up">Pick up</option>
-                   <option value="Specify">Specify</option>
-                   <option value="Think">Think</option>
-                   <option value="Canceled">Canceled</option>
+            <div id="consignee-country-value">
+                <select class="form-control" id="consignee_country" name="consignee_country">
+                    <option value="" selected="selected"></option>
+                    <option value="India">India</option>
+                    <option value="Nepal">Nepal</option>
+                    <option value="Nigeria">Nigeria</option>
+                    <option value="Ghana">Ghana</option>
+                    <option value="Cote D\'Ivoire">Cote D\'Ivoire</option>
+                    <option value="South Africa">South Africa</option>
                 </select>                
             </div>
             `)
     }
     else {
-        $('#status-value').remove()
+        $('#phil-ind-status-value').remove()
+        $('#consignee-country-value').remove()
+        $('#shipper-country-value').remove()
         $('[name="value-by-tracking"]').remove()
         $('.phil-ind-value-by-tracking').append(`
             <input class="form-control" type="text" name="value-by-tracking">
@@ -676,11 +682,17 @@ $('#eng-draft-columns').change((e)=>{
     }
 })
 
-
 $(document).delegate('#phil-ind-status-value select[name="status"]', 'change',(e)=>{
     const key = $(e.target).val();
     $('.phil-ind-value-by-tracking [name="status_ru"]').val(ruArrChina[key]);
     $('.phil-ind-value-by-tracking [name="status_he"]').val(heArrChina[key]);
+})
+
+$(document).delegate('#shipper-country-value select[name="shipper_country"]', 'change',(e)=>{
+    $('.phil-ind-value-by-tracking [name="shipper_country_val"]').val($(e.target).val());
+})
+$(document).delegate('#consignee-country-value select[name="consignee_country"]', 'change',(e)=>{
+    $('.phil-ind-value-by-tracking [name="consignee_country_val"]').val($(e.target).val());
 })
 /* End Tracking filter checkbox*/
 
@@ -743,74 +755,131 @@ $('.checkbox-operations form').submit((e)=>{
 })
 
 
-/* Phone mask */
-let count_error = 0;
+// Phone mask
+let countryCode = "+972";
+if ($('[name="shipper_country"]').val() === 'Germany') countryCode = "+49";
+$('[name="shipper_country"]').on('change', function(){
+    if (location.href.indexOf('phil-ind') !== -1){
+        if ($(this).val() === 'Germany') countryCode = "+49";
+        if ($(this).val() === 'Israel') countryCode = "+972"; 
+    }   
+});
 
+let count_error = 0;
 $('.standard-phone').on('input', function() {
     $('div.error-phone').remove();
-    if ($(this).val()[0] !== '+' && $(this).val().length == 1) {
-        $(this).val('+972');
-    }
-    else if($(this).val().length > 16){
-        if ($(this).val().length == 17) {
-            $(this).val($(this).val().slice(0, -1));
+    if (location.href.indexOf('phil-ind') == -1 && location.href.indexOf('courier-eng-draft') == -1) {
+
+        if ($(this).val()[0] !== '+' && $(this).val().length == 1) {
+            $(this).val(countryCode);
+        }
+        else if($(this).val().length > 16){
+            if ($(this).val().length == 17) {
+                $(this).val($(this).val().slice(0, -1));
+            }
+            else{
+                $(this).val(countryCode);
+            }
+        }
+        else if($(this).val().length < 5){
+            $(this).val(countryCode);
         }
         else{
-            $(this).val('+972');
-        }
-    }
-    else if($(this).val().length < 5){
-        $(this).val('+972');
-    }
-    else{
-        var regexp = /^\+972[0-9]+$/i;
-        if (!regexp.test($(this).val()) && count_error == 0) {
-            for (var i = $(this).val().length - 1; i >= 0; i--) {
-                if (!regexp.test($(this).val())) {
-                    $(this).val($(this).val().slice(0, -1));
-                }
-                else break;
-            }           
-            count_error = 1; 
-            if (location.href.indexOf('phil-ind') == -1) {
+            var regexp = /^\+972[0-9]+$/i;
+            if (!regexp.test($(this).val()) && count_error == 0) {
+                for (var i = $(this).val().length - 1; i >= 0; i--) {
+                    if (!regexp.test($(this).val())) {
+                        $(this).val($(this).val().slice(0, -1));
+                    }
+                    else break;
+                }           
+                count_error = 1; 
+
                 $(this).before(`
-                <div class="error-phone admin">
+                    <div class="error-phone">
                     Пожалуйста, заполните поле "Номер телефона отправителя (основной)" в 
                     международном формате, например: "+972531111111".
-                </div>`);
-            }
-            else{
-                $(this).before(`
-                <div class="error-phone admin">
-                    Please fill the box "Shipper\'s phone number (standard)" in the 
-                    international format, i.e. "+972531111111".
-                </div>`);
-            }        
-        } else if (!regexp.test($(this).val()) && count_error == 1 && $(this).val().length > 1) {
-            for (var i = $(this).val().length - 1; i >= 0; i--) {
-                if (!regexp.test($(this).val())) {
-                    $(this).val($(this).val().slice(0, -1));
+                    </div>`);
+
+            } else if (!regexp.test($(this).val()) && count_error == 1 && $(this).val().length > 1) {
+                for (var i = $(this).val().length - 1; i >= 0; i--) {
+                    if (!regexp.test($(this).val())) {
+                        $(this).val($(this).val().slice(0, -1));
+                    }
+                    else break;
                 }
-                else break;
-            }
-            if (location.href.indexOf('phil-ind') == -1) {
+
                 $(this).before(`
-                <div class="error-phone admin">
+                    <div class="error-phone">
                     Пожалуйста, заполните поле "Номер телефона отправителя (основной)" в 
                     международном формате, например: "+972531111111".
-                </div>`);
+                    </div>`);
+
+            } else if ($(this).val().length < 5 || regexp.test($(this).val())) {
+                count_error = 0;
+            }
+        }    
+    }
+    else if (location.href.indexOf('phil-ind') !== -1 || location.href.indexOf('courier-eng-draft') !== -1){
+        let phoneVal = "+972531111111";
+        let regexp = /^\+972[0-9]+$/i;
+        let minLength = 5;
+        if ($('[name="shipper_country"]').val() === 'Germany') {
+            regexp = /^\+49[0-9]+$/i;
+            phoneVal = "+4953111111111";
+            countryCode = "+49";
+            minLength = 4;
+        }
+        
+        if ($(this).val()[0] !== '+' && $(this).val().length == 1) {
+            $(this).val(countryCode);
+        }
+        else if($(this).val().length > 16){
+            if ($(this).val().length == 17) {
+                $(this).val($(this).val().slice(0, -1));
             }
             else{
-                $(this).before(`
-                <div class="error-phone admin">
-                    Please fill the box "Shipper\'s phone number (standard)" in the 
-                    international format, i.e. "+972531111111".
-                </div>`);
+                $(this).val(countryCode);
             }
-        } else if ($(this).val().length < 5 || regexp.test($(this).val())) {
-            count_error = 0;
         }
-    }            
+        else if($(this).val().length < minLength){
+            $(this).val(countryCode);
+        }
+        else{           
+            if (!regexp.test($(this).val()) && count_error == 0) {
+                for (var i = $(this).val().length - 1; i >= 0; i--) {
+                    if (!regexp.test($(this).val())) {
+                        $(this).val($(this).val().slice(0, -1));
+                    }
+                    else break;
+                }           
+                count_error = 1; 
+
+                $(this).before(`
+                    <div class="error-phone">
+                    Please fill the box "Shipper\'s phone number (standard)" in the 
+                    international format, i.e. `+phoneVal+`.
+                    </div>`);
+
+            } else if (!regexp.test($(this).val()) && count_error == 1 && $(this).val().length > 1) {
+                for (var i = $(this).val().length - 1; i >= 0; i--) {
+                    if (!regexp.test($(this).val())) {
+                        $(this).val($(this).val().slice(0, -1));
+                    }
+                    else break;
+                }
+
+                $(this).before(`
+                    <div class="error-phone">
+                    Please fill the box "Shipper\'s phone number (standard)" in the 
+                    international format, i.e. `+phoneVal+`.
+                    </div>`);
+
+            } else if ($(this).val().length < minLength || regexp.test($(this).val())) {
+                count_error = 0;
+            }
+        }    
+    }        
 });
 
 

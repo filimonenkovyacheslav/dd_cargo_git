@@ -68,7 +68,7 @@
                                         </div>
                                         <div class="row">
                                             <div class="col-md-12">
-                                                {!! Form::text('standard_phone',old('standard_phone'),['class' => 'form-control standard-phone', 'required'])!!}
+                                                {!! Form::text('standard_phone',old('standard_phone'),['class' => 'form-control', 'required'])!!}
                                             </div>
                                         </div>
                                     </div>                                
@@ -92,6 +92,17 @@
                     </div>
                 </div> 
 
+                @if (session('phone_exist'))
+                    <script type="text/javascript">
+                        var phoneExist = '<?=session("phone_exist")?>';
+                        var phoneNumber = '<?=session("phone_number")?>';
+                    </script>
+                @else
+                    <script type="text/javascript">
+                        var phoneExist = ''
+                    </script>
+                @endif 
+
                 <!-- Link to open the modal -->
                 <a href="#addEngParcel" class="add-eng-parcel" style="display:none" data-toggle="modal"></a>
 
@@ -106,6 +117,14 @@
                 @endif
 
                 <h3>Shipper’s Data</h3>
+
+                <div class="form-group">
+                    <div class="row">
+                        <div class="col-md-6">
+                            {!! Form::select('shipper_country', array('Israel' => 'Israel', 'Germany' => 'Germany'), isset($data_parcel->shipper_country) ? $data_parcel->shipper_country : '',['class' => 'form-control']) !!}
+                        </div>
+                    </div>
+                </div>
 
                 <div class="form-group">
                     <div class="row">
@@ -189,7 +208,7 @@
                 <div class="form-group">
                     <div class="row">
                         <div class="col-md-6">
-                            {!! Form::select('consignee_country', array('India' => 'India', 'Nepal' => 'Nepal', 'The Philippines' => 'The Philippines'), isset($data_parcel->consignee_country) ? $data_parcel->consignee_country : old('consignee_country'), ['class' => 'form-control']) !!}
+                            {!! Form::select('consignee_country', array('India' => 'India', 'Nepal' => 'Nepal', 'Nigeria' => 'Nigeria', 'Ghana' => 'Ghana', 'Cote D\'Ivoire' => 'Cote D\'Ivoire', 'South Africa' => 'South Africa'), isset($data_parcel->consignee_country) ? $data_parcel->consignee_country: '',['class' => 'form-control']) !!}
                         </div>
                         <div class="col-md-6">
                             {!! Form::text('consignee_address',isset($data_parcel->consignee_address) ? $data_parcel->consignee_address : old('consignee_address'),['class' => 'form-control', 'placeholder' => 'Consignee\'s address'])!!}
@@ -381,9 +400,9 @@
             event.preventDefault();
             const form = event.target;
 
-            const phone = document.querySelector('[name="standard_phone"]'); 
-            if (phone.value.length < 10 || phone.value.length > 13) {
-                alert('The number of characters in the standard phone must be from 10 to 13 !');
+            const phone = document.querySelector('.add-form-eng [name="standard_phone"]'); 
+            if (phone.value.length < 10 || phone.value.length > 24) {
+                alert('The number of characters in the standard phone must be from 10 to 24 !');
                 return false;
             }
 

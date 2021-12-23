@@ -335,71 +335,133 @@ function philIndAnswer2(elem) {
 
 
 // Phone mask
+let countryCode = "+972";
+$('[name="shipper_country"]').on('change', function(){
+	if (location.href.indexOf('phil-ind') !== -1 || location.href.indexOf('add-form-en') !== -1){
+		if ($(this).val() === 'Germany') countryCode = "+49";
+		if ($(this).val() === 'Israel') countryCode = "+972";
+		$('.standard-phone').val(countryCode);	
+	}	
+});
+if (location.href.indexOf('phil-ind') !== -1 || location.href.indexOf('add-form-en') !== -1){
+	if ($('[name="shipper_country"]').val() === 'Germany') countryCode = "+49";
+	if (!$('.standard-phone').val()) $('.standard-phone').val(countryCode);	
+}
+
 let count_error = 0;
 $('.standard-phone').on('input', function() {
 	$('div.error-phone').remove();
-    if ($(this).val()[0] !== '+' && $(this).val().length == 1) {
-        $(this).val('+972');
-    }
-    else if($(this).val().length > 16){
-        if ($(this).val().length == 17) {
-            $(this).val($(this).val().slice(0, -1));
-        }
-        else{
-            $(this).val('+972');
-        }
-    }
-    else if($(this).val().length < 5){
-    	$(this).val('+972');
-    }
-    else{
-        var regexp = /^\+972[0-9]+$/i;
-        if (!regexp.test($(this).val()) && count_error == 0) {
-        	for (var i = $(this).val().length - 1; i >= 0; i--) {
-        		if (!regexp.test($(this).val())) {
-        			$(this).val($(this).val().slice(0, -1));
-        		}
-        		else break;
-        	}       	
-            count_error = 1; 
-            if (location.href.indexOf('phil-ind') == -1) {
-                $(this).before(`
-        		<div class="error-phone">
-	        		Пожалуйста, заполните поле "Номер телефона отправителя (основной)" в 
-	        		международном формате, например: "+972531111111".
-        		</div>`);
-            }
-            else{
-            	$(this).before(`
-        		<div class="error-phone">
-	        		Please fill the box "Shipper\'s phone number (standard)" in the 
-	        		international format, i.e. "+972531111111".
-        		</div>`);
-            }        
-        } else if (!regexp.test($(this).val()) && count_error == 1 && $(this).val().length > 1) {
-        	for (var i = $(this).val().length - 1; i >= 0; i--) {
-        		if (!regexp.test($(this).val())) {
-        			$(this).val($(this).val().slice(0, -1));
-        		}
-        		else break;
-        	}
-            if (location.href.indexOf('phil-ind') == -1) {
-                $(this).before(`
-        		<div class="error-phone">
-	        		Пожалуйста, заполните поле "Номер телефона отправителя (основной)" в 
-	        		международном формате, например: "+972531111111".
-        		</div>`);
-            }
-            else{
-            	$(this).before(`
-        		<div class="error-phone">
-	        		Please fill the box "Shipper\'s phone number (standard)" in the 
-	        		international format, i.e. "+972531111111".
-        		</div>`);
-            }
-        } else if ($(this).val().length < 5 || regexp.test($(this).val())) {
-            count_error = 0;
-        }
-    }            
+	if (location.href.indexOf('phil-ind') == -1 && location.href.indexOf('add-form-en') == -1) {
+
+		if ($(this).val()[0] !== '+' && $(this).val().length == 1) {
+			$(this).val(countryCode);
+		}
+		else if($(this).val().length > 16){
+			if ($(this).val().length == 17) {
+				$(this).val($(this).val().slice(0, -1));
+			}
+			else{
+				$(this).val(countryCode);
+			}
+		}
+		else if($(this).val().length < 5){
+			$(this).val(countryCode);
+		}
+		else{
+			var regexp = /^\+972[0-9]+$/i;
+			if (!regexp.test($(this).val()) && count_error == 0) {
+				for (var i = $(this).val().length - 1; i >= 0; i--) {
+					if (!regexp.test($(this).val())) {
+						$(this).val($(this).val().slice(0, -1));
+					}
+					else break;
+				}       	
+				count_error = 1; 
+
+				$(this).before(`
+					<div class="error-phone">
+					Пожалуйста, заполните поле "Номер телефона отправителя (основной)" в 
+					международном формате, например: "+972531111111".
+					</div>`);
+
+			} else if (!regexp.test($(this).val()) && count_error == 1 && $(this).val().length > 1) {
+				for (var i = $(this).val().length - 1; i >= 0; i--) {
+					if (!regexp.test($(this).val())) {
+						$(this).val($(this).val().slice(0, -1));
+					}
+					else break;
+				}
+
+				$(this).before(`
+					<div class="error-phone">
+					Пожалуйста, заполните поле "Номер телефона отправителя (основной)" в 
+					международном формате, например: "+972531111111".
+					</div>`);
+
+			} else if ($(this).val().length < 5 || regexp.test($(this).val())) {
+				count_error = 0;
+			}
+		}    
+	}
+	else if (location.href.indexOf('phil-ind') !== -1 || location.href.indexOf('add-form-en') !== -1){
+		let phoneVal = "+972531111111";
+		let regexp = /^\+972[0-9]+$/i;
+		let minLength = 5;
+		if ($('[name="shipper_country"]').val() === 'Germany') {
+			regexp = /^\+49[0-9]+$/i;
+			phoneVal = "+4953111111111";
+			countryCode = "+49";
+			minLength = 4;
+		}
+		
+		if ($(this).val()[0] !== '+' && $(this).val().length == 1) {
+			$(this).val(countryCode);
+		}
+		else if($(this).val().length > 16){
+			if ($(this).val().length == 17) {
+				$(this).val($(this).val().slice(0, -1));
+			}
+			else{
+				$(this).val(countryCode);
+			}
+		}
+		else if($(this).val().length < minLength){
+			$(this).val(countryCode);
+		}
+		else{			
+			if (!regexp.test($(this).val()) && count_error == 0) {
+				for (var i = $(this).val().length - 1; i >= 0; i--) {
+					if (!regexp.test($(this).val())) {
+						$(this).val($(this).val().slice(0, -1));
+					}
+					else break;
+				}       	
+				count_error = 1; 
+
+				$(this).before(`
+					<div class="error-phone">
+					Please fill the box "Shipper\'s phone number (standard)" in the 
+					international format, i.e. `+phoneVal+`.
+					</div>`);
+
+			} else if (!regexp.test($(this).val()) && count_error == 1 && $(this).val().length > 1) {
+				for (var i = $(this).val().length - 1; i >= 0; i--) {
+					if (!regexp.test($(this).val())) {
+						$(this).val($(this).val().slice(0, -1));
+					}
+					else break;
+				}
+
+				$(this).before(`
+					<div class="error-phone">
+					Please fill the box "Shipper\'s phone number (standard)" in the 
+					international format, i.e. `+phoneVal+`.
+					</div>`);
+
+			} else if ($(this).val().length < minLength || regexp.test($(this).val())) {
+				count_error = 0;
+			}
+		}    
+	}        
 });
 

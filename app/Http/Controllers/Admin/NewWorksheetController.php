@@ -30,6 +30,27 @@ class NewWorksheetController extends AdminController
 
     public function index(){
         $title = 'Новый рабочий лист';
+        
+        // Auto-update status
+        $update_date = Date('Y-m-d', strtotime('-7 days'));
+        NewWorksheet::where([
+        	['status_date','<=',$update_date],
+        	['status_date','<>',null],
+        	['status',"Доставляется на склад в стране отправителя"]
+        ]) 
+        ->orWhere([
+        	['status_date','<=',$update_date],
+        	['status_date','<>',null],
+        	['status',"На складе в стране отправителя"]
+        ])            
+        ->update([
+        	'status' => "Доставляется в страну получателя",
+        	'status_en' => "Forwarding to the receiver country",
+        	'status_ua' => "Доставляється в країну отримувача",
+        	'status_he' => " נשלח למדינת המקבל",
+        	'status_date' => date('Y-m-d')
+        ]);
+        
         $new_worksheet_obj = NewWorksheet::paginate(10);     
 
         $arr_columns = parent::new_columns();

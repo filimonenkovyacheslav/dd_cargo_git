@@ -628,6 +628,9 @@ a.btn-move{
 .table-columns{
   margin-right: 50px;
 }
+#right-panel{
+  width: 100%;
+}
 
 /*Bootstrap Modal*/
 .modal-footer{

@@ -25,7 +25,27 @@ class PhilIndWorksheetController extends AdminController
     
 
     public function index(){
-        $title = 'Work sheet';      
+        $title = 'Work sheet';     
+
+        // Auto-update status
+        $update_date = Date('Y-m-d', strtotime('-14 days'));
+        PhilIndWorksheet::where([
+        	['status_date','<=',$update_date],
+        	['status_date','<>',null],
+        	['status',"Forwarding to the warehouse in the sender country"]
+        ]) 
+        ->orWhere([
+        	['status_date','<=',$update_date],
+        	['status_date','<>',null],
+        	['status',"At the warehouse in the sender country"]
+        ])            
+        ->update([
+        	'status' => "Forwarding to the receiver country",
+        	'status_ru' => "Доставляется в страну получателя",
+        	'status_he' => " נשלח למדינת המקבל",
+        	'status_date' => date('Y-m-d')
+        ]); 
+        
         $phil_ind_worksheet_obj = PhilIndWorksheet::paginate(10);
         $arr_columns = parent::new_phil_ind_columns();
         
@@ -464,6 +484,8 @@ class PhilIndWorksheetController extends AdminController
     	$track_arr = $request->input('tracking');
     	$value_by = $request->input('value-by-tracking');
     	$column = $request->input('phil-ind-tracking-columns');
+    	$shipper_country_val = $request->input('shipper_country_val');
+    	$consignee_country_val = $request->input('consignee_country_val');
     	$check_column = 'tracking';
     	$this_column = 'tracking_main';
     	$status_error = '';
@@ -480,6 +502,10 @@ class PhilIndWorksheetController extends AdminController
     	}
 
     	if ($track_arr) {
+
+    		if ($column === 'shipper_country') $value_by = $shipper_country_val;
+    		if ($column === 'consignee_country') $value_by = $consignee_country_val;
+    		
     		if ($value_by && $column) {
 
     			$status_error = $this->checkColumns($track_arr, $value_by, $column, $this_column, 'phil_ind_worksheet');
@@ -537,6 +563,46 @@ class PhilIndWorksheetController extends AdminController
     				for ($i=0; $i < count($track_arr); $i++) { 
     					if ($old_lot_arr[$i] !== $value_by){
     						$this->updateWarehouseLot($track_arr[$i], $value_by, 'en');
+    					}
+    				}
+    			}
+
+    			if ($column === 'shipper_country') {
+    				for ($i=0; $i < count($track_arr); $i++) { 
+    					$worksheet = PhilIndWorksheet::where('tracking_main',$track_arr[$i])->first();
+    					if (!$worksheet->direction) {
+    						$worksheet->direction = $this->from_country_dir[$value_by].'-';
+    						$worksheet->save();
+    					}
+    					else{
+    						$temp = explode('-', $worksheet->direction);
+    						if (count($temp) == 2) {
+    							$worksheet->direction = $this->from_country_dir[$value_by].'-'.$temp[1];
+    						}
+    						else{
+    							$worksheet->direction = $this->from_country_dir[$value_by].'-';
+    						} 
+    						$worksheet->save();  						
+    					}
+    				}
+    			}
+
+    			if ($column === 'consignee_country') {
+    				for ($i=0; $i < count($track_arr); $i++) { 
+    					$worksheet = PhilIndWorksheet::where('tracking_main',$track_arr[$i])->first();
+    					if (!$worksheet->direction) {
+    						$worksheet->direction = '-'.$this->to_country_dir[$value_by];
+    						$worksheet->save();
+    					}
+    					else{
+    						$temp = explode('-', $worksheet->direction);
+    						if (count($temp) == 2) {
+    							$worksheet->direction = $temp[0].'-'.$this->to_country_dir[$value_by];
+    						}
+    						else{
+    							$worksheet->direction = '-'.$this->to_country_dir[$value_by];
+    						} 
+    						$worksheet->save();  						
     					}
     				}
     			}
@@ -767,6 +833,46 @@ class PhilIndWorksheetController extends AdminController
     					if ($old_lot_arr[$i] !== $value_by){
     						$worksheet = PhilIndWorksheet::where('id',$row_arr[$i])->first();
     						$this->updateWarehouseLot($worksheet->tracking_main, $value_by, 'en');
+    					}
+    				}
+    			}
+
+    			if ($column === 'shipper_country') {
+    				for ($i=0; $i < count($row_arr); $i++) { 
+    					$worksheet = PhilIndWorksheet::where('id',$row_arr[$i])->first();
+    					if (!$worksheet->direction) {
+    						$worksheet->direction = $this->from_country_dir[$value_by].'-';
+    						$worksheet->save();
+    					}
+    					else{
+    						$temp = explode('-', $worksheet->direction);
+    						if (count($temp) == 2) {
+    							$worksheet->direction = $this->from_country_dir[$value_by].'-'.$temp[1];
+    						}
+    						else{
+    							$worksheet->direction = $this->from_country_dir[$value_by].'-';
+    						} 
+    						$worksheet->save();  						
+    					}
+    				}
+    			}
+
+    			if ($column === 'consignee_country') {
+    				for ($i=0; $i < count($row_arr); $i++) { 
+    					$worksheet = PhilIndWorksheet::where('id',$row_arr[$i])->first();
+    					if (!$worksheet->direction) {
+    						$worksheet->direction = '-'.$this->to_country_dir[$value_by];
+    						$worksheet->save();
+    					}
+    					else{
+    						$temp = explode('-', $worksheet->direction);
+    						if (count($temp) == 2) {
+    							$worksheet->direction = $temp[0].'-'.$this->to_country_dir[$value_by];
+    						}
+    						else{
+    							$worksheet->direction = '-'.$this->to_country_dir[$value_by];
+    						} 
+    						$worksheet->save();  						
     					}
     				}
     			}

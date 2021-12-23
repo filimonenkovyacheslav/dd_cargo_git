@@ -26,11 +26,12 @@ class CourierEngDraftController extends AdminController
     public function index(Request $request){
         $title = 'Draft';
         // Auto-delete operator
-        $delete_date = Date('Y-m-d', strtotime('-2 days'));
+        $delete_date = Date('Y-m-d', strtotime('-3 days'));
         CourierEngDraftWorksheet::where([
         	['status_date','<=',$delete_date],
         	['status_date','<>',null]
         ])
+        ->whereNotIn('status', $this->status_arr_4)
         ->orWhere([
         	['status_date', null],
         	['created_at','<=',$delete_date]
@@ -38,8 +39,7 @@ class CourierEngDraftController extends AdminController
         ->orWhere([
         	['status_date', null],
         	['updated_at','<=',$delete_date]
-        ])
-        ->whereNotIn('status', $this->status_arr_4)
+        ])       
         ->update([
         	'operator' => null
         ]);
@@ -245,7 +245,7 @@ class CourierEngDraftController extends AdminController
     					$worksheet = CourierEngDraftWorksheet::where('id',$row_arr[$i])->first();
     					$old_pallet_arr[] = $worksheet->pallet_number;
     				}
-    			}
+    			}    			
     			
     			if ($column !== 'operator') {
     				CourierEngDraftWorksheet::whereIn('id', $row_arr)
@@ -286,6 +286,46 @@ class CourierEngDraftController extends AdminController
     					if ($old_lot_arr[$i] !== $value_by){
     						$worksheet = CourierEngDraftWorksheet::where('id',$row_arr[$i])->first();
     						$this->updateWarehouseLot($worksheet->tracking_main, $value_by, 'en');
+    					}
+    				}
+    			}
+
+    			if ($column === 'shipper_country') {
+    				for ($i=0; $i < count($row_arr); $i++) { 
+    					$worksheet = CourierEngDraftWorksheet::where('id',$row_arr[$i])->first();
+    					if (!$worksheet->direction) {
+    						$worksheet->direction = $this->from_country_dir[$value_by].'-';
+    						$worksheet->save();
+    					}
+    					else{
+    						$temp = explode('-', $worksheet->direction);
+    						if (count($temp) == 2) {
+    							$worksheet->direction = $this->from_country_dir[$value_by].'-'.$temp[1];
+    						}
+    						else{
+    							$worksheet->direction = $this->from_country_dir[$value_by].'-';
+    						} 
+    						$worksheet->save();  						
+    					}
+    				}
+    			}
+
+    			if ($column === 'consignee_country') {
+    				for ($i=0; $i < count($row_arr); $i++) { 
+    					$worksheet = CourierEngDraftWorksheet::where('id',$row_arr[$i])->first();
+    					if (!$worksheet->direction) {
+    						$worksheet->direction = '-'.$this->to_country_dir[$value_by];
+    						$worksheet->save();
+    					}
+    					else{
+    						$temp = explode('-', $worksheet->direction);
+    						if (count($temp) == 2) {
+    							$worksheet->direction = $temp[0].'-'.$this->to_country_dir[$value_by];
+    						}
+    						else{
+    							$worksheet->direction = '-'.$this->to_country_dir[$value_by];
+    						} 
+    						$worksheet->save();  						
     					}
     				}
     			}

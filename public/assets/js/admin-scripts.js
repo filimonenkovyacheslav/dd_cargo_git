@@ -12,7 +12,7 @@ $(document).ready(function() {
 
     let btnMove = $('a.btn-move');
     btnMove.detach();
-    if (location.href.indexOf('warehouse') == -1 && location.href.indexOf('packing-eng-new') == -1 && location.href.indexOf('receipts') == -1 && location.href.indexOf('new-worksheet') == -1 && location.href.indexOf('phil-ind-worksheet') == -1 && location.href.indexOf('draft-worksheet') == -1 && location.href.indexOf('new-packing') == -1 && location.href.indexOf('invoice') == -1 && location.href.indexOf('manifest') == -1) {
+    if (location.href.indexOf('couriers-tasks') == -1 && location.href.indexOf('warehouse') == -1 && location.href.indexOf('packing-eng-new') == -1 && location.href.indexOf('receipts') == -1 && location.href.indexOf('new-worksheet') == -1 && location.href.indexOf('phil-ind-worksheet') == -1 && location.href.indexOf('draft-worksheet') == -1 && location.href.indexOf('new-packing') == -1 && location.href.indexOf('invoice') == -1 && location.href.indexOf('manifest') == -1) {
         $('#bootstrap-data-table_length').after(btnMove.get(0));
         $('#bootstrap-data-table_length').after(btnMove.get(2));
         $('#bootstrap-data-table_length').after(btnMove.get(1));

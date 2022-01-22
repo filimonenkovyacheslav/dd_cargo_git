@@ -31,6 +31,12 @@ class FrontController extends AdminController
     }
 
 
+    public function parcelFormOld()
+    {
+        return view('parcel_form_old');       
+    }
+
+
     public function newParcelAdd(Request $request)
     {        
         $parcels_qty = (int)$request->input('parcels_qty');
@@ -40,25 +46,11 @@ class FrontController extends AdminController
             if ($message) return redirect()->route('parcelForm')->with('phone_exist', $message)->with('phone_number',$request->input('standard_phone'));
         }
         else{
-            if ($parcels_qty > 1) {
-                for ($i=0; $i < $parcels_qty; $i++) { 
-                    $message = $this->__newParcelAdd($request);
-                }
-            }
-            else{
-                $message = $this->__newParcelAdd($request);
-            }
+            $message = $this->__newParcelAdd($request);
             return redirect()->route('parcelForm')->with('status', $message);
         }        
         
-        if ($parcels_qty > 1) {
-            for ($i=0; $i < $parcels_qty; $i++) { 
-                $message = $this->__newParcelAdd($request);
-            }
-        }
-        else{
-            $message = $this->__newParcelAdd($request);
-        }
+        $message = $this->__newParcelAdd($request);
 
         return redirect()->route('parcelForm')->with('status', $message);
     }
@@ -119,23 +111,41 @@ class FrontController extends AdminController
                 $new_worksheet->$field = trim($content);
             }
             else if ($field === 'comment_2'){
-                $new_worksheet->$field = $request->input('need_box');
+                if ($request->input('need_box')) $new_worksheet->$field = $request->input('need_box');
+                if ($request->input('comment_2')) $new_worksheet->$field = $request->input('comment_2');
             }
             else if ($field !== 'created_at'){
                 $new_worksheet->$field = $request->input($field);
             }           
         }
 
+        $new_worksheet->in_trash = false;
+
+        // New parcel form
+        if (null !== $request->input('status_box')) {
+            if ($request->input('status_box') === 'false') {
+                $new_worksheet->status = 'Забрать';
+            } 
+            else{
+                $new_worksheet->status = 'Коробка';
+            }
+        }
+         
+        if (null !== $request->input('need_box')) {
+            if ($request->input('need_box') === 'Мне не нужна коробка') {
+                $new_worksheet->status = 'Забрать';
+            }
+            else{
+                $new_worksheet->status = 'Коробка';
+            }
+        }        
+
         $new_worksheet->date = date('Y.m.d');
-        $new_worksheet->status_date = date('Y-m-d');
-        if ($request->input('need_box') === 'Мне не нужна коробка') {
-            $new_worksheet->status = 'Забрать';
-        }
-        else{
-            $new_worksheet->status = 'Коробка';
-        }
+        $new_worksheet->status_date = date('Y-m-d');       
 
         if ($new_worksheet->save()){
+
+            $new_worksheet->checkCourierTask($new_worksheet->status);
 
             $this->addingOrderNumber($new_worksheet->standard_phone, 'ru');
 
@@ -397,25 +407,11 @@ class FrontController extends AdminController
             if ($message) return redirect($request->input('url_name').'?phone_exist='.$message.'&phone_number='.$request->input('standard_phone'));
         }
         else{
-            if ($parcels_qty > 1) {
-                for ($i=0; $i < $parcels_qty; $i++) { 
-                    $message = $this->__forwardParcelAdd($request);
-                }
-            }
-            else{
-                $message = $this->__forwardParcelAdd($request);
-            }
+            $message = $this->__forwardParcelAdd($request);
             return redirect($request->input('url_name').'?message='.$message);
         }
         
-        if ($parcels_qty > 1) {
-            for ($i=0; $i < $parcels_qty; $i++) { 
-                $message = $this->__forwardParcelAdd($request);
-            }
-        }
-        else{
-            $message = $this->__forwardParcelAdd($request);
-        }
+        $message = $this->__forwardParcelAdd($request);
 
         return redirect($request->input('url_name').'?message='.$message);
     }
@@ -483,6 +479,8 @@ class FrontController extends AdminController
                 }           
             }
 
+            $new_worksheet->in_trash = false;
+
             $new_worksheet->date = date('Y.m.d');
             $new_worksheet->status_date = date('Y-m-d');
             if ($request->input('need_box') === 'Мне не нужна коробка') {
@@ -493,6 +491,8 @@ class FrontController extends AdminController
             }            
 
             if($new_worksheet->save()){
+
+                $new_worksheet->checkCourierTask($new_worksheet->status);
 
                 $this->addingOrderNumber($new_worksheet->standard_phone, 'ru');
                 $work_sheet_id = $new_worksheet->id;
@@ -964,6 +964,12 @@ class FrontController extends AdminController
     }
 
 
+    public function philIndParcelFormOld()
+    {
+        return view('phil_ind_parcel_form_old');        
+    }
+
+
     public function philIndParcelAdd(Request $request)
     {
         $parcels_qty = (int)$request->input('parcels_qty');
@@ -973,25 +979,11 @@ class FrontController extends AdminController
             if ($message) return redirect()->route('philIndParcelForm')->with('phone_exist', $message)->with('phone_number',$request->input('standard_phone'));
         }  
         else{
-            if ($parcels_qty > 1) {
-                for ($i=0; $i < $parcels_qty; $i++) { 
-                    $message = $this->__philIndParcelAdd($request);
-                }
-            }
-            else{
-                $message = $this->__philIndParcelAdd($request);
-            }
+            $message = $this->__philIndParcelAdd($request);
             return redirect()->route('philIndParcelForm')->with('status', $message);
         }     
         
-        if ($parcels_qty > 1) {
-            for ($i=0; $i < $parcels_qty; $i++) { 
-                $message = $this->__philIndParcelAdd($request);
-            }
-        }
-        else{
-            $message = $this->__philIndParcelAdd($request);
-        }
+        $message = $this->__philIndParcelAdd($request);
 
         return redirect()->route('philIndParcelForm')->with('status', $message);
     }
@@ -1029,6 +1021,8 @@ class FrontController extends AdminController
             }                               
         }
 
+        $worksheet->in_trash = false;
+
         if (!$worksheet->date) {
             $worksheet->date = date('Y-m-d');
         } 
@@ -1044,6 +1038,8 @@ class FrontController extends AdminController
 
         if ($worksheet->save()) {
 
+            $worksheet->checkCourierTask($worksheet->status);
+
             $this->addingOrderNumber($worksheet->standard_phone, 'en');
             $work_sheet_id = $worksheet->id;
 
@@ -1053,6 +1049,8 @@ class FrontController extends AdminController
             foreach($fields_packing as $field){
                 if ($field === 'country') {
                     $packing->$field = $request->input('consignee_country');
+                    // New parcel form
+                    if (!$request->input('consignee_address')) $packing->consignee_address = $request->input('consignee_country');                    
                 }
                 elseif ($field === 'shipper_name') {
                     $packing->$field = $request->input('first_name').' '.$request->input('last_name');
@@ -1183,6 +1181,9 @@ class FrontController extends AdminController
             }                       
 
             if ($worksheet->save()) {
+
+                $worksheet->checkCourierTask($worksheet->status);
+                
                 $work_sheet_id = $worksheet->id;
                 $packing = null;
 

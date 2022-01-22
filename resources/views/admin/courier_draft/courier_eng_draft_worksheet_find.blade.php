@@ -128,6 +128,7 @@
 										<th>Status Date</th>
 										<th>Main Tracking number</th> 
 										<th>Order number</th>
+										<th>Parcels qty</th>
 										<th>Local tracking number</th>
 										<th>Pallet number</th>
 										<th>Comments 1</th>
@@ -198,6 +199,8 @@
 
 											<a class="btn btn-primary" href="{{ url('/admin/courier-eng-draft-worksheet/'.$row->id) }}">Change</a>
 
+											<a class="btn btn-default" onclick="ConfirmDouble(event)" href="{{ url('/admin/courier-eng-draft-worksheet-double/'.$row->id) }}">Double</a>
+
 											@endcan
 
 											@can('activateEngDraft')
@@ -208,9 +211,9 @@
 
 											@can('editPost')
 
-											{!! Form::open(['url'=>route('deleteCourierEngDraftWorksheet'),'onsubmit' => 'return ConfirmDelete()', 'class'=>'form-horizontal','method' => 'POST']) !!}
+											{!! Form::open(['url'=>route('deleteCourierEngDraftWorksheet'), 'class'=>'form-horizontal','method' => 'POST']) !!}
 											{!! Form::hidden('action',$row->id) !!}
-											{!! Form::button('Delete',['class'=>'btn btn-danger','type'=>'submit']) !!}
+											{!! Form::button('Delete',['class'=>'btn btn-danger','type'=>'submit','onclick' => 'ConfirmDelete(event)']) !!}
 											{!! Form::close() !!}
 
 											@endcan
@@ -232,6 +235,9 @@
 										</td>
 										<td class="td-button" title="{{$row->order_number}}">
 											<div class="div-22">{{$row->order_number}}</div>
+										</td>
+										<td title="{{$row->parcels_qty}}">
+											<div class="div-22">{{$row->parcels_qty}}</div>
 										</td>
 										<td title="{{$row->tracking_local}}">
 											<div class="div-3">{{$row->tracking_local}}</div>
@@ -388,6 +394,7 @@
 									<select class="form-control" id="phil-ind-tracking-columns" name="phil-ind-tracking-columns">
 										<option value="" selected="selected"></option>
 										<option value="status">Status</option>
+										<option value="parcels_qty">Parcels qty</option>
 										<option value="tracking_local">Local tracking number</option>
 										<option value="pallet_number">Pallet number</option>
 										<option value="comments_1">Comments 1</option>
@@ -438,8 +445,8 @@
 
 								@can('editPost')
 
-								{!! Form::open(['url'=>route('deleteCourierEngDraftWorksheetById'),'onsubmit' => 'return ConfirmDelete()','method' => 'POST']) !!}
-								{!! Form::button('Delete',['class'=>'btn btn-danger  checkbox-operations-delete','type'=>'submit']) !!}
+								{!! Form::open(['url'=>route('deleteCourierEngDraftWorksheetById'),'method' => 'POST']) !!}
+								{!! Form::button('Delete',['class'=>'btn btn-danger  checkbox-operations-delete','type'=>'submit','onclick' => 'ConfirmDelete(event)']) !!}
 								{!! Form::close() !!}
 
 								@endcan
@@ -466,11 +473,26 @@
 	}
 
 
-	function ConfirmDelete()
+	function ConfirmDelete(event)
 	{
-		var x = confirm("Are you sure you want to delete?");
+		event.preventDefault();
+		const form = event.target.parentElement;
+		const data = new URLSearchParams(new FormData(form)).toString();
+		var x = confirm("Are you sure you want to permanently delete?");
 		if (x)
-			return true;
+			form.submit();
+		else
+			location.href = '/admin/to-trash?'+data+'&table=courier_eng_draft_worksheet';
+	}
+	
+
+	function ConfirmDouble(event)
+	{
+		event.preventDefault();
+		const href = $(event.target).attr('href');
+		var x = confirm("Are you sure you want to double?");
+		if (x)
+			location.href = href;
 		else
 			return false;
 	}

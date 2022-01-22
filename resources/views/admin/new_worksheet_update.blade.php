@@ -634,6 +634,8 @@
 
 							{!! Form::hidden('id',$new_worksheet->id)!!}
 
+							{!! Form::hidden('in_trash',$new_worksheet->in_trash)!!}
+
 							{!! Form::hidden('background',$new_worksheet->background)!!}
 
 							{!! Form::hidden('status_date',$new_worksheet->status_date)!!}

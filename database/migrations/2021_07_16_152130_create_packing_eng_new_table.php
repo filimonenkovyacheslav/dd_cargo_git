@@ -32,7 +32,8 @@ class CreatePackingEngNewTable extends Migration
             $table->text('items')->nullable(); 
             $table->string('shipment_val')->nullable(); 
             $table->integer('work_sheet_id')->nullable();  
-            $table->string('lot')->nullable();        
+            $table->string('lot')->nullable(); 
+            $table->boolean('in_trash')->default(false);       
             $table->timestamps();
         });
     }

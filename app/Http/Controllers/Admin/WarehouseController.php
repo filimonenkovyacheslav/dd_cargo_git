@@ -146,8 +146,8 @@ class WarehouseController extends AdminController
         if ($which_admin !== $warehouse->which_admin) {
         	return redirect()->to(session('this_previous_url'))->with('status-error', 'Tracking number is not correct!');
         }
-        $worksheet_ru = NewWorksheet::where('tracking_main', $tracking)->first();
-        $worksheet_en = PhilIndWorksheet::where('tracking_main', $tracking)->first();
+        $worksheet_ru = NewWorksheet::where('in_trash',false)->where('tracking_main', $tracking)->first();
+        $worksheet_en = PhilIndWorksheet::where('in_trash',false)->where('tracking_main', $tracking)->first();
 
         if (!$worksheet_ru && !$worksheet_en) {
         	if($warehouse->notifications){

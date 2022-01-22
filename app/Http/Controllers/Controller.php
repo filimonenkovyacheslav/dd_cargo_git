@@ -11,12 +11,10 @@ use App\NewWorksheet;
 use App\PhilIndWorksheet;
 use App\CourierDraftWorksheet;
 use App\CourierEngDraftWorksheet;
-use App\DraftWorksheet;
 use App\NewPacking;
 use App\PackingSea;
 use App\Invoice;
 use App\Manifest;
-use App\EngDraftWorksheet;
 use App\PackingEng;
 use \Dejurin\GoogleTranslateForFree;
 use App\Receipt;
@@ -37,7 +35,9 @@ class Controller extends BaseController
 
     protected function createDirection($from, $to)
     {
-        return $this->from_country_dir[$from].'-'.$this->to_country_dir[$to];
+        $from = ($from) ? $this->from_country_dir[$from] : '';
+        $to = ($to) ? $this->to_country_dir[$to] : '';
+        return $from.'-'.$to;        
     }
 
     
@@ -358,30 +358,30 @@ class Controller extends BaseController
 
     private function checkMaxLotRu($pallet, $lot)
     {
-        $lots = NewWorksheet::where([
+        $lots = NewWorksheet::where('in_trash',false)->where([
             ['pallet_number',$pallet],
             ['batch_number',$lot]
         ])->get();
-        $other_lots = NewWorksheet::where([
+        $other_lots = NewWorksheet::where('in_trash',false)->where([
             ['pallet_number',$pallet],
             ['batch_number','<>',null],
             ['batch_number','<>',$lot]
         ])->get();
-        $empty_lots = NewWorksheet::where([
+        $empty_lots = NewWorksheet::where('in_trash',false)->where([
             ['pallet_number',$pallet],
             ['batch_number',null]
         ])->get();
 
-        $c_lots = CourierDraftWorksheet::where([
+        $c_lots = CourierDraftWorksheet::where('in_trash',false)->where([
             ['pallet_number',$pallet],
             ['batch_number',$lot]
         ])->get();
-        $c_other_lots = CourierDraftWorksheet::where([
+        $c_other_lots = CourierDraftWorksheet::where('in_trash',false)->where([
             ['pallet_number',$pallet],
             ['batch_number','<>',null],
             ['batch_number','<>',$lot]
         ])->get();
-        $c_empty_lots = CourierDraftWorksheet::where([
+        $c_empty_lots = CourierDraftWorksheet::where('in_trash',false)->where([
             ['pallet_number',$pallet],
             ['batch_number',null]
         ])->get();
@@ -413,11 +413,11 @@ class Controller extends BaseController
             $batch_number = array_count_values($batch_number);            
             $batch_number = array_keys($batch_number, max($batch_number))[0];
             
-            $max_other_lots = NewWorksheet::where([
+            $max_other_lots = NewWorksheet::where('in_trash',false)->where([
                 ['pallet_number',$pallet],
                 ['batch_number',$batch_number]
             ])->get();
-            $c_max_other_lots = CourierDraftWorksheet::where([
+            $c_max_other_lots = CourierDraftWorksheet::where('in_trash',false)->where([
                 ['pallet_number',$pallet],
                 ['batch_number',$batch_number]
             ])->get();
@@ -431,12 +431,12 @@ class Controller extends BaseController
             if ($max_other_lots->count() > $lots->count()) {
                 $lots = $max_other_lots;
                 $lot = $batch_number;
-                $other_lots = NewWorksheet::where([
+                $other_lots = NewWorksheet::where('in_trash',false)->where([
                     ['pallet_number',$pallet],
                     ['batch_number','<>',null],
                     ['batch_number','<>',$batch_number]
                 ])->get();
-                $c_other_lots = CourierDraftWorksheet::where([
+                $c_other_lots = CourierDraftWorksheet::where('in_trash',false)->where([
                     ['pallet_number',$pallet],
                     ['batch_number','<>',null],
                     ['batch_number','<>',$batch_number]
@@ -456,29 +456,29 @@ class Controller extends BaseController
 
     private function checkMaxLotEn($pallet, $lot)
     {
-        $lots = PhilIndWorksheet::where([
+        $lots = PhilIndWorksheet::where('in_trash',false)->where([
             ['pallet_number',$pallet],
             ['lot',$lot]
         ])->get();
-        $other_lots = PhilIndWorksheet::where([
+        $other_lots = PhilIndWorksheet::where('in_trash',false)->where([
             ['pallet_number',$pallet],
             ['lot','<>',null],
             ['lot','<>',$lot]
         ])->get();
-        $empty_lots = PhilIndWorksheet::where([
+        $empty_lots = PhilIndWorksheet::where('in_trash',false)->where([
             ['pallet_number',$pallet],
             ['lot',null]
         ])->get();
-        $c_lots = CourierEngDraftWorksheet::where([
+        $c_lots = CourierEngDraftWorksheet::where('in_trash',false)->where([
             ['pallet_number',$pallet],
             ['lot',$lot]
         ])->get();
-        $c_other_lots = CourierEngDraftWorksheet::where([
+        $c_other_lots = CourierEngDraftWorksheet::where('in_trash',false)->where([
             ['pallet_number',$pallet],
             ['lot','<>',null],
             ['lot','<>',$lot]
         ])->get();
-        $c_empty_lots = CourierEngDraftWorksheet::where([
+        $c_empty_lots = CourierEngDraftWorksheet::where('in_trash',false)->where([
             ['pallet_number',$pallet],
             ['lot',null]
         ])->get();
@@ -509,11 +509,11 @@ class Controller extends BaseController
         if ($batch_number) {
             $batch_number = array_count_values($batch_number);            
             $batch_number = array_keys($batch_number, max($batch_number))[0];
-            $max_other_lots = PhilIndWorksheet::where([
+            $max_other_lots = PhilIndWorksheet::where('in_trash',false)->where([
                 ['pallet_number',$pallet],
                 ['lot',$batch_number]
             ])->get();
-            $c_max_other_lots = CourierEngDraftWorksheet::where([
+            $c_max_other_lots = CourierEngDraftWorksheet::where('in_trash',false)->where([
                 ['pallet_number',$pallet],
                 ['lot',$batch_number]
             ])->get();
@@ -528,12 +528,12 @@ class Controller extends BaseController
             if ($max_other_lots->count() > $lots->count()) {
                 $lots = $max_other_lots;
                 $lot = $batch_number;
-                $other_lots = PhilIndWorksheet::where([
+                $other_lots = PhilIndWorksheet::where('in_trash',false)->where([
                     ['pallet_number',$pallet],
                     ['lot','<>',null],
                     ['lot','<>',$batch_number]
                 ])->get();
-                $c_other_lots = CourierEngDraftWorksheet::where([
+                $c_other_lots = CourierEngDraftWorksheet::where('in_trash',false)->where([
                     ['pallet_number',$pallet],
                     ['lot','<>',null],
                     ['lot','<>',$batch_number]
@@ -615,11 +615,11 @@ class Controller extends BaseController
         }
         else{
             // For empty lots
-            $empty_lots = NewWorksheet::where([
+            $empty_lots = NewWorksheet::where('in_trash',false)->where([
                 ['pallet_number',$old_pallet],
                 ['batch_number',null]
             ])->get();  
-            $c_empty_lots = CourierDraftWorksheet::where([
+            $c_empty_lots = CourierDraftWorksheet::where('in_trash',false)->where([
                 ['pallet_number',$old_pallet],
                 ['batch_number',null]
             ])->get(); 
@@ -632,12 +632,12 @@ class Controller extends BaseController
                          
             if ($empty_lots) $temp_arr = $empty_lots->pluck('tracking_main')->toArray();
 
-            $first_lot = NewWorksheet::where([
+            $first_lot = NewWorksheet::where('in_trash',false)->where([
                 ['pallet_number',$old_pallet],
                 ['batch_number', '<>',null]
             ])->first();  
             if (!$first_lot) {
-                $first_lot = CourierDraftWorksheet::where([
+                $first_lot = CourierDraftWorksheet::where('in_trash',false)->where([
                     ['pallet_number',$old_pallet],
                     ['batch_number', '<>',null]
                 ])->first();
@@ -768,11 +768,11 @@ class Controller extends BaseController
         }
         else{
             // For empty lots
-            $empty_lots = PhilIndWorksheet::where([
+            $empty_lots = PhilIndWorksheet::where('in_trash',false)->where([
                 ['pallet_number',$old_pallet],
                 ['lot',null]
             ])->get(); 
-            $c_empty_lots = CourierEngDraftWorksheet::where([
+            $c_empty_lots = CourierEngDraftWorksheet::where('in_trash',false)->where([
                 ['pallet_number',$old_pallet],
                 ['lot',null]
             ])->get();    
@@ -784,12 +784,12 @@ class Controller extends BaseController
             }            
             if ($empty_lots) $temp_arr = $empty_lots->pluck('tracking_main')->toArray();
 
-            $first_lot = PhilIndWorksheet::where([
+            $first_lot = PhilIndWorksheet::where('in_trash',false)->where([
                 ['pallet_number',$old_pallet],
                 ['lot', '<>',null]
             ])->first();  
             if (!$first_lot) {
-                $first_lot = CourierEngDraftWorksheet::where([
+                $first_lot = CourierEngDraftWorksheet::where('in_trash',false)->where([
                     ['pallet_number',$old_pallet],
                     ['lot', '<>',null]
                 ])->first();
@@ -863,12 +863,12 @@ class Controller extends BaseController
             $result = $this->checkMaxLotRu($pallet, $lot);
         }
         else{           
-            $first_lot = NewWorksheet::where([
+            $first_lot = NewWorksheet::where('in_trash',false)->where([
                 ['pallet_number',$pallet],
                 ['batch_number', '<>',null]
             ])->first();   
             if (!$first_lot) {
-                $first_lot = CourierDraftWorksheet::where([
+                $first_lot = CourierDraftWorksheet::where('in_trash',false)->where([
                     ['pallet_number',$pallet],
                     ['batch_number', '<>',null]
                 ])->first();
@@ -878,11 +878,11 @@ class Controller extends BaseController
                 $result = $this->checkMaxLotRu($pallet, $first_lot->batch_number);                
             }
             else {
-                $lots = NewWorksheet::where([
+                $lots = NewWorksheet::where('in_trash',false)->where([
                     ['pallet_number',$pallet],
                     ['batch_number',null]
                 ])->get();
-                $c_lots = CourierDraftWorksheet::where([
+                $c_lots = CourierDraftWorksheet::where('in_trash',false)->where([
                     ['pallet_number',$pallet],
                     ['batch_number',null]
                 ])->get();
@@ -908,12 +908,12 @@ class Controller extends BaseController
             $result = $this->checkMaxLotEn($pallet, $lot);
         }
         else{           
-            $first_lot = PhilIndWorksheet::where([
+            $first_lot = PhilIndWorksheet::where('in_trash',false)->where([
                 ['pallet_number',$pallet],
                 ['lot', '<>',null]
             ])->first();
             if (!$first_lot) {
-                $first_lot = CourierEngDraftWorksheet::where([
+                $first_lot = CourierEngDraftWorksheet::where('in_trash',false)->where([
                     ['pallet_number',$pallet],
                     ['lot', '<>',null]
                 ])->first();
@@ -923,11 +923,11 @@ class Controller extends BaseController
                 $result = $this->checkMaxLotEn($pallet, $first_lot->lot);                
             }
             else {
-                $lots = PhilIndWorksheet::where([
+                $lots = PhilIndWorksheet::where('in_trash',false)->where([
                     ['pallet_number',$pallet],
                     ['lot',null]
                 ])->get();
-                $c_lots = CourierEngDraftWorksheet::where([
+                $c_lots = CourierEngDraftWorksheet::where('in_trash',false)->where([
                     ['pallet_number',$pallet],
                     ['lot',null]
                 ])->get();
@@ -956,12 +956,12 @@ class Controller extends BaseController
         $empty_lots_count = 0;
 
         if ($which_admin === 'ru') {
-            $worksheet = NewWorksheet::where('tracking_main',$tracking)->first();
+            $worksheet = NewWorksheet::where('in_trash',false)->where('tracking_main',$tracking)->first();
             if (!$worksheet) {
-                $worksheet = CourierDraftWorksheet::where('tracking_main',$tracking)->first();
+                $worksheet = CourierDraftWorksheet::where('in_trash',false)->where('tracking_main',$tracking)->first();
             }
-            $pallets = NewWorksheet::where('pallet_number',$worksheet->pallet_number)->get();
-            $c_pallets = CourierDraftWorksheet::where('pallet_number',$worksheet->pallet_number)->get();
+            $pallets = NewWorksheet::where('in_trash',false)->where('pallet_number',$worksheet->pallet_number)->get();
+            $c_pallets = CourierDraftWorksheet::where('in_trash',false)->where('pallet_number',$worksheet->pallet_number)->get();
             if ($pallets && $c_pallets) {
                 $pallets = $pallets->merge($c_pallets);
             }
@@ -977,12 +977,12 @@ class Controller extends BaseController
             $different_lots = $pallets->count() - $lots->count();                        
         }
         elseif ($which_admin === 'en') {
-            $worksheet = PhilIndWorksheet::where('tracking_main',$tracking)->first();
+            $worksheet = PhilIndWorksheet::where('in_trash',false)->where('tracking_main',$tracking)->first();
             if (!$worksheet) {
-                $worksheet = CourierEngDraftWorksheet::where('tracking_main',$tracking)->first();
+                $worksheet = CourierEngDraftWorksheet::where('in_trash',false)->where('tracking_main',$tracking)->first();
             }
-            $pallets = PhilIndWorksheet::where('pallet_number',$worksheet->pallet_number)->get();
-            $c_pallets = CourierEngDraftWorksheet::where('pallet_number',$worksheet->pallet_number)->get();
+            $pallets = PhilIndWorksheet::where('in_trash',false)->where('pallet_number',$worksheet->pallet_number)->get();
+            $c_pallets = CourierEngDraftWorksheet::where('in_trash',false)->where('pallet_number',$worksheet->pallet_number)->get();
             if ($pallets && $c_pallets) {
                 $pallets = $pallets->merge($c_pallets);
             }
@@ -1106,24 +1106,24 @@ class Controller extends BaseController
                 $result->save();
             }
             if ($this->checkWhichAdmin($tracking) === 'ru'){                   
-                NewWorksheet::where('tracking_main', $tracking)
+                NewWorksheet::where('in_trash',false)->where('tracking_main', $tracking)
                 ->update([
                     'pallet_number' => $result->pallet,
                     'batch_number' => $result->lot
                 ]);
-                CourierDraftWorksheet::where('tracking_main', $tracking)
+                CourierDraftWorksheet::where('in_trash',false)->where('tracking_main', $tracking)
                 ->update([
                     'pallet_number' => $result->pallet,
                     'batch_number' => $result->lot
                 ]);
             }
             else if ($this->checkWhichAdmin($tracking) === 'en'){
-                PhilIndWorksheet::where('tracking_main', $tracking)
+                PhilIndWorksheet::where('in_trash',false)->where('tracking_main', $tracking)
                 ->update([
                     'pallet_number' => $result->pallet,
                     'lot' => $result->lot
                 ]);
-                CourierEngDraftWorksheet::where('tracking_main', $tracking)
+                CourierEngDraftWorksheet::where('in_trash',false)->where('tracking_main', $tracking)
                 ->update([
                     'pallet_number' => $result->pallet,
                     'lot' => $result->lot
@@ -1221,9 +1221,9 @@ class Controller extends BaseController
 
         if ($which_admin === 'ru') {
             
-            $data = NewWorksheet::where('standard_phone', '+'.$standard_phone)
+            $data = NewWorksheet::where('in_trash',false)->where('standard_phone', '+'.$standard_phone)
             ->get();
-            $c_data = CourierDraftWorksheet::where('standard_phone', '+'.$standard_phone)->get();
+            $c_data = CourierDraftWorksheet::where('in_trash',false)->where('standard_phone', '+'.$standard_phone)->get();
             if ($data && $c_data) {
                 $data = $data->merge($c_data);
             }
@@ -1242,13 +1242,13 @@ class Controller extends BaseController
                 $data->transform(function ($item, $key) use($standard_phone) {
                     if (!$item->order_number) {
 
-                        $i = NewWorksheet::where([
+                        $i = NewWorksheet::where('in_trash',false)->where([
                             ['standard_phone', '+'.$standard_phone],
                             ['order_number', '<>', null]
                         ])->get()->last();
                         if ($i) $i = (int)$i->order_number;
 
-                        $c_i = CourierDraftWorksheet::where([
+                        $c_i = CourierDraftWorksheet::where('in_trash',false)->where([
                             ['standard_phone', '+'.$standard_phone],
                             ['order_number', '<>', null]
                         ])->get()->last();
@@ -1264,8 +1264,8 @@ class Controller extends BaseController
         } 
         elseif ($which_admin === 'en') {
 
-            $data = PhilIndWorksheet::where('standard_phone', '+'.$standard_phone)->get();
-            $c_data = CourierEngDraftWorksheet::where('standard_phone', '+'.$standard_phone)->get();
+            $data = PhilIndWorksheet::where('in_trash',false)->where('standard_phone', '+'.$standard_phone)->get();
+            $c_data = CourierEngDraftWorksheet::where('in_trash',false)->where('standard_phone', '+'.$standard_phone)->get();
             if ($data && $c_data) {
                 $data = $data->merge($c_data);
             }
@@ -1284,13 +1284,13 @@ class Controller extends BaseController
                 $data->transform(function ($item, $key) use($standard_phone) {
                     if (!$item->order_number) {
 
-                        $i = PhilIndWorksheet::where([
+                        $i = PhilIndWorksheet::where('in_trash',false)->where([
                                 ['standard_phone', '+'.$standard_phone],
                                 ['order_number', '<>', null]
                             ])->get()->last();
                         if ($i) $i = (int)$i->order_number;
                         
-                        $c_i = CourierEngDraftWorksheet::where([
+                        $c_i = CourierEngDraftWorksheet::where('in_trash',false)->where([
                                 ['standard_phone', '+'.$standard_phone],
                                 ['order_number', '<>', null]
                             ])->get()->last();
@@ -1309,87 +1309,6 @@ class Controller extends BaseController
 
     public function importDraft()
     {
-        /*$draft = NewWorksheet::where('order_number', null)->pluck('standard_phone')->unique();
-        $c_draft = CourierDraftWorksheet::where('order_number', null)->pluck('standard_phone')->unique();
-        $draft = $draft->merge($c_draft);
-        foreach ($draft as $key => $value) {
-            if ($value) $this->addingOrderNumber($value, 'ru');
-        }*/
-        
-
-        /*$draft = PhilIndWorksheet::where('order_number', null)->pluck('standard_phone');
-        for ($i=0; $i < count($draft); $i++) { 
-            $this->addingOrderNumber($draft[$i], 'en');
-        }*/
-
-        /*DraftWorksheet::query()->where([
-            ['parcels_qty',null],
-            ['id','>',486]
-        ])->orderBy('id')->chunk('1000', function($rows) {
-            foreach($rows as $row) {
-                $id = $row->id;
-                //$parcels_qty = (int)$row->parcels_qty;
-                $packing = PackingSea::where('work_sheet_id',$id)->get();
-                
-                //for ($i=0; $i < $parcels_qty; $i++) { 
-                    CourierDraftWorksheet::create($row->toArray());
-                    $new_id = DB::getPdo()->lastInsertId();
-                    if ($packing) {
-                        $packing->each(function ($item, $key) use($new_id){                                 
-                            $new_packing = $item->replicate();
-                            $new_packing->work_sheet_id = $new_id;
-                            $new_packing->save();
-                        });
-                    }                                          
-                //}                   
-
-                $this->addingOrderNumber($row->standard_phone, 'ru');              
-                PackingSea::where('work_sheet_id',$id)->delete();               
-            }
-        });*/
-        /*DraftWorksheet::query()->orderBy('id')->chunk('1000', function($rows) {
-            foreach($rows as $row) {
-                $id = $row->id;
-                $parcels_qty = (int)$row->parcels_qty;
-                $packing = PackingSea::where('work_sheet_id',$id)->get();
-                
-                for ($i=0; $i < $parcels_qty; $i++) { 
-                    CourierDraftWorksheet::create($row->toArray());
-                    $new_id = DB::getPdo()->lastInsertId();
-                    if ($packing) {
-                        $packing->each(function ($item, $key) use($new_id){                                 
-                            $new_packing = $item->replicate();
-                            $new_packing->work_sheet_id = $new_id;
-                            $new_packing->save();
-                        });
-                    }                                          
-                }                   
-
-                $this->addingOrderNumber($row->standard_phone, 'ru');              
-                PackingSea::where('work_sheet_id',$id)->delete();               
-            }
-        });
-
-        EngDraftWorksheet::query()->orderBy('id')->chunk('1000', function($rows) {
-            foreach($rows as $row) {
-                $id = $row->id;
-                $parcels_qty = (int)$row->parcels_qty;
-                $packing = PackingEng::where('work_sheet_id',$id)->first();
-                
-                for ($i=0; $i < $parcels_qty; $i++) { 
-                    CourierEngDraftWorksheet::create($row->toArray());
-                    $new_id = DB::getPdo()->lastInsertId();
-                    if ($packing) {
-                        $new_packing = $packing->replicate();
-                        $new_packing->work_sheet_id = $new_id;
-                        $new_packing->save();
-                    }                   
-                }
-                
-                $this->addingOrderNumber($row->standard_phone, 'en');
-                PackingEng::where('work_sheet_id',$id)->delete();             
-            }
-        });*/
 
         return '<h1>Draft imported successfully !</h1>';
     }

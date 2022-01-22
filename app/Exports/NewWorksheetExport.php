@@ -14,7 +14,7 @@ class NewWorksheetExport implements FromQuery, WithHeadings
 
     public function query()
     {
-        return NewWorksheet::query();
+        return NewWorksheet::query()->where('in_trash',false);
     } 
     
     public function headings(): array

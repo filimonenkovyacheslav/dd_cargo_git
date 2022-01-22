@@ -146,7 +146,20 @@
                     <li>
                         <a href="{{route('adminPhilIndIndex')}}"><i class="menu-icon fa fa-book "></i> Philippines India admin </a>
                     </li> 
-                    @endcan            
+                    @endcan   
+         
+                    @can('editCourierTasks')
+                    <li>
+                        <a href="{{route('adminCourierTask')}}"><i class="menu-icon fa fa-book "></i> Couriers Tasks</a>
+                    </li> 
+                    @endcan     
+
+                    @can('changeColor')
+                    <li>
+                        <a href="{{route('adminTrash')}}"><i class="menu-icon fa fa-book "></i> Корзина/Trash</a>
+                    </li> 
+                    @endcan      
+                
                 </ul>               
             </div><!-- /.navbar-collapse -->
         </nav>

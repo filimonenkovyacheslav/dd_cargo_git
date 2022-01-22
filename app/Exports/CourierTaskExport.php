@@ -2,23 +2,23 @@
 
 namespace App\Exports;
 
-use App\DraftWorksheet;
+use App\CourierTask;
 use Maatwebsite\Excel\Concerns\FromQuery;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\Exportable;
 use Illuminate\Support\Facades\Schema;
 
-class DraftWorksheetExport implements FromQuery, WithHeadings
+class CourierTaskExport implements FromQuery, WithHeadings
 {  
 	use Exportable;
 
     public function query()
     {
-        return DraftWorksheet::query();
+        return CourierTask::query();
     } 
     
     public function headings(): array
     {
-        return Schema::getColumnListing('draft_worksheet');
+        return Schema::getColumnListing('couriers_tasks');
     }
 }

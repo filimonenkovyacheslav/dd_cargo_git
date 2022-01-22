@@ -14,7 +14,7 @@ class ManifestExport implements FromQuery, WithHeadings
 
     public function query()
     {
-        return Manifest::query()->orderBy('work_sheet_id');
+        return Manifest::query()->where('in_trash',false)->orderBy('work_sheet_id');
     } 
     
     public function headings(): array

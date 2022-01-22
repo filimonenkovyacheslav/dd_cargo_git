@@ -73,6 +73,13 @@
 								{!! Form::text('tracking_main',$courier_draft_worksheet->tracking_main,['class' => 'form-control'])!!}
 							</div>
 						</div>
+
+						<div class="form-group">
+							{!! Form::label('parcels_qty','Кол-во посылок',['class' => 'col-md-2 control-label'])   !!}
+							<div class="col-md-8">
+								{!! Form::number('parcels_qty',$courier_draft_worksheet->parcels_qty,['class' => 'form-control'])!!}
+							</div>
+						</div>
 						
 						<div class="form-group">
 							{!! Form::label('tracking_local','Трекинг Локальные',['class' => 'col-md-2 control-label'])   !!}
@@ -395,6 +402,10 @@
 						</div>
 
 							{!! Form::hidden('id',$courier_draft_worksheet->id)!!}
+
+							{!! Form::hidden('in_trash',$courier_draft_worksheet->in_trash)!!}
+
+							{!! Form::hidden('parcels_qty',$courier_draft_worksheet->parcels_qty)!!}
 
 							{!! Form::hidden('site_name',$courier_draft_worksheet->site_name,['class' => 'form-control'])!!}
 

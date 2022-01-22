@@ -21,6 +21,7 @@ class CreateCourierEngDraftWorksheetTable extends Migration
             $table->string('status_date')->nullable();      
             $table->string('tracking_main')->nullable();
             $table->string('order_number')->nullable();
+            $table->string('parcels_qty')->default('1');
             $table->string('tracking_local')->nullable();
             $table->string('pallet_number')->nullable();
             $table->text('comments_1')->nullable();
@@ -61,7 +62,8 @@ class CreateCourierEngDraftWorksheetTable extends Migration
             $table->string('consignee_name_customs')->nullable();
             $table->text('consignee_address_customs')->nullable();
             $table->string('consignee_phone_customs')->nullable();
-            $table->string('consignee_id_customs')->nullable();     
+            $table->string('consignee_id_customs')->nullable();  
+            $table->boolean('in_trash')->default(false);   
             $table->timestamps();
         });
     }

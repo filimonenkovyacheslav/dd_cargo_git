@@ -31,7 +31,8 @@ class CreatePackingEngTable extends Migration
             $table->string('weight')->nullable();
             $table->text('items')->nullable(); 
             $table->string('shipment_val')->nullable(); 
-            $table->integer('work_sheet_id')->nullable();          
+            $table->integer('work_sheet_id')->nullable();  
+            $table->boolean('in_trash')->default(false);        
             $table->timestamps();
         });
     }

@@ -24,6 +24,7 @@ class CreateReceiptsArchiveTable extends Migration
             $table->date('update_date')->nullable();
             $table->boolean('status')->default(true);
             $table->text('comment')->nullable();
+            $table->boolean('in_trash')->default(false);
             $table->timestamps();
         });
     }

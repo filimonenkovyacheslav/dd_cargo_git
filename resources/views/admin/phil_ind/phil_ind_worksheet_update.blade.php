@@ -560,6 +560,8 @@
 
 							{!! Form::hidden('id',$phil_ind_worksheet->id)!!}
 
+							{!! Form::hidden('in_trash',$phil_ind_worksheet->in_trash)!!}
+
 							{!! Form::hidden('background',$phil_ind_worksheet->background)!!}
 
 							{!! Form::hidden('status_date',$phil_ind_worksheet->status_date)!!}

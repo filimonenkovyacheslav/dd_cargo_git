@@ -146,7 +146,7 @@ var quantityNo = 0;
 var quantitySender = 0;
 var quantityRecipient = 0;
 
-function clickAnswer(elem) {
+function clickAnswer(elem) {	
 	quantityClick++;
 	if ($(elem).hasClass('yes')) quantityYes++;
 	if ($(elem).hasClass('no')) quantityNo++;
@@ -159,7 +159,7 @@ function clickAnswer(elem) {
 		$('[name="quantity_recipient"]').val(quantityRecipient);
 	}
 	
-	if (quantityClick == 1) {		
+	/*if (quantityClick == 1) {		
 		setTimeout(
 			()=>{ 
 				$('#addRuParcel .question').text('Ввести те же данные получателя, которые были при предыдущем заказе?');
@@ -170,6 +170,16 @@ function clickAnswer(elem) {
 			}, 500);		
 	}
 	else if(quantityClick == 2 && quantityYes > 0) {		
+		setTimeout(
+			()=>{ 
+				$('#addRuParcel .question').text('Введите ваш номер телефона');
+				$('#addRuParcel .yes').hide();
+				$('#addRuParcel .no').hide();
+				$('#addRuParcel .check-phone').show();
+				$('#addRuParcel').modal(); 
+			}, 500);					
+	}*/
+	if(quantityClick == 1) {		
 		setTimeout(
 			()=>{ 
 				$('#addRuParcel .question').text('Введите ваш номер телефона');
@@ -195,7 +205,7 @@ function philIndAnswer(elem) {
 		$('[name="quantity_recipient"]').val(quantityRecipient);
 	}
 	
-	if (quantityClick == 1) {		
+	/*if (quantityClick == 1) {		
 		setTimeout(
 			()=>{ 
 				$('#philIndParcel .question').text('Enter the same recipient data that you had on the previous order?');
@@ -214,6 +224,16 @@ function philIndAnswer(elem) {
 				$('#philIndParcel .check-phone').show();
 				$('#philIndParcel').modal(); 
 			}, 500);					
+	}*/
+	if(quantityClick == 1) {		
+		setTimeout(
+			()=>{ 
+				$('#philIndParcel .question').text('Enter your phone number');
+				$('#philIndParcel .yes').hide();
+				$('#philIndParcel .no').hide();
+				$('#philIndParcel .check-phone').show();
+				$('#philIndParcel').modal(); 
+			}, 500);					
 	}
 }
 
@@ -224,7 +244,7 @@ if (phoneExist) {
 }
 
 
-function clickAnswer2(elem) {
+function clickAnswer2(elem) {	
 	quantityClick++;
 	if ($(elem).hasClass('yes')) quantityYes++;
 	if ($(elem).hasClass('no')) quantityNo++;
@@ -237,7 +257,7 @@ function clickAnswer2(elem) {
 		$('[name="quantity_recipient"]').val(quantityRecipient);
 	}
 	
-	if (quantityClick == 1 && quantityYes == 1) {		
+	/*if (quantityClick == 1 && quantityYes == 1) {		
 		setTimeout(
 			()=>{ 
 				$('#phoneExist .question').text('Вы хотите отправить тому же получателю?');
@@ -275,6 +295,28 @@ function clickAnswer2(elem) {
 				$('[name="quantity_recipient"]').val('');
 				$('#phoneExist .check-phone').submit();				
 			}, 500);					
+	}*/
+	if(quantityClick == 1 && quantityYes == 0) {		
+		setTimeout(
+			()=>{ 
+				$('#phoneExist .question').text('Благодарим за уточнение. Ваш существующий заказ обрабатывается');
+				$('#phoneExist .yes').hide();
+				$('#phoneExist .no').hide();
+				$('#phoneExist').modal(); 
+				quantityClick = 0;
+				quantityYes = 0;
+				quantityNo = 0;
+				quantitySender = 0;
+				quantityRecipient = 0;
+			}, 500);					
+	}
+	else if(quantityClick == 1 && quantityYes == 1) {		
+		setTimeout(
+			()=>{ 
+				$('#phoneExist [name="sender_phone"]').val(phoneNumber);
+				$('[name="quantity_recipient"]').val('');
+				$('#phoneExist .check-phone').submit();				
+			}, 500);					
 	}
 }
 
@@ -292,7 +334,7 @@ function philIndAnswer2(elem) {
 		$('[name="quantity_recipient"]').val(quantityRecipient);
 	}
 	
-	if (quantityClick == 1 && quantityYes == 1) {		
+	/*if (quantityClick == 1 && quantityYes == 1) {		
 		setTimeout(
 			()=>{ 
 				$('#phoneExist .question').text('Do you want to ship to the same consignee?');
@@ -324,6 +366,28 @@ function philIndAnswer2(elem) {
 			}, 500);					
 	}
 	else if(quantityClick == 2 && quantityYes == 1) {		
+		setTimeout(
+			()=>{ 
+				$('#phoneExist [name="shipper_phone"]').val(phoneNumber);
+				$('[name="quantity_recipient"]').val('');
+				$('#phoneExist .check-phone').submit();				
+			}, 500);					
+	}*/
+	if(quantityClick == 1 && quantityYes == 0) {		
+		setTimeout(
+			()=>{ 
+				$('#phoneExist .question').text('Thank you for your clarification. Your existing order is being processed');
+				$('#phoneExist .yes').hide();
+				$('#phoneExist .no').hide();
+				$('#phoneExist').modal(); 
+				quantityClick = 0;
+				quantityYes = 0;
+				quantityNo = 0;
+				quantitySender = 0;
+				quantityRecipient = 0;
+			}, 500);					
+	}
+	else if(quantityClick == 1 && quantityYes == 1) {		
 		setTimeout(
 			()=>{ 
 				$('#phoneExist [name="shipper_phone"]').val(phoneNumber);

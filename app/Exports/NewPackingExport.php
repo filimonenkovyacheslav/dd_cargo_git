@@ -14,7 +14,7 @@ class NewPackingExport implements FromQuery, WithHeadings
 
     public function query()
     {
-        return NewPacking::query()->orderBy('work_sheet_id');
+        return NewPacking::query()->where('in_trash',false)->orderBy('work_sheet_id');
     } 
     
     public function headings(): array

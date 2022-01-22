@@ -178,7 +178,7 @@
 										<th>{{$new_column_1}}<hr>
 											@can('editPost')
 
-											{!! Form::open(['url'=>route('philIndWorksheetDeleteColumn'),'onsubmit' => 'return ConfirmDelete()', 'class'=>'form-horizontal','method' => 'POST']) !!}
+											{!! Form::open(['url'=>route('philIndWorksheetDeleteColumn'),'onsubmit' => 'return ConfirmDeleteColumn()', 'class'=>'form-horizontal','method' => 'POST']) !!}
 											{!! Form::hidden('name_column','new_column_1') !!}
 											{!! Form::button('Delete',['class'=>'btn btn-danger','type'=>'submit']) !!}
 											{!! Form::close() !!}
@@ -190,7 +190,7 @@
 										<th>{{$new_column_2}}<hr>
 											@can('editPost')
 
-											{!! Form::open(['url'=>route('philIndWorksheetDeleteColumn'),'onsubmit' => 'return ConfirmDelete()', 'class'=>'form-horizontal','method' => 'POST']) !!}
+											{!! Form::open(['url'=>route('philIndWorksheetDeleteColumn'),'onsubmit' => 'return ConfirmDeleteColumn()', 'class'=>'form-horizontal','method' => 'POST']) !!}
 											{!! Form::hidden('name_column','new_column_2') !!}
 											{!! Form::button('Delete',['class'=>'btn btn-danger','type'=>'submit']) !!}
 											{!! Form::close() !!}
@@ -202,7 +202,7 @@
 										<th>{{$new_column_3}}<hr>
 											@can('editPost')
 
-											{!! Form::open(['url'=>route('philIndWorksheetDeleteColumn'),'onsubmit' => 'return ConfirmDelete()', 'class'=>'form-horizontal','method' => 'POST']) !!}
+											{!! Form::open(['url'=>route('philIndWorksheetDeleteColumn'),'onsubmit' => 'return ConfirmDeleteColumn()', 'class'=>'form-horizontal','method' => 'POST']) !!}
 											{!! Form::hidden('name_column','new_column_3') !!}
 											{!! Form::button('Delete',['class'=>'btn btn-danger','type'=>'submit']) !!}
 											{!! Form::close() !!}
@@ -214,7 +214,7 @@
 										<th>{{$new_column_4}}<hr>
 											@can('editPost')
 
-											{!! Form::open(['url'=>route('philIndWorksheetDeleteColumn'),'onsubmit' => 'return ConfirmDelete()', 'class'=>'form-horizontal','method' => 'POST']) !!}
+											{!! Form::open(['url'=>route('philIndWorksheetDeleteColumn'),'onsubmit' => 'return ConfirmDeleteColumn()', 'class'=>'form-horizontal','method' => 'POST']) !!}
 											{!! Form::hidden('name_column','new_column_4') !!}
 											{!! Form::button('Delete',['class'=>'btn btn-danger','type'=>'submit']) !!}
 											{!! Form::close() !!}
@@ -226,7 +226,7 @@
 										<th>{{$new_column_5}}<hr>
 											@can('editPost')
 
-											{!! Form::open(['url'=>route('philIndWorksheetDeleteColumn'),'onsubmit' => 'return ConfirmDelete()', 'class'=>'form-horizontal','method' => 'POST']) !!}
+											{!! Form::open(['url'=>route('philIndWorksheetDeleteColumn'),'onsubmit' => 'return ConfirmDeleteColumn()', 'class'=>'form-horizontal','method' => 'POST']) !!}
 											{!! Form::hidden('name_column','new_column_5') !!}
 											{!! Form::button('Delete',['class'=>'btn btn-danger','type'=>'submit']) !!}
 											{!! Form::close() !!}
@@ -270,9 +270,9 @@
 
 											@can('editPost')
 
-											{!! Form::open(['url'=>route('deletePhilIndWorksheet'),'onsubmit' => 'return ConfirmDelete()', 'class'=>'form-horizontal','method' => 'POST']) !!}
+											{!! Form::open(['url'=>route('deletePhilIndWorksheet'), 'class'=>'form-horizontal','method' => 'POST']) !!}
 											{!! Form::hidden('action',$row->id) !!}
-											{!! Form::button('Delete',['class'=>'btn btn-danger','type'=>'submit']) !!}
+											{!! Form::button('Delete',['class'=>'btn btn-danger','type'=>'submit','onclick' => 'ConfirmDelete(event)']) !!}
 											{!! Form::close() !!}
 
 											@endcan
@@ -542,8 +542,8 @@
 								{!! Form::button('Save',['class'=>'btn btn-primary checkbox-operations-change','type'=>'submit']) !!}
 								{!! Form::close() !!}
 
-								{!! Form::open(['url'=>route('deletePhilIndWorksheetById'),'onsubmit' => 'return ConfirmDelete()','method' => 'POST']) !!}
-								{!! Form::button('Delete',['class'=>'btn btn-danger  checkbox-operations-delete','type'=>'submit']) !!}
+								{!! Form::open(['url'=>route('deletePhilIndWorksheetById'),'method' => 'POST']) !!}
+								{!! Form::button('Delete',['class'=>'btn btn-danger  checkbox-operations-delete','type'=>'submit','onclick' => 'ConfirmDelete(event)']) !!}
 								{!! Form::close() !!}
 
 							</div>
@@ -561,7 +561,7 @@
 
 <script>
 
-	function ConfirmDelete()
+	function ConfirmDeleteColumn()
 	{
 		var x = confirm("Are you sure you want to delete?");
 		if (x)
@@ -570,6 +570,16 @@
 			return false;
 	}
 
+
+	function ConfirmDelete(event)
+	{
+		event.preventDefault();
+		const form = event.target.parentElement;
+		const data = new URLSearchParams(new FormData(form)).toString();
+		location.href = '/admin/to-trash?'+data+'&table=phil_ind_worksheet';
+	}
+
+	
 	function CheckColor(event){
 		
 		$('.alert.alert-danger').remove();

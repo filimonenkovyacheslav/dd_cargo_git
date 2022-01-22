@@ -14,7 +14,7 @@ class PhilIndWorksheetExport implements FromQuery, WithHeadings
 
     public function query()
     {
-        return PhilIndWorksheet::query();
+        return PhilIndWorksheet::query()->where('in_trash',false);
     } 
     
     public function headings(): array

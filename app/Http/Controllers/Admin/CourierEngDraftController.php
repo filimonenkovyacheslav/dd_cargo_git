@@ -10,6 +10,7 @@ use App\PackingEng;
 use App\PackingEngNew;
 use Auth;
 use Excel;
+use DB;
 use App\Exports\CourierEngDraftWorksheetExport;
 use App\ReceiptArchive;
 use App\Receipt;
@@ -27,7 +28,7 @@ class CourierEngDraftController extends AdminController
         $title = 'Draft';
         // Auto-delete operator
         $delete_date = Date('Y-m-d', strtotime('-3 days'));
-        CourierEngDraftWorksheet::where([
+        CourierEngDraftWorksheet::where('in_trash',false)->where([
         	['status_date','<=',$delete_date],
         	['status_date','<>',null]
         ])
@@ -45,12 +46,12 @@ class CourierEngDraftController extends AdminController
         ]);
         
         if ($request->input('for_active')) {
-        	$courier_eng_draft_worksheet_obj = CourierEngDraftWorksheet::where('tracking_main','<>',null)
+        	$courier_eng_draft_worksheet_obj = CourierEngDraftWorksheet::where('in_trash',false)->where('tracking_main','<>',null)
         	->orWhere('status','Pick up')
         	->paginate(10);
         }
         else{
-        	$courier_eng_draft_worksheet_obj = CourierEngDraftWorksheet::paginate(10);
+        	$courier_eng_draft_worksheet_obj = CourierEngDraftWorksheet::where('in_trash',false)->paginate(10);
         }    
         $user = Auth::user();
         $data = $request->all();
@@ -122,7 +123,16 @@ class CourierEngDraftController extends AdminController
 		}
 
 		$courier_eng_draft_worksheet->direction = $this->createDirection($request->input('shipper_country'), $request->input('consignee_country'));
-
+		// New parcel form
+		if (!$courier_eng_draft_worksheet->consignee_address) $courier_eng_draft_worksheet->consignee_address =  $request->input('consignee_country');
+		/*else{
+			$temp = explode(' ', $courier_eng_draft_worksheet->consignee_address);
+			if ($temp[0] !== $request->input('consignee_country')) {
+				unset($temp[0]);
+				$temp = implode(" ", $temp);
+				$courier_eng_draft_worksheet->consignee_address = $request->input('consignee_country').' '.$temp;
+			}
+		}*/
 
 		if ($old_status !== $courier_eng_draft_worksheet->status) {
 			CourierEngDraftWorksheet::where('id', $id)
@@ -142,14 +152,20 @@ class CourierEngDraftController extends AdminController
 		
 		if ($courier_eng_draft_worksheet->save()){
 
+			$courier_eng_draft_worksheet->checkCourierTask($courier_eng_draft_worksheet->status);
+
 			$this->addingOrderNumber($courier_eng_draft_worksheet->standard_phone, 'en');
 			
 			// Update Update Old Packing Eng
 			$address = explode(' ',$request->input('consignee_address'));
+			// New parcel form
+			if ($request->input('consignee_country')) $consignee_country = $request->input('consignee_country');
+			else $consignee_country = null;
+			
 			PackingEng::where('work_sheet_id', $id)
 			->update([
 				'tracking' => $request->input('tracking_main'),
-				'country' => $address[0],
+				'country' => $consignee_country,
 				'shipper_name' => $request->input('shipper_name'),
 				'shipper_address' => $request->input('shipper_address'),
 				'shipper_phone' => $request->input('standard_phone'),
@@ -327,28 +343,55 @@ class CourierEngDraftController extends AdminController
     						} 
     						$worksheet->save();  						
     					}
+
+    					// New parcel form
+    					if (!$worksheet->consignee_address){
+    						$worksheet->consignee_address = $value_by;
+    						$worksheet->save();
+    					}
+    					/*else{
+    						$temp = explode(' ', $worksheet->consignee_address);
+    						if ($temp[0] !== $value_by) {
+    							unset($temp[0]);
+    							$temp = implode(" ", $temp);
+    							$worksheet->consignee_address = $value_by.' '.$temp;
+    							$worksheet->save();
+    						}
+    					}*/
     				}
     			}
 
     			// Update Old Packing Eng
-    			$params_arr = ['shipper_name','shipper_address','shipper_id','consignee_name','consignee_address','consignee_phone','consignee_id','length','width','height','weight','shipment_val'];
+    			$params_arr = ['shipper_name','shipper_address','shipper_id','consignee_name','country','consignee_address','consignee_phone','consignee_id','length','width','height','weight','shipment_val'];
     			if ($column === 'shipped_items') {
     				PackingEng::whereIn('work_sheet_id', $row_arr)
     				->update([
     					'items' => $value_by
     				]);
-    			}
+    			}   			
     			if ($column === 'standard_phone') {
     				PackingEng::whereIn('work_sheet_id', $row_arr)
     				->update([
     					'shipper_phone' => $value_by
     				]);
     			}
+    			// New parcel form
+    			if ($column === 'consignee_country') {
+    				PackingEng::where('consignee_address', null)
+    				->whereIn('work_sheet_id', $row_arr)
+    				->update([
+    					'consignee_address' => $value_by,
+    					'country' => $value_by
+    				]);
+    				PackingEng::where('consignee_address','<>',null)
+    				->whereIn('work_sheet_id', $row_arr)
+    				->update([
+    					'country' => $value_by
+    				]);
+    			}
     			if ($column === 'consignee_address') {
-    				$address = explode(' ',$value_by);
     				PackingEng::whereIn('work_sheet_id', $row_arr)
     				->update([
-    					'country' => $address[0],
     					$column => $value_by
     				]);
     			}
@@ -417,7 +460,7 @@ class CourierEngDraftController extends AdminController
 
         if ($request->table_columns) {
         	if ($request->input('for_active')) {
-        		$courier_eng_draft_worksheet_obj = CourierEngDraftWorksheet::where([
+        		$courier_eng_draft_worksheet_obj = CourierEngDraftWorksheet::where('in_trash',false)->where([
         			[$request->table_columns, 'like', '%'.$search.'%'],
         			['tracking_main','<>',null]
         		])
@@ -427,7 +470,7 @@ class CourierEngDraftController extends AdminController
         		])->paginate(10);
         	}
         	else{
-        		$courier_eng_draft_worksheet_obj = CourierEngDraftWorksheet::where($request->table_columns, 'like', '%'.$search.'%')
+        		$courier_eng_draft_worksheet_obj = CourierEngDraftWorksheet::where('in_trash',false)->where($request->table_columns, 'like', '%'.$search.'%')
         		->paginate(10);
         	}
         }
@@ -436,7 +479,7 @@ class CourierEngDraftController extends AdminController
         	{
         		if ($key !== 'created_at' && $key !== 'updated_at') {
         			if ($request->input('for_active')) {
-        				$sheet = CourierEngDraftWorksheet::where([
+        				$sheet = CourierEngDraftWorksheet::where('in_trash',false)->where([
         					[$key, 'like', '%'.$search.'%'],
         					['tracking_main','<>',null]
         				])
@@ -446,12 +489,12 @@ class CourierEngDraftController extends AdminController
         				])->first();
         			}
         			else{
-        				$sheet = CourierEngDraftWorksheet::where($key, 'like', '%'.$search.'%')->first();
+        				$sheet = CourierEngDraftWorksheet::where('in_trash',false)->where($key, 'like', '%'.$search.'%')->first();
         			} 
 
         			if ($sheet) {  
         				if ($request->input('for_active')) {
-        					$temp_arr = CourierEngDraftWorksheet::where([
+        					$temp_arr = CourierEngDraftWorksheet::where('in_trash',false)->where([
         						[$key, 'like', '%'.$search.'%'],
         						['tracking_main','<>',null]
         					])
@@ -461,7 +504,7 @@ class CourierEngDraftController extends AdminController
         					])->get();
         				}      				
         				else{
-        					$temp_arr = CourierEngDraftWorksheet::where($key, 'like', '%'.$search.'%')->get();
+        					$temp_arr = CourierEngDraftWorksheet::where('in_trash',false)->where($key, 'like', '%'.$search.'%')->get();
         				}     				
 
         				$new_arr = $temp_arr->filter(function ($item, $k) use($id_arr) {
@@ -484,12 +527,133 @@ class CourierEngDraftController extends AdminController
     }
 
 
+    public function courierEngDraftWorksheetDouble($id)
+    {
+    	$worksheet = CourierEngDraftWorksheet::find($id);
+    	$other_worksheet_1 = CourierEngDraftWorksheet::where('in_trash',false)->where([
+    		['id','<>',$id],
+    		['standard_phone',$worksheet->standard_phone]
+    	])->get();
+    	$other_worksheet_2 = CourierEngDraftWorksheet::where('in_trash',false)->where([
+    		['id','<>',$id],
+    		['standard_phone',$worksheet->standard_phone],
+    		['shipper_name','<>',$worksheet->shipper_name],
+			['shipper_country','<>',$worksheet->shipper_country],
+			['shipper_city','<>',$worksheet->shipper_city],
+			['passport_number','<>',$worksheet->passport_number],
+			['shipper_address','<>',$worksheet->shipper_address],
+			['shipper_phone','<>',$worksheet->shipper_phone],
+			['shipper_id','<>',$worksheet->shipper_id],
+			['consignee_name','<>',$worksheet->consignee_name],
+			['consignee_country','<>',$worksheet->consignee_country],
+			['house_name','<>',$worksheet->house_name],
+			['post_office','<>',$worksheet->post_office],
+			['district','<>',$worksheet->district],
+			['state_pincode','<>',$worksheet->state_pincode],
+			['consignee_address','<>',$worksheet->consignee_address],
+			['consignee_phone','<>',$worksheet->consignee_phone],
+			['consignee_id','<>',$worksheet->consignee_id],
+			['status','<>',$worksheet->status],
+			['status_ru','<>',$worksheet->status_ru],
+			['status_he','<>',$worksheet->status_he],
+			['shipped_items','<>',$worksheet->shipped_items],
+			['direction','<>',$worksheet->direction]
+    	])->get();
+    	$other_worksheet_3 = CourierEngDraftWorksheet::where('in_trash',false)->where([
+    		['id','<>',$id],
+    		['standard_phone',$worksheet->standard_phone],
+    		['shipper_name',$worksheet->shipper_name],
+			['shipper_country',$worksheet->shipper_country],
+			['shipper_city',$worksheet->shipper_city],
+			['passport_number',$worksheet->passport_number],
+			['shipper_address',$worksheet->shipper_address],
+			['shipper_phone',$worksheet->shipper_phone],
+			['shipper_id',$worksheet->shipper_id],
+			['consignee_name',$worksheet->consignee_name],
+			['consignee_country',$worksheet->consignee_country],
+			['house_name',$worksheet->house_name],
+			['post_office',$worksheet->post_office],
+			['district',$worksheet->district],
+			['state_pincode',$worksheet->state_pincode],
+			['consignee_address',$worksheet->consignee_address],
+			['consignee_phone',$worksheet->consignee_phone],
+			['consignee_id',$worksheet->consignee_id],
+			['status',$worksheet->status],
+			['status_ru',$worksheet->status_ru],
+			['status_he',$worksheet->status_he],
+			['shipped_items',$worksheet->shipped_items],
+			['direction',$worksheet->direction]
+    	])->get();
+    	$worksheet_data = [
+    		'standard_phone' => $worksheet->standard_phone,
+    		'shipper_name' => $worksheet->shipper_name,
+			'shipper_country' => $worksheet->shipper_country,
+			'shipper_city' => $worksheet->shipper_city,
+			'passport_number' => $worksheet->passport_number,
+			'shipper_address' => $worksheet->shipper_address,
+			'shipper_phone' => $worksheet->shipper_phone,
+			'shipper_id' => $worksheet->shipper_id,
+			'consignee_name' => $worksheet->consignee_name,
+			'consignee_country' => $worksheet->consignee_country,
+			'house_name' => $worksheet->house_name,
+			'post_office' => $worksheet->post_office,
+			'district' => $worksheet->district,
+			'state_pincode' => $worksheet->state_pincode,
+			'consignee_address' => $worksheet->consignee_address,
+			'consignee_phone' => $worksheet->consignee_phone,
+			'consignee_id' => $worksheet->consignee_id,
+			'status' => $worksheet->status,
+			'status_ru' => $worksheet->status_ru,
+			'status_he' => $worksheet->status_he,
+			'shipped_items' => $worksheet->shipped_items,
+			'direction' => $worksheet->direction
+    	];   	
+
+    	if ($other_worksheet_1->count() != $other_worksheet_2->count()) {
+    		CourierEngDraftWorksheet::where('in_trash',false)->where([
+    			['id','<>',$id],
+    			['standard_phone',$worksheet->standard_phone]
+    		])->update($worksheet_data);
+    	}
+    	if ($other_worksheet_1->count() == $other_worksheet_3->count()){
+    		CourierEngDraftWorksheet::create($worksheet_data);
+    		$new_id = DB::getPdo()->lastInsertId();
+    		CourierEngDraftWorksheet::find($new_id)
+    		->update([
+    			'date'=>date('Y-m-d'),
+    			'status_date' => date('Y-m-d')
+    		]);
+    		$this->addingOrderNumber($worksheet->standard_phone, 'en');
+
+    		$new_worksheet = CourierEngDraftWorksheet::find($new_id);
+    		$new_worksheet->checkCourierTask($new_worksheet->status);
+
+    		$packing = PackingEng::where('work_sheet_id',$id)->get();
+    		if ($packing) {
+    			$packing->each(function ($item, $key) use($new_id){                                 
+    				$new_packing = $item->replicate();
+    				$new_packing->work_sheet_id = $new_id;
+    				$new_packing->tracking = null;
+    				$new_packing->save();
+    			});
+    		}
+    	}
+    	
+    	return redirect()->to(session('this_previous_url'))->with('status', 'Row duplicated successfully!');
+    }
+
+
     public function courierEngDraftCheckActivate($id){
     	$courier_eng_draft_worksheet = CourierEngDraftWorksheet::find($id);
     	$tracking = $courier_eng_draft_worksheet->tracking_main;
 		$country = '';
 		$error_message = 'Fill in required fields: ';
 		$user = Auth::user();
+
+		if ((int)$courier_eng_draft_worksheet->parcels_qty > 1) {
+			$error_message = 'You are trying to activate a record related to multiple parcels. Please fix the parcels quantity.';
+			return response()->json(['error' => $error_message]);
+		}
 
 		$country = $courier_eng_draft_worksheet->consignee_country;
 		if (!$country) {
@@ -547,7 +711,7 @@ class CourierEngDraftController extends AdminController
 			return response()->json(['error' => $error_message]);
 		}			
 		
-		$phone_exist = PhilIndWorksheet::where('standard_phone',$courier_eng_draft_worksheet->standard_phone)->get()->last();
+		$phone_exist = PhilIndWorksheet::where('in_trash',false)->where('standard_phone',$courier_eng_draft_worksheet->standard_phone)->get()->last();
 
 		if ($phone_exist) {
 			if (in_array($phone_exist->status, $this->status_arr)) {

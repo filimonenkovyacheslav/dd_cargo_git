@@ -49,6 +49,7 @@
 							<label class="table_columns" style="margin: 0 15px">Выберите колонку:
 								<select class="form-control" id="table_columns" name="table_columns">
 									<option value="" selected="selected"></option>
+									<option value="work_sheet_id">Id</option>
 									<option value="payer">Плательщик</option>
 									<option value="contract">Contract Nr.</option>
 									<option value="type">Type</option>
@@ -94,6 +95,7 @@
 							<table class="table table-striped table-bordered">
 								<thead>
 									<tr>
+										<th>Id</th>
 										<th>Плательщик</th>
 										<th>Contract Nr.</th>
 										<th>Type</th>
@@ -133,6 +135,9 @@
 									@foreach($new_packing_obj as $row)
 
 									<tr>
+										<td title="{{$row->work_sheet_id}}">
+											<div class="div-22">{{$row->work_sheet_id}}</div>
+										</td>
 										<td title="{{$row->payer}}">
 											<div class="div-3">{{$row->payer}}</div>
 										</td>

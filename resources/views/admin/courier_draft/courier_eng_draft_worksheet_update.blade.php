@@ -50,6 +50,13 @@
 								{!! Form::text('tracking_main',$courier_eng_draft_worksheet->tracking_main,['class' => 'form-control'])!!}
 							</div>
 						</div>
+
+						<div class="form-group">
+							{!! Form::label('parcels_qty','Parcels qty',['class' => 'col-md-2 control-label'])   !!}
+							<div class="col-md-8">
+								{!! Form::number('parcels_qty',$courier_eng_draft_worksheet->parcels_qty,['class' => 'form-control'])!!}
+							</div>
+						</div>
 						
 						<div class="form-group">
 							{!! Form::label('tracking_local','Local tracking number',['class' => 'col-md-2 control-label'])   !!}
@@ -345,6 +352,10 @@
 						</div>
 
 							{!! Form::hidden('id',$courier_eng_draft_worksheet->id)!!}
+
+							{!! Form::hidden('in_trash',$courier_eng_draft_worksheet->in_trash)!!}
+
+							{!! Form::hidden('parcels_qty',$courier_eng_draft_worksheet->parcels_qty)!!}
 
 							{!! Form::hidden('date',$courier_eng_draft_worksheet->date,['class' => 'form-control'])!!}
 

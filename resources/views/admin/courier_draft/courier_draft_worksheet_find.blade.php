@@ -133,6 +133,7 @@
 										<th>Партнер</th>
 										<th>Трекинг<hr>Основной</th> 
 										<th>№ заказа</th>
+										<th>Кол-во посылок</th>
 										<th>Трекинг<hr>Локальный</th>
 										<th>Трекинг<hr>Транзитный</th>
 										<th>Номер паллеты</th>
@@ -214,6 +215,8 @@
 											
 											<a class="btn btn-primary" href="{{ url('/admin/courier-draft-worksheet/'.$row->id) }}">Изменить</a>
 
+											<a class="btn btn-default" onclick="ConfirmDouble(event)" href="{{ url('/admin/courier-draft-worksheet-double/'.$row->id) }}">Дубль</a>
+
 											@endcan
 
 											@can('activateDraft')
@@ -224,9 +227,9 @@
 
 											@can('editPost')
 
-											{!! Form::open(['url'=>route('deleteCourierDraftWorksheet'),'onsubmit' => 'return ConfirmDelete()', 'class'=>'form-horizontal','method' => 'POST']) !!}
+											{!! Form::open(['url'=>route('deleteCourierDraftWorksheet'), 'class'=>'form-horizontal','method' => 'POST']) !!}
 											{!! Form::hidden('action',$row->id) !!}
-											{!! Form::button('Удалить',['class'=>'btn btn-danger','type'=>'submit']) !!}
+											{!! Form::button('Удалить',['class'=>'btn btn-danger','type'=>'submit','onclick' => 'ConfirmDelete(event)']) !!}
 											{!! Form::close() !!}
 
 											@endcan
@@ -257,6 +260,9 @@
 										</td>
 										<td class="td-button" title="{{$row->order_number}}">
 											<div class="div-22">{{$row->order_number}}</div>
+										</td>
+										<td title="{{$row->parcels_qty}}">
+											<div class="div-22">{{$row->parcels_qty}}</div>
 										</td>
 										<td title="{{$row->tracking_local}}">
 											<div class="div-5">{{$row->tracking_local}}</div>
@@ -425,6 +431,8 @@
 											
 											<a class="btn btn-primary" href="{{ url('/admin/courier-draft-worksheet/'.$row->id) }}">Изменить</a>
 
+											<a class="btn btn-default" onclick="ConfirmDouble(event)" href="{{ url('/admin/courier-draft-worksheet-double/'.$row->id) }}">Дубль</a>
+
 											@endcan
 
 											@can('activateDraft')
@@ -435,9 +443,9 @@
 
 											@can('editPost')
 
-											{!! Form::open(['url'=>route('deleteCourierDraftWorksheet'),'onsubmit' => 'return ConfirmDelete()', 'class'=>'form-horizontal','method' => 'POST']) !!}
+											{!! Form::open(['url'=>route('deleteCourierDraftWorksheet'), 'class'=>'form-horizontal','method' => 'POST']) !!}
 											{!! Form::hidden('action',$row->id) !!}
-											{!! Form::button('Удалить',['class'=>'btn btn-danger','type'=>'submit']) !!}
+											{!! Form::button('Удалить',['class'=>'btn btn-danger','type'=>'submit','onclick' => 'ConfirmDelete(event)']) !!}
 											{!! Form::close() !!}
 
 											@endcan
@@ -468,6 +476,9 @@
 										</td>
 										<td class="td-button" title="{{$row->order_number}}">
 											<div class="div-22">{{$row->order_number}}</div>
+										</td>
+										<td title="{{$row->parcels_qty}}">
+											<div class="div-22">{{$row->parcels_qty}}</div>
 										</td>
 										<td title="{{$row->tracking_local}}">
 											<div class="div-5">{{$row->tracking_local}}</div>
@@ -660,6 +671,7 @@
 											<option value="tariff">Тариф</option>
 											<option value="status">Статус</option>
 											<option value="partner">Партнер</option>
+											<option value="parcels_qty">Кол-во посылок</option>
 											<option value="tracking_local">Локальный</option>
 											<option value="tracking_transit">Транзитный</option>
 											<option value="pallet_number">№ паллеты</option>
@@ -710,8 +722,8 @@
 								{!! Form::button('Сохранить',['class'=>'btn btn-primary checkbox-operations-change','type'=>'submit']) !!}
 								{!! Form::close() !!}
 
-								{!! Form::open(['url'=>route('deleteCourierDraftWorksheetById'),'onsubmit' => 'return ConfirmDelete()','method' => 'POST']) !!}
-								{!! Form::button('Удалить',['class'=>'btn btn-danger  checkbox-operations-delete','type'=>'submit']) !!}
+								{!! Form::open(['url'=>route('deleteCourierDraftWorksheetById'),'method' => 'POST']) !!}
+								{!! Form::button('Удалить',['class'=>'btn btn-danger  checkbox-operations-delete','type'=>'submit','onclick' => 'ConfirmDelete(event)']) !!}
 								{!! Form::close() !!}
 
 								@endcan
@@ -735,11 +747,25 @@
 		document.querySelector('[name="for_active"]').value = 'for_active';
 	}
 
-	function ConfirmDelete()
+	function ConfirmDelete(event)
 	{
-		var x = confirm("Вы уверены, что хотите удалить?");
+		event.preventDefault();
+		const form = event.target.parentElement;
+		const data = new URLSearchParams(new FormData(form)).toString();
+		var x = confirm("Вы уверены, что хотите удалить окончательно?");
 		if (x)
-			return true;
+			form.submit();
+		else
+			location.href = '/admin/to-trash?'+data+'&table=courier_draft_worksheet';
+	}
+
+	function ConfirmDouble(event)
+	{
+		event.preventDefault();
+		const href = $(event.target).attr('href');
+		var x = confirm("Вы уверены, что хотите продублировать?");
+		if (x)
+			location.href = href;
 		else
 			return false;
 	}

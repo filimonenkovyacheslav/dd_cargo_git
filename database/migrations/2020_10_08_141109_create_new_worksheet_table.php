@@ -77,6 +77,7 @@ class CreateNewWorksheetTable extends Migration
             $table->string('recipient_passport_customs')->nullable();
             $table->date('update_status_date')->nullable();
             $table->string('background')->nullable();
+            $table->boolean('in_trash')->default(false);
             $table->timestamps();
         });
     }

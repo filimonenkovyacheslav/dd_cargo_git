@@ -29,7 +29,7 @@ class PhilIndWorksheetController extends AdminController
 
         // Auto-update status
         $update_date = Date('Y-m-d', strtotime('-14 days'));
-        PhilIndWorksheet::where([
+        PhilIndWorksheet::where('in_trash',false)->where([
         	['status_date','<=',$update_date],
         	['status_date','<>',null],
         	['status',"Forwarding to the warehouse in the sender country"]
@@ -46,7 +46,7 @@ class PhilIndWorksheetController extends AdminController
         	'status_date' => date('Y-m-d')
         ]); 
         
-        $phil_ind_worksheet_obj = PhilIndWorksheet::paginate(10);
+        $phil_ind_worksheet_obj = PhilIndWorksheet::where('in_trash',false)->paginate(10);
         $arr_columns = parent::new_phil_ind_columns();
         
         return view('admin.phil_ind.phil_ind_worksheet', ['title' => $title,'phil_ind_worksheet_obj' => $phil_ind_worksheet_obj,'new_column_1' => $arr_columns[0],'new_column_2' => $arr_columns[1],'new_column_3' => $arr_columns[2],'new_column_4' => $arr_columns[3],'new_column_5' => $arr_columns[4]]);
@@ -208,6 +208,8 @@ class PhilIndWorksheetController extends AdminController
 		}		
 		
 		if ($phil_ind_worksheet->save()) {
+
+			$phil_ind_worksheet->checkCourierTask($phil_ind_worksheet->status);
 
 			// Update Update New Packing Eng
 			$address = explode(' ',$request->input('consignee_address'));
@@ -396,7 +398,7 @@ class PhilIndWorksheetController extends AdminController
 
 	public function showPhilIndStatus(){
         $title = 'Changing statuses by lot number';
-        $worksheet_obj = PhilIndWorksheet::all();
+        $worksheet_obj = PhilIndWorksheet::where('in_trash',false)->get();
         $number_arr = [];
         foreach ($worksheet_obj as $row) {
         	if (!in_array($row->lot, $number_arr)) {
@@ -410,6 +412,7 @@ class PhilIndWorksheetController extends AdminController
     public function changePhilIndStatus(Request $request){
         if ($request->input('lot_number') && $request->input('status')) {
         	DB::table('phil_ind_worksheet')
+        	->where('in_trash',false)
         	->where([
         		['lot', $request->input('lot_number')],
         		['tracking_main','<>',null]
@@ -427,7 +430,7 @@ class PhilIndWorksheetController extends AdminController
 
     public function showPhilIndStatusDate(){
         $title = 'Changing statuses by date';
-        $worksheet_obj = PhilIndWorksheet::all();
+        $worksheet_obj = PhilIndWorksheet::where('in_trash',false)->get();
         $date_arr = [];
         foreach ($worksheet_obj as $row) {
         	if (!in_array($row->date, $date_arr)) {
@@ -441,6 +444,7 @@ class PhilIndWorksheetController extends AdminController
     public function changePhilIndStatusDate(Request $request){
         if ($request->input('date') && $request->input('status')) {
         	DB::table('phil_ind_worksheet')
+        	->where('in_trash',false)
         	->where([
         		['date', $request->input('date')],
         		['tracking_main','<>',null]
@@ -458,7 +462,7 @@ class PhilIndWorksheetController extends AdminController
 
     public function showPhilIndData(){
         $title = 'Mass change of data by tracking number (supports mass selection of checkboxes)';
-        $worksheet_obj = PhilIndWorksheet::orderBy('tracking_main')->get();
+        $worksheet_obj = PhilIndWorksheet::where('in_trash',false)->orderBy('tracking_main')->get();
         $date_arr = [];
         foreach ($worksheet_obj as $row) {
         	$temp = $row->tracking_main;
@@ -639,7 +643,7 @@ class PhilIndWorksheetController extends AdminController
 
 	public function indexPackingEng(){
         $title = 'Old Packing List';
-        $packing_eng_obj = PackingEng::all();       
+        $packing_eng_obj = PackingEng::where('in_trash',false)->get();       
         
         return view('admin.packing.packing_eng', ['title' => $title,'packing_eng_obj' => $packing_eng_obj]);
     }
@@ -647,7 +651,7 @@ class PhilIndWorksheetController extends AdminController
 
     public function indexPackingEngNew(){
         $title = 'New Packing List';
-        $packing_eng_new_obj = PackingEngNew::paginate(10);       
+        $packing_eng_new_obj = PackingEngNew::where('in_trash',false)->paginate(10);       
         
         return view('admin.packing.packing_eng_new', compact('title','packing_eng_new_obj'));
     }
@@ -672,16 +676,16 @@ class PhilIndWorksheetController extends AdminController
         $new_arr = [];      
 
         if ($request->table_columns) {
-        	$packing_eng_new_obj = PackingEngNew::where($request->table_columns, 'like', '%'.$search.'%')
+        	$packing_eng_new_obj = PackingEngNew::where('in_trash',false)->where($request->table_columns, 'like', '%'.$search.'%')
         	->paginate(10);
         }
         else{
         	foreach($attributes as $key => $value)
         	{
         		if ($key !== 'created_at' && $key !== 'updated_at') {
-        			$sheet = PackingEngNew::where($key, 'like', '%'.$search.'%')->get()->first();
+        			$sheet = PackingEngNew::where('in_trash',false)->where($key, 'like', '%'.$search.'%')->get()->first();
         			if ($sheet) {       				
-        				$temp_arr = PackingEngNew::where($key, 'like', '%'.$search.'%')->get();
+        				$temp_arr = PackingEngNew::where('in_trash',false)->where($key, 'like', '%'.$search.'%')->get();
         				$new_arr = $temp_arr->filter(function ($item, $k) use($id_arr) {
         					if (!in_array($item->id, $id_arr)) { 
         						$id_arr[] = $item->id;       						  
@@ -940,16 +944,16 @@ class PhilIndWorksheetController extends AdminController
         $new_arr = []; 
         
         if ($request->table_columns) {
-        	$phil_ind_worksheet_obj = PhilIndWorksheet::where($request->table_columns, 'like', '%'.$search.'%')
+        	$phil_ind_worksheet_obj = PhilIndWorksheet::where('in_trash',false)->where($request->table_columns, 'like', '%'.$search.'%')
         	->paginate(10);
         }
         else{
         	foreach($attributes as $key => $value)
         	{
         		if ($key !== 'created_at' && $key !== 'updated_at' && $key !== 'update_status_date') {
-        			$sheet = PhilIndWorksheet::where($key, 'like', '%'.$search.'%')->get()->first();
+        			$sheet = PhilIndWorksheet::where('in_trash',false)->where($key, 'like', '%'.$search.'%')->get()->first();
         			if ($sheet) {
-        				$temp_arr = PhilIndWorksheet::where($key, 'like', '%'.$search.'%')->get();
+        				$temp_arr = PhilIndWorksheet::where('in_trash',false)->where($key, 'like', '%'.$search.'%')->get();
         				$new_arr = $temp_arr->filter(function ($item, $k) use($id_arr) {
         					if (!in_array($item->id, $id_arr)) { 
         						$id_arr[] = $item->id;       						  

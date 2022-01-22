@@ -46,6 +46,7 @@ class CreatePackingSeaTable extends Migration
             $table->string('value_euro')->nullable();
             $table->string('value_cent')->nullable();
             $table->integer('work_sheet_id')->nullable();
+            $table->boolean('in_trash')->default(false);
             $table->timestamps();
         });
     }

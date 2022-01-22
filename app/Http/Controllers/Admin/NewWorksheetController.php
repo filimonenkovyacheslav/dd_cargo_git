@@ -31,9 +31,11 @@ class NewWorksheetController extends AdminController
     public function index(){
         $title = 'Новый рабочий лист';
         
+        //dd(NewWorksheet::find(1014)->courierTask);
+        
         // Auto-update status
         $update_date = Date('Y-m-d', strtotime('-7 days'));
-        NewWorksheet::where([
+        NewWorksheet::where('in_trash',false)->where([
         	['status_date','<=',$update_date],
         	['status_date','<>',null],
         	['status',"Доставляется на склад в стране отправителя"]
@@ -51,14 +53,14 @@ class NewWorksheetController extends AdminController
         	'status_date' => date('Y-m-d')
         ]);
         
-        $new_worksheet_obj = NewWorksheet::paginate(10);     
+        $new_worksheet_obj = NewWorksheet::where('in_trash',false)->paginate(10);     
 
         $arr_columns = parent::new_columns();
 
         $user = Auth::user();
         $viewer_arr = parent::VIEWER_ARR;
 
-        $update_all_statuses = NewWorksheet::where('update_status_date','=', date('Y-m-d'))->get()->count();
+        $update_all_statuses = NewWorksheet::where('in_trash',false)->where('update_status_date','=', date('Y-m-d'))->get()->count();
         
         return view('admin.new_worksheet', ['title' => $title,'new_worksheet_obj' => $new_worksheet_obj,'new_column_1' => $arr_columns[0],'new_column_2' => $arr_columns[1],'new_column_3' => $arr_columns[2],'new_column_4' => $arr_columns[3],'new_column_5' => $arr_columns[4], 'user' => $user, 'viewer_arr' => $viewer_arr, 'update_all_statuses' => $update_all_statuses]);
     }
@@ -134,7 +136,7 @@ class NewWorksheetController extends AdminController
 
 	public function update(Request $request, $id)
 	{
-		$new_worksheet = NewWorksheet::find($id);
+		$new_worksheet = NewWorksheet::find($id);		
 		$old_tracking = $new_worksheet->tracking_main;
 		$old_pallet = $new_worksheet->pallet_number;
 		$old_batch_number = $new_worksheet->batch_number;
@@ -223,6 +225,7 @@ class NewWorksheetController extends AdminController
 			$this->updateManifest($request, $id, $tr, $content_arr);									
 			
 			$new_worksheet->save();
+			$new_worksheet->checkCourierTask($new_worksheet->status);
 
 			// Adding order number
 			if ($new_worksheet->standard_phone) {
@@ -660,7 +663,7 @@ class NewWorksheetController extends AdminController
 
 	public function showNewStatus(){
         $title = 'Изменение статусов по номеру партии';
-        $worksheet_obj = NewWorksheet::all();
+        $worksheet_obj = NewWorksheet::where('in_trash',false)->get();
         $number_arr = [];
         foreach ($worksheet_obj as $row) {
         	if (!in_array($row->batch_number, $number_arr)) {
@@ -674,6 +677,7 @@ class NewWorksheetController extends AdminController
     public function changeNewStatus(Request $request){
         if ($request->input('batch_number') && $request->input('status')) {
         	DB::table('new_worksheet')
+        	->where('in_trash',false)
         	->where([
         		['batch_number', $request->input('batch_number')],
         		['tracking_main','<>',null]
@@ -692,7 +696,7 @@ class NewWorksheetController extends AdminController
 
     public function showNewStatusDate(){
         $title = 'Изменение статусов по дате';
-        $worksheet_obj = NewWorksheet::all();
+        $worksheet_obj = NewWorksheet::where('in_trash',false)->get();
         $date_arr = [];
         foreach ($worksheet_obj as $row) {
         	if (!in_array($row->date, $date_arr)) {
@@ -706,6 +710,7 @@ class NewWorksheetController extends AdminController
     public function changeNewStatusDate(Request $request){
         if ($request->input('date') && $request->input('status')) {
         	DB::table('new_worksheet')
+        	->where('in_trash',false)
         	->where([
         		['date', $request->input('date')],
         		['tracking_main','<>',null]
@@ -724,7 +729,7 @@ class NewWorksheetController extends AdminController
 
     public function showNewData(){
         $title = 'Массовое изменение данных по трекингу (поддерживает массовое выделение чекбоксов)';
-        $worksheet_obj = NewWorksheet::orderBy('tracking_main')->get();
+        $worksheet_obj = NewWorksheet::where('in_trash',false)->orderBy('tracking_main')->get();
         $date_arr = [];
         foreach ($worksheet_obj as $row) {
         	$temp = $row->tracking_main;
@@ -1054,6 +1059,7 @@ class NewWorksheetController extends AdminController
     				for ($i=0; $i < count($row_arr); $i++) { 
     					if ($old_lot_arr[$i] !== $value_by){
     						$worksheet = NewWorksheet::where('id',$row_arr[$i])->first();
+    						$worksheet->checkCourierTask($worksheet->status);
     						$this->updateWarehouseLot($worksheet->tracking_main, $value_by, 'ru');
     					}
     				}
@@ -1131,7 +1137,7 @@ class NewWorksheetController extends AdminController
 
 	public function indexPackingSea(){
         $title = 'Старый пакинг лист';
-        $packing_sea_obj = PackingSea::all();       
+        $packing_sea_obj = PackingSea::where('in_trash',false)->get();       
         
         return view('admin.packing.packing_sea', ['title' => $title,'packing_sea_obj' => $packing_sea_obj]);
     }
@@ -1159,16 +1165,16 @@ class NewWorksheetController extends AdminController
         $new_arr = [];      
 
         if ($request->table_columns) {
-        	$new_worksheet_obj = NewWorksheet::where($request->table_columns, 'like', '%'.$search.'%')
+        	$new_worksheet_obj = NewWorksheet::where('in_trash',false)->where($request->table_columns, 'like', '%'.$search.'%')
         	->paginate(10);
         }
         else{
         	foreach($attributes as $key => $value)
         	{
         		if ($key !== 'created_at' && $key !== 'updated_at' && $key !== 'update_status_date') {
-        			$sheet = NewWorksheet::where($key, 'like', '%'.$search.'%')->get()->first();
+        			$sheet = NewWorksheet::where('in_trash',false)->where($key, 'like', '%'.$search.'%')->get()->first();
         			if ($sheet) {       				
-        				$temp_arr = NewWorksheet::where($key, 'like', '%'.$search.'%')->get();
+        				$temp_arr = NewWorksheet::where('in_trash',false)->where($key, 'like', '%'.$search.'%')->get();
         				$new_arr = $temp_arr->filter(function ($item, $k) use($id_arr) {
         					if (!in_array($item->id, $id_arr)) { 
         						$id_arr[] = $item->id;       						  
@@ -1184,7 +1190,7 @@ class NewWorksheetController extends AdminController
         }
         
         $data = $request->all();    
-        $update_all_statuses = NewWorksheet::where('update_status_date','=', date('Y-m-d'))->get()->count();
+        $update_all_statuses = NewWorksheet::where('in_trash',false)->where('update_status_date','=', date('Y-m-d'))->get()->count();
         
         return view('admin.new_worksheet', ['title' => $title,'data' => $data,'new_worksheet_obj' => $new_worksheet_obj,'new_column_1' => $arr_columns[0],'new_column_2' => $arr_columns[1],'new_column_3' => $arr_columns[2],'new_column_4' => $arr_columns[3],'new_column_5' => $arr_columns[4], 'user' => $user, 'viewer_arr' => $viewer_arr, 'update_all_statuses' => $update_all_statuses]);
     }

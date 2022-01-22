@@ -61,6 +61,7 @@
 							<label class="table_columns" style="margin: 0 15px">Выберите колонку:
 								<select class="form-control" id="table_columns" name="table_columns">
 									<option value="" selected="selected"></option>
+									<option value="id">Id</option>
 									<option value="site_name">Сайт</option>
 									<option value="date">Дата</option>
 									<option value="direction">Направление</option>
@@ -126,6 +127,7 @@
 									<tr>
 										<th>V</th>
 										<th>Изменить</th>
+										<th>Id</th>
 										<th>Сайт</th>
 										<th>Дата<hr>
 											@can('editPost')
@@ -192,7 +194,7 @@
 										<th>{{$new_column_1}}<hr>
 											@can('update-user')
 
-											{!! Form::open(['url'=>route('newWorksheetDeleteColumn'),'onsubmit' => 'return ConfirmDelete()', 'class'=>'form-horizontal','method' => 'POST']) !!}
+											{!! Form::open(['url'=>route('newWorksheetDeleteColumn'),'onsubmit' => 'return ConfirmDeleteColumn()', 'class'=>'form-horizontal','method' => 'POST']) !!}
 											{!! Form::hidden('name_column','new_column_1') !!}
 											{!! Form::button('Удалить',['class'=>'btn btn-danger','type'=>'submit']) !!}
 											{!! Form::close() !!}
@@ -204,7 +206,7 @@
 										<th>{{$new_column_2}}<hr>
 											@can('update-user')
 
-											{!! Form::open(['url'=>route('newWorksheetDeleteColumn'),'onsubmit' => 'return ConfirmDelete()', 'class'=>'form-horizontal','method' => 'POST']) !!}
+											{!! Form::open(['url'=>route('newWorksheetDeleteColumn'),'onsubmit' => 'return ConfirmDeleteColumn()', 'class'=>'form-horizontal','method' => 'POST']) !!}
 											{!! Form::hidden('name_column','new_column_2') !!}
 											{!! Form::button('Удалить',['class'=>'btn btn-danger','type'=>'submit']) !!}
 											{!! Form::close() !!}
@@ -216,7 +218,7 @@
 										<th>{{$new_column_3}}<hr>
 											@can('update-user')
 
-											{!! Form::open(['url'=>route('newWorksheetDeleteColumn'),'onsubmit' => 'return ConfirmDelete()', 'class'=>'form-horizontal','method' => 'POST']) !!}
+											{!! Form::open(['url'=>route('newWorksheetDeleteColumn'),'onsubmit' => 'return ConfirmDeleteColumn()', 'class'=>'form-horizontal','method' => 'POST']) !!}
 											{!! Form::hidden('name_column','new_column_3') !!}
 											{!! Form::button('Удалить',['class'=>'btn btn-danger','type'=>'submit']) !!}
 											{!! Form::close() !!}
@@ -228,7 +230,7 @@
 										<th>{{$new_column_4}}<hr>
 											@can('update-user')
 
-											{!! Form::open(['url'=>route('newWorksheetDeleteColumn'),'onsubmit' => 'return ConfirmDelete()', 'class'=>'form-horizontal','method' => 'POST']) !!}
+											{!! Form::open(['url'=>route('newWorksheetDeleteColumn'),'onsubmit' => 'return ConfirmDeleteColumn()', 'class'=>'form-horizontal','method' => 'POST']) !!}
 											{!! Form::hidden('name_column','new_column_4') !!}
 											{!! Form::button('Удалить',['class'=>'btn btn-danger','type'=>'submit']) !!}
 											{!! Form::close() !!}
@@ -240,7 +242,7 @@
 										<th>{{$new_column_5}}<hr>
 											@can('update-user')
 
-											{!! Form::open(['url'=>route('newWorksheetDeleteColumn'),'onsubmit' => 'return ConfirmDelete()', 'class'=>'form-horizontal','method' => 'POST']) !!}
+											{!! Form::open(['url'=>route('newWorksheetDeleteColumn'),'onsubmit' => 'return ConfirmDeleteColumn()', 'class'=>'form-horizontal','method' => 'POST']) !!}
 											{!! Form::hidden('name_column','new_column_5') !!}
 											{!! Form::button('Удалить',['class'=>'btn btn-danger','type'=>'submit']) !!}
 											{!! Form::close() !!}
@@ -280,13 +282,16 @@
 
 											@can('editPost')
 
-											{!! Form::open(['url'=>route('deleteNewWorksheet'),'onsubmit' => 'return ConfirmDelete()', 'class'=>'form-horizontal','method' => 'POST']) !!}
+											{!! Form::open(['url'=>route('deleteNewWorksheet'), 'class'=>'form-horizontal','method' => 'POST']) !!}
 											{!! Form::hidden('action',$row->id) !!}
-											{!! Form::button('Удалить',['class'=>'btn btn-danger','type'=>'submit']) !!}
+											{!! Form::button('Удалить',['class'=>'btn btn-danger','type'=>'submit','onclick' => 'ConfirmDelete(event)']) !!}
 											{!! Form::close() !!}
 
 											@endcan
-										</td> 										
+										</td> 	
+										<td title="{{$row->id}}">
+											<div class="div-22">{{$row->id}}</div>
+										</td>									
 										<td title="{{$row->site_name}}">
 											<div class="div-22">{{$row->site_name}}</div>
 										</td>
@@ -509,13 +514,16 @@
 
 											@can('editPost')
 
-											{!! Form::open(['url'=>route('deleteNewWorksheet'),'onsubmit' => 'return ConfirmDelete()', 'class'=>'form-horizontal','method' => 'POST']) !!}
+											{!! Form::open(['url'=>route('deleteNewWorksheet'), 'class'=>'form-horizontal','method' => 'POST']) !!}
 											{!! Form::hidden('action',$row->id) !!}
-											{!! Form::button('Удалить',['class'=>'btn btn-danger','type'=>'submit']) !!}
+											{!! Form::button('Удалить',['class'=>'btn btn-danger','type'=>'submit','onclick' => 'ConfirmDelete(event)']) !!}
 											{!! Form::close() !!}
 
 											@endcan
 										</td> 
+										<td title="{{$row->id}}">
+											<div class="div-22">{{$row->id}}</div>
+										</td>
 										<td title="{{$row->site_name}}">
 											<div class="div-22">{{$row->site_name}}</div>
 										</td>
@@ -833,8 +841,8 @@
 								{!! Form::button('Сохранить',['class'=>'btn btn-primary checkbox-operations-change','type'=>'submit']) !!}
 								{!! Form::close() !!}
 
-								{!! Form::open(['url'=>route('deleteNewWorksheetById'),'onsubmit' => 'return ConfirmDelete()','method' => 'POST']) !!}
-								{!! Form::button('Удалить',['class'=>'btn btn-danger  checkbox-operations-delete','type'=>'submit']) !!}
+								{!! Form::open(['url'=>route('deleteNewWorksheetById'),'method' => 'POST']) !!}
+								{!! Form::button('Удалить',['class'=>'btn btn-danger  checkbox-operations-delete','type'=>'submit','onclick' => 'ConfirmDelete(event)']) !!}
 								{!! Form::close() !!}
 
 							</div>
@@ -852,13 +860,22 @@
 
 <script>
 
-	function ConfirmDelete()
+	function ConfirmDeleteColumn()
 	{
 		var x = confirm("Вы уверены, что хотите удалить?");
 		if (x)
 			return true;
 		else
 			return false;
+	}
+
+	
+	function ConfirmDelete(event)
+	{
+		event.preventDefault();
+		const form = event.target.parentElement;
+		const data = new URLSearchParams(new FormData(form)).toString();		
+		location.href = '/admin/to-trash?'+data+'&table=new_worksheet';
 	}
 
 	function updateStatus(elem) {

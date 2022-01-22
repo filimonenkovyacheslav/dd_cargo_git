@@ -62,7 +62,8 @@ class CreatePhilIndWorksheetTable extends Migration
             $table->text('consignee_address_customs')->nullable();
             $table->string('consignee_phone_customs')->nullable();
             $table->string('consignee_id_customs')->nullable();
-            $table->string('background')->nullable();           
+            $table->string('background')->nullable();  
+            $table->boolean('in_trash')->default(false);         
             $table->timestamps();
         });
     }

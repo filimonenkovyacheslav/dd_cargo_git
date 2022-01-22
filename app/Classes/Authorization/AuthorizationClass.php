@@ -74,6 +74,9 @@ class AuthorizationClass extends Authorization
 			'editOwnPost' => [
 					'description' => 'Edit own post',
 				],
+			'editCourierTasks' => [
+					'description' => 'Edit Courier Tasks',
+				],
 			'changeColor' => [
 					'description' => 'Change color',
 				]		
@@ -112,6 +115,7 @@ class AuthorizationClass extends Authorization
 				'editEngDraft',
 				'activateDraft',
 				'activateEngDraft',
+				'editCourierTasks',
 				'changeColor'
 			],
 			'office_ru' => [
@@ -120,12 +124,14 @@ class AuthorizationClass extends Authorization
 				'editColumns-1',
 				'editDraft',
 				'activateDraft',
+				'editCourierTasks',
 				'changeColor'					
 			],
 			'office_agent_ru' => [
 				'view-post',
 				'update-post',
 				'editColumns-4',
+				'editCourierTasks',
 				'changeColor'				
 			],
 			'viewer' => [
@@ -161,6 +167,7 @@ class AuthorizationClass extends Authorization
 				'editComments-eng',
 				'editEngDraft',
 				'activateEngDraft',
+				'editCourierTasks',
 				'changeColor'					
 			],
 			'office_ind' => [
@@ -168,7 +175,13 @@ class AuthorizationClass extends Authorization
 				'eng-view-post',
 				'eng-update-post',
 				'editColumns-eng',
+				'editCourierTasks',
 				'changeColor'					
+			],
+			'courier' => [
+				'view-post',
+				'eng-view-post',
+				'editCourierTasks'
 			],
 			'viewer_eng' => [
 				'eng-view-post',

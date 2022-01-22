@@ -29,6 +29,7 @@ class CreateManifestTable extends Migration
             $table->string('attachment_number')->nullable();
             $table->integer('work_sheet_id')->nullable();
             $table->string('batch_number')->nullable();
+            $table->boolean('in_trash')->default(false);
             $table->timestamps();
         });
     }

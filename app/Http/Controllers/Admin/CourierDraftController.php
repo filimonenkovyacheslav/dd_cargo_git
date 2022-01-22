@@ -13,6 +13,7 @@ use App\Manifest;
 use Auth;
 use \Dejurin\GoogleTranslateForFree;
 use Excel;
+use DB;
 use App\Exports\CourierDraftWorksheetExport;
 use App\ReceiptArchive;
 use App\Receipt;
@@ -28,12 +29,12 @@ class CourierDraftController extends AdminController
     public function index(Request $request){
         $title = 'Черновик';
         if ($request->input('for_active')) {
-        	$courier_draft_worksheet_obj = CourierDraftWorksheet::where('tracking_main','<>',null)
+        	$courier_draft_worksheet_obj = CourierDraftWorksheet::where('in_trash',false)->where('tracking_main','<>',null)
         	->orWhere('status','Забрать')
         	->paginate(10);
         }
         else{
-        	$courier_draft_worksheet_obj = CourierDraftWorksheet::paginate(10);
+        	$courier_draft_worksheet_obj = CourierDraftWorksheet::where('in_trash',false)->paginate(10);
         }
         $data = $request->all();   
         $user = Auth::user();
@@ -198,6 +199,7 @@ class CourierDraftController extends AdminController
 			}
 			// End Update Packing Sea
 			$courier_draft_worksheet->save();
+			$courier_draft_worksheet->checkCourierTask($courier_draft_worksheet->status);
 
 			$this->addingOrderNumber($courier_draft_worksheet->standard_phone, 'ru');
 
@@ -381,7 +383,7 @@ class CourierDraftController extends AdminController
 
         if ($request->table_columns) {
         	if ($request->input('for_active')) {
-        		$courier_draft_worksheet_obj = CourierDraftWorksheet::where([
+        		$courier_draft_worksheet_obj = CourierDraftWorksheet::where('in_trash',false)->where([
         			[$request->table_columns, 'like', '%'.$search.'%'],
         			['tracking_main','<>',null]
         		])
@@ -391,7 +393,7 @@ class CourierDraftController extends AdminController
         		])->paginate(10);
         	}
         	else{
-        		$courier_draft_worksheet_obj = CourierDraftWorksheet::where($request->table_columns, 'like', '%'.$search.'%')
+        		$courier_draft_worksheet_obj = CourierDraftWorksheet::where('in_trash',false)->where($request->table_columns, 'like', '%'.$search.'%')
         		->paginate(10);
         	}        	
         }
@@ -400,7 +402,7 @@ class CourierDraftController extends AdminController
         	{
         		if ($key !== 'created_at' && $key !== 'updated_at' && $key !== 'update_status_date') {
         			if ($request->input('for_active')) {
-        				$sheet = CourierDraftWorksheet::where([
+        				$sheet = CourierDraftWorksheet::where('in_trash',false)->where([
         					[$key, 'like', '%'.$search.'%'],
         					['tracking_main','<>',null]
         				])
@@ -410,12 +412,12 @@ class CourierDraftController extends AdminController
         				])->first();
         			}
         			else{
-        				$sheet = CourierDraftWorksheet::where($key, 'like', '%'.$search.'%')->first();
+        				$sheet = CourierDraftWorksheet::where('in_trash',false)->where($key, 'like', '%'.$search.'%')->first();
         			}         			       			
         			
         			if ($sheet) { 
         				if ($request->input('for_active')) {
-        					$temp_arr = CourierDraftWorksheet::where([
+        					$temp_arr = CourierDraftWorksheet::where('in_trash',false)->where([
         						[$key, 'like', '%'.$search.'%'],
         						['tracking_main','<>',null]
         					])
@@ -425,7 +427,7 @@ class CourierDraftController extends AdminController
         					])->get();
         				}      				
         				else{
-        					$temp_arr = CourierDraftWorksheet::where($key, 'like', '%'.$search.'%')->get();
+        					$temp_arr = CourierDraftWorksheet::where('in_trash',false)->where($key, 'like', '%'.$search.'%')->get();
         				}
 
         				$new_arr = $temp_arr->filter(function ($item, $k) use($id_arr) {
@@ -448,11 +450,150 @@ class CourierDraftController extends AdminController
     }
 
 
+    public function courierDraftWorksheetDouble($id)
+    {
+    	$worksheet = CourierDraftWorksheet::find($id);
+    	$other_worksheet_1 = CourierDraftWorksheet::where('in_trash',false)->where([
+    		['id','<>',$id],
+    		['standard_phone',$worksheet->standard_phone]
+    	])->get();
+    	$other_worksheet_2 = CourierDraftWorksheet::where('in_trash',false)->where([
+    		['id','<>',$id],
+    		['standard_phone',$worksheet->standard_phone],
+    		['sender_name','<>',$worksheet->sender_name],
+			['sender_country','<>',$worksheet->sender_country],
+			['sender_city','<>',$worksheet->sender_city],
+			['sender_postcode','<>',$worksheet->sender_postcode],
+			['sender_address','<>',$worksheet->sender_address],
+			['sender_phone','<>',$worksheet->sender_phone],
+			['sender_passport','<>',$worksheet->sender_passport],
+			['recipient_name','<>',$worksheet->recipient_name],
+			['recipient_country','<>',$worksheet->recipient_country],
+			['region','<>',$worksheet->region],
+			['district','<>',$worksheet->district],
+			['recipient_city','<>',$worksheet->recipient_city],
+			['recipient_postcode','<>',$worksheet->recipient_postcode],
+			['recipient_street','<>',$worksheet->recipient_street],
+			['recipient_house','<>',$worksheet->recipient_house],
+			['body','<>',$worksheet->body],
+			['recipient_room','<>',$worksheet->recipient_room],
+			['recipient_phone','<>',$worksheet->recipient_phone],
+			['recipient_passport','<>',$worksheet->recipient_passport],
+			['recipient_email','<>',$worksheet->recipient_email],
+			['site_name','<>',$worksheet->site_name],
+			['status','<>',$worksheet->status],
+			['status_en','<>',$worksheet->status_en],
+			['status_he','<>',$worksheet->status_he],
+			['status_ua','<>',$worksheet->status_ua],
+			['package_content','<>',$worksheet->package_content],
+			['direction','<>',$worksheet->direction]
+    	])->get();
+    	$other_worksheet_3 = CourierDraftWorksheet::where('in_trash',false)->where([
+    		['id','<>',$id],
+    		['standard_phone',$worksheet->standard_phone],
+    		['sender_name',$worksheet->sender_name],
+			['sender_country',$worksheet->sender_country],
+			['sender_city',$worksheet->sender_city],
+			['sender_postcode',$worksheet->sender_postcode],
+			['sender_address',$worksheet->sender_address],
+			['sender_phone',$worksheet->sender_phone],
+			['sender_passport',$worksheet->sender_passport],
+			['recipient_name',$worksheet->recipient_name],
+			['recipient_country',$worksheet->recipient_country],
+			['region',$worksheet->region],
+			['district',$worksheet->district],
+			['recipient_city',$worksheet->recipient_city],
+			['recipient_postcode',$worksheet->recipient_postcode],
+			['recipient_street',$worksheet->recipient_street],
+			['recipient_house',$worksheet->recipient_house],
+			['body',$worksheet->body],
+			['recipient_room',$worksheet->recipient_room],
+			['recipient_phone',$worksheet->recipient_phone],
+			['recipient_passport',$worksheet->recipient_passport],
+			['recipient_email',$worksheet->recipient_email],
+			['site_name',$worksheet->site_name],
+			['status',$worksheet->status],
+			['status_en',$worksheet->status_en],
+			['status_he',$worksheet->status_he],
+			['status_ua',$worksheet->status_ua],
+			['package_content',$worksheet->package_content],
+			['direction',$worksheet->direction]
+    	])->get();
+    	$worksheet_data = [
+    		'standard_phone' => $worksheet->standard_phone,
+    		'sender_name' => $worksheet->sender_name,
+    		'sender_country' => $worksheet->sender_country,
+    		'sender_city' => $worksheet->sender_city,
+    		'sender_postcode' => $worksheet->sender_postcode,
+    		'sender_address' => $worksheet->sender_address,
+    		'sender_phone' => $worksheet->sender_phone,
+    		'sender_passport' => $worksheet->sender_passport,
+    		'recipient_name' => $worksheet->recipient_name,
+    		'recipient_country' => $worksheet->recipient_country,
+    		'region' => $worksheet->region,
+    		'district' => $worksheet->district,
+    		'recipient_city' => $worksheet->recipient_city,
+    		'recipient_postcode' => $worksheet->recipient_postcode,
+    		'recipient_street' => $worksheet->recipient_street,
+    		'recipient_house' => $worksheet->recipient_house,
+    		'body' => $worksheet->body,
+    		'recipient_room' => $worksheet->recipient_room,
+    		'recipient_phone' => $worksheet->recipient_phone,
+    		'recipient_passport' => $worksheet->recipient_passport,
+    		'recipient_email' => $worksheet->recipient_email,
+    		'site_name' => $worksheet->site_name,
+    		'status' => $worksheet->status,
+    		'status_en' => $worksheet->status_en,
+    		'status_he' => $worksheet->status_he,
+    		'status_ua' => $worksheet->status_ua,
+    		'package_content' => $worksheet->package_content,
+    		'direction' => $worksheet->direction
+    	];   	
+
+    	if ($other_worksheet_1->count() != $other_worksheet_2->count()) {
+    		CourierDraftWorksheet::where('in_trash',false)->where([
+    			['id','<>',$id],
+    			['standard_phone',$worksheet->standard_phone]
+    		])->update($worksheet_data);
+    	}
+    	if ($other_worksheet_1->count() == $other_worksheet_3->count()){
+    		CourierDraftWorksheet::create($worksheet_data);
+    		$new_id = DB::getPdo()->lastInsertId();
+    		CourierDraftWorksheet::find($new_id)
+    		->update([
+    			'date'=>date('Y.m.d'),
+    			'status_date' => date('Y-m-d')
+    		]);
+    		$this->addingOrderNumber($worksheet->standard_phone, 'ru');
+
+    		$new_worksheet = CourierDraftWorksheet::find($new_id);
+    		$new_worksheet->checkCourierTask($new_worksheet->status);
+    		
+    		$packing = PackingSea::where('work_sheet_id',$id)->get();
+    		if ($packing) {
+    			$packing->each(function ($item, $key) use($new_id){                                 
+    				$new_packing = $item->replicate();
+    				$new_packing->work_sheet_id = $new_id;
+    				$new_packing->track_code = null;
+    				$new_packing->save();
+    			});
+    		}                                          
+    	}
+    	
+    	return redirect()->to(session('this_previous_url'))->with('status', 'Строка успешно продублирована!');
+    }
+
+
     public function courierDraftCheckActivate($id)
     {
     	$courier_draft_worksheet = CourierDraftWorksheet::find($id);
 		$error_message = 'Заполните обязателные поля: ';
 		$user = Auth::user();
+
+		if ((int)$courier_draft_worksheet->parcels_qty > 1) {
+			$error_message = 'Вы пытаетесь активировать запись, которая относится к нескольким посылкам. Проверьте количество посылок перед активацией.';
+			return response()->json(['error' => $error_message]);
+		}
 
 		if (!$courier_draft_worksheet->sender_name) $error_message .= 'Отправитель,';
 		if (!$courier_draft_worksheet->standard_phone) $error_message .= 'Телефон (стандарт),';
@@ -461,7 +602,8 @@ class CourierDraftController extends AdminController
 		if (!$courier_draft_worksheet->recipient_street) $error_message .= 'Улица получателя,';
 		if (!$courier_draft_worksheet->recipient_house) $error_message .= '№ дома пол-ля,';
 		if (!$courier_draft_worksheet->recipient_room) $error_message .= '№ кв. пол-ля,';
-		if (!$courier_draft_worksheet->recipient_phone) $error_message .= 'Телефон получателя,';	
+		if (!$courier_draft_worksheet->recipient_phone) $error_message .= 'Телефон получателя,';
+		if (!$courier_draft_worksheet->package_content) $error_message .= 'Содержание,';	
 
 		if ($error_message !== 'Заполните обязателные поля: ') {
 			return response()->json(['error' => $error_message]);
@@ -486,7 +628,7 @@ class CourierDraftController extends AdminController
 		}			
 
 		foreach($fields as $field){
-			if ($field !== 'created_at' && $field !== 'id') {
+			if ($field !== 'created_at' && $field !== 'id' && $field !== 'parcels_qty') {
 				$new_worksheet->$field = $courier_draft_worksheet->$field;
 			}			
 		}

@@ -19,7 +19,7 @@ use Excel;
 
 class AdminController extends Controller
 {
-	const ROLES_ARR = array('admin' => 'admin', 'user' => 'user', 'warehouse' => 'warehouse', 'office_1' => 'office_1','office_ru' => 'office_ru', 'office_agent_ru' => 'office_agent_ru', 'viewer' => 'viewer', 'china_admin' => 'china_admin', 'china_viewer' => 'china_viewer', 'office_eng' => 'office_eng', 'office_ind' => 'office_ind', 'viewer_eng' => 'viewer_eng', 'viewer_1' => 'viewer_1', 'viewer_2' => 'viewer_2', 'viewer_3' => 'viewer_3', 'viewer_4' => 'viewer_4', 'viewer_5' => 'viewer_5');
+	const ROLES_ARR = array('admin' => 'admin', 'user' => 'user', 'warehouse' => 'warehouse', 'office_1' => 'office_1','office_ru' => 'office_ru', 'office_agent_ru' => 'office_agent_ru', 'viewer' => 'viewer', 'china_admin' => 'china_admin', 'china_viewer' => 'china_viewer', 'office_eng' => 'office_eng', 'office_ind' => 'office_ind', 'viewer_eng' => 'viewer_eng', 'viewer_1' => 'viewer_1', 'viewer_2' => 'viewer_2', 'viewer_3' => 'viewer_3', 'viewer_4' => 'viewer_4', 'viewer_5' => 'viewer_5', 'courier' => 'courier');
 	const VIEWER_ARR = array('viewer_1', 'viewer_2', 'viewer_3', 'viewer_4', 'viewer_5');
 	private $ru_status_arr = ["Возврат", "Коробка", "Забрать", "Уточнить", "Думают", "Отмена", "Подготовка"];
 	private $en_status_arr = ["Pending", "Return", "Box", "Pick up", "Specify", "Think", "Canceled"];
@@ -206,7 +206,7 @@ class AdminController extends Controller
 				if ($status_error) return $status_error;
 			} 
 
-			$check_sheet = NewWorksheet::whereIn($check_column, $arr)->whereIn('status',$this->ru_status_arr_2)->first();
+			$check_sheet = NewWorksheet::where('in_trash',false)->whereIn($check_column, $arr)->whereIn('status',$this->ru_status_arr_2)->first();
 			if ($check_sheet) {
 				if ($column === 'pay_sum')
 				{
@@ -236,7 +236,7 @@ class AdminController extends Controller
 				if ($status_error) return $status_error;
 			} 
 
-			$check_sheet = PhilIndWorksheet::whereIn($check_column, $arr)->whereIn('status',$this->en_status_arr_2)->first();
+			$check_sheet = PhilIndWorksheet::where('in_trash',false)->whereIn($check_column, $arr)->whereIn('status',$this->en_status_arr_2)->first();
 			if ($check_sheet) {
 				if ($column === 'amount_payment')
 				{
@@ -266,7 +266,7 @@ class AdminController extends Controller
 				if ($status_error) return $status_error;
 			} 
 
-			$check_sheet = CourierDraftWorksheet::whereIn($check_column, $arr)->whereIn('status',$this->ru_status_arr_2)->first();
+			$check_sheet = CourierDraftWorksheet::where('in_trash',false)->whereIn($check_column, $arr)->whereIn('status',$this->ru_status_arr_2)->first();
 			if ($check_sheet) {
 				if ($column === 'pay_sum')
 				{
@@ -296,7 +296,7 @@ class AdminController extends Controller
 				if ($status_error) return $status_error;
 			} 
 
-			$check_sheet = CourierEngDraftWorksheet::whereIn($check_column, $arr)->whereIn('status',$this->en_status_arr_2)->first();
+			$check_sheet = CourierEngDraftWorksheet::where('in_trash',false)->whereIn($check_column, $arr)->whereIn('status',$this->en_status_arr_2)->first();
 			if ($check_sheet) {
 				if ($column === 'amount_payment')
 				{
@@ -477,19 +477,19 @@ class AdminController extends Controller
         $title = 'Notifications';
         $check_archive = ReceiptArchive::where([
         	['status',false],
-        	['update_date',date('Y-m-d')]
+        	['update_date','<=',date('Y-m-d')]
         ])->first();
 
         if ($check_archive) {
         	ReceiptArchive::where([
         		['status',false],
-        		['update_date',date('Y-m-d')]
+        		['update_date','<=',date('Y-m-d')]
         	])->update([
         		'status' => true
         	]);
         }
 
-        $archive_obj = ReceiptArchive::where('status',true)->paginate(10);     
+        $archive_obj = ReceiptArchive::where('in_trash',false)->where('status',true)->paginate(10);     
         
         return view('admin.receipts.receipts_archive', compact('title','archive_obj'));
     }
@@ -679,7 +679,7 @@ class AdminController extends Controller
 		// If not double
 		$pos = strripos($data['tracking_main'], 'CD');
 		if ($pos === false) {
-			$worksheet = PhilIndWorksheet::where('tracking_main', $data['tracking_main'])->first();
+			$worksheet = PhilIndWorksheet::where('in_trash',false)->where('tracking_main', $data['tracking_main'])->first();
 			$courier_worksheet = CourierEngDraftWorksheet::where('tracking_main', $data['tracking_main'])->first();
 			if ($worksheet) {
 				$worksheet->payment_date_comments = $data['date'];
@@ -699,7 +699,7 @@ class AdminController extends Controller
 			}
 		}
 		else{
-			$worksheet = NewWorksheet::where('tracking_main', $data['tracking_main'])->first();
+			$worksheet = NewWorksheet::where('in_trash',false)->where('tracking_main', $data['tracking_main'])->first();
 			$courier_worksheet = CourierDraftWorksheet::where('tracking_main', $data['tracking_main'])->first();
 			if ($worksheet) {
 				$worksheet->pay_date = $data['date'];
@@ -950,15 +950,15 @@ class AdminController extends Controller
         $new_arr = [];      
 
         if ($request->table_columns) {
-        	$archive_obj = ReceiptArchive::where($request->table_columns, 'like', '%'.$search.'%')->paginate(10);
+        	$archive_obj = ReceiptArchive::where('in_trash',false)->where($request->table_columns, 'like', '%'.$search.'%')->paginate(10);
         }
         else{
         	foreach($attributes as $key => $value)
         	{
         		if ($key !== 'created_at' && $key !== 'updated_at') {
-        			$sheet = ReceiptArchive::where($key, 'like', '%'.$search.'%')->get()->first();
+        			$sheet = ReceiptArchive::where('in_trash',false)->where($key, 'like', '%'.$search.'%')->get()->first();
         			if ($sheet) {       				
-        				$temp_arr = ReceiptArchive::where($key, 'like', '%'.$search.'%')->get();
+        				$temp_arr = ReceiptArchive::where('in_trash',false)->where($key, 'like', '%'.$search.'%')->get();
         				$new_arr = $temp_arr->filter(function ($item, $k) use($id_arr) {
         					if (!in_array($item->id, $id_arr)) { 
         						$id_arr[] = $item->id;       						  

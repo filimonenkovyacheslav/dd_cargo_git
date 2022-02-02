@@ -87,14 +87,10 @@
 
                     <li>
                         <a href="{{route('adminWorksheet')}}"><i class="menu-icon fa fa-archive "></i> Рабочий лист </a>
-                    </li> 
+                    </li>                    
 
                     <li>
-                        <a href="{{route('adminDraftWorksheet')}}"><i class="menu-icon fa fa-book "></i> Черновой лист</a>
-                    </li>
-
-                    <li>
-                        <a href="{{route('adminCourierDraftWorksheet')}}"><i class="menu-icon fa fa-book "></i> Черновик курьеров</a>
+                        <a href="{{route('adminCourierDraftWorksheet')}}"><i class="menu-icon fa fa-book "></i> Черновик</a>
                     </li>
 
                     <li>
@@ -150,7 +146,20 @@
                     <li>
                         <a href="{{route('adminPhilIndIndex')}}"><i class="menu-icon fa fa-book "></i> Philippines India admin </a>
                     </li> 
-                    @endcan            
+                    @endcan   
+         
+                    @can('editCourierTasks')
+                    <li>
+                        <a href="{{route('adminCourierTask')}}"><i class="menu-icon fa fa-book "></i> Couriers Tasks</a>
+                    </li> 
+                    @endcan     
+
+                    @can('changeColor')
+                    <li>
+                        <a href="{{route('adminTrash')}}"><i class="menu-icon fa fa-book "></i> Корзина/Trash</a>
+                    </li> 
+                    @endcan      
+                
                 </ul>               
             </div><!-- /.navbar-collapse -->
         </nav>

@@ -58,6 +58,7 @@
 									<option value="direction">Направление</option>
 									<option value="tariff">Тариф</option>
 									<option value="status">Статус</option>
+									<option value="status_date">Дата Статуса</option>
 									<option value="partner">Партнер</option>
 									<option value="tracking_main">Основной</option>
 									<option value="tracking_local">Локальный</option>
@@ -67,6 +68,7 @@
 									<option value="comments">Комментарии</option>
 									<option value="sender_name">Отправитель</option>
 									<option value="sender_country">Страна отправителя</option>
+									<option value="shipper_region">Регион отправителя</option>
 									<option value="sender_city">Город отправителя</option>
 									<option value="sender_postcode">Индекс отправителя</option>
 									<option value="sender_address">Адрес отправителя</option>
@@ -106,8 +108,16 @@
 							<label>Фильтр:
 								<input type="search" name="table_filter_value" class="form-control form-control-sm">
 							</label>
+							
+							<input type="hidden" name="for_active">
+							
 							<button type="button" id="table_filter_button" style="margin-left:35px" class="btn btn-default">Искать</button>
 						</form>
+
+						<label style="margin-top: 30px;margin-left: 30px;">Показывать только записи для активации
+							<input type="checkbox" onclick="forActivation(event)" class="for_active" style="width:20px;height:20px;">
+						</label>
+					
 					</div>
 					
 					<div class="card-body new-worksheet">
@@ -122,9 +132,11 @@
 										<th>Off<hr>Направ- ление</th>
 										<th>Тариф</th>
 										<th>Статус</th>
+										<th>Дата Статуса</th>
 										<th>Партнер</th>
 										<th>Трекинг<hr>Основной</th> 
 										<th>№ заказа</th>
+										<th>Кол-во посылок</th>
 										<th>Трекинг<hr>Локальный</th>
 										<th>Трекинг<hr>Транзитный</th>
 										<th>Номер паллеты</th>
@@ -132,6 +144,7 @@
 										<th>DIR<hr>Комментарии</th>
 										<th>Отправитель</th>
 										<th>Страна отправителя</th>
+										<th>Регион отправителя</th>
 										<th>Город отправителя</th>
 										<th>Индекс отправителя</th>
 										<th>Адрес отправителя</th>
@@ -196,6 +209,8 @@
 											
 											<a class="btn btn-primary" href="{{ url('/admin/courier-draft-worksheet/'.$row->id) }}">Изменить</a>
 
+											<a class="btn btn-default" onclick="ConfirmDouble(event)" href="{{ url('/admin/courier-draft-worksheet-double/'.$row->id) }}">Дубль</a>
+
 											@endcan
 
 											@can('activateDraft')
@@ -206,9 +221,9 @@
 
 											@can('editPost')
 
-											{!! Form::open(['url'=>route('deleteCourierDraftWorksheet'),'onsubmit' => 'return ConfirmDelete()', 'class'=>'form-horizontal','method' => 'POST']) !!}
+											{!! Form::open(['url'=>route('deleteCourierDraftWorksheet'), 'class'=>'form-horizontal','method' => 'POST']) !!}
 											{!! Form::hidden('action',$row->id) !!}
-											{!! Form::button('Удалить',['class'=>'btn btn-danger','type'=>'submit']) !!}
+											{!! Form::button('Удалить',['class'=>'btn btn-danger','type'=>'submit','onclick' => 'ConfirmDelete(event)']) !!}
 											{!! Form::close() !!}
 
 											@endcan
@@ -228,6 +243,9 @@
 										<td title="{{$row->status}}">
 											<div class="div-3">{{$row->status}}</div>
 										</td>
+										<td title="{{$row->status_date}}">
+											<div class="div-1">{{$row->status_date}}</div>
+										</td>
 										<td title="{{$row->partner}}">
 											<div class="div-3">{{$row->partner}}</div>
 										</td>										
@@ -236,6 +254,9 @@
 										</td>
 										<td class="td-button" title="{{$row->order_number}}">
 											<div class="div-22">{{$row->order_number}}</div>
+										</td>
+										<td title="{{$row->parcels_qty}}">
+											<div class="div-22">{{$row->parcels_qty}}</div>
 										</td>
 										<td title="{{$row->tracking_local}}">
 											<div class="div-5">{{$row->tracking_local}}</div>
@@ -257,6 +278,9 @@
 										</td>
 										<td title="{{$row->sender_country}}">
 											<div class="div-11">{{$row->sender_country}}</div>
+										</td>
+										<td title="{{$row->shipper_region}}">
+											<div class="div-2">{{$row->shipper_region}}</div>
 										</td>
 										<td title="{{$row->sender_city}}">
 											<div class="div-12">{{$row->sender_city}}</div>
@@ -404,6 +428,8 @@
 											
 											<a class="btn btn-primary" href="{{ url('/admin/courier-draft-worksheet/'.$row->id) }}">Изменить</a>
 
+											<a class="btn btn-default" onclick="ConfirmDouble(event)" href="{{ url('/admin/courier-draft-worksheet-double/'.$row->id) }}">Дубль</a>
+
 											@endcan
 
 											@can('activateDraft')
@@ -414,9 +440,9 @@
 
 											@can('editPost')
 
-											{!! Form::open(['url'=>route('deleteCourierDraftWorksheet'),'onsubmit' => 'return ConfirmDelete()', 'class'=>'form-horizontal','method' => 'POST']) !!}
+											{!! Form::open(['url'=>route('deleteCourierDraftWorksheet'), 'class'=>'form-horizontal','method' => 'POST']) !!}
 											{!! Form::hidden('action',$row->id) !!}
-											{!! Form::button('Удалить',['class'=>'btn btn-danger','type'=>'submit']) !!}
+											{!! Form::button('Удалить',['class'=>'btn btn-danger','type'=>'submit','onclick' => 'ConfirmDelete(event)']) !!}
 											{!! Form::close() !!}
 
 											@endcan
@@ -436,6 +462,9 @@
 										<td title="{{$row->status}}">
 											<div class="div-3">{{$row->status}}</div>
 										</td>
+										<td title="{{$row->status_date}}">
+											<div class="div-1">{{$row->status_date}}</div>
+										</td>
 										<td title="{{$row->partner}}">
 											<div class="div-3">{{$row->partner}}</div>
 										</td>
@@ -444,6 +473,9 @@
 										</td>
 										<td class="td-button" title="{{$row->order_number}}">
 											<div class="div-22">{{$row->order_number}}</div>
+										</td>
+										<td title="{{$row->parcels_qty}}">
+											<div class="div-22">{{$row->parcels_qty}}</div>
 										</td>
 										<td title="{{$row->tracking_local}}">
 											<div class="div-5">{{$row->tracking_local}}</div>
@@ -465,6 +497,9 @@
 										</td>
 										<td title="{{$row->sender_country}}">
 											<div class="div-11">{{$row->sender_country}}</div>
+										</td>
+										<td title="{{$row->shipper_region}}">
+											<div class="div-2">{{$row->shipper_region}}</div>
 										</td>
 										<td title="{{$row->sender_city}}">
 											<div class="div-12">{{$row->sender_city}}</div>
@@ -641,9 +676,10 @@
 											<option value="tariff">Тариф</option>
 											<option value="status">Статус</option>
 											<option value="partner">Партнер</option>
+											<option value="parcels_qty">Кол-во посылок</option>
 											<option value="tracking_local">Локальный</option>
 											<option value="tracking_transit">Транзитный</option>
-											<option value="pallet_number">Номер паллеты</option>
+											<option value="pallet_number">№ паллеты</option>
 											<option value="comment_2">Коммент</option>
 											<option value="comments">Комментарии</option>
 											<option value="sender_name">Отправитель</option>
@@ -675,7 +711,7 @@
 											<option value="length">Длина</option>
 											<option value="volume_weight">Объемный вес</option>
 											<option value="quantity_things">Кол-во предметов</option>
-											<!-- <option value="batch_number">Партия</option> -->
+											<option value="batch_number">Партия</option>
 											<option value="pay_date">Дата оплаты и комментарии</option>
 											<option value="pay_sum">Сумма оплаты</option>  
 										</select>
@@ -691,8 +727,8 @@
 								{!! Form::button('Сохранить',['class'=>'btn btn-primary checkbox-operations-change','type'=>'submit']) !!}
 								{!! Form::close() !!}
 
-								{!! Form::open(['url'=>route('deleteCourierDraftWorksheetById'),'onsubmit' => 'return ConfirmDelete()','method' => 'POST']) !!}
-								{!! Form::button('Удалить',['class'=>'btn btn-danger  checkbox-operations-delete','type'=>'submit']) !!}
+								{!! Form::open(['url'=>route('deleteCourierDraftWorksheetById'),'method' => 'POST']) !!}
+								{!! Form::button('Удалить',['class'=>'btn btn-danger  checkbox-operations-delete','type'=>'submit','onclick' => 'ConfirmDelete(event)']) !!}
 								{!! Form::close() !!}
 
 								@endcan
@@ -710,15 +746,35 @@
 
 <script>
 
-	function ConfirmDelete()
+	let href = location.href;
+	if (href.indexOf('for_active') !== -1) {
+		document.querySelector('.for_active').checked = true;
+		document.querySelector('[name="for_active"]').value = 'for_active';
+	}
+
+	
+	function ConfirmDelete(event)
 	{
-		var x = confirm("Вы уверены, что хотите удалить?");
+		event.preventDefault();
+		const form = event.target.parentElement;
+		const data = new URLSearchParams(new FormData(form)).toString();
+		var x = confirm("Вы уверены, что хотите удалить окончательно?");
 		if (x)
-			return true;
+			form.submit();
+		else
+			location.href = '/admin/to-trash?'+data+'&table=courier_draft_worksheet';
+	}
+
+	function ConfirmDouble(event)
+	{
+		event.preventDefault();
+		const href = $(event.target).attr('href');
+		var x = confirm("Вы уверены, что хотите продублировать?");
+		if (x)
+			location.href = href;
 		else
 			return false;
 	}
-
 	
 	function ConfirmActivate(event)
 	{

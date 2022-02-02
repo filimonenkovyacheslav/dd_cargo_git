@@ -80,11 +80,7 @@
                     </li>
 
                     <li>
-                        <a href="{{route('adminEngDraftWorksheet')}}"><i class="menu-icon fa fa-archive "></i> Draft </a>
-                    </li>
-
-                    <li>
-                        <a href="{{route('adminCourierEngDraftWorksheet')}}"><i class="menu-icon fa fa-archive "></i> Courier Draft </a>
+                        <a href="{{route('adminCourierEngDraftWorksheet')}}"><i class="menu-icon fa fa-archive "></i> Draft </a>
                     </li>
 
                     <li>
@@ -134,7 +130,20 @@
                     <li>
                         <a href="{{route('adminChinaIndex')}}"><i class="menu-icon fa fa-book "></i> China admin </a>
                     </li>
-                    @endcan               
+                    @endcan      
+
+                    @can('editCourierTasks')
+                    <li>
+                        <a href="{{route('adminCourierTask')}}"><i class="menu-icon fa fa-book "></i> Couriers Tasks</a>
+                    </li> 
+                    @endcan   
+
+                    @can('changeColor')
+                    <li>
+                        <a href="{{route('adminTrash')}}"><i class="menu-icon fa fa-book "></i> Корзина/Trash</a>
+                    </li> 
+                    @endcan        
+                
                 </ul>
             </div><!-- /.navbar-collapse -->
         </nav>

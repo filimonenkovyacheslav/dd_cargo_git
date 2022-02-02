@@ -73,7 +73,13 @@ class AuthorizationClass extends Authorization
 				],
 			'editOwnPost' => [
 					'description' => 'Edit own post',
-				]			
+				],
+			'editCourierTasks' => [
+					'description' => 'Edit Courier Tasks',
+				],
+			'changeColor' => [
+					'description' => 'Change color',
+				]		
 		];
 	}
 
@@ -106,19 +112,27 @@ class AuthorizationClass extends Authorization
 				'editColumns-1',
 				'editColumns-4',
 				'editDraft',
-				'editEngDraft'
+				'editEngDraft',
+				'activateDraft',
+				'activateEngDraft',
+				'editCourierTasks',
+				'changeColor'
 			],
 			'office_ru' => [
 				'view-post',
 				'update-post',
 				'editColumns-1',
 				'editDraft',
-				'activateDraft'					
+				'activateDraft',
+				'editCourierTasks',
+				'changeColor'					
 			],
 			'office_agent_ru' => [
 				'view-post',
 				'update-post',
-				'editColumns-4'				
+				'editColumns-4',
+				'editCourierTasks',
+				'changeColor'				
 			],
 			'viewer' => [
 				'view-post',
@@ -152,13 +166,22 @@ class AuthorizationClass extends Authorization
 				'eng-update-post',
 				'editComments-eng',
 				'editEngDraft',
-				'activateEngDraft'					
+				'activateEngDraft',
+				'editCourierTasks',
+				'changeColor'					
 			],
 			'office_ind' => [
 				'view-post',
 				'eng-view-post',
 				'eng-update-post',
-				'editColumns-eng'					
+				'editColumns-eng',
+				'editCourierTasks',
+				'changeColor'					
+			],
+			'courier' => [
+				'view-post',
+				'eng-view-post',
+				'editCourierTasks'
 			],
 			'viewer_eng' => [
 				'eng-view-post',

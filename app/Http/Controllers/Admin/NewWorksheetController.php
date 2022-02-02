@@ -18,26 +18,49 @@ use App\Invoice;
 use App\Manifest;
 use App\ReceiptArchive;
 use \Dejurin\GoogleTranslateForFree;
-//use App\Warehouse;
+use App\Warehouse;
 
 
 class NewWorksheetController extends AdminController
 {
 	
-	private $status_arr = ["Доставляется на склад в стране отправителя", "Возврат", "Коробка", "Забрать", "Уточнить", "Думают", "Отмена"];
-	private $status_arr_2 = ["На таможне в стране отправителя", "На складе в стране отправителя", "Доставляется на склад в стране отправителя", "Возврат", "Коробка", "Забрать", "Уточнить", "Думают", "Отмена"];
+	private $status_arr = ["Доставляется на склад в стране отправителя", "Возврат", "Коробка", "Забрать", "Уточнить", "Думают", "Отмена", "Подготовка"];
+	private $status_arr_2 = ["На таможне в стране отправителя", "На складе в стране отправителя", "Доставляется на склад в стране отправителя", "Возврат", "Коробка", "Забрать", "Уточнить", "Думают", "Отмена", "Подготовка"];
     
 
     public function index(){
         $title = 'Новый рабочий лист';
-        $new_worksheet_obj = NewWorksheet::paginate(10);     
+        
+        //dd(NewWorksheet::find(1014)->courierTask);
+        
+        // Auto-update status
+        $update_date = Date('Y-m-d', strtotime('-7 days'));
+        NewWorksheet::where('in_trash',false)->where([
+        	['status_date','<=',$update_date],
+        	['status_date','<>',null],
+        	['status',"Доставляется на склад в стране отправителя"]
+        ]) 
+        ->orWhere([
+        	['status_date','<=',$update_date],
+        	['status_date','<>',null],
+        	['status',"На складе в стране отправителя"]
+        ])            
+        ->update([
+        	'status' => "Доставляется в страну получателя",
+        	'status_en' => "Forwarding to the receiver country",
+        	'status_ua' => "Доставляється в країну отримувача",
+        	'status_he' => " נשלח למדינת המקבל",
+        	'status_date' => date('Y-m-d')
+        ]);
+        
+        $new_worksheet_obj = NewWorksheet::where('in_trash',false)->paginate(10);     
 
         $arr_columns = parent::new_columns();
 
         $user = Auth::user();
         $viewer_arr = parent::VIEWER_ARR;
 
-        $update_all_statuses = NewWorksheet::where('update_status_date','=', date('Y-m-d'))->get()->count();
+        $update_all_statuses = NewWorksheet::where('in_trash',false)->where('update_status_date','=', date('Y-m-d'))->get()->count();
         
         return view('admin.new_worksheet', ['title' => $title,'new_worksheet_obj' => $new_worksheet_obj,'new_column_1' => $arr_columns[0],'new_column_2' => $arr_columns[1],'new_column_3' => $arr_columns[2],'new_column_4' => $arr_columns[3],'new_column_5' => $arr_columns[4], 'user' => $user, 'viewer_arr' => $viewer_arr, 'update_all_statuses' => $update_all_statuses]);
     }
@@ -49,8 +72,9 @@ class NewWorksheetController extends AdminController
 		$new_worksheet = NewWorksheet::find($id);
 		$title = 'Изменение строки '.$new_worksheet->id;
 		$user = Auth::user();
+		$israel_cities = $this->israelCities();
 
-		return view('admin.new_worksheet_update', ['title' => $title,'new_worksheet' => $new_worksheet, 'user' => $user,'new_column_1' => $arr_columns[0],'new_column_2' => $arr_columns[1],'new_column_3' => $arr_columns[2],'new_column_4' => $arr_columns[3],'new_column_5' => $arr_columns[4]]);
+		return view('admin.new_worksheet_update', ['title' => $title,'new_worksheet' => $new_worksheet, 'user' => $user,'new_column_1' => $arr_columns[0],'new_column_2' => $arr_columns[1],'new_column_3' => $arr_columns[2],'new_column_4' => $arr_columns[3],'new_column_5' => $arr_columns[4],'israel_cities' => $israel_cities]);
 	}
 
 
@@ -58,7 +82,21 @@ class NewWorksheetController extends AdminController
 		$status_error = '';
 		if (!$request->input('status')) return 'ERROR STATUS!';
 		
+		$status_error = $this->checkStatus('new_worksheet', $id, $request->input('status'));
+		if($status_error) return $status_error;
+
+		if ($request->input('recipient_phone')) {
+			$status_error = $this->checkConsigneePhone($request->input('recipient_phone'), 'ru');
+			if($status_error) return $status_error;
+		}
+		
 		if ($request->input('tracking_main')) {
+			
+			if (!$this->trackingValidate($request->input('tracking_main'))){
+				$status_error = "Tracking number is not correct.";
+				return $status_error;
+			}
+			
 			$check_tracking = NewWorksheet::where([
 				['tracking_main', '=', $request->input('tracking_main')],
 				['id', '<>', $id]
@@ -73,6 +111,10 @@ class NewWorksheetController extends AdminController
 			])->first();
 			if($check_tracking) $status_error = 'ВНИМАНИЕ! В СИСТЕМЕ УЖЕ СУЩЕСТВУЕТ ТАКОЙ ТРЕКИНГ-НОМЕР. ИСПРАВЬТЕ ОШИБОЧНУЮ ЗАПИСЬ ИЛИ ВНЕСИТЕ ДРУГОЙ НОМЕР!';
 			if($status_error) return $status_error;
+		}
+		elseif (!$request->input('tracking_main') && ($request->input('batch_number') || $request->input('pallet_number'))){
+			$status_error = "Нельзя ввести номер партии или паллеты без трекинг-номера";
+			return $status_error;
 		}
 		
 		if ($request->input('pay_sum')){
@@ -95,7 +137,7 @@ class NewWorksheetController extends AdminController
 
 	public function update(Request $request, $id)
 	{
-		$new_worksheet = NewWorksheet::find($id);
+		$new_worksheet = NewWorksheet::find($id);		
 		$old_tracking = $new_worksheet->tracking_main;
 		$old_pallet = $new_worksheet->pallet_number;
 		$old_batch_number = $new_worksheet->batch_number;
@@ -104,7 +146,7 @@ class NewWorksheetController extends AdminController
 		$fields = $this->getTableColumns('new_worksheet');
 		$status_error = '';
 		$status = 'Строка успешно обновлена!';
-		$check_result = '';
+		$check_result = '';		
 
 		for ($i=0; $i < count($arr_columns); $i++) { 
 			if ($arr_columns[$i]) {
@@ -119,6 +161,10 @@ class NewWorksheetController extends AdminController
 			if ($field !== 'created_at') {
 				$new_worksheet->$field = $request->input($field);
 			}
+		}
+
+		if (in_array($new_worksheet->sender_city, array_keys($this->israel_cities))) {
+			$new_worksheet->shipper_region = $this->israel_cities[$new_worksheet->sender_city];
 		}
 
 		if ($request->input('tracking_main')){
@@ -137,7 +183,7 @@ class NewWorksheetController extends AdminController
 					$new_worksheet->status_en = "Forwarding to the receiver country";
 					$new_worksheet->status_he = " נשלח למדינת המקבל";
 					$new_worksheet->status_ua = "Доставляється в країну відправника";
-				}
+				}				
 			}			
 
 			$date_result = (strtotime('2021-09-20') <= strtotime(str_replace('.', '-', $new_worksheet->date)));
@@ -162,17 +208,7 @@ class NewWorksheetController extends AdminController
 						$status .= ' '.$check_result;
 					}
 				}
-			}
-
-			// Update Warehouse
-			/*if ($old_pallet !== $request->input('pallet_number')) {
-				if ($old_tracking !== $request->input('tracking_main')) {
-					$this->updateWarehouse($old_pallet, $request->input('pallet_number'), $old_tracking, $request->input('tracking_main'));
-				}
-				else{
-					$this->updateWarehouse($old_pallet, $request->input('pallet_number'), $old_tracking);
-				}				
-			}*/			
+			}			
 		}	
 
 		if ($old_status !== $new_worksheet->status) {
@@ -191,39 +227,34 @@ class NewWorksheetController extends AdminController
 
 			$this->updateInvoice($request, $id, $tr);
 			$this->updateNewPacking($request, $id, $tr, $content_arr);			
-			$this->updateManifest($request, $id, $tr, $content_arr);
-						
-			// Adding order number
-			if ($new_worksheet->standard_phone) {
-
-				$standard_phone = ltrim($new_worksheet->standard_phone, " \+");
-
-				$data = NewWorksheet::where('standard_phone', '+'.$standard_phone)
-				->get();
-
-				if (!$data->first()->order_number) {
-					$data->transform(function ($item, $key) {
-						return $item->update(['order_number'=> ((int)$key+1)]);             
-					});
-				}
-				else{
-					$data->transform(function ($item, $key) use($standard_phone) {
-						if (!$item->order_number) {
-
-							$i = (int)(NewWorksheet::where([
-								['standard_phone', '+'.$standard_phone],
-								['order_number', '<>', null]
-							])->get()->last()->order_number);
-
-							$i++;
-							return $item->update(['order_number'=> $i]);
-						}               
-					});
-				}
-			}
-			// End Adding order number
+			$this->updateManifest($request, $id, $tr, $content_arr);									
 			
 			$new_worksheet->save();
+			$new_worksheet->checkCourierTask($new_worksheet->status);
+
+			// Adding order number
+			if ($new_worksheet->standard_phone) {
+				$this->addingOrderNumber($new_worksheet->standard_phone, 'ru');
+			}
+
+			if ($request->input('tracking_main')) {
+				// Check for missing tracking
+				$this->checkForMissingTracking($request->input('tracking_main'));
+				
+				// Update Warehouse pallet
+				if ($old_pallet !== $request->input('pallet_number')) {
+					$message = $this->updateWarehousePallet($old_tracking, $request->input('tracking_main'), $old_pallet, $request->input('pallet_number'), $old_batch_number, $new_worksheet->batch_number, 'ru', $new_worksheet);
+					if ($message) {
+						return redirect()->to(session('this_previous_url'))->with('status-error', 'Pallet number is not correct!');
+					}			
+				}
+
+				// Update Warehouse lot
+				if ($old_batch_number !== $new_worksheet->batch_number){
+					$this->updateWarehouseLot($request->input('tracking_main'), $new_worksheet->batch_number, 'ru');
+				}
+			}
+			
 			if ($status_error) {
 				return redirect()->to(session('this_previous_url'))->with('status-error', $status_error);
 			}
@@ -536,6 +567,8 @@ class NewWorksheetController extends AdminController
 	public function destroy(Request $request)
 	{
 		$id = $request->input('action');
+		$this->removeTrackingFromPalletWorksheet($id, 'ru');
+		
 		NewWorksheet::where('id', $id)->delete();
 		NewPacking::where('work_sheet_id', $id)->delete();
 		Invoice::where('work_sheet_id', $id)->delete();
@@ -635,7 +668,7 @@ class NewWorksheetController extends AdminController
 
 	public function showNewStatus(){
         $title = 'Изменение статусов по номеру партии';
-        $worksheet_obj = NewWorksheet::all();
+        $worksheet_obj = NewWorksheet::where('in_trash',false)->get();
         $number_arr = [];
         foreach ($worksheet_obj as $row) {
         	if (!in_array($row->batch_number, $number_arr)) {
@@ -649,7 +682,11 @@ class NewWorksheetController extends AdminController
     public function changeNewStatus(Request $request){
         if ($request->input('batch_number') && $request->input('status')) {
         	DB::table('new_worksheet')
-        	->where('batch_number', $request->input('batch_number'))
+        	->where('in_trash',false)
+        	->where([
+        		['batch_number', $request->input('batch_number')],
+        		['tracking_main','<>',null]
+        	])
           	->update([
           		'status' => $request->input('status'), 
           		'status_en' => $request->input('status_en'),
@@ -664,7 +701,7 @@ class NewWorksheetController extends AdminController
 
     public function showNewStatusDate(){
         $title = 'Изменение статусов по дате';
-        $worksheet_obj = NewWorksheet::all();
+        $worksheet_obj = NewWorksheet::where('in_trash',false)->get();
         $date_arr = [];
         foreach ($worksheet_obj as $row) {
         	if (!in_array($row->date, $date_arr)) {
@@ -678,7 +715,11 @@ class NewWorksheetController extends AdminController
     public function changeNewStatusDate(Request $request){
         if ($request->input('date') && $request->input('status')) {
         	DB::table('new_worksheet')
-        	->where('date', $request->input('date'))
+        	->where('in_trash',false)
+        	->where([
+        		['date', $request->input('date')],
+        		['tracking_main','<>',null]
+        	])
           	->update([
           		'status' => $request->input('status'), 
           		'status_en' => $request->input('status_en'),
@@ -693,7 +734,7 @@ class NewWorksheetController extends AdminController
 
     public function showNewData(){
         $title = 'Массовое изменение данных по трекингу (поддерживает массовое выделение чекбоксов)';
-        $worksheet_obj = NewWorksheet::orderBy('tracking_main')->get();
+        $worksheet_obj = NewWorksheet::where('in_trash',false)->orderBy('tracking_main')->get();
         $date_arr = [];
         foreach ($worksheet_obj as $row) {
         	$temp = $row->tracking_main;
@@ -705,7 +746,7 @@ class NewWorksheetController extends AdminController
         			$date_arr[$row->tracking_main] = $row->tracking_main;
         		}
         	}
-        	if (strripos($temp, 'IN') !== false || strripos($temp, 'PH') !== false || strripos($temp, 'NE') !== false || strripos($temp, 'CD') !== false) {
+        	if ($this->checkWhichAdmin($temp)) {
         		if (!in_array($row->tracking_main, $date_arr)) {
         			$date_arr[$row->tracking_main] = $row->tracking_main;
         		}
@@ -721,17 +762,64 @@ class NewWorksheetController extends AdminController
     	$column = $request->input('tracking-columns');
     	$status_error = '';
     	$check_column = 'tracking_main';
+    	$old_lot_arr = [];
+    	$old_pallet_arr = [];
     	
     	if ($track_arr) {
     		if ($value_by && $column) {
 
-				$status_error = $this->checkColumns($track_arr, $value_by, $column, $check_column);   				
+				$status_error = $this->checkColumns($track_arr, $value_by, $column, $check_column, 'new_worksheet');   				
 				if($status_error) return redirect()->to(session('this_previous_url'))->with('status-error', $status_error);
+
+				if ($column === 'batch_number') {
+    				for ($i=0; $i < count($track_arr); $i++) { 
+    					$worksheet = NewWorksheet::where('tracking_main',$track_arr[$i])->first();
+    					$old_lot_arr[] = $worksheet->batch_number;
+    				}
+    			}
+
+    			if ($column === 'pallet_number') {
+    				for ($i=0; $i < count($track_arr); $i++) { 
+    					$worksheet = NewWorksheet::where('tracking_main',$track_arr[$i])->first();
+    					$old_pallet_arr[] = $worksheet->pallet_number;
+    				}
+    			}
     			
     			NewWorksheet::whereIn('tracking_main', $track_arr)
     			->update([
     				$column => $value_by
     			]); 
+
+    			if ($column === 'pallet_number') {
+    				for ($i=0; $i < count($track_arr); $i++) { 
+    					$worksheet = NewWorksheet::where('tracking_main',$track_arr[$i])->first();
+    					if ($old_pallet_arr[$i] !== $value_by){
+    						$message = $this->updateWarehousePallet($worksheet->tracking_main, $worksheet->tracking_main, $old_pallet_arr[$i], $value_by, $worksheet->batch_number, $worksheet->batch_number, 'ru', $worksheet);
+    						if ($message) {
+    							return redirect()->to(session('this_previous_url'))->with('status-error', 'Pallet number is not correct!');
+    						}
+    					}
+    				}
+    			}
+
+    			if ($column === 'batch_number') {
+    				NewWorksheet::whereIn('tracking_main', $track_arr)
+    				->whereIn('status',$this->status_arr_2)
+    				->update([
+    					'status' => "Доставляется в страну получателя",
+    					'status_en' => "Forwarding to the receiver country",
+    					'status_he' => " נשלח למדינת המקבל",
+    					'status_ua' => "Forwarding to the receiver country",
+    					'status_date' => date('Y-m-d')
+    				]);
+
+    				for ($i=0; $i < count($track_arr); $i++) { 
+    					if ($old_lot_arr[$i] !== $value_by){
+    						$worksheet = NewWorksheet::where('tracking_main',$track_arr[$i])->first();
+    						$this->updateWarehouseLot($worksheet->tracking_main, $value_by, 'ru');
+    					}
+    				}
+    			} 
 				
 				$this->updateAllPackingByTracking($track_arr, $value_by, $column);
 
@@ -763,19 +851,20 @@ class NewWorksheetController extends AdminController
     			->update([
     				'partner' => $request->input('partner')
     			]);       	
-    		}
-
-    		if ($column === 'batch_number') {
+    		}   
+    		else if ($request->input('sender_city')) {
     			NewWorksheet::whereIn('tracking_main', $track_arr)
-    			->whereIn('status',$this->status_arr_2)
     			->update([
-    				'status' => "Доставляется в страну получателя",
-    				'status_en' => "Forwarding to the receiver country",
-    				'status_he' => " נשלח למדינת המקבל",
-    				'status_ua' => "Forwarding to the receiver country",
-    				'status_date' => date('Y-m-d')
-    			]);
-    		}
+    				'sender_city' => $request->input('sender_city')
+    			]);  
+
+    			if (in_array($request->input('sender_city'), array_keys($this->israel_cities))) {
+    				NewWorksheet::whereIn('tracking_main', $track_arr)
+    				->update([
+    					'shipper_region' => $this->israel_cities[$request->input('sender_city')]
+    				]);
+    			}
+    		} 		
     	}
         
         if($status_error){
@@ -913,61 +1002,118 @@ class NewWorksheetController extends AdminController
     }
 
 
-    private function checkColumns($arr, $value_by, $column, $check_column){
-    	$status_error = '';
-    	$check_sheet = NewWorksheet::whereIn($check_column, $arr)->whereIn('status',$this->status_arr)->first();
-    	if ($check_sheet) {
-    		if ($column === 'pay_sum')
-    		{
-    			$status_error = "ВНИМАНИЕ! ПРИ ПОЛУЧЕНИИ ОПЛАТЫ СТАТУС НЕ МОЖЕТ БЫТЬ НИЖЕ - 'На складе в стране отправителя'. ДОБАВЬТЕ ЗАПИСЬ ОБ ОПЛАТЕ В ПРАВИЛЬНУЮ СТРОКУ ИЛИ ИЗМЕНИТЕ СТАТУС";
-    			return $status_error;
-    		}
-
-    		if ($column === 'pallet_number')
-    		{
-    			$status_error = "ВНИМАНИЕ! ПРИ ДОБАВЛЕНИИ НОМЕРА ПАЛЛЕТЫ СТАТУС НЕ МОЖЕТ БЫТЬ НИЖЕ - 'На складе в стране отправителя'. ДОБАВЬТЕ ЗАПИСЬ О НОМЕРЕ ПАЛЛЕТЫ В ПРАВИЛЬНУЮ СТРОКУ ИЛИ ИЗМЕНИТЕ СТАТУС";
-    			return $status_error;
-    		}
-    	}
-    	return $status_error;
-    }
-
-
     public function addNewDataById(Request $request){
     	$row_arr = $request->input('row_id');
     	$value_by = $request->input('value-by-tracking');
     	$column = $request->input('tracking-columns');
     	$status_error = '';
     	$check_column = 'id';
+    	$old_lot_arr = [];
+    	$old_pallet_arr = [];
+    	$color = $request->input('tr_color');    	
 
     	if ($row_arr) {
-    		if ($value_by && $column) {
+    		if ($color) {
+    			if ($color !== 'transparent') {
+    				NewWorksheet::whereIn('id', $row_arr)
+    				->update([
+    					'background' => $color
+    				]);
+    			}
+    			else{
+    				NewWorksheet::whereIn('id', $row_arr)
+    				->update([
+    					'background' => null
+    				]);
+    			}
+    		}
+    		elseif ($value_by && $column) {
 
-    			$status_error = $this->checkColumns($row_arr, $value_by, $column, $check_column);
+    			$status_error = $this->checkColumns($row_arr, $value_by, $column, $check_column, 'new_worksheet');
     			if($status_error) return redirect()->to(session('this_previous_url'))->with('status-error', $status_error);
+
+    			if ($column === 'batch_number') {
+    				for ($i=0; $i < count($row_arr); $i++) { 
+    					$worksheet = NewWorksheet::where('id',$row_arr[$i])->first();
+    					$old_lot_arr[] = $worksheet->batch_number;
+    				}
+    			}
+
+    			if ($column === 'pallet_number') {
+    				for ($i=0; $i < count($row_arr); $i++) { 
+    					$worksheet = NewWorksheet::where('id',$row_arr[$i])->first();
+    					$old_pallet_arr[] = $worksheet->pallet_number;
+    				}
+    			}
     			
     			NewWorksheet::whereIn('id', $row_arr)
     			->update([
     				$column => $value_by
-    			]);  
+    			]); 
+
+    			if ($column === 'pallet_number') {
+    				for ($i=0; $i < count($row_arr); $i++) { 
+    					$worksheet = NewWorksheet::where('id',$row_arr[$i])->first();
+    					if ($old_pallet_arr[$i] !== $value_by){
+    						$message = $this->updateWarehousePallet($worksheet->tracking_main, $worksheet->tracking_main, $old_pallet_arr[$i], $value_by, $worksheet->batch_number, $worksheet->batch_number, 'ru', $worksheet);
+    						if ($message) {
+    							return redirect()->to(session('this_previous_url'))->with('status-error', 'Pallet number is not correct!');
+    						}
+    					}
+    				}
+    			}
+
+    			if ($column === 'batch_number') {
+    				NewWorksheet::whereIn('id', $row_arr)
+    				->whereIn('status',$this->status_arr_2)
+    				->update([
+    					'status' => "Доставляется в страну получателя",
+    					'status_en' => "Forwarding to the receiver country",
+    					'status_he' => " נשלח למדינת המקבל",
+    					'status_ua' => "Forwarding to the receiver country",
+    					'status_date' => date('Y-m-d')
+    				]);
+
+    				for ($i=0; $i < count($row_arr); $i++) { 
+    					if ($old_lot_arr[$i] !== $value_by){
+    						$worksheet = NewWorksheet::where('id',$row_arr[$i])->first();
+    						$worksheet->checkCourierTask($worksheet->status);
+    						$this->updateWarehouseLot($worksheet->tracking_main, $value_by, 'ru');
+    					}
+    				}
+    			} 
 
     			$this->updateAllPackingById($row_arr, $value_by, $column);    	
     		}
     		else if ($request->input('status')){
-    			NewWorksheet::whereIn('id', $row_arr)
-    			->update([
-    				'status' => $request->input('status'), 
-    				'status_en' => $request->input('status_en'),
-    				'status_ua' => $request->input('status_ua'),
-    				'status_he' => $request->input('status_he'),
-    				'status_date' => date('Y-m-d')
-    			]);
+    			for ($i=0; $i < count($row_arr); $i++) { 
+    				$status_error = $this->checkStatus('new_worksheet', $row_arr[$i], $request->input('status'));
+    				if (!$status_error) {
+    					NewWorksheet::where('id', $row_arr[$i])
+    					->update([
+    						'status' => $request->input('status'), 
+    						'status_en' => $request->input('status_en'),
+    						'status_ua' => $request->input('status_ua'),
+    						'status_he' => $request->input('status_he'),
+    						'status_date' => date('Y-m-d')
+    					]);
+    				}
+
+    				$worksheet = NewWorksheet::find($row_arr[$i]);
+    				$worksheet->checkCourierTask($worksheet->status);
+    			}    			
     		}
     		else if ($request->input('site_name')) {
     			NewWorksheet::whereIn('id', $row_arr)
     			->update([
     				'site_name' => $request->input('site_name')
-    			]);       	
+    			]);     
+
+    			
+    			for ($i=0; $i < count($row_arr); $i++) { 
+    				$worksheet = NewWorksheet::find($row_arr[$i]);
+    				$worksheet->checkCourierTask($worksheet->status);
+    			}    	
     		}
     		else if ($request->input('tariff')) {
     			NewWorksheet::whereIn('id', $row_arr)
@@ -980,19 +1126,25 @@ class NewWorksheetController extends AdminController
     			->update([
     				'partner' => $request->input('partner')
     			]);       	
-    		}
-
-    		if ($column === 'batch_number') {
+    		} 
+    		else if ($request->input('sender_city')) {
     			NewWorksheet::whereIn('id', $row_arr)
-    			->whereIn('status',$this->status_arr_2)
     			->update([
-    				'status' => "Доставляется в страну получателя",
-    				'status_en' => "Forwarding to the receiver country",
-    				'status_he' => " נשלח למדינת המקבל",
-    				'status_ua' => "Forwarding to the receiver country",
-    				'status_date' => date('Y-m-d')
-    			]);
-    		}   		
+    				'sender_city' => $request->input('sender_city')
+    			]);  
+
+    			if (in_array($request->input('sender_city'), array_keys($this->israel_cities))) {
+    				NewWorksheet::whereIn('id', $row_arr)
+    				->update([
+    					'shipper_region' => $this->israel_cities[$request->input('sender_city')]
+    				]);
+    			}
+
+    			for ($i=0; $i < count($row_arr); $i++) { 
+    				$worksheet = NewWorksheet::find($row_arr[$i]);
+    				$worksheet->checkCourierTask($worksheet->status);
+    			}
+    		}		
     	}
 
     	if($status_error){
@@ -1007,6 +1159,9 @@ class NewWorksheetController extends AdminController
     public function deleteNewWorksheetById(Request $request)
 	{
 		$row_arr = $request->input('row_id');
+		for ($i=0; $i < count($row_arr); $i++) { 
+			$this->removeTrackingFromPalletWorksheet($row_arr[$i], 'ru');
+		}
 
 		NewWorksheet::whereIn('id', $row_arr)->delete();
 		NewPacking::whereIn('work_sheet_id', $row_arr)->delete();
@@ -1020,15 +1175,14 @@ class NewWorksheetController extends AdminController
 
     public function exportExcel()
 	{
-
+		ini_set('memory_limit', '256M');
     	return Excel::download(new NewWorksheetExport, 'NewWorksheetExport.xlsx');
-
 	}
 
 
 	public function indexPackingSea(){
         $title = 'Старый пакинг лист';
-        $packing_sea_obj = PackingSea::all();       
+        $packing_sea_obj = PackingSea::where('in_trash',false)->get();       
         
         return view('admin.packing.packing_sea', ['title' => $title,'packing_sea_obj' => $packing_sea_obj]);
     }
@@ -1056,16 +1210,16 @@ class NewWorksheetController extends AdminController
         $new_arr = [];      
 
         if ($request->table_columns) {
-        	$new_worksheet_obj = NewWorksheet::where($request->table_columns, 'like', '%'.$search.'%')
+        	$new_worksheet_obj = NewWorksheet::where('in_trash',false)->where($request->table_columns, 'like', '%'.$search.'%')
         	->paginate(10);
         }
         else{
         	foreach($attributes as $key => $value)
         	{
         		if ($key !== 'created_at' && $key !== 'updated_at' && $key !== 'update_status_date') {
-        			$sheet = NewWorksheet::where($key, 'like', '%'.$search.'%')->get()->first();
+        			$sheet = NewWorksheet::where('in_trash',false)->where($key, 'like', '%'.$search.'%')->get()->first();
         			if ($sheet) {       				
-        				$temp_arr = NewWorksheet::where($key, 'like', '%'.$search.'%')->get();
+        				$temp_arr = NewWorksheet::where('in_trash',false)->where($key, 'like', '%'.$search.'%')->get();
         				$new_arr = $temp_arr->filter(function ($item, $k) use($id_arr) {
         					if (!in_array($item->id, $id_arr)) { 
         						$id_arr[] = $item->id;       						  
@@ -1081,7 +1235,7 @@ class NewWorksheetController extends AdminController
         }
         
         $data = $request->all();    
-        $update_all_statuses = NewWorksheet::where('update_status_date','=', date('Y-m-d'))->get()->count();
+        $update_all_statuses = NewWorksheet::where('in_trash',false)->where('update_status_date','=', date('Y-m-d'))->get()->count();
         
         return view('admin.new_worksheet', ['title' => $title,'data' => $data,'new_worksheet_obj' => $new_worksheet_obj,'new_column_1' => $arr_columns[0],'new_column_2' => $arr_columns[1],'new_column_3' => $arr_columns[2],'new_column_4' => $arr_columns[3],'new_column_5' => $arr_columns[4], 'user' => $user, 'viewer_arr' => $viewer_arr, 'update_all_statuses' => $update_all_statuses]);
     }

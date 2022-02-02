@@ -14,7 +14,7 @@ class CourierDraftWorksheetExport implements FromQuery, WithHeadings
 
     public function query()
     {
-        return CourierDraftWorksheet::query();
+        return CourierDraftWorksheet::query()->where('in_trash',false);
     } 
     
     public function headings(): array

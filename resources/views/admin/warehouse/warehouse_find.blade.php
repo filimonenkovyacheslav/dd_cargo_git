@@ -1,6 +1,6 @@
 @extends('layouts.admin')
 @section('content')
-@can('editPost')
+@can('editColumns-2')
 <!-- <div class="breadcrumbs">
 	<div class="col-sm-4">
 		<div class="page-header float-left">
@@ -25,7 +25,7 @@
 	<div class="animated fadeIn">
 		<div class="row">
 			<div class="col-md-12">
-				<a href="{{ route('exportExcelReceipts') }}" style="margin-bottom: 20px;" class="btn btn-success btn-move">Export to Excel</a>
+				<a href="{{ route('exportExcelWarehouse') }}" style="margin-bottom: 20px;" class="btn btn-success btn-move">Export to Excel</a>
 			</div>
 		</div>
 		<div class="row">
@@ -49,34 +49,33 @@
 						session(['this_previous_url' => url()->full()]);
 					@endphp
 					
-					<a class="btn btn-primary btn-move" id="add-rows" data-toggle="modal" data-target="#addRowsModal">Добавить строки (Add rows)</a>
-
-					@can('update-user')
-					
-					<a class="btn btn-danger btn-move" id="delete-rows" data-toggle="modal" data-target="#deleteRowsModal">Delete rows</a>
-
-					@endcan
+					<a class="btn" id="run-modal" data-toggle="modal" data-target="#warehouseRunModal"></a>
 
 					<div class="btn-move-wrapper" style="display:flex">
-						<form action="{{ url('/admin/receipts-filter/'.$legal_entity) }}" method="GET" id="form-worksheet-table-filter" enctype="multipart/form-data">
+						<form action="{{ url('/admin/warehouse-filter/') }}" method="GET" id="form-worksheet-table-filter" enctype="multipart/form-data">
 							@csrf
-							<label class="table_columns" style="margin: 0 15px">Выберите колонку (Choose column):
+							<label class="table_columns" style="margin: 0 15px">Choose column:
 								<select class="form-control" id="table_columns" name="table_columns">
 									<option value="" selected="selected"></option>
-									<option value="legal_entity">Юр. лицо (Legal entity)</option>
-									<option value="receipt_number">№ квитанции (Receipt number)</option>
-									<option value="sum">Сумма (Sum)</option>
-									<option value="date">Дата (Date)</option>
-									<option value="tracking_main">Номер посылки (Tracking number)</option>			
-									<option value="courier_name">Имя курьера (Courier name)</option>
-									<option value="comment">Комментарий (Comment)</option>                
+									<option value="pallet">PALLET</option>
+									<option value="cell">CELL</option>
+									<option value="arrived">ARRIVED</option>
+									<option value="left">LEFT</option>
+									<option value="lot">LOT</option>			
+									<option value="notifications">NOTIFICATIONS</option>
+									<option value="tracking_numbers">TRACKING</option>              
 								</select>
 							</label>
-							<label>Фильтр (Filter):
+							<label>Filter:
 								<input type="search" name="table_filter_value" class="form-control form-control-sm">
 							</label>
-							<button type="button" id="table_filter_button" style="margin-left:30px" class="btn btn-default">Поиск (Search)</button>
+							<input type="hidden" name="hide_left">
+							<button type="button" id="table_filter_button" style="margin-left:30px" class="btn btn-default">Search</button>
 						</form>
+
+						<label style="margin-top: 30px;margin-left: 30px;">Hide left pallets
+							<input type="checkbox" onclick="hideLeft(event)" class="hide_left" style="width:20px;height:20px;">
+						</label>
 					</div>
 					
 					<div class="card-body new-worksheet">
@@ -84,14 +83,16 @@
 							<table class="table table-striped table-bordered">
 								<thead>
 									<tr>
-										<th>Изменить (Change)</th>
-										<th>Юр. лицо (Legal entity)</th>
-										<th>№ квитанции (Receipt number)</th>
-										<th>Сумма (Sum)</th>
-										<th>Дата (Date)</th>
-										<th>Номер посылки (Tracking number)</th>
-										<th>Имя курьера (Courier name)</th>
-										<th>Комментарий (Comment)</th>
+										<th>V</th>
+										<th>Change</th>
+										<th>PALLET
+											<a class="btn btn-primary" target="_blank" href="{{ route('palletsShow') }}">Change</a>
+										</th>
+										<th>CELL</th>
+										<th>ARRIVED</th>
+										<th>LEFT</th>
+										<th>LOT</th>
+										<th>NOTIFICATIONS</th>
 									</tr>
 
 								</thead>
@@ -101,9 +102,9 @@
 									$id_arr = [];
 									@endphp
 
-									@if(isset($filter_arr))
-									@for($i=0; $i < count($filter_arr); $i++)
-									@foreach($filter_arr[$i] as $row)
+									@if(isset($warehouse_arr))
+									@for($i=0; $i < count($warehouse_arr); $i++)
+									@foreach($warehouse_arr[$i] as $row)
 
 									@if (!in_array($row->id, $id_arr))
 									@php
@@ -111,43 +112,67 @@
 									@endphp
 
 									<tr>
+										<td class="td-checkbox">
+											<input type="checkbox" name="row_id[]" value="{{ $row->id }}">
+										</td>
 										<td class="td-button">
-											<a class="btn btn-primary" href="{{ url('/admin/receipts-update/'.$row->id) }}">Редактировать (Edit)</a>
+											<a class="btn btn-primary" href="{{ url('/admin/warehouse-open/'.$row->id) }}">Open</a>
 
-											@if(!$row->double)
+											<a class="btn btn-success" onclick="runModal(event)" href="{{ url('/admin/warehouse-edit/'.$row->id) }}">Edit</a>
 
-											<a class="btn btn-success" href="{{ url('/admin/receipts-double/'.$row->id) }}">Добавить дубль (Add)</a>
+											@can('editPost')
 
-											@else											
-
-											{!! Form::open(['url'=>route('deleteReceipt'),'onsubmit' => 'return ConfirmDelete()', 'class'=>'form-horizontal','method' => 'POST']) !!}
+											{!! Form::open(['url'=>route('deleteWarehouse'),'onsubmit' => 'return ConfirmDelete()', 'class'=>'form-horizontal','method' => 'POST']) !!}
 											{!! Form::hidden('action',$row->id) !!}
-											{!! Form::button('Удалить дубль(Delete)',['class'=>'btn btn-danger','type'=>'submit']) !!}
+											{!! Form::button('Delete',['class'=>'btn btn-danger','type'=>'submit']) !!}
 											{!! Form::close() !!}
 
-											@endif
+											@endcan
 
 										</td>
-										<td title="{{$row->legal_entity}}">
-											<div class="div-3">{{$row->legal_entity}}</div>
+										<td title="{{$row->pallet}}">
+											<div class="div-3">{{$row->pallet}}</div>
 										</td>
-										<td title="{{$row->receipt_number}}">
-											<div class="div-3">{{$row->receipt_number}}</div>
+										<td title="{{$row->cell}}">
+											<div class="div-3">{{$row->cell}}</div>
 										</td>
-										<td title="{{$row->sum}}">
-											<div class="div-3">{{$row->sum}}</div>
+										<td title="{{$row->arrived}}">
+											<div class="div-3">{{$row->arrived}}</div>
 										</td>
-										<td title="{{$row->date}}">
-											<div class="div-3">{{$row->date}}</div>
+										<td title="{{$row->left}}">
+											<div class="div-3">{{$row->left}}</div>
 										</td>
-										<td title="{{$row->tracking_main}}">
-											<div class="div-3">{{$row->tracking_main}}</div>
-										</td>										
-										<td title="{{$row->courier_name}}">
-											<div class="div-3">{{$row->courier_name}}</div>
+										<td title="{{$row->lot}}">
+											<div class="div-3">{{$row->lot}}</div>
 										</td>
-										<td title="{{$row->comment}}">
-											<div class="div-3">{{$row->comment}}</div>
+										@php
+										$notifications = '';
+										if($row->notifications){
+											$temp = json_decode($row->notifications);
+											if ($temp->tracking){
+												$temp_mess = json_decode($temp->tracking);
+												$temp_mess = $temp_mess->message;
+											}
+											else{
+												$temp_mess = '';
+											}
+											if ($temp->pallet){
+												$temp_pallet = json_decode($temp->pallet);
+												if (is_object($temp_pallet)) {
+													$temp_pallet = $temp_pallet->other_arr.' '.$temp_pallet->empty_arr;
+												}
+												else{
+													$temp_pallet = $temp->pallet;
+												}
+											}
+											else{
+												$temp_pallet = '';
+											}
+											$notifications = $temp_pallet.' '.$temp_mess;
+										}										
+										@endphp										
+										<td title="{{$notifications}}">
+											<div style="width: 400px">{{$notifications}}</div>
 										</td>                  
 									</tr>
 
@@ -158,18 +183,64 @@
 								</tbody>
 							</table>
 
-							<div class="receipts-sum">
-								<h5>Просуммировать все суммы оплат между датами «От и До» включительно</h5>
-								<br>
-								<label>От:
-									<input type="date" name="from_date">
+							<div class="checkbox-operations">
+								
+								{!! Form::open(['url'=>route('addWarehouseDataById'), 'class'=>'worksheet-add-form','method' => 'POST']) !!}
+
+								<label>Select action with selected rows:
+									<select class="form-control" name="checkbox_operations_select">
+										<option value=""></option>
+										@can('editPost')
+										<option value="delete">Delete</option>
+										@endcan
+										<option value="change">Change</option>
+									</select>
 								</label>
-								<label>До:
-									<input type="date" name="to_date">
+
+								<label class="checkbox-operations-change">Choose column:
+									<select class="form-control" id="warehouse-columns" name="warehouse-columns">
+										<option value="" selected="selected"></option>
+										<option value="cell">CELL</option>  
+									</select>
+								</label>	
+
+								<label class="value-by-tracking checkbox-operations-change">Input value:
+									<input class="form-control" type="text" name="value-by-id">
 								</label>
-								<button onclick="sumByDate()" class="btn btn-success">Просуммировать</button>
+
+								{!! Form::button('Save',['class'=>'btn btn-primary checkbox-operations-change','type'=>'submit']) !!}
+								{!! Form::close() !!}
+
+								@can('editPost')
+
+								{!! Form::open(['url'=>route('deleteWarehouseById'),'onsubmit' => 'return ConfirmDelete()','method' => 'POST']) !!}
+								{!! Form::button('Delete',['class'=>'btn btn-danger  checkbox-operations-delete','type'=>'submit']) !!}
+								{!! Form::close() !!}
+
+								@endcan
+
 							</div>
-						
+
+							<div class="container">
+								<div class="row">
+									<div class="col-md-6">
+										<label>IN - <span>{{$in_count}}</span> pallets</label><br>
+										<label>CD - <span>{{$cd_count}}</span> pallets</label><br>
+									</div>
+									<div class="pallets-sum col-md-6">
+										<h5>Pallets sum by date</h5>
+										<br>
+										<label>From:
+											<input type="date" name="from_date">
+										</label>
+										<label>Till:
+											<input type="date" name="to_date">
+										</label>
+										<button onclick="sumByDate()" class="btn btn-success">Sum</button>
+									</div>
+								</div>
+							</div>							
+													
 						</div>
 					</div>
 				</div>
@@ -180,85 +251,28 @@
 </div><!-- .content -->
 
 <!-- Modal -->
-<div class="modal fade" id="addRowsModal" tabindex="-1" role="dialog" aria-labelledby="addRowsModalLabel" aria-hidden="true">
+<div class="modal fade" id="warehouseRunModal" tabindex="-1" role="dialog" aria-labelledby="warehouseRunModalLabel" aria-hidden="true">
 	<div class="modal-dialog" role="document">
 		<div class="modal-content">
 			<div class="modal-header">
-				<h5 class="modal-title" id="addRowsModalLabel">Добавить строки (Add rows)</h5>
+				<h5 class="modal-title" id="warehouseRunModalLabel">Editing of <span class="pallet-title"></span></h5>
 				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
 					<span aria-hidden="true">&times;</span>
 				</button>
 			</div>
-			<form action="{{ route('receiptsAdd') }}" method="POST" enctype="multipart/form-data">
+			<form action="" method="POST" enctype="multipart/form-data">
 				@csrf
 				<div class="modal-body">
-					<div class="form-group">
-						<label class="control-label">Выберите диапазон (Select a range)</label>
-						<select class="form-control" name="range_select">
-							<option value="ХХ01">ХХ01 - ХХ50</option>
-							<option value="ХХ51">ХХ51 - ХХ00</option>							
-						</select>
-					</div>	
-					<div class="form-group">
-						<label class="control-label">Выберите Юр. лицо (Select a Legal entity)</label>
-						<select class="form-control" name="legal_entity">
-							<option value="UL">Юнион Логистик</option>
-							<option value="DD">Д.Дымщиц</option>							
-						</select>
-					</div>													
-					<div class="form-group">
-						<label class="control-label">Начало диапазона (Range start)</label>
-						<p>* Введите без двух последних цифр (Enter without the last two digits)</p>
-						<input type="number" name="range_start" class="form-control" min="0">
-					</div>		
-					<div class="form-group">
-						<label class="control-label">Имя Курьера (Courier name)</label>
-						<input type="text" name="courier_name" class="form-control">
-					</div>											
+					<label>CELL:
+						<input type="text" name="cell" class="form-control form-control-sm">
+					</label>
+					<label>NOTIFICATIONS:
+						<p class="form-control form-control-sm notifications"></p>
+					</label>												
 				</div>
 				<div class="modal-footer">
-					<button type="submit" class="btn btn-primary" style="font-size:.8rem">Добавить серию номеров квитанций (Add a series of receipt numbers)</button>
-				</div>
-			</form>
-		</div>
-	</div>
-</div>
-
-<div class="modal fade" id="deleteRowsModal" tabindex="-1" role="dialog" aria-labelledby="deleteRowsModalLabel" aria-hidden="true">
-	<div class="modal-dialog" role="document">
-		<div class="modal-content">
-			<div class="modal-header">
-				<h5 class="modal-title" id="deleteRowsModalLabel">Удалить строки (Delete rows)</h5>
-				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
-					<span aria-hidden="true">&times;</span>
-				</button>
-			</div>
-			<form action="{{ route('deleteReceipts') }}" method="POST" enctype="multipart/form-data">
-				@csrf
-				<div class="modal-body">
-					<div class="form-group">
-						<label class="control-label">Выберите диапазон (Select a range)</label>
-						<select class="form-control" name="range_select">
-							<option value="ХХ01">ХХ01 - ХХ50</option>
-							<option value="ХХ51">ХХ51 - ХХ00</option>							
-						</select>
-					</div>	
-					<div class="form-group">
-						<label class="control-label">Выберите Юр. лицо (Select a Legal entity)</label>
-						<select class="form-control" name="legal_entity">
-							<option value="UL">Юнион Логистик</option>
-							<option value="DD">Д.Дымщиц</option>							
-						</select>
-					</div>													
-					<div class="form-group">
-						<label class="control-label">Начало диапазона (Range start)</label>
-						<p>* Введите без двух последних цифр (Enter without the last two digits)</p>
-						<input type="number" name="range_start" class="form-control" min="0">
-					</div>												
-				</div>
-				<div class="modal-footer">
-					<button type="submit" class="btn btn-danger" style="font-size:.8rem">Удалить серию номеров квитанций (Delete a series of receipt numbers)</button>
-				</div>
+					<button type="submit" class="btn btn-primary">Save</button>
+				</div>				
 			</form>
 		</div>
 	</div>
@@ -266,6 +280,27 @@
 
 <script>
 
+	let href = location.href;
+	if (href.indexOf('hide_left') !== -1) {
+		document.querySelector('.hide_left').checked = true;
+		document.querySelector('[name="hide_left"]').value = 'hide_left';
+	}
+
+	function hideLeft(event)
+	{
+		let href = location.href;
+		
+		if (event.target.checked){						
+			document.querySelector('[name="hide_left"]').value = 'hide_left';
+			location.href = addGet(href, 'hide_left=hide_left');
+		}
+		else{
+			document.querySelector('[name="hide_left"]').value = '';
+			location.href = removeURLParameter(href, 'hide_left');			
+		}
+	}
+
+	
 	function ConfirmDelete()
 	{
 		var x = confirm("Are you sure you want to delete?");
@@ -275,34 +310,62 @@
 			return false;
 	}
 
+	function runModal(event)
+	{
+		event.preventDefault();
+		const href = event.target.href;
+		
+		$.ajax({
+			url: href,
+			type: "GET",
+			headers: {
+				'X-CSRF-Token': $('meta[name="csrf-token"]').attr('content')
+			},
+			success: function (data) {
+				document.querySelector('#run-modal').click();
+				if (data.title) $('#warehouseRunModal .pallet-title').text(data.title);
+				if (data.warehouse) {
+					const warehouse = JSON.parse(data.warehouse);
+					$('#warehouseRunModal form').attr('action','/admin/warehouse-edit/'+warehouse.id);
+					$('#warehouseRunModal [name="cell"]').val(warehouse.cell);
+					if (warehouse.notifications) {
+						const notifications = JSON.parse(warehouse.notifications);
+						const pallet = JSON.parse(notifications.pallet);
+						$('#warehouseRunModal .notifications').text(pallet.empty_arr+' '+pallet.other_arr+' '+notifications.tracking);
+					}					
+				}					
+			},
+			error: function (msg) {
+				alert('Ошибка admin');
+			}
+		});		
+	}
+
+
 	function sumByDate(){		
 		let fromDate = document.querySelector('[name="from_date"]').value;
 		let toDate = document.querySelector('[name="to_date"]').value;
 
-		if (fromDate && toDate) {
-			fromDate = fromDate.split('-');
-			fromDate = fromDate[0].slice(2)+fromDate[1]+fromDate[2];
-			toDate = toDate.split('-');
-			toDate = toDate[0].slice(2)+toDate[1]+toDate[2];
-			
+		if (fromDate && toDate) {						
 			$.ajax({
-				url: "{{ url('/admin/receipts-sum?') }}"+"from_date="+fromDate+"&to_date="+toDate,
+				url: "{{ url('/admin/pallets-sum/') }}"+"?from_date="+fromDate+"&to_date="+toDate,
 				type: "GET",
 				headers: {
 					'X-CSRF-Token': $('meta[name="csrf-token"]').attr('content')
 				},
 				success: function (data) {
-					$('.receipts-sum .alert').remove()
+					console.log(data)
+					$('.pallets-sum .alert').remove()
 					data = JSON.parse(data)
 					if (data.error) {
-						$('.receipts-sum button').after('<div class="alert alert-danger">'+data.error+'</div>')
+						$('.pallets-sum button').after('<div class="alert alert-danger">'+data.error+'</div>')
 					}
 					if (data.sum) {
-						$('.receipts-sum button').after('<div class="alert alert-success">Сумма: '+data.sum+'</div>')
+						$('.pallets-sum button').after('<div class="alert alert-success">Sum: '+data.sum+'</div>')
 					}
 				},
 				error: function (msg) {
-					alert('Ошибка admin');
+					alert('Error admin');
 				}
 			});
 		}
@@ -310,6 +373,6 @@
 
 </script>
 @else
-<h1>Вы не можете просматривать эту страницу (You cannot view this page)!</h1>
+<h1>You cannot view this page!</h1>
 @endcan
 @endsection

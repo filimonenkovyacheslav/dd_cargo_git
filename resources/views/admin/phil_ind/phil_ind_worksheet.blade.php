@@ -69,6 +69,8 @@
 									<option value="comments_1">Comments 1</option>
 									<option value="comments_2">Comments 2</option>
 									<option value="shipper_name">Shipper\'s name</option>
+									<option value="shipper_country">Shipper\'s country</option>
+									<option value="shipper_region">Shipper region</option>
 									<option value="shipper_city">Shipper\'s city/village</option>
 									<option value="passport_number">GSTN/Passport number</option>
 									<option value="return_date">Estimated return to India date</option>
@@ -77,6 +79,7 @@
 									<option value="shipper_phone">Shipper\'s phone (additionally)</option>
 									<option value="shipper_id">Shipper\'s ID number</option>
 									<option value="consignee_name">Consignee\'s name</option>
+									<option value="consignee_country">Consignee\'s country</option>
 									<option value="house_name">House name</option>
 									<option value="post_office">Local post office</option>
 									<option value="district">District/City</option>
@@ -135,6 +138,8 @@
 										<th>Comments 1</th>
 										<th>Comments 2</th>
 										<th>Shipper's name</th>
+										<th>Shipper's country</th>
+										<th>Shipper region</th>
 										<th>Shipper\'s city/village</th>
 										<th>GSTN/Passport number</th>
 										<th>Estimated return to India date</th>
@@ -143,6 +148,7 @@
 										<th>Shipper's phone number (additionally)</th>
 										<th>Shipper's ID number</th>
 										<th>Consignee's name</th>
+										<th>Consignee's country</th>
 										<th>House name</th>
 										<th>Local post office</th>
 										<th>District/City</th>
@@ -174,7 +180,7 @@
 										<th>{{$new_column_1}}<hr>
 											@can('editPost')
 
-											{!! Form::open(['url'=>route('philIndWorksheetDeleteColumn'),'onsubmit' => 'return ConfirmDelete()', 'class'=>'form-horizontal','method' => 'POST']) !!}
+											{!! Form::open(['url'=>route('philIndWorksheetDeleteColumn'),'onsubmit' => 'return ConfirmDeleteColumn()', 'class'=>'form-horizontal','method' => 'POST']) !!}
 											{!! Form::hidden('name_column','new_column_1') !!}
 											{!! Form::button('Delete',['class'=>'btn btn-danger','type'=>'submit']) !!}
 											{!! Form::close() !!}
@@ -186,7 +192,7 @@
 										<th>{{$new_column_2}}<hr>
 											@can('editPost')
 
-											{!! Form::open(['url'=>route('philIndWorksheetDeleteColumn'),'onsubmit' => 'return ConfirmDelete()', 'class'=>'form-horizontal','method' => 'POST']) !!}
+											{!! Form::open(['url'=>route('philIndWorksheetDeleteColumn'),'onsubmit' => 'return ConfirmDeleteColumn()', 'class'=>'form-horizontal','method' => 'POST']) !!}
 											{!! Form::hidden('name_column','new_column_2') !!}
 											{!! Form::button('Delete',['class'=>'btn btn-danger','type'=>'submit']) !!}
 											{!! Form::close() !!}
@@ -198,7 +204,7 @@
 										<th>{{$new_column_3}}<hr>
 											@can('editPost')
 
-											{!! Form::open(['url'=>route('philIndWorksheetDeleteColumn'),'onsubmit' => 'return ConfirmDelete()', 'class'=>'form-horizontal','method' => 'POST']) !!}
+											{!! Form::open(['url'=>route('philIndWorksheetDeleteColumn'),'onsubmit' => 'return ConfirmDeleteColumn()', 'class'=>'form-horizontal','method' => 'POST']) !!}
 											{!! Form::hidden('name_column','new_column_3') !!}
 											{!! Form::button('Delete',['class'=>'btn btn-danger','type'=>'submit']) !!}
 											{!! Form::close() !!}
@@ -210,7 +216,7 @@
 										<th>{{$new_column_4}}<hr>
 											@can('editPost')
 
-											{!! Form::open(['url'=>route('philIndWorksheetDeleteColumn'),'onsubmit' => 'return ConfirmDelete()', 'class'=>'form-horizontal','method' => 'POST']) !!}
+											{!! Form::open(['url'=>route('philIndWorksheetDeleteColumn'),'onsubmit' => 'return ConfirmDeleteColumn()', 'class'=>'form-horizontal','method' => 'POST']) !!}
 											{!! Form::hidden('name_column','new_column_4') !!}
 											{!! Form::button('Delete',['class'=>'btn btn-danger','type'=>'submit']) !!}
 											{!! Form::close() !!}
@@ -222,7 +228,7 @@
 										<th>{{$new_column_5}}<hr>
 											@can('editPost')
 
-											{!! Form::open(['url'=>route('philIndWorksheetDeleteColumn'),'onsubmit' => 'return ConfirmDelete()', 'class'=>'form-horizontal','method' => 'POST']) !!}
+											{!! Form::open(['url'=>route('philIndWorksheetDeleteColumn'),'onsubmit' => 'return ConfirmDeleteColumn()', 'class'=>'form-horizontal','method' => 'POST']) !!}
 											{!! Form::hidden('name_column','new_column_5') !!}
 											{!! Form::button('Delete',['class'=>'btn btn-danger','type'=>'submit']) !!}
 											{!! Form::close() !!}
@@ -244,8 +250,9 @@
 									@if(isset($phil_ind_worksheet_obj))
 									@foreach($phil_ind_worksheet_obj as $row)
 
-									<tr>
+									<tr class="{{$row->background}}">
 										<td class="td-checkbox">
+											<input type="hidden" name="old_color[]" value="{{$row->background}}">
 											<input type="checkbox" name="row_id[]" value="{{ $row->id }}">
 										</td>
 										<td class="td-button">
@@ -255,9 +262,9 @@
 
 											@can('editPost')
 
-											{!! Form::open(['url'=>route('deletePhilIndWorksheet'),'onsubmit' => 'return ConfirmDelete()', 'class'=>'form-horizontal','method' => 'POST']) !!}
+											{!! Form::open(['url'=>route('deletePhilIndWorksheet'), 'class'=>'form-horizontal','method' => 'POST']) !!}
 											{!! Form::hidden('action',$row->id) !!}
-											{!! Form::button('Delete',['class'=>'btn btn-danger','type'=>'submit']) !!}
+											{!! Form::button('Delete',['class'=>'btn btn-danger','type'=>'submit','onclick' => 'ConfirmDelete(event)']) !!}
 											{!! Form::close() !!}
 
 											@endcan
@@ -295,6 +302,12 @@
 										<td title="{{$row->shipper_name}}">
 											<div class="div-3">{{$row->shipper_name}}</div>
 										</td>
+										<td title="{{$row->shipper_country}}">
+											<div class="div-3">{{$row->shipper_country}}</div>
+										</td>
+										<td title="{{$row->shipper_region}}">
+											<div class="div-2">{{$row->shipper_region}}</div>
+										</td>
 										<td title="{{$row->shipper_city}}">
 											<div class="div-3">{{$row->shipper_city}}</div>
 										</td>
@@ -308,7 +321,7 @@
 											<div class="div-3">{{$row->shipper_address}}</div>
 										</td>
 										<td title="{{$row->standard_phone}}">
-											<div class="div-3">{{$row->standard_phone}}</div>
+											<div class="div-4">{{$row->standard_phone}}</div>
 										</td>
 										<td title="{{$row->shipper_phone}}">
 											<div class="div-3">{{$row->shipper_phone}}</div>
@@ -318,6 +331,9 @@
 										</td>
 										<td title="{{$row->consignee_name}}">
 											<div class="div-3">{{$row->consignee_name}}</div>
+										</td>
+										<td title="{{$row->consignee_country}}">
+											<div class="div-3">{{$row->consignee_country}}</div>
 										</td>
 										<td title="{{$row->house_name}}">
 											<div class="div-3">{{$row->house_name}}</div>
@@ -442,11 +458,21 @@
 
 							<div class="checkbox-operations">
 								
-								{!! Form::open(['url'=>route('addPhilIndDataById'), 'class'=>'worksheet-add-form','method' => 'POST']) !!}
+								{!! Form::open(['url'=>route('addPhilIndDataById'), 'onsubmit' => 'return CheckColor(event)', 'class'=>'worksheet-add-form','method' => 'POST']) !!}
+
+								<input type="hidden" name="which_admin" value="en">
 
 								<label>Select action with selected rows:
 									<select class="form-control" name="checkbox_operations_select">
 										<option value=""></option>
+										@endcan
+
+										@can('changeColor')
+										<option value="color">Change color</option>
+										@endcan
+
+										@can('editPost')
+										
 										<option value="delete">Delete</option>
 										<option value="change">Change</option>
 									</select>
@@ -455,13 +481,13 @@
 								<label class="checkbox-operations-change">Choose column:
 									<select class="form-control" id="phil-ind-tracking-columns" name="phil-ind-tracking-columns">
 										<option value="" selected="selected"></option>
-										<option value="direction">Direction</option>
 										<option value="status">Status</option>
 										<option value="tracking_local">Local tracking number</option>
 										<option value="pallet_number">Pallet number</option>
 										<option value="comments_1">Comments 1</option>
 										<option value="comments_2">Comments 2</option>
 										<option value="shipper_name">Shipper's name</option>
+										<option value="shipper_country">Shipper's country</option>
 										<option value="shipper_city">Shipper\'s city/village</option>
 										<option value="passport_number">GSTN/Passport number</option>
 										<option value="return_date">Estimated return to India date</option>
@@ -469,6 +495,7 @@
 										<option value="shipper_phone">Shipper's phone number</option>
 										<option value="shipper_id">Shipper's ID number</option>
 										<option value="consignee_name">Consignee's name</option>
+										<option value="consignee_country">Consignee's country</option>
 										<option value="house_name">House name</option>
 										<option value="post_office">Local post office</option>
 										<option value="district">District/City</option>
@@ -490,19 +517,32 @@
 										<option value="payment_date_comments">Payment date and comments</option>
 										<option value="amount_payment">Amount of payment</option>   
 									</select>
-								</label>	
+								</label>
+
+								<label class="checkbox-operations-color">Choose color:
+									<select class="form-control" name="tr_color">
+										<option value="" selected="selected"></option>
+										<option value="transparent">No color</option>
+										<option value="tr-orange">Orange</option>
+										<option value="tr-yellow">Yellow</option>
+										<option value="tr-green">Green</option>
+										<option value="tr-blue">Blue</option>
+									</select>
+								</label>
 
 								<label class="phil-ind-value-by-tracking checkbox-operations-change">Input value:
 									<input class="form-control" type="text" name="value-by-tracking">
 									<input type="hidden" name="status_ru">
 									<input type="hidden" name="status_he">
+									<input type="hidden" name="shipper_country_val">
+									<input type="hidden" name="consignee_country_val">
 								</label>
 
 								{!! Form::button('Save',['class'=>'btn btn-primary checkbox-operations-change','type'=>'submit']) !!}
 								{!! Form::close() !!}
 
-								{!! Form::open(['url'=>route('deletePhilIndWorksheetById'),'onsubmit' => 'return ConfirmDelete()','method' => 'POST']) !!}
-								{!! Form::button('Delete',['class'=>'btn btn-danger  checkbox-operations-delete','type'=>'submit']) !!}
+								{!! Form::open(['url'=>route('deletePhilIndWorksheetById'),'method' => 'POST']) !!}
+								{!! Form::button('Delete',['class'=>'btn btn-danger  checkbox-operations-delete','type'=>'submit','onclick' => 'ConfirmDelete(event)']) !!}
 								{!! Form::close() !!}
 
 							</div>
@@ -520,13 +560,58 @@
 
 <script>
 
-	function ConfirmDelete()
+	function ConfirmDeleteColumn()
 	{
 		var x = confirm("Are you sure you want to delete?");
 		if (x)
 			return true;
 		else
 			return false;
+	}
+
+
+	function ConfirmDelete(event)
+	{
+		event.preventDefault();
+		const form = event.target.parentElement;
+		const data = new URLSearchParams(new FormData(form)).toString();
+		location.href = '/admin/to-trash?'+data+'&table=phil_ind_worksheet';
+	}
+
+	
+	function CheckColor(event){
+		
+		$('.alert.alert-danger').remove();
+		const form = event.target;
+		const color = document.querySelector('[name="tr_color"]').value;
+
+		if (color) {
+			event.preventDefault();
+			$.ajax({
+				url: '/admin/check-row-color/',
+				type: "POST",
+				data: $(form).serialize(),
+				headers: {
+					'X-CSRF-Token': $('meta[name="csrf-token"]').attr('content')
+				},
+				success: function (data) {
+					console.log(data);
+					if (data.error) {
+						$('.card-header').after(`
+							<div class="alert alert-danger">
+							`+data.error+`										
+							</div>`)
+						return 0;
+					}
+					else{
+						form.submit();
+					}
+				},
+				error: function (msg) {
+					alert('Admin error');
+				}
+			});
+		}		
 	}
 
 </script>

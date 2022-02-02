@@ -26,6 +26,8 @@ class CreatePhilIndWorksheetTable extends Migration
             $table->text('comments_1')->nullable();
             $table->text('comments_2')->nullable();          
             $table->string('shipper_name')->nullable();
+            $table->string('shipper_country')->nullable();
+            $table->string('shipper_region')->nullable();
             $table->string('shipper_city')->nullable();
             $table->string('passport_number')->nullable();
             $table->string('return_date')->nullable();
@@ -34,6 +36,7 @@ class CreatePhilIndWorksheetTable extends Migration
             $table->string('shipper_phone')->nullable();
             $table->string('shipper_id')->nullable();
             $table->string('consignee_name')->nullable();
+            $table->string('consignee_country')->nullable();
             $table->string('house_name')->nullable();
             $table->string('post_office')->nullable();
             $table->string('district')->nullable();
@@ -59,7 +62,9 @@ class CreatePhilIndWorksheetTable extends Migration
             $table->string('consignee_name_customs')->nullable();
             $table->text('consignee_address_customs')->nullable();
             $table->string('consignee_phone_customs')->nullable();
-            $table->string('consignee_id_customs')->nullable();           
+            $table->string('consignee_id_customs')->nullable();
+            $table->string('background')->nullable();  
+            $table->boolean('in_trash')->default(false);         
             $table->timestamps();
         });
     }

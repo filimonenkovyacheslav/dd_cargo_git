@@ -20,9 +20,11 @@ class CreateCourierDraftWorksheetTable extends Migration
             $table->string('direction')->nullable();
             $table->string('tariff')->nullable();
             $table->text('status')->nullable();
+            $table->string('status_date')->nullable();
             $table->string('partner')->nullable();
             $table->string('tracking_main')->nullable();
             $table->string('order_number')->nullable();
+            $table->string('parcels_qty')->default('1');
             $table->string('tracking_local')->nullable();
             $table->string('tracking_transit')->nullable();
             $table->string('pallet_number')->nullable();
@@ -30,6 +32,7 @@ class CreateCourierDraftWorksheetTable extends Migration
             $table->text('comments')->nullable();
             $table->text('sender_name')->nullable();
             $table->string('sender_country')->nullable();
+            $table->string('shipper_region')->nullable();
             $table->string('sender_city')->nullable();
             $table->string('sender_postcode')->nullable();
             $table->text('sender_address')->nullable();
@@ -75,6 +78,7 @@ class CreateCourierDraftWorksheetTable extends Migration
             $table->string('recipient_phone_customs')->nullable();
             $table->string('recipient_passport_customs')->nullable();
             $table->date('update_status_date')->nullable();
+            $table->boolean('in_trash')->default(false);
             $table->timestamps();
         });
     }

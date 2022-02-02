@@ -10,34 +10,55 @@ use App\ChinaWorksheet;
 use App\PhilIndWorksheet;
 use App\PackingSea;
 use App\PackingEng;
+use App\PackingEngNew;
 use App\Http\Controllers\Admin\AdminController;
-use App\DraftWorksheet;
-use App\EngDraftWorksheet;
+use App\CourierDraftWorksheet;
+use App\CourierEngDraftWorksheet;
 use DB;
 
 
 class FrontController extends AdminController
-{
-    public function index()
+{    
+    public function parcelForm()
     {
-               
+        $israel_cities = $this->israelCities();
+        $israel_cities['other'] = 'Другой город';
+        return view('parcel_form',compact('israel_cities'));       
     }
 
 
-    public function parcelForm()
+    public function parcelFormOld()
     {
-        return view('parcel_form');       
+        return view('parcel_form_old');       
     }
 
 
     public function newParcelAdd(Request $request)
     {        
-        $fields = $this->getTableColumns('draft_worksheet'); 
+        $parcels_qty = (int)$request->input('parcels_qty');
+        $message = '';
+        if (!$request->input('phone_exist_checked')) {
+            $message = $this->checkExistPhone($request,'courier_draft_worksheet');
+            if ($message) return redirect()->route('parcelForm')->with('phone_exist', $message)->with('phone_number',$request->input('standard_phone'));
+        }
+        else{
+            $message = $this->__newParcelAdd($request);
+            return redirect()->route('parcelForm')->with('status', $message);
+        }        
+        
+        $message = $this->__newParcelAdd($request);
 
-        $new_worksheet = new DraftWorksheet();       
+        return redirect()->route('parcelForm')->with('status', $message);
+    }
+
+
+    private function __newParcelAdd($request)
+    {        
+        $fields = $this->getTableColumns('courier_draft_worksheet'); 
+        $new_worksheet = new CourierDraftWorksheet();         
 
         foreach($fields as $field){
-            
+
             if ($field === 'sender_name') {
                 $new_worksheet->$field = $request->input('first_name').' '.$request->input('last_name');
             }
@@ -80,28 +101,55 @@ class FrontController extends AdminController
                     $content .= $request->input('other_content_8').': '.$request->input('other_quantity_8').'; ';
                 }
                 if(!$content){
-                    $content = 'Пусто: 0;';
+                    $content = 'Пусто: 0';
                 }                
-                
+
                 $new_worksheet->$field = trim($content);
             }
             else if ($field === 'comment_2'){
-                $new_worksheet->$field = $request->input('need_box');
+                if ($request->input('need_box')) $new_worksheet->$field = $request->input('need_box');
+                if ($request->input('comment_2')) $new_worksheet->$field = $request->input('comment_2');
             }
             else if ($field !== 'created_at'){
                 $new_worksheet->$field = $request->input($field);
             }           
         }
 
+        $new_worksheet->in_trash = false;
+        if (in_array($new_worksheet->sender_city, array_keys($this->israel_cities))) {
+            $new_worksheet->shipper_region = $this->israel_cities[$new_worksheet->sender_city];
+        }        
+
+        // New parcel form
+        if (null !== $request->input('status_box')) {
+            if ($request->input('status_box') === 'false') {
+                $new_worksheet->status = 'Забрать';
+            } 
+            else{
+                $new_worksheet->status = 'Коробка';
+            }
+        }
+         
+        if (null !== $request->input('need_box')) {
+            if ($request->input('need_box') === 'Мне не нужна коробка') {
+                $new_worksheet->status = 'Забрать';
+            }
+            else{
+                $new_worksheet->status = 'Коробка';
+            }
+        }        
+
         $new_worksheet->date = date('Y.m.d');
-        $new_worksheet->status = 'Забрать';
+        $new_worksheet->status_date = date('Y-m-d');       
 
-        if ($new_worksheet->save()){
-            
-            $work_sheet_id = $new_worksheet->id;
+        if ($new_worksheet->save()){           
 
+            $this->addingOrderNumber($new_worksheet->standard_phone, 'ru');
+            $work_sheet_id = $new_worksheet->id;       
             $message = 'Заказ посылки успешно создан !';
-                       
+            $new_worksheet = CourierDraftWorksheet::find($work_sheet_id);
+            $new_worksheet->checkCourierTask($new_worksheet->status);
+
             // Packing
             $fields_packing = ['payer', 'contract', 'type', 'track_code', 'full_shipper', 'full_consignee', 'country_code', 'postcode', 'region', 'district', 'city', 'street', 'house', 'body', 'room', 'phone', 'tariff', 'tariff_cent', 'weight_kg', 'weight_g', 'service_code', 'amount_1', 'amount_2', 'attachment_number', 'attachment_name', 'amount_3', 'weight_enclosures_kg', 'weight_enclosures_g', 'value_euro', 'value_cent', 'work_sheet_id'];
             $j=1;
@@ -341,17 +389,36 @@ class FrontController extends AdminController
         }
         else{
             $message = 'Ошибка сохранения !';
-        }        
+        }             
         
-        return redirect()->route('parcelForm')->with('status', $message);        
+        return $message;        
     }
 
 
     public function forwardParcelAdd(Request $request)
     {
+        $parcels_qty = (int)$request->input('parcels_qty');
+        $message = '';
+        if (!$request->input('phone_exist_checked')){           
+            $message = $this->checkExistPhone($request,'courier_draft_worksheet');
+            if ($message) return redirect($request->input('url_name').'?phone_exist='.$message.'&phone_number='.$request->input('standard_phone'));
+        }
+        else{
+            $message = $this->__forwardParcelAdd($request);
+            return redirect($request->input('url_name').'?message='.$message);
+        }
+        
+        $message = $this->__forwardParcelAdd($request);
+
+        return redirect($request->input('url_name').'?message='.$message);
+    }
+
+
+    private function __forwardParcelAdd($request)
+    {
         if ($request->input('url_name')) {
-            $new_worksheet = new DraftWorksheet();
-            $fields = $this->getTableColumns('draft_worksheet');        
+            $new_worksheet = new CourierDraftWorksheet();
+            $fields = $this->getTableColumns('courier_draft_worksheet');     
 
             foreach($fields as $field){
                 if ($field === 'sender_name') {
@@ -396,7 +463,7 @@ class FrontController extends AdminController
                         $content .= $request->input('other_content_8').': '.$request->input('other_quantity_8').'; ';
                     }
                     if(!$content){
-                        $content = 'Пусто: 0;';
+                        $content = 'Пусто: 0';
                     } 
 
                     $new_worksheet->$field = trim($content);
@@ -409,12 +476,28 @@ class FrontController extends AdminController
                 }           
             }
 
-            $new_worksheet->date = date('Y.m.d');
-            $new_worksheet->status = 'Забрать';            
+            $new_worksheet->in_trash = false;
+            if (in_array($new_worksheet->sender_city, array_keys($this->israel_cities))) {
+                $new_worksheet->shipper_region = $this->israel_cities[$new_worksheet->sender_city];
+            }
 
-            if($new_worksheet->save()){
+            $new_worksheet->date = date('Y.m.d');
+            $new_worksheet->status_date = date('Y-m-d');
+            if ($request->input('need_box') === 'Мне не нужна коробка') {
+                $new_worksheet->status = 'Забрать';
+            }
+            else{
+                $new_worksheet->status = 'Коробка';
+            }            
+
+            if($new_worksheet->save()){              
+
+                $this->addingOrderNumber($new_worksheet->standard_phone, 'ru');
+                
                 $work_sheet_id = $new_worksheet->id;
                 $message = 'Заказ посылки успешно создан !';
+                $new_worksheet = CourierDraftWorksheet::find($work_sheet_id);
+                $new_worksheet->checkCourierTask($new_worksheet->status);
 
                 // Packing
                 $fields_packing = ['payer', 'contract', 'type', 'track_code', 'full_shipper', 'full_consignee', 'country_code', 'postcode', 'region', 'district', 'city', 'street', 'house', 'body', 'room', 'phone', 'tariff', 'tariff_cent', 'weight_kg', 'weight_g', 'service_code', 'amount_1', 'amount_2', 'attachment_number', 'attachment_name', 'amount_3', 'weight_enclosures_kg', 'weight_enclosures_g', 'value_euro', 'value_cent', 'work_sheet_id'];
@@ -657,7 +740,7 @@ class FrontController extends AdminController
                 $message = 'Ошибка формы !';
             }                       
 
-            return redirect($request->input('url_name').'?message='.$message);
+            return $message;
         }
 
     }
@@ -877,27 +960,216 @@ class FrontController extends AdminController
 
 
     public function philIndParcelForm()
+    {  
+        $israel_cities = $this->israelCities();
+        $israel_cities['other'] = 'Other city';
+        return view('phil_ind_parcel_form',compact('israel_cities'));      
+    }
+
+
+    public function philIndParcelFormOld()
     {
-        return view('phil_ind_parcel_form');        
+        return view('phil_ind_parcel_form_old');        
     }
 
 
     public function philIndParcelAdd(Request $request)
     {
-        $worksheet = new EngDraftWorksheet();
-        $fields = $this->getTableColumns('eng_draft_worksheet');
-        $phone_exist = EngDraftWorksheet::where('standard_phone',$request->input('standard_phone'))->first();
+        $parcels_qty = (int)$request->input('parcels_qty');
+        $message = '';
+        if (!$request->input('phone_exist_checked')) {
+            $message = $this->checkExistPhone($request,'courier_eng_draft_worksheet');
+            if ($message) return redirect()->route('philIndParcelForm')->with('phone_exist', $message)->with('phone_number',$request->input('standard_phone'));
+        }  
+        else{
+            $message = $this->__philIndParcelAdd($request);
+            return redirect()->route('philIndParcelForm')->with('status', $message);
+        }     
         
-        if (!$phone_exist) {
+        $message = $this->__philIndParcelAdd($request);
+
+        return redirect()->route('philIndParcelForm')->with('status', $message);
+    }
+    
+
+    private function __philIndParcelAdd($request)
+    {
+        $worksheet = new CourierEngDraftWorksheet();
+        $fields = $this->getTableColumns('courier_eng_draft_worksheet');
+
+        foreach($fields as $field){
+            if ($field === 'shipper_name') {
+                $worksheet->$field = $request->input('first_name').' '.$request->input('last_name');
+            }
+            else if ($field === 'consignee_name') {
+                $worksheet->$field = $request->input('consignee_first_name').' '.$request->input('consignee_last_name');
+            }
+            else if ($field === 'consignee_address') {
+                $worksheet->$field = $request->input('consignee_country').' '.$request->input('consignee_address');
+            }
+            else if ($field === 'shipped_items') {
+                $temp = '';
+                for ($i=1; $i < 11; $i++) { 
+                    if (null !== $request->input('item_'.$i)) {
+                        $temp .= $request->input('item_'.$i).': '.$request->input('q_item_'.$i).'; ';
+                    }
+                }
+                $worksheet->$field = $temp;
+            }
+            else if ($field === 'direction') {
+                $worksheet->$field = $this->createDirection($request->input('shipper_country'), $request->input('consignee_country'));
+            }
+            else if ($field !== 'created_at'){
+                $worksheet->$field = $request->input($field);
+            }                               
+        }
+
+        $worksheet->in_trash = false;
+        if ($worksheet->shipper_country === 'Israel') {
+            if (in_array($worksheet->shipper_city, array_keys($this->israel_cities))) {
+                $worksheet->shipper_region = $this->israel_cities[$worksheet->shipper_city];
+            }
+        }        
+
+        if (!$worksheet->date) {
+            $worksheet->date = date('Y-m-d');
+        } 
+
+        $worksheet->status_date = date('Y-m-d');
+
+        if (!$request->input('status_box')) {
+            $worksheet->status = 'Pick up';
+        } 
+        else{
+            $worksheet->status = 'Box';
+        }                        
+
+        if ($worksheet->save()) {          
+
+            $this->addingOrderNumber($worksheet->standard_phone, 'en');
+            $work_sheet_id = $worksheet->id;
+            $new_worksheet = CourierEngDraftWorksheet::find($work_sheet_id);
+            $new_worksheet->checkCourierTask($new_worksheet->status);
+
+            // Packing
+            $fields_packing = ['tracking', 'country', 'shipper_name', 'shipper_address', 'shipper_phone', 'shipper_id', 'consignee_name', 'consignee_address', 'consignee_phone', 'consignee_id', 'length', 'width', 'height', 'weight', 'items', 'shipment_val', 'work_sheet_id'];
+            $packing = new PackingEng;
+            foreach($fields_packing as $field){
+                if ($field === 'country') {
+                    $packing->$field = $request->input('consignee_country');
+                    // New parcel form
+                    if (!$request->input('consignee_address')) $packing->consignee_address = $request->input('consignee_country');                    
+                }
+                elseif ($field === 'shipper_name') {
+                    $packing->$field = $request->input('first_name').' '.$request->input('last_name');
+                }
+                elseif ($field === 'shipper_phone') {
+                    $packing->$field = $request->input('standard_phone');
+                }
+                elseif ($field === 'consignee_name') {
+                    $packing->$field = $request->input('consignee_first_name').' '.$request->input('consignee_last_name');
+                }
+                elseif ($field === 'work_sheet_id') {
+                    $packing->$field = $work_sheet_id;
+                }
+                else if ($field === 'items') {
+                    $temp = '';
+                    for ($i=1; $i < 11; $i++) { 
+                        if (null !== $request->input('item_'.$i)) {
+                            $temp .= $request->input('item_'.$i).': '.$request->input('q_item_'.$i).'; ';
+                        }
+                    }
+                    $packing->$field = $temp;
+                }
+                else{
+                    $packing->$field = $request->input($field);
+                } 
+            }
+            $packing->save();
+
+            $message = 'Shipment order successfully created !';
+        }
+        else{
+            $message = 'Saving error !';
+        }
+
+        return $message;        
+    }
+
+
+    public function showFormEng()
+    {
+        return view('additional_form_eng');        
+    }
+
+
+    public function engCheckTrackingPhone(Request $request)
+    {
+        $message = 'Please fill or edit or skip the boxes below.';
+        
+        if ($request->input('tracking_main')) {
+            $courier_result = CourierEngDraftWorksheet::where([
+                ['standard_phone', $request->input('standard_phone')],
+                ['tracking_main', $request->input('tracking_main')]
+            ])->first();
+            $worksheet_result = PhilIndWorksheet::where([
+                ['standard_phone', $request->input('standard_phone')],
+                ['tracking_main', $request->input('tracking_main')]
+            ])->first();
+
+            if ($courier_result) {
+                $id = $courier_result->id;
+                $data_parcel = $this->fillResponseDataEng($courier_result, $request, true);
+                return redirect()->route('showFormEng')->with('status', $message)->with('id', $id)->with('data_parcel', json_encode($data_parcel))->with('sheet', 'courier');
+            }
+            elseif ($worksheet_result) {
+                $id = $worksheet_result->id;
+                $data_parcel = $this->fillResponseDataEng($worksheet_result, $request, true);
+                return redirect()->route('showFormEng')->with('status', $message)->with('id', $id)->with('data_parcel', json_encode($data_parcel))->with('sheet', 'worksheet');
+            }
+            else{
+                $message = 'The data you entered is not true or do not match each other. Please try again';
+                return redirect()->route('showFormEng')->with('status-error', $message);
+            }
+        }
+        else{
+            $draft_result = CourierEngDraftWorksheet::where('standard_phone', $request->input('standard_phone'))->first();
+
+            if ($draft_result) {
+                $id = $draft_result->id;
+                $data_parcel = $this->fillResponseDataEng($draft_result, $request, true);
+                return redirect()->route('showFormEng')->with('status', $message)->with('id', $id)->with('data_parcel', json_encode($data_parcel))->with('sheet', 'courier');
+            }
+            else{
+                $message = 'The data you entered is not found. Please try again';
+                return redirect()->route('showFormEng')->with('status-error', $message);
+            }
+        }                
+    }
+
+
+    public function addFormEng(Request $request)
+    {
+        $worksheet = null;
+        if ($request->input('sheet') === 'courier') {
+            $worksheet = CourierEngDraftWorksheet::find($request->input('id'));
+            $fields = $this->getTableColumns('courier_eng_draft_worksheet');
+        }
+        elseif ($request->input('sheet') === 'worksheet') {
+            $worksheet = PhilIndWorksheet::find($request->input('id'));
+            $fields = $this->getTableColumns('phil_ind_worksheet');
+        }
+        
+        if ($worksheet) {
             
             foreach($fields as $field){
-                if ($field === 'shipper_name') {
+                if ($field === 'shipper_name' && $request->input('first_name') && $request->input('last_name')) {
                     $worksheet->$field = $request->input('first_name').' '.$request->input('last_name');
                 }
-                else if ($field === 'consignee_name') {
+                else if ($field === 'consignee_name' && $request->input('consignee_first_name') && $request->input('consignee_last_name')) {
                     $worksheet->$field = $request->input('consignee_first_name').' '.$request->input('consignee_last_name');
                 }
-                else if ($field === 'consignee_address') {
+                else if ($field === 'consignee_address' && $request->input('consignee_country') && $request->input('consignee_address')) {
                     $worksheet->$field = $request->input('consignee_country').' '.$request->input('consignee_address');
                 }
                 else if ($field === 'shipped_items') {
@@ -907,139 +1179,305 @@ class FrontController extends AdminController
                             $temp .= $request->input('item_'.$i).' - '.$request->input('q_item_'.$i).'; ';
                         }
                     }
-                    $worksheet->$field = $temp;
+                    if ($temp) {
+                        $worksheet->$field = $temp;
+                    }                    
                 }
-                else if ($field !== 'created_at'){
+                else if ($field !== 'created_at' && $request->input($field)){
                     $worksheet->$field = $request->input($field);
                 }                               
-            }
-
-            if (!$worksheet->date) {
-                $worksheet->date = date('Y-m-d');
-            } 
-
-            if (!$request->input('status_box')) {
-                $worksheet->status = 'Pick up';
-            } 
-            else{
-                $worksheet->status = 'Box';
-            }                        
+            }                       
 
             if ($worksheet->save()) {
+
+                $worksheet->checkCourierTask($worksheet->status);
+                
                 $work_sheet_id = $worksheet->id;
+                $packing = null;
 
-                // Packing
-                $fields_packing = ['tracking', 'country', 'shipper_name', 'shipper_address', 'shipper_phone', 'shipper_id', 'consignee_name', 'consignee_address', 'consignee_phone', 'consignee_id', 'length', 'width', 'height', 'weight', 'items', 'shipment_val', 'work_sheet_id'];
-                $packing = new PackingEng;
-                foreach($fields_packing as $field){
-                    if ($field === 'country') {
-                        $packing->$field = $request->input('consignee_country');
-                    }
-                    elseif ($field === 'shipper_name') {
-                        $packing->$field = $request->input('first_name').' '.$request->input('last_name');
-                    }
-                    elseif ($field === 'shipper_phone') {
-                        $packing->$field = $request->input('standard_phone');
-                    }
-                    elseif ($field === 'consignee_name') {
-                        $packing->$field = $request->input('consignee_first_name').' '.$request->input('consignee_last_name');
-                    }
-                    elseif ($field === 'work_sheet_id') {
-                        $packing->$field = $work_sheet_id;
-                    }
-                    else if ($field === 'items') {
-                        $temp = '';
-                        for ($i=1; $i < 11; $i++) { 
-                            if (null !== $request->input('item_'.$i)) {
-                                $temp .= $request->input('item_'.$i).' - '.$request->input('q_item_'.$i).'; ';
-                            }
-                        }
-                        $packing->$field = $temp;
-                    }
-                    else{
-                        $packing->$field = $request->input($field);
-                    } 
+                if ($request->input('sheet') === 'draft' || $request->input('sheet') === 'courier') {
+                    $packing = PackingEng::where('work_sheet_id',$work_sheet_id)->first();
                 }
-                $packing->save();
+                elseif ($request->input('sheet') === 'worksheet') {
+                    $packing = PackingEngNew::where('work_sheet_id',$work_sheet_id)->first();
+                }
 
-                $message = 'Shipment order successfully created !';
+                if ($packing) {
+                    // Packing
+                    $fields_packing = ['tracking', 'country', 'shipper_name', 'shipper_address', 'shipper_phone', 'shipper_id', 'consignee_name', 'consignee_address', 'consignee_phone', 'consignee_id', 'items', 'shipment_val'];
+
+                    foreach($fields_packing as $field){
+                        if ($field === 'country' && $request->input('consignee_country')) {
+                            $packing->$field = $request->input('consignee_country');
+                        }
+                        elseif ($field === 'shipper_name' && $request->input('first_name') && $request->input('last_name')) {
+                            $packing->$field = $request->input('first_name').' '.$request->input('last_name');
+                        }
+                        elseif ($field === 'shipper_phone' && $request->input('standard_phone')) {
+                            $packing->$field = $request->input('standard_phone');
+                        }
+                        elseif ($field === 'consignee_name' && $request->input('consignee_first_name') && $request->input('consignee_last_name')) {
+                            $packing->$field = $request->input('consignee_first_name').' '.$request->input('consignee_last_name');
+                        }
+                        else if ($field === 'items') {
+                            $temp = '';
+                            for ($i=1; $i < 11; $i++) { 
+                                if (null !== $request->input('item_'.$i)) {
+                                    $temp .= $request->input('item_'.$i).' - '.$request->input('q_item_'.$i).'; ';
+                                }
+                            }
+                            if ($temp) {
+                                $packing->$field = $temp;
+                            }                       
+                        }
+                        elseif ($request->input($field)){
+                            $packing->$field = $request->input($field);
+                        } 
+                    }
+                    $packing->save();
+                    // End Packing
+                    $message = 'The data on your order was updated successfully !';
+                    return redirect()->route('showFormEng')->with('status', $message);
+                }
+                else{
+                    $message = 'The data on your packing was not updated. Please try again !';
+                    return redirect()->route('showFormEng')->with('status-error', $message);
+                }                              
             }
             else{
-                $message = 'Saving error !';
+                $message = 'The data on your order was not updated. Please try again !';
+                return redirect()->route('showFormEng')->with('status-error', $message);
             }
         }
         else{
-            $message = 'An order of yours already exists in our database. Please contact us in case you wish to revise it.';
+            $message = 'The data on your order was not updated. Please try again !';
+            return redirect()->route('showFormEng')->with('status-error', $message);
+        }                              
+    }
+
+
+    private function fillResponseDataRu($data, $request, $content = false, $draft = false){
+        $data_parcel = [];
+        if ($draft) $data_parcel['phone_exist_checked'] = 'true';
+        
+        if ($request->input('quantity_sender') === '1') {               
+            $sender_name = explode(" ", $data->sender_name);
+            if (count($sender_name) > 1) {
+                $data_parcel['first_name'] = $sender_name[0];
+                $data_parcel['last_name'] = $sender_name[1];
+            }
+            elseif (count($sender_name) == 1) {
+                $data_parcel['first_name'] = $sender_name[0];
+                $data_parcel['last_name'] = '';
+            }
+            else{
+                $data_parcel['first_name'] = '';
+                $data_parcel['last_name'] = '';
+            }               
+            $data_parcel['sender_address'] = $data->sender_address;
+            $data_parcel['sender_city'] = $data->sender_city;
+            $data_parcel['sender_postcode'] = $data->sender_postcode;
+            $data_parcel['sender_country'] = $data->sender_country;
+            $data_parcel['standard_phone'] = $data->standard_phone;
+            $data_parcel['sender_phone'] = $data->sender_phone;
+            $data_parcel['sender_passport'] = $data->sender_passport;
         }
-               
-        return redirect()->route('philIndParcelForm')->with('status', $message);        
+        if ($request->input('quantity_recipient') === '1') {
+            $recipient_name = explode(" ", $data->recipient_name);
+            if (count($recipient_name) > 1) {
+                $data_parcel['recipient_first_name'] = $recipient_name[0];
+                $data_parcel['recipient_last_name'] = $recipient_name[1];
+            }
+            elseif (count($recipient_name) == 1) {
+                $data_parcel['recipient_first_name'] = $recipient_name[0];
+                $data_parcel['recipient_last_name'] = '';
+            }
+            else{
+                $data_parcel['recipient_first_name'] = '';
+                $data_parcel['recipient_last_name'] = '';
+            }
+            $data_parcel['recipient_street'] = $data->recipient_street;
+            $data_parcel['recipient_house'] = $data->recipient_house;
+            $data_parcel['recipient_room'] = $data->recipient_room;                
+            $data_parcel['recipient_city'] = $data->recipient_city;
+            $data_parcel['recipient_postcode'] = $data->recipient_postcode;
+            $data_parcel['recipient_country'] = $data->recipient_country;
+            $data_parcel['recipient_email'] = $data->recipient_email;
+            $data_parcel['recipient_phone'] = $data->recipient_phone;
+            $data_parcel['recipient_passport'] = $data->recipient_passport;               
+            $data_parcel['body'] = $data->body;
+            $data_parcel['district'] = $data->district;
+            $data_parcel['region'] = $data->region;
+        }
+
+        return $data_parcel;
+    }
+
+
+    private function fillResponseDataEng($data, $request, $content = false, $draft = false)
+    {
+        $data_parcel = [];
+        if ($draft) $data_parcel['phone_exist_checked'] = 'true';
+        
+        if ($request->input('quantity_sender') === '1') {
+            $shipper_name = explode(" ", $data->shipper_name);
+            if (count($shipper_name) > 1) {
+                $data_parcel['first_name'] = $shipper_name[0];
+                $data_parcel['last_name'] = $shipper_name[1];
+            }
+            elseif (count($shipper_name) == 1) {
+                $data_parcel['first_name'] = $shipper_name[0];
+                $data_parcel['last_name'] = '';
+            }
+            else{
+                $data_parcel['first_name'] = '';
+                $data_parcel['last_name'] = '';
+            }
+            $data_parcel['shipper_address'] = $data->shipper_address;
+            $data_parcel['standard_phone'] = $data->standard_phone;
+            $data_parcel['shipper_phone'] = $data->shipper_phone;
+            $data_parcel['shipper_country'] = $data->shipper_country;
+            $data_parcel['shipper_id'] = $data->shipper_id;
+        }
+        
+        if ($request->input('quantity_recipient') === '1') {
+            if (!$draft) {
+                $data = PhilIndWorksheet::where([
+                    ['shipper_phone',$request->input('shipper_phone')],
+                    ['consignee_name','<>', null],
+                    ['consignee_address','<>', null],
+                    ['consignee_phone','<>', null]
+                ])
+                ->orWhere([
+                    ['standard_phone', 'like', '%'.$request->input('shipper_phone').'%'],
+                    ['consignee_name','<>', null],
+                    ['consignee_address','<>', null],
+                    ['consignee_phone','<>', null]
+                ])
+                ->get()->last();
+            }
+            
+            if ($data) {
+                $address = trim(stristr($data->consignee_address, " "));                    
+                $consignee_name = explode(" ", $data->consignee_name);
+                if (count($consignee_name) > 1) {
+                    $data_parcel['consignee_first_name'] = $consignee_name[0];
+                    $data_parcel['consignee_last_name'] = $consignee_name[1];
+                }
+                elseif (count($consignee_name) == 1) {
+                    $data_parcel['consignee_first_name'] = $consignee_name[0];
+                    $data_parcel['consignee_last_name'] = '';
+                }
+                else{
+                    $data_parcel['consignee_first_name'] = '';
+                    $data_parcel['consignee_last_name'] = '';
+                }
+                $data_parcel['consignee_address'] = $address;
+                $data_parcel['consignee_country'] = $data->consignee_country;
+                $data_parcel['consignee_phone'] = $data->consignee_phone;
+                $data_parcel['consignee_id'] = $data->consignee_id;
+            }
+            else{
+                $data_parcel['consignee_first_name'] = '';
+                $data_parcel['consignee_last_name'] = '';
+                $data_parcel['consignee_address'] = '';
+                $data_parcel['consignee_phone'] = '';
+                $data_parcel['consignee_id'] = '';
+                $data_parcel['consignee_country'] = '';
+            }
+        }
+
+        if ($content) {
+            $shipper_name = explode(" ", $data->shipper_name);
+            if (count($shipper_name) > 1) {
+                $data_parcel['first_name'] = $shipper_name[0];
+                $data_parcel['last_name'] = $shipper_name[1];
+            }
+            elseif (count($shipper_name) == 1) {
+                $data_parcel['first_name'] = $shipper_name[0];
+                $data_parcel['last_name'] = '';
+            }
+            else{
+                $data_parcel['first_name'] = '';
+                $data_parcel['last_name'] = '';
+            }
+            $data_parcel['shipper_address'] = $data->shipper_address;
+            $data_parcel['standard_phone'] = $data->standard_phone;
+            $data_parcel['shipper_phone'] = $data->shipper_phone;
+            $data_parcel['shipper_country'] = $data->shipper_country;
+            $data_parcel['shipper_id'] = $data->shipper_id;
+
+            $address = trim(stristr($data->consignee_address, " "));               
+            $consignee_name = explode(" ", $data->consignee_name);
+            if (count($consignee_name) > 1) {
+                $data_parcel['consignee_first_name'] = $consignee_name[0];
+                $data_parcel['consignee_last_name'] = $consignee_name[1];
+            }
+            elseif (count($consignee_name) == 1) {
+                $data_parcel['consignee_first_name'] = $consignee_name[0];
+                $data_parcel['consignee_last_name'] = '';
+            }
+            else{
+                $data_parcel['consignee_first_name'] = '';
+                $data_parcel['consignee_last_name'] = '';
+            }
+            $data_parcel['consignee_country'] = $data->consignee_country;
+            $data_parcel['consignee_address'] = $address;
+            $data_parcel['consignee_phone'] = $data->consignee_phone;
+            $data_parcel['consignee_id'] = $data->consignee_id;
+            $data_parcel['shipment_val'] = $data->shipment_val;
+
+            $items = explode(";", $data->shipped_items);            
+            if (count($items)) {
+                $temp = '';
+                for ($i=0; $i < count($items); $i++) {                    
+                    if (strripos($items[$i], '-') !== false) {
+                        $temp = explode("-", $items[$i]);
+                        $data_parcel['item_'.($i+1)] = trim($temp[0]);
+                        $data_parcel['q_item_'.($i+1)] = trim($temp[1]);
+                    }
+                    elseif (strripos($items[$i], ':') !== false) {
+                        $temp = explode(":", $items[$i]);
+                        $data_parcel['item_'.($i+1)] = trim($temp[0]);
+                        $data_parcel['q_item_'.($i+1)] = trim($temp[1]);
+                    }
+                }
+            }
+        }
+        
+        return $data_parcel;
     }
 
 
     public function checkPhone(Request $request)
     {
-        $data = NewWorksheet::where([
-            ['sender_phone',$request->input('sender_phone')],
-            ['site_name', '=', 'DD-C']
-        ])
-        ->orWhere([
-            ['standard_phone', 'like', '%'.$request->input('sender_phone').'%'],
-            ['site_name', '=', 'DD-C']
-        ])
-        ->get()->last();
+        if ($request->input('draft')) {
+            $data = CourierDraftWorksheet::where([
+                ['standard_phone', 'like', '%'.$request->input('sender_phone').'%'],
+                ['site_name', '=', 'DD-C']
+            ])->get()->last();
+        }
+        else{
+            $data = NewWorksheet::where([
+                ['sender_phone',$request->input('sender_phone')],
+                ['site_name', '=', 'DD-C']
+            ])
+            ->orWhere([
+                ['standard_phone', 'like', '%'.$request->input('sender_phone').'%'],
+                ['site_name', '=', 'DD-C']
+            ])
+            ->get()->last();
+        }
+        
         $message = 'Данный номер телефона в системе отсутствует';
         $add_parcel = 'true';
-        $data_parcel = [];
 
         if ($data) {
-            if ($request->input('quantity_sender') === '1') {               
-                $sender_name = explode(" ", $data->sender_name);
-                if (count($sender_name) > 1) {
-                    $data_parcel['first_name'] = $sender_name[0];
-                    $data_parcel['last_name'] = $sender_name[1];
-                }
-                elseif (count($sender_name) == 1) {
-                    $data_parcel['first_name'] = $sender_name[0];
-                    $data_parcel['last_name'] = '';
-                }
-                else{
-                    $data_parcel['first_name'] = '';
-                    $data_parcel['last_name'] = '';
-                }               
-                $data_parcel['sender_address'] = $data->sender_address;
-                $data_parcel['sender_city'] = $data->sender_city;
-                $data_parcel['sender_postcode'] = $data->sender_postcode;
-                $data_parcel['sender_country'] = $data->sender_country;
-                $data_parcel['standard_phone'] = $data->standard_phone;
-                $data_parcel['sender_phone'] = $data->sender_phone;
-                $data_parcel['sender_passport'] = $data->sender_passport;
+            if ($request->input('draft')) {
+                $data_parcel = $this->fillResponseDataRu($data, $request, false, true);
             }
-            if ($request->input('quantity_recipient') === '1') {
-                $recipient_name = explode(" ", $data->recipient_name);
-                if (count($recipient_name) > 1) {
-                    $data_parcel['recipient_first_name'] = $recipient_name[0];
-                    $data_parcel['recipient_last_name'] = $recipient_name[1];
-                }
-                elseif (count($recipient_name) == 1) {
-                    $data_parcel['recipient_first_name'] = $recipient_name[0];
-                    $data_parcel['recipient_last_name'] = '';
-                }
-                else{
-                    $data_parcel['recipient_first_name'] = '';
-                    $data_parcel['recipient_last_name'] = '';
-                }
-                $data_parcel['recipient_street'] = $data->recipient_street;
-                $data_parcel['recipient_house'] = $data->recipient_house;
-                $data_parcel['recipient_room'] = $data->recipient_room;                
-                $data_parcel['recipient_city'] = $data->recipient_city;
-                $data_parcel['recipient_postcode'] = $data->recipient_postcode;
-                $data_parcel['recipient_country'] = $data->recipient_country;
-                $data_parcel['recipient_email'] = $data->recipient_email;
-                $data_parcel['recipient_phone'] = $data->recipient_phone;
-                $data_parcel['recipient_passport'] = $data->recipient_passport;               
-                $data_parcel['body'] = $data->body;
-                $data_parcel['district'] = $data->district;
-                $data_parcel['region'] = $data->region;
+            else{
+                $data_parcel = $this->fillResponseDataRu($data, $request);
             }
             return redirect()->route('parcelForm', ['data_parcel' => $data_parcel])->with('add_parcel', $add_parcel)->with('data_parcel', json_encode($data_parcel));
         }
@@ -1053,17 +1491,31 @@ class FrontController extends AdminController
     {       
         if ($request->input('url_name')) {
 
-            $data = NewWorksheet::where([
-                ['sender_phone',$request->input('sender_phone')],
-                ['site_name', '=', 'For']
-            ])
-            ->orWhere([
-                ['standard_phone', 'like', '%'.$request->input('sender_phone').'%'],
-                ['site_name', '=', 'For']
-            ])
-            ->get()->last();
+            if ($request->input('draft')) {
+                $data = CourierDraftWorksheet::where([
+                    ['standard_phone', 'like', '%'.$request->input('sender_phone').'%'],
+                    ['site_name', '=', 'For']
+                ])->get()->last();
+            }
+            else{
+                $data = NewWorksheet::where([
+                    ['sender_phone',$request->input('sender_phone')],
+                    ['site_name', '=', 'For']
+                ])
+                ->orWhere([
+                    ['standard_phone', 'like', '%'.$request->input('sender_phone').'%'],
+                    ['site_name', '=', 'For']
+                ])
+                ->get()->last();
+            }
+
             $message = 'Данный номер телефона в системе отсутствует';
-            $data_parcel = '?';
+            if ($request->input('draft')) {
+                $data_parcel = '?phone_exist_checked=true&';
+            }
+            else{
+                $data_parcel = '?';
+            }
 
             //dd($data);
 
@@ -1128,74 +1580,27 @@ class FrontController extends AdminController
 
     public function philIndCheckPhone(Request $request)
     {
-        $data = PhilIndWorksheet::where('shipper_phone',$request->input('shipper_phone'))
-        ->orWhere('standard_phone', 'like', '%'.$request->input('shipper_phone').'%')
-        ->get()->last();
+        if ($request->input('draft')) {
+            $data = CourierEngDraftWorksheet::where('standard_phone', 'like', '%'.$request->input('shipper_phone').'%')->get()->last();
+        }
+        else{
+            $data = PhilIndWorksheet::where('shipper_phone',$request->input('shipper_phone'))
+            ->orWhere('standard_phone', 'like', '%'.$request->input('shipper_phone').'%')
+            ->get()->last();
+        }
+        
         $message = 'This phone number is not available in the system';
         $add_parcel = 'true';
         $data_parcel = [];
 
         if ($data) {
-            if ($request->input('quantity_sender') === '1') {
-                $shipper_name = explode(" ", $data->shipper_name);
-                if (count($shipper_name) > 1) {
-                    $data_parcel['first_name'] = $shipper_name[0];
-                    $data_parcel['last_name'] = $shipper_name[1];
-                }
-                elseif (count($shipper_name) == 1) {
-                    $data_parcel['first_name'] = $shipper_name[0];
-                    $data_parcel['last_name'] = '';
-                }
-                else{
-                    $data_parcel['first_name'] = '';
-                    $data_parcel['last_name'] = '';
-                }
-                $data_parcel['shipper_address'] = $data->shipper_address;
-                $data_parcel['standard_phone'] = $data->standard_phone;
-                $data_parcel['shipper_phone'] = $data->shipper_phone;
-                $data_parcel['shipper_id'] = $data->shipper_id;
+            if ($request->input('draft')) {
+                $data_parcel = $this->fillResponseDataEng($data, $request, false, true);
             }
-            if ($request->input('quantity_recipient') === '1') {
-                $data = PhilIndWorksheet::where([
-                        ['shipper_phone',$request->input('shipper_phone')],
-                        ['consignee_name','<>', null],
-                        ['consignee_address','<>', null],
-                        ['consignee_phone','<>', null]
-                    ])
-                    ->orWhere([
-                        ['standard_phone', 'like', '%'.$request->input('shipper_phone').'%'],
-                        ['consignee_name','<>', null],
-                        ['consignee_address','<>', null],
-                        ['consignee_phone','<>', null]
-                    ])
-                    ->get()->last();
-                if ($data) {
-                    $address = trim(stristr($data->consignee_address, " "));                    
-                    $consignee_name = explode(" ", $data->consignee_name);
-                    if (count($consignee_name) > 1) {
-                        $data_parcel['consignee_first_name'] = $consignee_name[0];
-                        $data_parcel['consignee_last_name'] = $consignee_name[1];
-                    }
-                    elseif (count($consignee_name) == 1) {
-                        $data_parcel['consignee_first_name'] = $consignee_name[0];
-                        $data_parcel['consignee_last_name'] = '';
-                    }
-                    else{
-                        $data_parcel['consignee_first_name'] = '';
-                        $data_parcel['consignee_last_name'] = '';
-                    }
-                    $data_parcel['consignee_address'] = $address;
-                    $data_parcel['consignee_phone'] = $data->consignee_phone;
-                    $data_parcel['consignee_id'] = $data->consignee_id;
-                }
-                else{
-                    $data_parcel['consignee_first_name'] = '';
-                    $data_parcel['consignee_last_name'] = '';
-                    $data_parcel['consignee_address'] = '';
-                    $data_parcel['consignee_phone'] = '';
-                    $data_parcel['consignee_id'] = '';
-                }
+            else{
+                $data_parcel = $this->fillResponseDataEng($data, $request);
             }
+            
             return redirect()->route('philIndParcelForm', ['data_parcel' => $data_parcel])->with('add_parcel', $add_parcel)->with('data_parcel', json_encode($data_parcel));
         }
         else{

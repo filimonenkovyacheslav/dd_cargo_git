@@ -14,7 +14,7 @@ class InvoiceExport implements FromQuery, WithHeadings
 
     public function query()
     {
-        return Invoice::query()->orderBy('work_sheet_id');
+        return Invoice::query()->where('in_trash',false)->orderBy('work_sheet_id');
     } 
     
     public function headings(): array

@@ -61,10 +61,12 @@
 				                <option value="comments_1">Comments 1</option>
 				                <option value="comments_2">Comments 2</option>
 				                <option value="shipper_name">Shipper's name</option>
+				                <option value="shipper_country">Shipper's country</option>
 				                <option value="shipper_address">Shipper's address</option>
 				                <option value="shipper_phone">Shipper's phone number</option>
 				                <option value="shipper_id">Shipper's ID number</option>
 				                <option value="consignee_name">Consignee's name</option>
+				                <option value="consignee_country">Consignee's country</option>
 				                <option value="consignee_address">Consignee's address</option>
 				                <option value="consignee_phone">Consignee's phone number</option>
 				                <option value="consignee_id">Consignee's ID number</option>
@@ -88,6 +90,8 @@
 							<input class="form-control" type="text" name="value-by-tracking">
 							<input type="hidden" name="status_ru">
 							<input type="hidden" name="status_he">
+							<input type="hidden" name="shipper_country_val">
+							<input type="hidden" name="consignee_country_val">
 						</label>							
 
 						{!! Form::button('Save',['class'=>'btn btn-primary','type'=>'submit']) !!}

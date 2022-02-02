@@ -18,7 +18,7 @@ class NewPackingController extends AdminController
 	public function index()
 	{
 		$title = 'Новый пакинг лист';
-        $new_packing_obj = NewPacking::orderBy('work_sheet_id')->paginate(10);
+        $new_packing_obj = NewPacking::where('in_trash',false)->orderBy('work_sheet_id')->paginate(10);
 
         return view('admin.packing.new_packing', compact('title','new_packing_obj'));
 	}
@@ -42,16 +42,16 @@ class NewPackingController extends AdminController
         $new_arr = [];      
 
         if ($request->table_columns) {
-        	$new_packing_obj = NewPacking::where($request->table_columns, 'like', '%'.$search.'%')
+        	$new_packing_obj = NewPacking::where('in_trash',false)->where($request->table_columns, 'like', '%'.$search.'%')
         	->paginate(10);
         }
         else{
         	foreach($attributes as $key => $value)
         	{
         		if ($key !== 'created_at' && $key !== 'updated_at' && $key !== 'update_status_date') {
-        			$sheet = NewPacking::where($key, 'like', '%'.$search.'%')->get()->first();
+        			$sheet = NewPacking::where('in_trash',false)->where($key, 'like', '%'.$search.'%')->get()->first();
         			if ($sheet) {       				
-        				$temp_arr = NewPacking::where($key, 'like', '%'.$search.'%')->get();
+        				$temp_arr = NewPacking::where('in_trash',false)->where($key, 'like', '%'.$search.'%')->get();
         				$new_arr = $temp_arr->filter(function ($item, $k) use($id_arr) {
         					if (!in_array($item->id, $id_arr)) { 
         						$id_arr[] = $item->id;       						  
@@ -75,7 +75,7 @@ class NewPackingController extends AdminController
     public function indexInvoice()
 	{
 		$title = 'Инвойс-Израиль';
-        $invoice_obj = Invoice::orderBy('work_sheet_id')->paginate(10);
+        $invoice_obj = Invoice::where('in_trash',false)->orderBy('work_sheet_id')->paginate(10);
 
         return view('admin.packing.invoice', compact('title','invoice_obj'));
 	}
@@ -99,16 +99,16 @@ class NewPackingController extends AdminController
         $new_arr = [];      
 
         if ($request->table_columns) {
-        	$invoice_obj = Invoice::where($request->table_columns, 'like', '%'.$search.'%')
+        	$invoice_obj = Invoice::where('in_trash',false)->where($request->table_columns, 'like', '%'.$search.'%')
         	->paginate(10);
         }
         else{
         	foreach($attributes as $key => $value)
         	{
         		if ($key !== 'created_at' && $key !== 'updated_at') {
-        			$sheet = Invoice::where($key, 'like', '%'.$search.'%')->get()->first();
+        			$sheet = Invoice::where('in_trash',false)->where($key, 'like', '%'.$search.'%')->get()->first();
         			if ($sheet) {       				
-        				$temp_arr = Invoice::where($key, 'like', '%'.$search.'%')->get();
+        				$temp_arr = Invoice::where('in_trash',false)->where($key, 'like', '%'.$search.'%')->get();
         				$new_arr = $temp_arr->filter(function ($item, $k) use($id_arr) {
         					if (!in_array($item->id, $id_arr)) { 
         						$id_arr[] = $item->id;       						  
@@ -132,7 +132,7 @@ class NewPackingController extends AdminController
         public function indexManifest()
 	{
 		$title = 'Манифест';
-        $manifest_obj = Manifest::orderBy('work_sheet_id')->paginate(10);
+        $manifest_obj = Manifest::where('in_trash',false)->orderBy('work_sheet_id')->paginate(10);
 
         return view('admin.packing.manifest', compact('title','manifest_obj'));
 	}
@@ -156,16 +156,16 @@ class NewPackingController extends AdminController
         $new_arr = [];      
 
         if ($request->table_columns) {
-        	$manifest_obj = Manifest::where($request->table_columns, 'like', '%'.$search.'%')
+        	$manifest_obj = Manifest::where('in_trash',false)->where($request->table_columns, 'like', '%'.$search.'%')
         	->paginate(10);
         }
         else{
         	foreach($attributes as $key => $value)
         	{
         		if ($key !== 'created_at' && $key !== 'updated_at') {
-        			$sheet = Manifest::where($key, 'like', '%'.$search.'%')->get()->first();
+        			$sheet = Manifest::where('in_trash',false)->where($key, 'like', '%'.$search.'%')->get()->first();
         			if ($sheet) {       				
-        				$temp_arr = Manifest::where($key, 'like', '%'.$search.'%')->get();
+        				$temp_arr = Manifest::where('in_trash',false)->where($key, 'like', '%'.$search.'%')->get();
         				$new_arr = $temp_arr->filter(function ($item, $k) use($id_arr) {
         					if (!in_array($item->id, $id_arr)) { 
         						$id_arr[] = $item->id;       						  

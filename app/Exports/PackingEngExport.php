@@ -14,7 +14,7 @@ class PackingEngExport implements FromQuery, WithHeadings
 
     public function query()
     {
-        return PackingEng::query();
+        return PackingEng::query()->where('in_trash',false);
     } 
     
     public function headings(): array

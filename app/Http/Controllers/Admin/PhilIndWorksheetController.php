@@ -25,8 +25,28 @@ class PhilIndWorksheetController extends AdminController
     
 
     public function index(){
-        $title = 'Work sheet';      
-        $phil_ind_worksheet_obj = PhilIndWorksheet::paginate(10);
+        $title = 'Work sheet';     
+
+        // Auto-update status
+        $update_date = Date('Y-m-d', strtotime('-14 days'));
+        PhilIndWorksheet::where('in_trash',false)->where([
+        	['status_date','<=',$update_date],
+        	['status_date','<>',null],
+        	['status',"Forwarding to the warehouse in the sender country"]
+        ]) 
+        ->orWhere([
+        	['status_date','<=',$update_date],
+        	['status_date','<>',null],
+        	['status',"At the warehouse in the sender country"]
+        ])            
+        ->update([
+        	'status' => "Forwarding to the receiver country",
+        	'status_ru' => "Доставляется в страну получателя",
+        	'status_he' => " נשלח למדינת המקבל",
+        	'status_date' => date('Y-m-d')
+        ]); 
+        
+        $phil_ind_worksheet_obj = PhilIndWorksheet::where('in_trash',false)->paginate(10);
         $arr_columns = parent::new_phil_ind_columns();
         
         return view('admin.phil_ind.phil_ind_worksheet', ['title' => $title,'phil_ind_worksheet_obj' => $phil_ind_worksheet_obj,'new_column_1' => $arr_columns[0],'new_column_2' => $arr_columns[1],'new_column_3' => $arr_columns[2],'new_column_4' => $arr_columns[3],'new_column_5' => $arr_columns[4]]);
@@ -39,16 +59,31 @@ class PhilIndWorksheetController extends AdminController
 		$phil_ind_worksheet = PhilIndWorksheet::find($id);
 		$title = 'Update row '.$phil_ind_worksheet->id;
 		$user = Auth::user();
+		$israel_cities = $this->israelCities();
 
-		return view('admin.phil_ind.phil_ind_worksheet_update', ['title' => $title,'phil_ind_worksheet' => $phil_ind_worksheet, 'user' => $user,'new_column_1' => $arr_columns[0],'new_column_2' => $arr_columns[1],'new_column_3' => $arr_columns[2],'new_column_4' => $arr_columns[3],'new_column_5' => $arr_columns[4]]);
+		return view('admin.phil_ind.phil_ind_worksheet_update', ['title' => $title,'phil_ind_worksheet' => $phil_ind_worksheet, 'user' => $user,'new_column_1' => $arr_columns[0],'new_column_2' => $arr_columns[1],'new_column_3' => $arr_columns[2],'new_column_4' => $arr_columns[3],'new_column_5' => $arr_columns[4],'israel_cities' => $israel_cities]);
 	}
 
 
 	private function validateUpdate($request, $id){
 		$status_error = '';
 		if (!$request->input('status')) return 'ERROR STATUS!';
+		
+		$status_error = $this->checkStatus('phil_ind_worksheet', $id, $request->input('status'));
+		if($status_error) return $status_error;
+		
+		if ($request->input('consignee_phone')) {
+			$status_error = $this->checkConsigneePhone($request->input('consignee_phone'), 'en');
+			if($status_error) return $status_error;
+		}
 
 		if ($request->input('tracking_main')) {
+
+			if (!$this->trackingValidate($request->input('tracking_main'))){
+				$status_error = "Tracking number is not correct.";
+				return $status_error;
+			}
+			
 			$check_tracking = PhilIndWorksheet::where([
 				['tracking_main', '=', $request->input('tracking_main')],
 				['id', '<>', $id]
@@ -63,6 +98,10 @@ class PhilIndWorksheetController extends AdminController
 			])->first();
 			if($check_tracking) $status_error = 'WARNING! THE TRACKING NUMBER ALREADY EXISTS. FIX THE DEFECT RECORD OR CHANGE THE TRACKING NUMBER';
 			if($status_error) return $status_error;
+		}
+		elseif (!$request->input('tracking_main') && ($request->input('lot') || $request->input('pallet_number'))){
+			$status_error = "You cannot enter a lot or pallet number without a tracking number";
+			return $status_error;
 		}
 
 		if ($request->input('amount_payment')){
@@ -86,6 +125,7 @@ class PhilIndWorksheetController extends AdminController
 	{
 		$phil_ind_worksheet = PhilIndWorksheet::find($id);
 		$old_tracking = $phil_ind_worksheet->tracking_main;
+		$old_pallet = $phil_ind_worksheet->pallet_number;
 		$old_lot = $phil_ind_worksheet->lot;
 		$old_status = $phil_ind_worksheet->status;
 		$arr_columns = parent::new_phil_ind_columns();
@@ -118,6 +158,12 @@ class PhilIndWorksheetController extends AdminController
 				$phil_ind_worksheet->$field = $request->input($field);
 			}
 		}
+
+		if (in_array($phil_ind_worksheet->shipper_city, array_keys($this->israel_cities))) {
+			$phil_ind_worksheet->shipper_region = $this->israel_cities[$phil_ind_worksheet->shipper_city];
+		}
+
+		$phil_ind_worksheet->direction = $this->createDirection($request->input('shipper_country'), $request->input('consignee_country'));
 
 		if ($request->input('tracking_main')){
 			if (in_array($phil_ind_worksheet->status, $this->status_arr)){
@@ -167,6 +213,8 @@ class PhilIndWorksheetController extends AdminController
 		}		
 		
 		if ($phil_ind_worksheet->save()) {
+
+			$phil_ind_worksheet->checkCourierTask($phil_ind_worksheet->status);
 
 			// Update Update New Packing Eng
 			$address = explode(' ',$request->input('consignee_address'));
@@ -219,30 +267,24 @@ class PhilIndWorksheetController extends AdminController
 			
 			// Adding order number
 			if ($phil_ind_worksheet->standard_phone) {
+				$this->addingOrderNumber($phil_ind_worksheet->standard_phone, 'en');
+			}
 
-				$standard_phone = ltrim($phil_ind_worksheet->standard_phone, " \+");
-
-				$data = PhilIndWorksheet::where('standard_phone', '+'.$standard_phone)
-				->get();
-
-				if (!$data->first()->order_number) {
-					$data->transform(function ($item, $key) {
-						return $item->update(['order_number'=> ((int)$key+1)]);             
-					});
+			if ($request->input('tracking_main')) {
+				// Check for missing tracking
+				$this->checkForMissingTracking($request->input('tracking_main'));
+				
+				// Update Warehouse pallet
+				if ($old_pallet !== $request->input('pallet_number')) {
+					$message = $this->updateWarehousePallet($old_tracking, $request->input('tracking_main'), $old_pallet, $request->input('pallet_number'), $old_lot, $phil_ind_worksheet->lot, 'en', $phil_ind_worksheet);
+					if ($message) {
+						return redirect()->to(session('this_previous_url'))->with('status-error', 'Pallet number is not correct!');
+					}				
 				}
-				else{
-					$data->transform(function ($item, $key) use($standard_phone) {
-						if (!$item->order_number) {
 
-							$i = (int)(PhilIndWorksheet::where([
-								['standard_phone', '+'.$standard_phone],
-								['order_number', '<>', null]
-							])->get()->last()->order_number);
-
-							$i++;
-							return $item->update(['order_number'=> $i]);
-						}               
-					});
+				// Update Warehouse lot
+				if ($old_lot !== $phil_ind_worksheet->lot){
+					$this->updateWarehouseLot($request->input('tracking_main'), $phil_ind_worksheet->lot, 'en');	
 				}
 			}
 		}	
@@ -256,30 +298,11 @@ class PhilIndWorksheetController extends AdminController
 	}
 
 
-	private function checkColumns($arr, $value_by, $column, $this_column){
-    	$status_error = '';
-    	$check_sheet = PhilIndWorksheet::whereIn($this_column, $arr)->whereIn('status',$this->status_arr)->first();
-    	if ($check_sheet) {
-    		if ($column === 'amount_payment')
-    		{
-    			$status_error = "WARNING! A STATUS CANNOT BE LOWER - 'At the warehouse in the sender country' AFTER PAYMENT. PLEASE ADD THE DATA TO A CORRECT RECORD OR UPDATE THE STATUS";
-    			return $status_error;
-    		}
-
-    		if ($column === 'pallet_number')
-    		{
-    			$status_error = "WARNING! A STATUS CANNOT BE LOWER - 'At the warehouse in the sender country' AFTER ADDING A PALLET NUMBER. PLEASE ADD THE DATA TO A CORRECT RECORD OR UPDATE THE STATUS";
-    			return $status_error;
-    		}
-    	}
-    	return $status_error;
-    }
-
-
 	public function destroy(Request $request)
 	{
 		$id = $request->input('action');
-
+		$this->removeTrackingFromPalletWorksheet($id, 'en');
+		
 		DB::table('phil_ind_worksheet')
 		->where('id', '=', $id)
 		->delete();
@@ -380,7 +403,7 @@ class PhilIndWorksheetController extends AdminController
 
 	public function showPhilIndStatus(){
         $title = 'Changing statuses by lot number';
-        $worksheet_obj = PhilIndWorksheet::all();
+        $worksheet_obj = PhilIndWorksheet::where('in_trash',false)->get();
         $number_arr = [];
         foreach ($worksheet_obj as $row) {
         	if (!in_array($row->lot, $number_arr)) {
@@ -394,7 +417,11 @@ class PhilIndWorksheetController extends AdminController
     public function changePhilIndStatus(Request $request){
         if ($request->input('lot_number') && $request->input('status')) {
         	DB::table('phil_ind_worksheet')
-        	->where('lot', $request->input('lot_number'))
+        	->where('in_trash',false)
+        	->where([
+        		['lot', $request->input('lot_number')],
+        		['tracking_main','<>',null]
+        	])
           	->update([
           		'status' => $request->input('status'), 
           		'status_he' => $request->input('status_he'),
@@ -408,7 +435,7 @@ class PhilIndWorksheetController extends AdminController
 
     public function showPhilIndStatusDate(){
         $title = 'Changing statuses by date';
-        $worksheet_obj = PhilIndWorksheet::all();
+        $worksheet_obj = PhilIndWorksheet::where('in_trash',false)->get();
         $date_arr = [];
         foreach ($worksheet_obj as $row) {
         	if (!in_array($row->date, $date_arr)) {
@@ -422,7 +449,11 @@ class PhilIndWorksheetController extends AdminController
     public function changePhilIndStatusDate(Request $request){
         if ($request->input('date') && $request->input('status')) {
         	DB::table('phil_ind_worksheet')
-        	->where('date', $request->input('date'))
+        	->where('in_trash',false)
+        	->where([
+        		['date', $request->input('date')],
+        		['tracking_main','<>',null]
+        	])
           	->update([
           		'status' => $request->input('status'), 
           		'status_he' => $request->input('status_he'),
@@ -436,7 +467,7 @@ class PhilIndWorksheetController extends AdminController
 
     public function showPhilIndData(){
         $title = 'Mass change of data by tracking number (supports mass selection of checkboxes)';
-        $worksheet_obj = PhilIndWorksheet::orderBy('tracking_main')->get();
+        $worksheet_obj = PhilIndWorksheet::where('in_trash',false)->orderBy('tracking_main')->get();
         $date_arr = [];
         foreach ($worksheet_obj as $row) {
         	$temp = $row->tracking_main;
@@ -448,7 +479,7 @@ class PhilIndWorksheetController extends AdminController
         			$date_arr[$row->tracking_main] = $row->tracking_main;
         		}
         	}
-        	if (strripos($temp, 'IN') !== false || strripos($temp, 'PH') !== false || strripos($temp, 'NE') !== false || strripos($temp, 'CD') !== false) {
+        	if ($this->checkWhichAdmin($temp)) {
         		if (!in_array($row->tracking_main, $date_arr)) {
         			$date_arr[$row->tracking_main] = $row->tracking_main;
         		}
@@ -462,11 +493,15 @@ class PhilIndWorksheetController extends AdminController
     	$track_arr = $request->input('tracking');
     	$value_by = $request->input('value-by-tracking');
     	$column = $request->input('phil-ind-tracking-columns');
+    	$shipper_country_val = $request->input('shipper_country_val');
+    	$consignee_country_val = $request->input('consignee_country_val');
     	$check_column = 'tracking';
     	$this_column = 'tracking_main';
     	$status_error = '';
     	$user = Auth::user();
     	$operator_change_row_arr = [];
+    	$old_lot_arr = [];
+    	$old_pallet_arr = [];
 
     	for ($i=0; $i < count($track_arr); $i++) { 
     		$phil_ind_worksheet = PhilIndWorksheet::where('tracking_main',$track_arr[$i])->first();
@@ -476,10 +511,28 @@ class PhilIndWorksheetController extends AdminController
     	}
 
     	if ($track_arr) {
+
+    		if ($column === 'shipper_country') $value_by = $shipper_country_val;
+    		if ($column === 'consignee_country') $value_by = $consignee_country_val;
+    		
     		if ($value_by && $column) {
 
-    			$status_error = $this->checkColumns($track_arr, $value_by, $column, $this_column);
+    			$status_error = $this->checkColumns($track_arr, $value_by, $column, $this_column, 'phil_ind_worksheet');
     			if($status_error) return redirect()->to(session('this_previous_url'))->with('status-error', $status_error);
+
+    			if ($column === 'lot') {
+    				for ($i=0; $i < count($track_arr); $i++) { 
+    					$worksheet = PhilIndWorksheet::where('tracking_main',$track_arr[$i])->first();
+    					$old_lot_arr[] = $worksheet->lot;
+    				}
+    			}
+
+    			if ($column === 'pallet_number') {
+    				for ($i=0; $i < count($track_arr); $i++) { 
+    					$worksheet = PhilIndWorksheet::where('tracking_main',$track_arr[$i])->first();
+    					$old_pallet_arr[] = $worksheet->pallet_number;
+    				}
+    			}
     			
     			if ($column !== 'operator') {
     				PhilIndWorksheet::whereIn('tracking_main', $track_arr)
@@ -494,6 +547,75 @@ class PhilIndWorksheetController extends AdminController
     				]);
     			}
 
+    			if ($column === 'pallet_number') {
+    				for ($i=0; $i < count($track_arr); $i++) { 
+    					$worksheet = PhilIndWorksheet::where('tracking_main',$track_arr[$i])->first();
+    					if ($old_pallet_arr[$i] !== $value_by){
+    						$message = $this->updateWarehousePallet($track_arr[$i], $track_arr[$i], $old_pallet_arr[$i], $value_by, $worksheet->lot, $worksheet->lot, 'en', $worksheet);
+    						if ($message) {
+    							return redirect()->to(session('this_previous_url'))->with('status-error', 'Pallet number is not correct!');
+    						}
+    					}
+    				}
+    			}
+
+    			if ($column === 'lot') {
+    				PhilIndWorksheet::whereIn('tracking_main', $track_arr)
+    				->whereIn('status',$this->status_arr_2)
+    				->update([
+    					'status' => "Forwarding to the receiver country",
+    					'status_ru' => "Доставляется в страну получателя",
+    					'status_he' => " נשלח למדינת המקבל",
+    					'status_date' => date('Y-m-d')
+    				]);
+
+    				for ($i=0; $i < count($track_arr); $i++) { 
+    					if ($old_lot_arr[$i] !== $value_by){
+    						$this->updateWarehouseLot($track_arr[$i], $value_by, 'en');
+    					}
+    				}
+    			}
+
+    			if ($column === 'shipper_country') {
+    				for ($i=0; $i < count($track_arr); $i++) { 
+    					$worksheet = PhilIndWorksheet::where('tracking_main',$track_arr[$i])->first();
+    					if (!$worksheet->direction) {
+    						$worksheet->direction = $this->from_country_dir[$value_by].'-';
+    						$worksheet->save();
+    					}
+    					else{
+    						$temp = explode('-', $worksheet->direction);
+    						if (count($temp) == 2) {
+    							$worksheet->direction = $this->from_country_dir[$value_by].'-'.$temp[1];
+    						}
+    						else{
+    							$worksheet->direction = $this->from_country_dir[$value_by].'-';
+    						} 
+    						$worksheet->save();  						
+    					}
+    				}
+    			}
+
+    			if ($column === 'consignee_country') {
+    				for ($i=0; $i < count($track_arr); $i++) { 
+    					$worksheet = PhilIndWorksheet::where('tracking_main',$track_arr[$i])->first();
+    					if (!$worksheet->direction) {
+    						$worksheet->direction = '-'.$this->to_country_dir[$value_by];
+    						$worksheet->save();
+    					}
+    					else{
+    						$temp = explode('-', $worksheet->direction);
+    						if (count($temp) == 2) {
+    							$worksheet->direction = $temp[0].'-'.$this->to_country_dir[$value_by];
+    						}
+    						else{
+    							$worksheet->direction = '-'.$this->to_country_dir[$value_by];
+    						} 
+    						$worksheet->save();  						
+    					}
+    				}
+    			}
+
     			$this->updateNewPacking($track_arr, $value_by, $column, $check_column);     		
     		}
     		else if ($request->input('status')){
@@ -505,17 +627,19 @@ class PhilIndWorksheetController extends AdminController
     				'status_date' => date('Y-m-d')
     			]);
     		}
-
-    		if ($column === 'lot') {
+    		else if ($request->input('shipper_city')) {
     			PhilIndWorksheet::whereIn('tracking_main', $track_arr)
-    			->whereIn('status',$this->status_arr_2)
     			->update([
-    				'status' => "Forwarding to the receiver country",
-    				'status_ru' => "Доставляется в страну получателя",
-    				'status_he' => " נשלח למדינת המקבל",
-    				'status_date' => date('Y-m-d')
-    			]);
-    		}
+    				'shipper_city' => $request->input('shipper_city')
+    			]);  
+
+    			if (in_array($request->input('shipper_city'), array_keys($this->israel_cities))) {
+    				PhilIndWorksheet::whereIn('tracking_main', $track_arr)
+    				->update([
+    					'shipper_region' => $this->israel_cities[$request->input('shipper_city')]
+    				]);
+    			}
+    		}    		
     	}
 
     	if($status_error){
@@ -537,7 +661,7 @@ class PhilIndWorksheetController extends AdminController
 
 	public function indexPackingEng(){
         $title = 'Old Packing List';
-        $packing_eng_obj = PackingEng::all();       
+        $packing_eng_obj = PackingEng::where('in_trash',false)->get();       
         
         return view('admin.packing.packing_eng', ['title' => $title,'packing_eng_obj' => $packing_eng_obj]);
     }
@@ -545,7 +669,7 @@ class PhilIndWorksheetController extends AdminController
 
     public function indexPackingEngNew(){
         $title = 'New Packing List';
-        $packing_eng_new_obj = PackingEngNew::paginate(10);       
+        $packing_eng_new_obj = PackingEngNew::where('in_trash',false)->paginate(10);       
         
         return view('admin.packing.packing_eng_new', compact('title','packing_eng_new_obj'));
     }
@@ -570,16 +694,16 @@ class PhilIndWorksheetController extends AdminController
         $new_arr = [];      
 
         if ($request->table_columns) {
-        	$packing_eng_new_obj = PackingEngNew::where($request->table_columns, 'like', '%'.$search.'%')
+        	$packing_eng_new_obj = PackingEngNew::where('in_trash',false)->where($request->table_columns, 'like', '%'.$search.'%')
         	->paginate(10);
         }
         else{
         	foreach($attributes as $key => $value)
         	{
         		if ($key !== 'created_at' && $key !== 'updated_at') {
-        			$sheet = PackingEngNew::where($key, 'like', '%'.$search.'%')->get()->first();
+        			$sheet = PackingEngNew::where('in_trash',false)->where($key, 'like', '%'.$search.'%')->get()->first();
         			if ($sheet) {       				
-        				$temp_arr = PackingEngNew::where($key, 'like', '%'.$search.'%')->get();
+        				$temp_arr = PackingEngNew::where('in_trash',false)->where($key, 'like', '%'.$search.'%')->get();
         				$new_arr = $temp_arr->filter(function ($item, $k) use($id_arr) {
         					if (!in_array($item->id, $id_arr)) { 
         						$id_arr[] = $item->id;       						  
@@ -636,11 +760,16 @@ class PhilIndWorksheetController extends AdminController
     	$row_arr = $request->input('row_id');
     	$value_by = $request->input('value-by-tracking');
     	$column = $request->input('phil-ind-tracking-columns');
+    	$shipper_country_val = $request->input('shipper_country_val');
+    	$consignee_country_val = $request->input('consignee_country_val');
     	$user = Auth::user();
     	$operator_change_row_arr = [];
     	$status_error = '';
     	$check_column = 'work_sheet_id';
     	$this_column = 'id';
+    	$old_lot_arr = [];
+    	$old_pallet_arr = [];
+    	$color = $request->input('tr_color');
 
     	for ($i=0; $i < count($row_arr); $i++) { 
     		$phil_ind_worksheet = PhilIndWorksheet::find($row_arr[$i]);
@@ -650,10 +779,42 @@ class PhilIndWorksheetController extends AdminController
     	}
 		
     	if ($row_arr) {
-    		if ($value_by && $column) {
+    		
+    		if ($column === 'shipper_country') $value_by = $shipper_country_val;
+    		if ($column === 'consignee_country') $value_by = $consignee_country_val;
+    		
+    		if ($color) {
+    			if ($color !== 'transparent') {
+    				PhilIndWorksheet::whereIn('id', $row_arr)
+    				->update([
+    					'background' => $color
+    				]);
+    			}
+    			else{
+    				PhilIndWorksheet::whereIn('id', $row_arr)
+    				->update([
+    					'background' => null
+    				]);
+    			}
+    		}
+    		elseif ($value_by && $column) {
 
-				$status_error = $this->checkColumns($row_arr, $value_by, $column, $this_column);
+				$status_error = $this->checkColumns($row_arr, $value_by, $column, $this_column, 'phil_ind_worksheet');
 				if($status_error) return redirect()->to(session('this_previous_url'))->with('status-error', $status_error);
+
+				if ($column === 'lot') {
+    				for ($i=0; $i < count($row_arr); $i++) { 
+    					$worksheet = PhilIndWorksheet::where('id',$row_arr[$i])->first();
+    					$old_lot_arr[] = $worksheet->lot;
+    				}
+    			}
+
+    			if ($column === 'pallet_number') {
+    				for ($i=0; $i < count($row_arr); $i++) { 
+    					$worksheet = PhilIndWorksheet::where('id',$row_arr[$i])->first();
+    					$old_pallet_arr[] = $worksheet->pallet_number;
+    				}
+    			}
     			
     			if ($column !== 'operator') {
     				PhilIndWorksheet::whereIn('id', $row_arr)
@@ -668,28 +829,114 @@ class PhilIndWorksheetController extends AdminController
     				]);
     			}
 
+    			if ($column === 'pallet_number') {
+    				for ($i=0; $i < count($row_arr); $i++) { 
+    					$worksheet = PhilIndWorksheet::where('id',$row_arr[$i])->first();
+    					if ($old_pallet_arr[$i] !== $value_by){
+    						$message = $this->updateWarehousePallet($worksheet->tracking_main, $worksheet->tracking_main, $old_pallet_arr[$i], $value_by, $worksheet->lot, $worksheet->lot, 'en', $worksheet);
+    						if ($message) {
+    							return redirect()->to(session('this_previous_url'))->with('status-error', 'Pallet number is not correct!');
+    						}
+    					}
+    				}
+    			}
+
+    			if ($column === 'lot') {
+    				PhilIndWorksheet::whereIn('id', $row_arr)
+    				->whereIn('status',$this->status_arr_2)
+    				->update([
+    					'status' => "Forwarding to the receiver country",
+    					'status_ru' => "Доставляется в страну получателя",
+    					'status_he' => " נשלח למדינת המקבל",
+    					'status_date' => date('Y-m-d')
+    				]);
+
+    				for ($i=0; $i < count($row_arr); $i++) { 
+    					if ($old_lot_arr[$i] !== $value_by){
+    						$worksheet = PhilIndWorksheet::where('id',$row_arr[$i])->first();
+    						$this->updateWarehouseLot($worksheet->tracking_main, $value_by, 'en');
+    					}
+    				}
+    			}
+
+    			if ($column === 'shipper_country') {
+    				for ($i=0; $i < count($row_arr); $i++) { 
+    					$worksheet = PhilIndWorksheet::where('id',$row_arr[$i])->first();
+    					if (!$worksheet->direction) {
+    						$worksheet->direction = $this->from_country_dir[$value_by].'-';
+    						$worksheet->save();
+    					}
+    					else{
+    						$temp = explode('-', $worksheet->direction);
+    						if (count($temp) == 2) {
+    							$worksheet->direction = $this->from_country_dir[$value_by].'-'.$temp[1];
+    						}
+    						else{
+    							$worksheet->direction = $this->from_country_dir[$value_by].'-';
+    						} 
+    						$worksheet->save();  						
+    					}
+    				}
+    			}
+
+    			if ($column === 'consignee_country') {
+    				for ($i=0; $i < count($row_arr); $i++) { 
+    					$worksheet = PhilIndWorksheet::where('id',$row_arr[$i])->first();
+    					if (!$worksheet->direction) {
+    						$worksheet->direction = '-'.$this->to_country_dir[$value_by];
+    						$worksheet->save();
+    					}
+    					else{
+    						$temp = explode('-', $worksheet->direction);
+    						if (count($temp) == 2) {
+    							$worksheet->direction = $temp[0].'-'.$this->to_country_dir[$value_by];
+    						}
+    						else{
+    							$worksheet->direction = '-'.$this->to_country_dir[$value_by];
+    						} 
+    						$worksheet->save();  						
+    					}
+    				}
+    			}
+
     			$this->updateNewPacking($row_arr, $value_by, $column, $check_column);     	    		
     		}
     		else if ($request->input('status')){
+    			for ($i=0; $i < count($row_arr); $i++) { 
+    				$status_error = $this->checkStatus('phil_ind_worksheet', $row_arr[$i], $request->input('status'));
+    				if (!$status_error) {
+    					PhilIndWorksheet::where('id', $row_arr[$i])
+    					->update([
+    						'status' => $request->input('status'), 
+    						'status_ru' => $request->input('status_ru'),
+    						'status_he' => $request->input('status_he'),
+    						'status_date' => date('Y-m-d')
+    					]);
+    				}
+    				
+    				$worksheet = PhilIndWorksheet::find($row_arr[$i]);
+    				$worksheet->checkCourierTask($worksheet->status);
+    			} 
+    		}
+    		else if ($request->input('shipper_city')) {
     			PhilIndWorksheet::whereIn('id', $row_arr)
     			->update([
-    				'status' => $request->input('status'), 
-    				'status_ru' => $request->input('status_ru'),
-    				'status_he' => $request->input('status_he'),
-    				'status_date' => date('Y-m-d')
-    			]);
-    		}
+    				'shipper_city' => $request->input('shipper_city')
+    			]);  
 
-    		if ($column === 'lot') {
-    			PhilIndWorksheet::whereIn('id', $row_arr)
-    			->whereIn('status',$this->status_arr_2)
-    			->update([
-    				'status' => "Forwarding to the receiver country",
-    				'status_ru' => "Доставляется в страну получателя",
-    				'status_he' => " נשלח למדינת המקבל",
-    				'status_date' => date('Y-m-d')
-    			]);
+    			if (in_array($request->input('shipper_city'), array_keys($this->israel_cities))) {
+    				PhilIndWorksheet::whereIn('id', $row_arr)
+    				->update([
+    					'shipper_region' => $this->israel_cities[$request->input('shipper_city')]
+    				]);
+    			}
+
+    			for ($i=0; $i < count($row_arr); $i++) { 
+    				$worksheet = PhilIndWorksheet::find($row_arr[$i]);
+    				$worksheet->checkCourierTask($worksheet->status);
+    			}
     		}
+    		else $status_error = 'New fields error!';
     	}
         
         if($status_error){
@@ -705,6 +952,10 @@ class PhilIndWorksheetController extends AdminController
 	{
 		$row_arr = $request->input('row_id');
 
+		for ($i=0; $i < count($row_arr); $i++) { 
+			$this->removeTrackingFromPalletWorksheet($row_arr[$i], 'en');
+		}
+
 		PhilIndWorksheet::whereIn('id', $row_arr)->delete();
 		PackingEngNew::whereIn('work_sheet_id', $row_arr)->delete();
 		ReceiptArchive::whereIn('worksheet_id', $row_arr)->delete();
@@ -715,6 +966,7 @@ class PhilIndWorksheetController extends AdminController
 
 	public function exportExcelPackingEng()
 	{
+		ini_set('memory_limit', '256M');
     	return Excel::download(new PackingEngExport, 'PackingEngExport.xlsx');
 	}
 
@@ -731,16 +983,16 @@ class PhilIndWorksheetController extends AdminController
         $new_arr = []; 
         
         if ($request->table_columns) {
-        	$phil_ind_worksheet_obj = PhilIndWorksheet::where($request->table_columns, 'like', '%'.$search.'%')
+        	$phil_ind_worksheet_obj = PhilIndWorksheet::where('in_trash',false)->where($request->table_columns, 'like', '%'.$search.'%')
         	->paginate(10);
         }
         else{
         	foreach($attributes as $key => $value)
         	{
         		if ($key !== 'created_at' && $key !== 'updated_at' && $key !== 'update_status_date') {
-        			$sheet = PhilIndWorksheet::where($key, 'like', '%'.$search.'%')->get()->first();
+        			$sheet = PhilIndWorksheet::where('in_trash',false)->where($key, 'like', '%'.$search.'%')->get()->first();
         			if ($sheet) {
-        				$temp_arr = PhilIndWorksheet::where($key, 'like', '%'.$search.'%')->get();
+        				$temp_arr = PhilIndWorksheet::where('in_trash',false)->where($key, 'like', '%'.$search.'%')->get();
         				$new_arr = $temp_arr->filter(function ($item, $k) use($id_arr) {
         					if (!in_array($item->id, $id_arr)) { 
         						$id_arr[] = $item->id;       						  

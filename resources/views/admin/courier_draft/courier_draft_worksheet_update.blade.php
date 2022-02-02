@@ -73,6 +73,13 @@
 								{!! Form::text('tracking_main',$courier_draft_worksheet->tracking_main,['class' => 'form-control'])!!}
 							</div>
 						</div>
+
+						<div class="form-group">
+							{!! Form::label('parcels_qty','Кол-во посылок',['class' => 'col-md-2 control-label'])   !!}
+							<div class="col-md-8">
+								{!! Form::number('parcels_qty',$courier_draft_worksheet->parcels_qty,['class' => 'form-control'])!!}
+							</div>
+						</div>
 						
 						<div class="form-group">
 							{!! Form::label('tracking_local','Трекинг Локальные',['class' => 'col-md-2 control-label'])   !!}
@@ -89,11 +96,12 @@
 						</div>
 
 						<div class="form-group">
-							{!! Form::label('pallet_number','Номер паллеты',['class' => 'col-md-2 control-label'])   !!}
+							{!! Form::label('pallet_number','№ паллеты',['class' => 'col-md-2 control-label'])   !!}
 							<div class="col-md-8">
 								{!! Form::text('pallet_number',$courier_draft_worksheet->pallet_number,['class' => 'form-control'])!!}
 							</div>
 						</div>
+
 						<div class="form-group">
 							{!! Form::label('comment_2','OFF Коммент',['class' => 'col-md-2 control-label'])   !!}
 							<div class="col-md-8">
@@ -120,10 +128,27 @@
 								{!! Form::text('sender_country',$courier_draft_worksheet->sender_country,['class' => 'form-control'])!!}
 							</div>
 						</div>
+
 						<div class="form-group">
 							{!! Form::label('sender_city','Город отправителя',['class' => 'col-md-2 control-label'])   !!}
-							<div class="col-md-8">
+							<div class="col-md-4">
+								{!! Form::select('choose_city_ru', ['0' => 'Метод изменения города', '1' => 'Выбрать из списка (автоматически определится Регион)', '2' => 'Ввести вручную (Регион возможно не определится)'],'0',['class' => 'form-control']) !!}
+							</div>
+							<div class="col-md-4 choose-city-ru">
+								@if (in_array($courier_draft_worksheet->sender_city, array_keys($israel_cities)))
+								
+								{!! Form::select('sender_city', $israel_cities, isset($courier_draft_worksheet->sender_city) ? $courier_draft_worksheet->sender_city : '',['class' => 'form-control']) !!}
+
+								{!! Form::text('sender_city',$courier_draft_worksheet->sender_city,['class' => 'form-control','style' => 'display:none','disabled' => 'disabled'])!!}
+								
+								@else
+
+								{!! Form::select('sender_city', $israel_cities, isset($courier_draft_worksheet->sender_city) ? $courier_draft_worksheet->sender_city : '',['class' => 'form-control','style' => 'display:none','disabled' => 'disabled']) !!}
+
 								{!! Form::text('sender_city',$courier_draft_worksheet->sender_city,['class' => 'form-control'])!!}
+
+								@endif
+
 							</div>
 						</div>
 						<div class="form-group">
@@ -298,13 +323,13 @@
 								{!! Form::text('quantity_things',$courier_draft_worksheet->quantity_things,['class' => 'form-control'])!!}
 							</div>
 						</div>
-
-						<!-- <div class="form-group">
+						<div class="form-group">
 							{!! Form::label('batch_number','Партия',['class' => 'col-md-2 control-label'])   !!}
 							<div class="col-md-8">
 								{!! Form::text('batch_number',$courier_draft_worksheet->batch_number,['class' => 'form-control'])!!}
 							</div>
-						</div> -->
+						</div>
+
 						<div class="form-group">
 							{!! Form::label('pay_date','Дата оплаты и комментарии',['class' => 'col-md-2 control-label'])   !!}
 							<div class="col-md-8">
@@ -395,6 +420,12 @@
 
 							{!! Form::hidden('id',$courier_draft_worksheet->id)!!}
 
+							{!! Form::hidden('shipper_region',$courier_draft_worksheet->shipper_region)!!}
+
+							{!! Form::hidden('in_trash',$courier_draft_worksheet->in_trash)!!}
+
+							{!! Form::hidden('parcels_qty',$courier_draft_worksheet->parcels_qty)!!}
+
 							{!! Form::hidden('site_name',$courier_draft_worksheet->site_name,['class' => 'form-control'])!!}
 
 							{!! Form::hidden('date',$courier_draft_worksheet->date,['class' => 'form-control'])!!}
@@ -404,6 +435,8 @@
 							{!! Form::hidden('tariff',$courier_draft_worksheet->tariff,['class' => 'form-control'])!!}
 
 							{!! Form::hidden('status',$courier_draft_worksheet->status,['class' => 'form-control'])!!}
+
+							{!! Form::hidden('status_date',$courier_draft_worksheet->status_date)!!}
 
 							{!! Form::hidden('partner',$courier_draft_worksheet->partner,['class' => 'form-control'])!!}
 

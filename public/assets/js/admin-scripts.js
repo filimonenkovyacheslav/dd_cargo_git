@@ -12,7 +12,7 @@ $(document).ready(function() {
 
     let btnMove = $('a.btn-move');
     btnMove.detach();
-    if (location.href.indexOf('packing-eng-new') == -1 && location.href.indexOf('receipts') == -1 && location.href.indexOf('new-worksheet') == -1 && location.href.indexOf('phil-ind-worksheet') == -1 && location.href.indexOf('draft-worksheet') == -1 && location.href.indexOf('new-packing') == -1 && location.href.indexOf('invoice') == -1 && location.href.indexOf('manifest') == -1) {
+    if (location.href.indexOf('couriers-tasks') == -1 && location.href.indexOf('warehouse') == -1 && location.href.indexOf('packing-eng-new') == -1 && location.href.indexOf('receipts') == -1 && location.href.indexOf('new-worksheet') == -1 && location.href.indexOf('phil-ind-worksheet') == -1 && location.href.indexOf('draft-worksheet') == -1 && location.href.indexOf('new-packing') == -1 && location.href.indexOf('invoice') == -1 && location.href.indexOf('manifest') == -1) {
         $('#bootstrap-data-table_length').after(btnMove.get(0));
         $('#bootstrap-data-table_length').after(btnMove.get(2));
         $('#bootstrap-data-table_length').after(btnMove.get(1));
@@ -65,8 +65,8 @@ $('form.phil-ind-update-form button').click((e)=>{
     e.preventDefault();
 
     const phone = document.querySelector('[name="standard_phone"]'); 
-    if (phone.value.length < 10 || phone.value.length > 13) {
-        alert('The number of characters in the phone must be from 10 to 13 !');
+    if (phone.value.length < 10 || phone.value.length > 24) {
+        alert('The number of characters in the phone must be from 10 to 24 !');
         return false;
     }
     
@@ -137,7 +137,7 @@ const uaArr = {
     "Доставляется на склад в стране отправителя": "Доставляється до складу в країні відправника",
     "На складе в стране отправителя": "На складі в країні відправника",
     "На таможне в стране отправителя": "На митниці в країні відправника",
-    "Доставляется в страну получателя": "Доставляється в країну відправника",
+    "Доставляется в страну получателя": "Доставляється в країну отримувача",
     "На таможне в стране получателя": "На митниці в країні отримувача",
     "Доставляется получателю": "Доставляється отримувачу",
     "Доставлено": "Доставлено"
@@ -450,6 +450,7 @@ $('#tracking-columns').change((e)=>{
         $('#site_name').remove()
         $('#tariff').remove()
         $('#partner').remove()
+        $('#city-value').remove()
         $('.value-by-tracking').append(`
             <div id="status-value">
                 <select class="form-control" id="status" name="status">
@@ -461,6 +462,7 @@ $('#tracking-columns').change((e)=>{
                    <option value="На таможне в стране получателя">На таможне в стране получателя</option>
                    <option value="Доставляется получателю">Доставляется получателю</option>
                    <option value="Доставлено">Доставлено</option>
+                   <option value="Подготовка">Подготовка</option>
                    <option value="Возврат">Возврат</option>
                    <option value="Коробка">Коробка</option>
                    <option value="Забрать">Забрать</option>
@@ -476,6 +478,7 @@ $('#tracking-columns').change((e)=>{
         $('#status-value').remove()
         $('#tariff').remove()
         $('#partner').remove()
+        $('#city-value').remove()
         $('.value-by-tracking').append(`
             <select class="form-control" id="site_name" name="site_name">
                <option value="DD-C">DD-C</option>
@@ -488,6 +491,7 @@ $('#tracking-columns').change((e)=>{
         $('#status-value').remove()
         $('#site_name').remove()
         $('#partner').remove()
+        $('#city-value').remove()
         $('.value-by-tracking').append(`
             <select class="form-control" id="tariff" name="tariff">
                <option value="" selected="selected"></option>
@@ -501,6 +505,7 @@ $('#tracking-columns').change((e)=>{
         $('#status-value').remove()
         $('#site_name').remove()
         $('#tariff').remove()
+        $('#city-value').remove()
         $('.value-by-tracking').append(`
             <select class="form-control" id="partner" name="partner">
                <option value="" selected="selected"></option>
@@ -512,18 +517,37 @@ $('#tracking-columns').change((e)=>{
             </select>
             `)
     }
+    else if(thisVal === 'sender_city') {
+        $('[name="value-by-tracking"]').remove()
+        $('#status-value').remove()
+        $('#site_name').remove()
+        $('#tariff').remove()
+        $('#partner').remove()
+        $('.value-by-tracking').append(`
+            <div id="city-value">
+                <div class="col-md-4">
+                    <select class="form-control" name="choose_city_ru"><option value="0" selected="selected">Метод изменения города</option><option value="1">Выбрать из списка (автоматически определится Регион)</option><option value="2">Ввести вручную (Регион возможно не определится)</option></select>
+                </div>
+
+                <div class="col-md-4 choose-city-ru">                    
+                    <select class="form-control" style="display:none" disabled="disabled" id="sender_city" name="sender_city"><option value="Acre">Acre</option><option value="Afula">Afula</option><option value="Arad">Arad</option><option value="Ariel">Ariel</option><option value="Ashdod">Ashdod</option><option value="Ashkelon">Ashkelon</option><option value="Baqa-Jatt">Baqa-Jatt</option><option value="Bat Yam">Bat Yam</option><option value="Beersheba">Beersheba</option><option value="Beit She'an">Beit She'an</option><option value="Beit Shemesh">Beit Shemesh</option><option value="Beitar Illit">Beitar Illit</option><option value="Bnei Brak">Bnei Brak</option><option value="Dimona">Dimona</option><option value="Eilat">Eilat</option><option value="El'ad">El'ad</option><option value="Giv'atayim">Giv'atayim</option><option value="Giv'at Shmuel">Giv'at Shmuel</option><option value="Hadera">Hadera</option><option value="Haifa">Haifa</option><option value="Herzliya">Herzliya</option><option value="Hod HaSharon">Hod HaSharon</option><option value="Holon">Holon</option><option value="Jerusalem">Jerusalem</option><option value="Karmiel">Karmiel</option><option value="Kafr Qasim">Kafr Qasim</option><option value="Kfar Saba">Kfar Saba</option><option value="Kiryat Ata">Kiryat Ata</option><option value="Kiryat Bialik">Kiryat Bialik</option><option value="Kiryat Gat">Kiryat Gat</option><option value="Kiryat Malakhi">Kiryat Malakhi</option><option value="Kiryat Motzkin">Kiryat Motzkin</option><option value="Kiryat Ono">Kiryat Ono</option><option value="Kiryat Shmona">Kiryat Shmona</option><option value="Kiryat Yam">Kiryat Yam</option><option value="Lod">Lod</option><option value="Ma'ale Adumim">Ma'ale Adumim</option><option value="Ma'alot-Tarshiha">Ma'alot-Tarshiha</option><option value="Migdal HaEmek">Migdal HaEmek</option><option value="Modi'in Illit">Modi'in Illit</option><option value="Modi'in-Maccabim-Re'ut">Modi'in-Maccabim-Re'ut</option><option value="Nahariya">Nahariya</option><option value="Nazareth">Nazareth</option><option value="Nazareth Illit">Nazareth Illit</option><option value="Nesher">Nesher</option><option value="Ness Ziona">Ness Ziona</option><option value="Netanya">Netanya</option><option value="Netivot">Netivot</option><option value="Ofakim">Ofakim</option><option value="Or Akiva">Or Akiva</option><option value="Or Yehuda">Or Yehuda</option><option value="Petah Tikva">Petah Tikva</option><option value="Qalansawe">Qalansawe</option><option value="Ra'anana">Ra'anana</option><option value="Rahat">Rahat</option><option value="Ramat Gan">Ramat Gan</option><option value="Ramat HaSharon">Ramat HaSharon</option><option value="Ramla">Ramla</option><option value="Rehovot">Rehovot</option><option value="Rishon LeZion">Rishon LeZion</option><option value="Rosh HaAyin">Rosh HaAyin</option><option value="Safed">Safed</option><option value="Sakhnin">Sakhnin</option><option value="Sderot">Sderot</option><option value="Shefa-'Amr (Shfar'am)">Shefa-'Amr (Shfar'am)</option><option value="Tamra">Tamra</option><option value="Tayibe">Tayibe</option><option value="Tel Aviv">Tel Aviv</option><option value="Tiberias">Tiberias</option><option value="Tira">Tira</option><option value="Tirat Carmel">Tirat Carmel</option><option value="Umm al-Fahm">Umm al-Fahm</option><option value="Yavne">Yavne</option><option value="Yehud-Monosson">Yehud-Monosson</option><option value="Yokneam">Yokneam</option></select>
+                    <input class="form-control" name="sender_city" type="text" id="sender_city">                    
+                </div>
+            </div>
+            `)
+    }
     else {
         $('#status-value').remove()
         $('#site_name').remove()
         $('#tariff').remove()
         $('#partner').remove()
+        $('#city-value').remove()
         $('[name="value-by-tracking"]').remove()
         $('.value-by-tracking').append(`
             <input class="form-control" type="text" name="value-by-tracking">
             `)
     }
-})
-
+});
 
 $(document).delegate('#status-value select[name="status"]', 'change',(e)=>{
     const key = $(e.target).val();
@@ -532,11 +556,15 @@ $(document).delegate('#status-value select[name="status"]', 'change',(e)=>{
     $('.value-by-tracking [name="status_ua"]').val(uaArr[key]);
 })
 
+
 // phil-ind worksheet
 $('#phil-ind-tracking-columns').change((e)=>{
-    const thisVal = $(e.target).val();
+    const thisVal = $(e.target).val();   
     if (thisVal === 'status') {
         $('[name="value-by-tracking"]').remove()
+        $('#consignee-country-value').remove()
+        $('#shipper-country-value').remove()
+        $('#city-value').remove()
         $('.phil-ind-value-by-tracking').append(`
             <div id="phil-ind-status-value">
                 <select class="form-control" id="status" name="status">
@@ -559,20 +587,81 @@ $('#phil-ind-tracking-columns').change((e)=>{
             </div>
             `)
     }
-    else {
-        $('#status-value').remove()
+    else if (thisVal === 'shipper_country') {       
         $('[name="value-by-tracking"]').remove()
+        $('#phil-ind-status-value').remove()
+        $('#consignee-country-value').remove()
+        $('#city-value').remove()
+        $('.phil-ind-value-by-tracking').append(`
+            <div id="shipper-country-value">
+                <select class="form-control" id="shipper_country" name="shipper_country">
+                    <option value="" selected="selected"></option>
+                    <option value="Israel">Israel</option>
+                    <option value="Germany">Germany</option>
+                </select>                
+            </div>
+            `)
+    }
+    else if (thisVal === 'consignee_country') {
+        $('[name="value-by-tracking"]').remove()
+        $('#phil-ind-status-value').remove()
+        $('#shipper-country-value').remove()
+        $('#city-value').remove()
+        $('.phil-ind-value-by-tracking').append(`
+            <div id="consignee-country-value">
+                <select class="form-control" id="consignee_country" name="consignee_country">
+                    <option value="" selected="selected"></option>
+                    <option value="India">India</option>
+                    <option value="Nepal">Nepal</option>
+                    <option value="Nigeria">Nigeria</option>
+                    <option value="Ghana">Ghana</option>
+                    <option value="Cote D\'Ivoire">Cote D\'Ivoire</option>
+                    <option value="South Africa">South Africa</option>
+                </select>                
+            </div>
+            `)
+    }
+    else if (thisVal === 'shipper_city') {
+        $('[name="value-by-tracking"]').remove()
+        $('#phil-ind-status-value').remove()
+        $('#shipper-country-value').remove()
+        $('#consignee-country-value').remove()
+        $('.phil-ind-value-by-tracking').append(`
+            <div id="city-value">
+                <div class="col-md-4 choose-city-eng">
+                    <select class="form-control" name="choose_city_eng"><option value="0" selected="selected">City change method</option><option value="1">Select from the list (Region will be automatically determined)</option><option value="2">Enter manually (Region may not be determined)</option></select>
+                </div>
+
+                <div class="col-md-4 choose-city-eng">                    
+                    <select class="form-control" style="display:none" disabled="disabled" id="shipper_city" name="shipper_city"><option value="Acre">Acre</option><option value="Afula">Afula</option><option value="Arad">Arad</option><option value="Ariel">Ariel</option><option value="Ashdod">Ashdod</option><option value="Ashkelon">Ashkelon</option><option value="Baqa-Jatt">Baqa-Jatt</option><option value="Bat Yam">Bat Yam</option><option value="Beersheba">Beersheba</option><option value="Beit She'an">Beit She'an</option><option value="Beit Shemesh">Beit Shemesh</option><option value="Beitar Illit">Beitar Illit</option><option value="Bnei Brak">Bnei Brak</option><option value="Dimona">Dimona</option><option value="Eilat">Eilat</option><option value="El'ad">El'ad</option><option value="Giv'atayim">Giv'atayim</option><option value="Giv'at Shmuel">Giv'at Shmuel</option><option value="Hadera">Hadera</option><option value="Haifa">Haifa</option><option value="Herzliya">Herzliya</option><option value="Hod HaSharon">Hod HaSharon</option><option value="Holon">Holon</option><option value="Jerusalem">Jerusalem</option><option value="Karmiel">Karmiel</option><option value="Kafr Qasim">Kafr Qasim</option><option value="Kfar Saba">Kfar Saba</option><option value="Kiryat Ata">Kiryat Ata</option><option value="Kiryat Bialik">Kiryat Bialik</option><option value="Kiryat Gat">Kiryat Gat</option><option value="Kiryat Malakhi">Kiryat Malakhi</option><option value="Kiryat Motzkin">Kiryat Motzkin</option><option value="Kiryat Ono">Kiryat Ono</option><option value="Kiryat Shmona">Kiryat Shmona</option><option value="Kiryat Yam">Kiryat Yam</option><option value="Lod">Lod</option><option value="Ma'ale Adumim">Ma'ale Adumim</option><option value="Ma'alot-Tarshiha">Ma'alot-Tarshiha</option><option value="Migdal HaEmek">Migdal HaEmek</option><option value="Modi'in Illit">Modi'in Illit</option><option value="Modi'in-Maccabim-Re'ut">Modi'in-Maccabim-Re'ut</option><option value="Nahariya">Nahariya</option><option value="Nazareth">Nazareth</option><option value="Nazareth Illit">Nazareth Illit</option><option value="Nesher">Nesher</option><option value="Ness Ziona">Ness Ziona</option><option value="Netanya">Netanya</option><option value="Netivot">Netivot</option><option value="Ofakim">Ofakim</option><option value="Or Akiva">Or Akiva</option><option value="Or Yehuda">Or Yehuda</option><option value="Petah Tikva">Petah Tikva</option><option value="Qalansawe">Qalansawe</option><option value="Ra'anana">Ra'anana</option><option value="Rahat">Rahat</option><option value="Ramat Gan">Ramat Gan</option><option value="Ramat HaSharon">Ramat HaSharon</option><option value="Ramla">Ramla</option><option value="Rehovot">Rehovot</option><option value="Rishon LeZion">Rishon LeZion</option><option value="Rosh HaAyin">Rosh HaAyin</option><option value="Safed">Safed</option><option value="Sakhnin">Sakhnin</option><option value="Sderot">Sderot</option><option value="Shefa-'Amr (Shfar'am)">Shefa-'Amr (Shfar'am)</option><option value="Tamra">Tamra</option><option value="Tayibe">Tayibe</option><option value="Tel Aviv">Tel Aviv</option><option value="Tiberias">Tiberias</option><option value="Tira">Tira</option><option value="Tirat Carmel">Tirat Carmel</option><option value="Umm al-Fahm">Umm al-Fahm</option><option value="Yavne">Yavne</option><option value="Yehud-Monosson">Yehud-Monosson</option><option value="Yokneam">Yokneam</option></select>
+                    <input class="form-control" name="shipper_city" type="text" id="shipper_city">                   
+                </div>           
+            </div>
+            `)
+    }
+    else {
+        $('#phil-ind-status-value').remove()
+        $('#consignee-country-value').remove()
+        $('#shipper-country-value').remove()
+        $('[name="value-by-tracking"]').remove()
+        $('#city-value').remove()
         $('.phil-ind-value-by-tracking').append(`
             <input class="form-control" type="text" name="value-by-tracking">
             `)
     }
 })
 
-
 $(document).delegate('#phil-ind-status-value select[name="status"]', 'change',(e)=>{
     const key = $(e.target).val();
     $('.phil-ind-value-by-tracking [name="status_ru"]').val(ruArrChina[key]);
     $('.phil-ind-value-by-tracking [name="status_he"]').val(heArrChina[key]);
+})
+
+$(document).delegate('#shipper-country-value select[name="shipper_country"]', 'change',(e)=>{
+    $('.phil-ind-value-by-tracking [name="shipper_country_val"]').val($(e.target).val());
+})
+$(document).delegate('#consignee-country-value select[name="consignee_country"]', 'change',(e)=>{
+    $('.phil-ind-value-by-tracking [name="consignee_country_val"]').val($(e.target).val());
 })
 /* End Tracking filter checkbox*/
 
@@ -582,15 +671,24 @@ $('[name="checkbox_operations_select"]').change((e)=>{
     const thisVal = $(e.target).val();
     if (thisVal === 'delete') {
         $('.checkbox-operations-change').hide()
+        $('.checkbox-operations-color').hide()
         $('.checkbox-operations-delete').show()
     }
     else if (thisVal === 'change'){
         $('.checkbox-operations-change').show()
         $('.checkbox-operations-delete').hide()
+        $('.checkbox-operations-color').hide()
+    }
+    else if (thisVal === 'color'){
+        $('.checkbox-operations-change').hide()
+        $('.checkbox-operations-delete').hide()
+        $('.checkbox-operations-color').show()
+        $('button.checkbox-operations-change').show()
     }
     else{
         $('.checkbox-operations-change').hide()
         $('.checkbox-operations-delete').hide()
+        $('.checkbox-operations-color').hide()
     }
 })
 
@@ -600,10 +698,16 @@ $('[name="row_id[]"]').change((e)=>{
         const thisVal = $(e.target).val();
         $('.checkbox-operations form').append(`
             <input type="hidden" name="row_id[]" value="`+$(e.target).val()+`" data-id="`+$(e.target).val()+`">
-            `)
+            `);
+        $('.checkbox-operations form').append(`
+            <input type="hidden" name="old_color[]" 
+            value="`+$(e.target).siblings('[name="old_color[]"]').val()+`" 
+            data-color="`+$(e.target).val()+`">
+            `);
     }
     else{
-        $('.checkbox-operations form input[data-id="'+$(e.target).val()+'"]').remove()
+        $('.checkbox-operations form input[data-id="'+$(e.target).val()+'"]').remove();
+        $('.checkbox-operations form input[data-color="'+$(e.target).val()+'"]').remove();
     }
 })
 
@@ -620,74 +724,145 @@ $('.checkbox-operations form').submit((e)=>{
 })
 
 
-/* Phone mask */
-let count_error = 0;
+// Phone mask
+let countryCode = "+972";
+if ($('[name="shipper_country"]').val() === 'Germany') countryCode = "+49";
+$('[name="shipper_country"]').on('change', function(){
+    if (location.href.indexOf('phil-ind') !== -1 || location.href.indexOf('courier-eng-draft') !== -1){
+        if ($(this).val() === 'Germany') {
+            countryCode = "+49";
+            console.log('"+49"')
+            $('.choose-city-eng').hide();
+            $('.choose-city-eng [name="shipper_city"]').prop('disabled', true);
+            $('.choose-city-germany').show();
+            $('.choose-city-germany [name="shipper_city"]').prop('disabled', false);
+        }
+        if ($(this).val() === 'Israel') {
+            countryCode = "+972";
+            console.log('"+972"')
+            $('.choose-city-germany').hide();
+            $('.choose-city-germany [name="shipper_city"]').prop('disabled', true);  
+            $('.choose-city-eng').show();
+            $('.choose-city-eng [name="shipper_city"]').prop('disabled', false);        
+        } 
+    }   
+});
 
+let count_error = 0;
 $('.standard-phone').on('input', function() {
     $('div.error-phone').remove();
-    if ($(this).val()[0] !== '+' && $(this).val().length == 1) {
-        $(this).val('+972');
-    }
-    else if($(this).val().length > 16){
-        if ($(this).val().length == 17) {
-            $(this).val($(this).val().slice(0, -1));
+    if (location.href.indexOf('phil-ind') == -1 && location.href.indexOf('courier-eng-draft') == -1) {
+
+        if ($(this).val()[0] !== '+' && $(this).val().length == 1) {
+            $(this).val(countryCode);
+        }
+        else if($(this).val().length > 16){
+            if ($(this).val().length == 17) {
+                $(this).val($(this).val().slice(0, -1));
+            }
+            else{
+                $(this).val(countryCode);
+            }
+        }
+        else if($(this).val().length < 5){
+            $(this).val(countryCode);
         }
         else{
-            $(this).val('+972');
-        }
-    }
-    else if($(this).val().length < 5){
-        $(this).val('+972');
-    }
-    else{
-        var regexp = /^\+972[0-9]+$/i;
-        if (!regexp.test($(this).val()) && count_error == 0) {
-            for (var i = $(this).val().length - 1; i >= 0; i--) {
-                if (!regexp.test($(this).val())) {
-                    $(this).val($(this).val().slice(0, -1));
-                }
-                else break;
-            }           
-            count_error = 1; 
-            if (location.href.indexOf('phil-ind') == -1) {
+            var regexp = /^\+972[0-9]+$/i;
+            if (!regexp.test($(this).val()) && count_error == 0) {
+                for (var i = $(this).val().length - 1; i >= 0; i--) {
+                    if (!regexp.test($(this).val())) {
+                        $(this).val($(this).val().slice(0, -1));
+                    }
+                    else break;
+                }           
+                count_error = 1; 
+
                 $(this).before(`
-                <div class="error-phone admin">
+                    <div class="error-phone">
                     Пожалуйста, заполните поле "Номер телефона отправителя (основной)" в 
                     международном формате, например: "+972531111111".
-                </div>`);
-            }
-            else{
-                $(this).before(`
-                <div class="error-phone admin">
-                    Please fill the box "Shipper\'s phone number (standard)" in the 
-                    international format, i.e. "+972531111111".
-                </div>`);
-            }        
-        } else if (!regexp.test($(this).val()) && count_error == 1 && $(this).val().length > 1) {
-            for (var i = $(this).val().length - 1; i >= 0; i--) {
-                if (!regexp.test($(this).val())) {
-                    $(this).val($(this).val().slice(0, -1));
+                    </div>`);
+
+            } else if (!regexp.test($(this).val()) && count_error == 1 && $(this).val().length > 1) {
+                for (var i = $(this).val().length - 1; i >= 0; i--) {
+                    if (!regexp.test($(this).val())) {
+                        $(this).val($(this).val().slice(0, -1));
+                    }
+                    else break;
                 }
-                else break;
-            }
-            if (location.href.indexOf('phil-ind') == -1) {
+
                 $(this).before(`
-                <div class="error-phone admin">
+                    <div class="error-phone">
                     Пожалуйста, заполните поле "Номер телефона отправителя (основной)" в 
                     международном формате, например: "+972531111111".
-                </div>`);
+                    </div>`);
+
+            } else if ($(this).val().length < 5 || regexp.test($(this).val())) {
+                count_error = 0;
+            }
+        }    
+    }
+    else if (location.href.indexOf('phil-ind') !== -1 || location.href.indexOf('courier-eng-draft') !== -1){
+        let phoneVal = "+972531111111";
+        let regexp = /^\+972[0-9]+$/i;
+        let minLength = 5;
+        if ($('[name="shipper_country"]').val() === 'Germany') {
+            regexp = /^\+49[0-9]+$/i;
+            phoneVal = "+4953111111111";
+            countryCode = "+49";
+            minLength = 4;
+        }
+        
+        if ($(this).val()[0] !== '+' && $(this).val().length == 1) {
+            $(this).val(countryCode);
+        }
+        else if($(this).val().length > 16){
+            if ($(this).val().length == 17) {
+                $(this).val($(this).val().slice(0, -1));
             }
             else{
-                $(this).before(`
-                <div class="error-phone admin">
-                    Please fill the box "Shipper\'s phone number (standard)" in the 
-                    international format, i.e. "+972531111111".
-                </div>`);
+                $(this).val(countryCode);
             }
-        } else if ($(this).val().length < 5 || regexp.test($(this).val())) {
-            count_error = 0;
         }
-    }            
+        else if($(this).val().length < minLength){
+            $(this).val(countryCode);
+        }
+        else{           
+            if (!regexp.test($(this).val()) && count_error == 0) {
+                for (var i = $(this).val().length - 1; i >= 0; i--) {
+                    if (!regexp.test($(this).val())) {
+                        $(this).val($(this).val().slice(0, -1));
+                    }
+                    else break;
+                }           
+                count_error = 1; 
+
+                $(this).before(`
+                    <div class="error-phone">
+                    Please fill the box "Shipper\'s phone number (standard)" in the 
+                    international format, i.e. `+phoneVal+`.
+                    </div>`);
+
+            } else if (!regexp.test($(this).val()) && count_error == 1 && $(this).val().length > 1) {
+                for (var i = $(this).val().length - 1; i >= 0; i--) {
+                    if (!regexp.test($(this).val())) {
+                        $(this).val($(this).val().slice(0, -1));
+                    }
+                    else break;
+                }
+
+                $(this).before(`
+                    <div class="error-phone">
+                    Please fill the box "Shipper\'s phone number (standard)" in the 
+                    international format, i.e. `+phoneVal+`.
+                    </div>`);
+
+            } else if ($(this).val().length < minLength || regexp.test($(this).val())) {
+                count_error = 0;
+            }
+        }    
+    }        
 });
 
 
@@ -709,4 +884,112 @@ $(".table-container").scroll(function() {
             'position':'inherit'
         })
     }
+});
+
+
+/*ФУНКЦИИ ДЛЯ УДАЛЕНИЯ И ДОБАВЛЕНИЯ ОПРЕДЕЛЁННЫХ GET ПАРАМЕТРОВ */
+function removeURLParameter(url, parameter) {
+    //prefer to use l.search if you have a location/link object
+    var urlparts= url.split('?');   
+    if (urlparts.length>=2) {
+
+        var prefix= encodeURIComponent(parameter)+'=';
+        var pars= urlparts[1].split(/[&;]/g);
+
+        //reverse iteration as may be destructive
+        for (var i= pars.length; i-- > 0;) {    
+            //idiom for string.startsWith
+            if (pars[i].lastIndexOf(prefix, 0) !== -1) {  
+                pars.splice(i, 1);
+            }
+        }
+        
+        if(pars.length > 0) {
+            url= urlparts[0]+'?'+pars.join('&');
+        } else {
+            url= urlparts[0];
+        }
+
+        return url;
+    } else {
+        return url;
+    }
+}
+
+
+function serializeGet(obj) {
+    var str = [];
+    for(var p in obj){
+        if (obj.hasOwnProperty(p)) {
+            str.push(encodeURIComponent(p) + "=" + encodeURIComponent(obj[p]));
+        }
+    }
+
+    return str.join("&");
+}
+
+
+function addGet(url, get) {
+
+    if (typeof(get) === 'object') {
+        get = serializeGet(get);
+    }
+
+    if (url.match(/\?/)) {
+        return url + '&' + get;
+    }
+
+    if (!url.match(/\.\w{3,4}$/) && url.substr(-1, 1) !== '/') {
+        url += '/';
+    }
+    
+    return url + '?' + get;
+}
+
+
+// Show posts for activation
+function forActivation(event)
+{
+    let href = location.href;
+
+    if (event.target.checked){                      
+        document.querySelector('[name="for_active"]').value = 'for_active';
+        location.href = addGet(href, 'for_active=for_active');
+    }
+    else{
+        document.querySelector('[name="for_active"]').value = '';
+        location.href = removeURLParameter(href, 'for_active');         
+    }
+}
+
+
+// Shipper City list
+$(document).delegate('select[name="choose_city_ru"]', 'change', function(){
+    if ($(this).val() === '1') {
+        $('.choose-city-ru select[name="sender_city"]').show();
+        $('.choose-city-ru select[name="sender_city"]').prop('disabled', false);
+        $('.choose-city-ru input[name="sender_city"]').hide();
+        $('.choose-city-ru input[name="sender_city"]').prop('disabled', true);
+    }  
+    else if ($(this).val() === '2') {
+        $('.choose-city-ru select[name="sender_city"]').hide();
+        $('.choose-city-ru select[name="sender_city"]').prop('disabled', true);
+        $('.choose-city-ru input[name="sender_city"]').show();
+        $('.choose-city-ru input[name="sender_city"]').prop('disabled', false);
+    }                         
+});
+
+$(document).delegate('select[name="choose_city_eng"]', 'change', function(){
+    if ($(this).val() === '1') {
+        $('.choose-city-eng select[name="shipper_city"]').show();
+        $('.choose-city-eng select[name="shipper_city"]').prop('disabled', false);
+        $('.choose-city-eng input[name="shipper_city"]').hide();
+        $('.choose-city-eng input[name="shipper_city"]').prop('disabled', true);
+    }  
+    else if ($(this).val() === '2') {
+        $('.choose-city-eng select[name="shipper_city"]').hide();
+        $('.choose-city-eng select[name="shipper_city"]').prop('disabled', true);
+        $('.choose-city-eng input[name="shipper_city"]').show();
+        $('.choose-city-eng input[name="shipper_city"]').prop('disabled', false);
+    }                         
 });

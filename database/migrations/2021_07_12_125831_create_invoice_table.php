@@ -30,6 +30,7 @@ class CreateInvoiceTable extends Migration
             $table->string('declared_value')->nullable();           
             $table->integer('work_sheet_id')->nullable();
             $table->string('batch_number')->nullable();
+            $table->boolean('in_trash')->default(false);
             $table->timestamps();
         });
     }

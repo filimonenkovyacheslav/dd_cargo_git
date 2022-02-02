@@ -12,7 +12,7 @@ use App\CourierEngDraftWorksheet;
 class CourierTask extends Model
 {   
     protected $table = 'couriers_tasks';
-    protected $fillable = ['worksheet_id','eng_worksheet_id','draft_id', 'eng_draft_id', 'direction', 'status', 'parcels_qty', 'comments_1', 'comments_2', 'shipper_name', 'shipper_country','shipper_city','shipper_address','standard_phone','courier','pick_up_date_comments'];
+    protected $fillable = ['worksheet_id','eng_worksheet_id','draft_id', 'eng_draft_id', 'direction', 'site_name', 'status', 'parcels_qty', 'comments_1', 'comments_2', 'shipper_name', 'shipper_country','shipper_city','shipper_address','standard_phone','courier','pick_up_date_comments','shipper_region','order_number'];
 
 
     /**
@@ -33,12 +33,15 @@ class CourierTask extends Model
             $new_task = new CourierTask();
             $new_task->worksheet_id = $row->id;
             $new_task->direction = $row->direction;
+            $new_task->site_name = $row->site_name;
             $new_task->status = $row->status;
             $new_task->parcels_qty = 1;
+            $new_task->order_number = $row->order_number;
             $new_task->comments_1 = $row->comment_2;
             $new_task->comments_2 = $row->comments;
             $new_task->shipper_name = $row->sender_name;
             $new_task->shipper_country = $row->sender_country;
+            $new_task->shipper_region = $row->shipper_region;
             $new_task->shipper_city = $row->sender_city;
             $new_task->shipper_address = $row->sender_address;
             $new_task->standard_phone = $row->standard_phone;
@@ -50,12 +53,15 @@ class CourierTask extends Model
             $new_task = new CourierTask();
             $new_task->eng_worksheet_id = $row->id;
             $new_task->direction = $row->direction;
+            $new_task->site_name = 'For';
             $new_task->status = $row->status;
             $new_task->parcels_qty = 1;
+            $new_task->order_number = $row->order_number;
             $new_task->comments_1 = $row->comments_1;
             $new_task->comments_2 = $row->comments_2;
             $new_task->shipper_name = $row->shipper_name;
             $new_task->shipper_country = $row->shipper_country;
+            $new_task->shipper_region = $row->shipper_region;
             $new_task->shipper_city = $row->shipper_city;
             $new_task->shipper_address = $row->shipper_address;
             $new_task->standard_phone = $row->standard_phone;
@@ -67,12 +73,15 @@ class CourierTask extends Model
             $new_task = new CourierTask();
             $new_task->draft_id = $row->id;
             $new_task->direction = $row->direction;
+            $new_task->site_name = $row->site_name;
             $new_task->status = $row->status;
             $new_task->parcels_qty = $row->parcels_qty;
+            $new_task->order_number = $row->order_number;
             $new_task->comments_1 = $row->comment_2;
             $new_task->comments_2 = $row->comments;
             $new_task->shipper_name = $row->sender_name;
             $new_task->shipper_country = $row->sender_country;
+            $new_task->shipper_region = $row->shipper_region;
             $new_task->shipper_city = $row->sender_city;
             $new_task->shipper_address = $row->sender_address;
             $new_task->standard_phone = $row->standard_phone;
@@ -84,12 +93,15 @@ class CourierTask extends Model
             $new_task = new CourierTask();
             $new_task->eng_draft_id = $row->id;
             $new_task->direction = $row->direction;
+            $new_task->site_name = 'For';
             $new_task->status = $row->status;
             $new_task->parcels_qty = $row->parcels_qty;
+            $new_task->order_number = $row->order_number;
             $new_task->comments_1 = $row->comments_1;
             $new_task->comments_2 = $row->comments_2;
             $new_task->shipper_name = $row->shipper_name;
             $new_task->shipper_country = $row->shipper_country;
+            $new_task->shipper_region = $row->shipper_region;
             $new_task->shipper_city = $row->shipper_city;
             $new_task->shipper_address = $row->shipper_address;
             $new_task->standard_phone = $row->standard_phone;

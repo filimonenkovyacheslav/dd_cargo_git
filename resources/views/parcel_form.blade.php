@@ -184,8 +184,14 @@
                         <div class="col-md-6">
                             {!! Form::select('sender_country', array('Israel' => 'Israel', 'Germany' => 'Germany'), isset($data_parcel->sender_country) ? $data_parcel->sender_country : '',['class' => 'form-control']) !!}
                         </div>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <div class="row">
+                        {!! Form::label('sender_city','Если вы не нашли в списке название вашего населенного пункта, выберите название ближайшего к вам города',['class' => 'col-md-6 control-label'])   !!}
                         <div class="col-md-6">
-                            {!! Form::text('sender_city',isset($data_parcel->sender_city) ? $data_parcel->sender_city : old('sender_city'),['class' => 'form-control', 'placeholder' => 'Shipper\'s city*', 'required'])!!}
+                            {!! Form::select('sender_city', $israel_cities, isset($data_parcel->sender_city) ? $data_parcel->sender_city : '',['class' => 'form-control']) !!}
                         </div>
                     </div>
                 </div>

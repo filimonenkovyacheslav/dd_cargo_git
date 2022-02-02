@@ -70,6 +70,7 @@
 									<option value="comments_2">Comments 2</option>
 									<option value="shipper_name">Shipper\'s name</option>
 									<option value="shipper_country">Shipper\'s country</option>
+									<option value="shipper_region">Shipper region</option>
 									<option value="shipper_city">Shipper\'s city/village</option>
 									<option value="passport_number">GSTN/Passport number</option>
 									<option value="return_date">Estimated return to India date</option>
@@ -138,6 +139,7 @@
 										<th>Comments 2</th>
 										<th>Shipper's name</th>
 										<th>Shipper's country</th>
+										<th>Shipper region</th>
 										<th>Shipper\'s city/village</th>
 										<th>GSTN/Passport number</th>
 										<th>Estimated return to India date</th>
@@ -302,6 +304,9 @@
 										</td>
 										<td title="{{$row->shipper_country}}">
 											<div class="div-3">{{$row->shipper_country}}</div>
+										</td>
+										<td title="{{$row->shipper_region}}">
+											<div class="div-2">{{$row->shipper_region}}</div>
 										</td>
 										<td title="{{$row->shipper_city}}">
 											<div class="div-3">{{$row->shipper_city}}</div>

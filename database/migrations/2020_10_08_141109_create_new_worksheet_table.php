@@ -31,7 +31,8 @@ class CreateNewWorksheetTable extends Migration
             $table->text('comments')->nullable();
             $table->text('sender_name')->nullable();
             $table->string('sender_country')->nullable();
-            $table->string('sender_city')->nullable();
+            $table->string('shipper_region')->nullable();
+            $table->string('sender_city')->nullable();            
             $table->string('sender_postcode')->nullable();
             $table->text('sender_address')->nullable();
             $table->string('standard_phone')->nullable();

@@ -9,7 +9,7 @@ use App\CourierTask;
 class CourierEngDraftWorksheet extends BaseModel
 {   
     protected $table = 'courier_eng_draft_worksheet';
-    protected $fillable = ['order_number', 'tracking_main', 'status', 'status_date', 'status_ru', 'status_he', 'operator','date','direction','tracking_local','pallet_number','comments_1','comments_2','shipper_name', 'shipper_city','passport_number','return_date','shipper_address','standard_phone','shipper_phone','shipper_id','consignee_name','house_name','post_office','district','state_pincode','consignee_address','consignee_phone','consignee_id','shipped_items','shipment_val','courier','delivery_date_comments','weight','width','height','length','volume_weight','lot','payment_date_comments','amount_payment','status_date','shipper_country','consignee_country','parcels_qty','in_trash'];
+    protected $fillable = ['order_number', 'tracking_main', 'status', 'status_date', 'status_ru', 'status_he', 'operator','date','direction','tracking_local','pallet_number','comments_1','comments_2','shipper_name', 'shipper_city','passport_number','return_date','shipper_address','standard_phone','shipper_phone','shipper_id','consignee_name','house_name','post_office','district','state_pincode','consignee_address','consignee_phone','consignee_id','shipped_items','shipment_val','courier','delivery_date_comments','weight','width','height','length','volume_weight','lot','payment_date_comments','amount_payment','status_date','shipper_country','consignee_country','parcels_qty','in_trash','shipper_region'];
 
 
     /**
@@ -34,12 +34,15 @@ class CourierEngDraftWorksheet extends BaseModel
             $new_task = new CourierTask();
             $new_task->eng_draft_id = $this->id;
             $new_task->direction = $this->direction;
+            $new_task->site_name = 'For';
             $new_task->status = $this->status;
             $new_task->parcels_qty = $this->parcels_qty;
+            $new_task->order_number = $this->order_number;
             $new_task->comments_1 = $this->comments_1;
             $new_task->comments_2 = $this->comments_2;
             $new_task->shipper_name = $this->shipper_name;
             $new_task->shipper_country = $this->shipper_country;
+            $new_task->shipper_region = $this->shipper_region;
             $new_task->shipper_city = $this->shipper_city;
             $new_task->shipper_address = $this->shipper_address;
             $new_task->standard_phone = $this->standard_phone;
@@ -50,12 +53,15 @@ class CourierEngDraftWorksheet extends BaseModel
         }
         elseif ($this->courierTask) {
             $this->courierTask->direction = $this->direction;
+            $this->courierTask->site_name = 'For';
             $this->courierTask->status = $this->status;
             $this->courierTask->parcels_qty = $this->parcels_qty;
+            $this->courierTask->order_number = $this->order_number;
             $this->courierTask->comments_1 = $this->comments_1;
             $this->courierTask->comments_2 = $this->comments_2;
             $this->courierTask->shipper_name = $this->shipper_name;
             $this->courierTask->shipper_country = $this->shipper_country;
+            $this->courierTask->shipper_region = $this->shipper_region;
             $this->courierTask->shipper_city = $this->shipper_city;
             $this->courierTask->shipper_address = $this->shipper_address;
             $this->courierTask->standard_phone = $this->standard_phone;

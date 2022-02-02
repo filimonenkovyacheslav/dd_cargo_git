@@ -27,6 +27,7 @@ class CreatePhilIndWorksheetTable extends Migration
             $table->text('comments_2')->nullable();          
             $table->string('shipper_name')->nullable();
             $table->string('shipper_country')->nullable();
+            $table->string('shipper_region')->nullable();
             $table->string('shipper_city')->nullable();
             $table->string('passport_number')->nullable();
             $table->string('return_date')->nullable();

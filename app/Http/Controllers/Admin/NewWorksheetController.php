@@ -72,8 +72,9 @@ class NewWorksheetController extends AdminController
 		$new_worksheet = NewWorksheet::find($id);
 		$title = 'Изменение строки '.$new_worksheet->id;
 		$user = Auth::user();
+		$israel_cities = $this->israelCities();
 
-		return view('admin.new_worksheet_update', ['title' => $title,'new_worksheet' => $new_worksheet, 'user' => $user,'new_column_1' => $arr_columns[0],'new_column_2' => $arr_columns[1],'new_column_3' => $arr_columns[2],'new_column_4' => $arr_columns[3],'new_column_5' => $arr_columns[4]]);
+		return view('admin.new_worksheet_update', ['title' => $title,'new_worksheet' => $new_worksheet, 'user' => $user,'new_column_1' => $arr_columns[0],'new_column_2' => $arr_columns[1],'new_column_3' => $arr_columns[2],'new_column_4' => $arr_columns[3],'new_column_5' => $arr_columns[4],'israel_cities' => $israel_cities]);
 	}
 
 
@@ -160,6 +161,10 @@ class NewWorksheetController extends AdminController
 			if ($field !== 'created_at') {
 				$new_worksheet->$field = $request->input($field);
 			}
+		}
+
+		if (in_array($new_worksheet->sender_city, array_keys($this->israel_cities))) {
+			$new_worksheet->shipper_region = $this->israel_cities[$new_worksheet->sender_city];
 		}
 
 		if ($request->input('tracking_main')){
@@ -846,7 +851,20 @@ class NewWorksheetController extends AdminController
     			->update([
     				'partner' => $request->input('partner')
     			]);       	
-    		}
+    		}   
+    		else if ($request->input('sender_city')) {
+    			NewWorksheet::whereIn('tracking_main', $track_arr)
+    			->update([
+    				'sender_city' => $request->input('sender_city')
+    			]);  
+
+    			if (in_array($request->input('sender_city'), array_keys($this->israel_cities))) {
+    				NewWorksheet::whereIn('tracking_main', $track_arr)
+    				->update([
+    					'shipper_region' => $this->israel_cities[$request->input('sender_city')]
+    				]);
+    			}
+    		} 		
     	}
         
         if($status_error){
@@ -1080,13 +1098,22 @@ class NewWorksheetController extends AdminController
     						'status_date' => date('Y-m-d')
     					]);
     				}
+
+    				$worksheet = NewWorksheet::find($row_arr[$i]);
+    				$worksheet->checkCourierTask($worksheet->status);
     			}    			
     		}
     		else if ($request->input('site_name')) {
     			NewWorksheet::whereIn('id', $row_arr)
     			->update([
     				'site_name' => $request->input('site_name')
-    			]);       	
+    			]);     
+
+    			
+    			for ($i=0; $i < count($row_arr); $i++) { 
+    				$worksheet = NewWorksheet::find($row_arr[$i]);
+    				$worksheet->checkCourierTask($worksheet->status);
+    			}    	
     		}
     		else if ($request->input('tariff')) {
     			NewWorksheet::whereIn('id', $row_arr)
@@ -1099,7 +1126,25 @@ class NewWorksheetController extends AdminController
     			->update([
     				'partner' => $request->input('partner')
     			]);       	
-    		} 		
+    		} 
+    		else if ($request->input('sender_city')) {
+    			NewWorksheet::whereIn('id', $row_arr)
+    			->update([
+    				'sender_city' => $request->input('sender_city')
+    			]);  
+
+    			if (in_array($request->input('sender_city'), array_keys($this->israel_cities))) {
+    				NewWorksheet::whereIn('id', $row_arr)
+    				->update([
+    					'shipper_region' => $this->israel_cities[$request->input('sender_city')]
+    				]);
+    			}
+
+    			for ($i=0; $i < count($row_arr); $i++) { 
+    				$worksheet = NewWorksheet::find($row_arr[$i]);
+    				$worksheet->checkCourierTask($worksheet->status);
+    			}
+    		}		
     	}
 
     	if($status_error){

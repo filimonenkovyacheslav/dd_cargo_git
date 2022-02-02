@@ -450,6 +450,7 @@ $('#tracking-columns').change((e)=>{
         $('#site_name').remove()
         $('#tariff').remove()
         $('#partner').remove()
+        $('#city-value').remove()
         $('.value-by-tracking').append(`
             <div id="status-value">
                 <select class="form-control" id="status" name="status">
@@ -477,6 +478,7 @@ $('#tracking-columns').change((e)=>{
         $('#status-value').remove()
         $('#tariff').remove()
         $('#partner').remove()
+        $('#city-value').remove()
         $('.value-by-tracking').append(`
             <select class="form-control" id="site_name" name="site_name">
                <option value="DD-C">DD-C</option>
@@ -489,6 +491,7 @@ $('#tracking-columns').change((e)=>{
         $('#status-value').remove()
         $('#site_name').remove()
         $('#partner').remove()
+        $('#city-value').remove()
         $('.value-by-tracking').append(`
             <select class="form-control" id="tariff" name="tariff">
                <option value="" selected="selected"></option>
@@ -502,6 +505,7 @@ $('#tracking-columns').change((e)=>{
         $('#status-value').remove()
         $('#site_name').remove()
         $('#tariff').remove()
+        $('#city-value').remove()
         $('.value-by-tracking').append(`
             <select class="form-control" id="partner" name="partner">
                <option value="" selected="selected"></option>
@@ -513,95 +517,37 @@ $('#tracking-columns').change((e)=>{
             </select>
             `)
     }
-    else {
+    else if(thisVal === 'sender_city') {
+        $('[name="value-by-tracking"]').remove()
         $('#status-value').remove()
         $('#site_name').remove()
         $('#tariff').remove()
         $('#partner').remove()
-        $('[name="value-by-tracking"]').remove()
         $('.value-by-tracking').append(`
-            <input class="form-control" type="text" name="value-by-tracking">
-            `)
-    }
-});
+            <div id="city-value">
+                <div class="col-md-4">
+                    <select class="form-control" name="choose_city_ru"><option value="0" selected="selected">Метод изменения города</option><option value="1">Выбрать из списка (автоматически определится Регион)</option><option value="2">Ввести вручную (Регион возможно не определится)</option></select>
+                </div>
 
-
-// draft worksheet
-$('#draft-columns').change((e)=>{
-    const thisVal = $(e.target).val();
-    if (thisVal === 'status') {
-        $('[name="value-by-tracking"]').remove()
-        $('#site_name').remove()
-        $('#tariff').remove()
-        $('#partner').remove()
-        $('.value-by-tracking').append(`
-            <div id="status-value">
-                <select class="form-control" id="status" name="status">
-                   <option value="" selected="selected"></option>
-                   <option value="Подготовка">Подготовка</option>
-                   <option value="Возврат">Возврат</option>
-                   <option value="Коробка">Коробка</option>
-                   <option value="Забрать">Забрать</option>
-                   <option value="Уточнить">Уточнить</option>
-                   <option value="Думают">Думают</option>
-                   <option value="Отмена">Отмена</option>
-                </select>                
+                <div class="col-md-4 choose-city-ru">                    
+                    <select class="form-control" style="display:none" disabled="disabled" id="sender_city" name="sender_city"><option value="Acre">Acre</option><option value="Afula">Afula</option><option value="Arad">Arad</option><option value="Ariel">Ariel</option><option value="Ashdod">Ashdod</option><option value="Ashkelon">Ashkelon</option><option value="Baqa-Jatt">Baqa-Jatt</option><option value="Bat Yam">Bat Yam</option><option value="Beersheba">Beersheba</option><option value="Beit She'an">Beit She'an</option><option value="Beit Shemesh">Beit Shemesh</option><option value="Beitar Illit">Beitar Illit</option><option value="Bnei Brak">Bnei Brak</option><option value="Dimona">Dimona</option><option value="Eilat">Eilat</option><option value="El'ad">El'ad</option><option value="Giv'atayim">Giv'atayim</option><option value="Giv'at Shmuel">Giv'at Shmuel</option><option value="Hadera">Hadera</option><option value="Haifa">Haifa</option><option value="Herzliya">Herzliya</option><option value="Hod HaSharon">Hod HaSharon</option><option value="Holon">Holon</option><option value="Jerusalem">Jerusalem</option><option value="Karmiel">Karmiel</option><option value="Kafr Qasim">Kafr Qasim</option><option value="Kfar Saba">Kfar Saba</option><option value="Kiryat Ata">Kiryat Ata</option><option value="Kiryat Bialik">Kiryat Bialik</option><option value="Kiryat Gat">Kiryat Gat</option><option value="Kiryat Malakhi">Kiryat Malakhi</option><option value="Kiryat Motzkin">Kiryat Motzkin</option><option value="Kiryat Ono">Kiryat Ono</option><option value="Kiryat Shmona">Kiryat Shmona</option><option value="Kiryat Yam">Kiryat Yam</option><option value="Lod">Lod</option><option value="Ma'ale Adumim">Ma'ale Adumim</option><option value="Ma'alot-Tarshiha">Ma'alot-Tarshiha</option><option value="Migdal HaEmek">Migdal HaEmek</option><option value="Modi'in Illit">Modi'in Illit</option><option value="Modi'in-Maccabim-Re'ut">Modi'in-Maccabim-Re'ut</option><option value="Nahariya">Nahariya</option><option value="Nazareth">Nazareth</option><option value="Nazareth Illit">Nazareth Illit</option><option value="Nesher">Nesher</option><option value="Ness Ziona">Ness Ziona</option><option value="Netanya">Netanya</option><option value="Netivot">Netivot</option><option value="Ofakim">Ofakim</option><option value="Or Akiva">Or Akiva</option><option value="Or Yehuda">Or Yehuda</option><option value="Petah Tikva">Petah Tikva</option><option value="Qalansawe">Qalansawe</option><option value="Ra'anana">Ra'anana</option><option value="Rahat">Rahat</option><option value="Ramat Gan">Ramat Gan</option><option value="Ramat HaSharon">Ramat HaSharon</option><option value="Ramla">Ramla</option><option value="Rehovot">Rehovot</option><option value="Rishon LeZion">Rishon LeZion</option><option value="Rosh HaAyin">Rosh HaAyin</option><option value="Safed">Safed</option><option value="Sakhnin">Sakhnin</option><option value="Sderot">Sderot</option><option value="Shefa-'Amr (Shfar'am)">Shefa-'Amr (Shfar'am)</option><option value="Tamra">Tamra</option><option value="Tayibe">Tayibe</option><option value="Tel Aviv">Tel Aviv</option><option value="Tiberias">Tiberias</option><option value="Tira">Tira</option><option value="Tirat Carmel">Tirat Carmel</option><option value="Umm al-Fahm">Umm al-Fahm</option><option value="Yavne">Yavne</option><option value="Yehud-Monosson">Yehud-Monosson</option><option value="Yokneam">Yokneam</option></select>
+                    <input class="form-control" name="sender_city" type="text" id="sender_city">                    
+                </div>
             </div>
             `)
     }
-    else if(thisVal === 'site_name'){
-        $('[name="value-by-tracking"]').remove()
-        $('#status-value').remove()
-        $('#tariff').remove()
-        $('#partner').remove()
-        $('.value-by-tracking').append(`
-            <select class="form-control" id="site_name" name="site_name">
-               <option value="DD-C">DD-C</option>
-               <option value="For">For</option>
-            </select>
-            `)
-    }
-    else if(thisVal === 'tariff'){
-        $('[name="value-by-tracking"]').remove()
-        $('#status-value').remove()
-        $('#site_name').remove()
-        $('#partner').remove()
-        $('.value-by-tracking').append(`
-            <select class="form-control" id="tariff" name="tariff">
-               <option value="" selected="selected"></option>
-               <option value="Море">Море</option>
-               <option value="Авиа">Авиа</option>
-            </select>
-            `)
-    }
-    else if(thisVal === 'partner'){
-        $('[name="value-by-tracking"]').remove()
-        $('#status-value').remove()
-        $('#site_name').remove()
-        $('#tariff').remove()
-        $('.value-by-tracking').append(`
-            <select class="form-control" id="partner" name="partner">
-               <option value="" selected="selected"></option>
-               <option value="viewer_1">viewer_1</option>
-               <option value="viewer_2">viewer_2</option>
-               <option value="viewer_3">viewer_3</option>
-               <option value="viewer_4">viewer_4</option>
-               <option value="viewer_5">viewer_5</option>
-            </select>
-            `)
-    }
     else {
         $('#status-value').remove()
         $('#site_name').remove()
         $('#tariff').remove()
         $('#partner').remove()
+        $('#city-value').remove()
         $('[name="value-by-tracking"]').remove()
         $('.value-by-tracking').append(`
             <input class="form-control" type="text" name="value-by-tracking">
             `)
     }
 });
-
 
 $(document).delegate('#status-value select[name="status"]', 'change',(e)=>{
     const key = $(e.target).val();
@@ -610,6 +556,7 @@ $(document).delegate('#status-value select[name="status"]', 'change',(e)=>{
     $('.value-by-tracking [name="status_ua"]').val(uaArr[key]);
 })
 
+
 // phil-ind worksheet
 $('#phil-ind-tracking-columns').change((e)=>{
     const thisVal = $(e.target).val();   
@@ -617,6 +564,7 @@ $('#phil-ind-tracking-columns').change((e)=>{
         $('[name="value-by-tracking"]').remove()
         $('#consignee-country-value').remove()
         $('#shipper-country-value').remove()
+        $('#city-value').remove()
         $('.phil-ind-value-by-tracking').append(`
             <div id="phil-ind-status-value">
                 <select class="form-control" id="status" name="status">
@@ -643,6 +591,7 @@ $('#phil-ind-tracking-columns').change((e)=>{
         $('[name="value-by-tracking"]').remove()
         $('#phil-ind-status-value').remove()
         $('#consignee-country-value').remove()
+        $('#city-value').remove()
         $('.phil-ind-value-by-tracking').append(`
             <div id="shipper-country-value">
                 <select class="form-control" id="shipper_country" name="shipper_country">
@@ -657,6 +606,7 @@ $('#phil-ind-tracking-columns').change((e)=>{
         $('[name="value-by-tracking"]').remove()
         $('#phil-ind-status-value').remove()
         $('#shipper-country-value').remove()
+        $('#city-value').remove()
         $('.phil-ind-value-by-tracking').append(`
             <div id="consignee-country-value">
                 <select class="form-control" id="consignee_country" name="consignee_country">
@@ -671,11 +621,30 @@ $('#phil-ind-tracking-columns').change((e)=>{
             </div>
             `)
     }
+    else if (thisVal === 'shipper_city') {
+        $('[name="value-by-tracking"]').remove()
+        $('#phil-ind-status-value').remove()
+        $('#shipper-country-value').remove()
+        $('#consignee-country-value').remove()
+        $('.phil-ind-value-by-tracking').append(`
+            <div id="city-value">
+                <div class="col-md-4 choose-city-eng">
+                    <select class="form-control" name="choose_city_eng"><option value="0" selected="selected">City change method</option><option value="1">Select from the list (Region will be automatically determined)</option><option value="2">Enter manually (Region may not be determined)</option></select>
+                </div>
+
+                <div class="col-md-4 choose-city-eng">                    
+                    <select class="form-control" style="display:none" disabled="disabled" id="shipper_city" name="shipper_city"><option value="Acre">Acre</option><option value="Afula">Afula</option><option value="Arad">Arad</option><option value="Ariel">Ariel</option><option value="Ashdod">Ashdod</option><option value="Ashkelon">Ashkelon</option><option value="Baqa-Jatt">Baqa-Jatt</option><option value="Bat Yam">Bat Yam</option><option value="Beersheba">Beersheba</option><option value="Beit She'an">Beit She'an</option><option value="Beit Shemesh">Beit Shemesh</option><option value="Beitar Illit">Beitar Illit</option><option value="Bnei Brak">Bnei Brak</option><option value="Dimona">Dimona</option><option value="Eilat">Eilat</option><option value="El'ad">El'ad</option><option value="Giv'atayim">Giv'atayim</option><option value="Giv'at Shmuel">Giv'at Shmuel</option><option value="Hadera">Hadera</option><option value="Haifa">Haifa</option><option value="Herzliya">Herzliya</option><option value="Hod HaSharon">Hod HaSharon</option><option value="Holon">Holon</option><option value="Jerusalem">Jerusalem</option><option value="Karmiel">Karmiel</option><option value="Kafr Qasim">Kafr Qasim</option><option value="Kfar Saba">Kfar Saba</option><option value="Kiryat Ata">Kiryat Ata</option><option value="Kiryat Bialik">Kiryat Bialik</option><option value="Kiryat Gat">Kiryat Gat</option><option value="Kiryat Malakhi">Kiryat Malakhi</option><option value="Kiryat Motzkin">Kiryat Motzkin</option><option value="Kiryat Ono">Kiryat Ono</option><option value="Kiryat Shmona">Kiryat Shmona</option><option value="Kiryat Yam">Kiryat Yam</option><option value="Lod">Lod</option><option value="Ma'ale Adumim">Ma'ale Adumim</option><option value="Ma'alot-Tarshiha">Ma'alot-Tarshiha</option><option value="Migdal HaEmek">Migdal HaEmek</option><option value="Modi'in Illit">Modi'in Illit</option><option value="Modi'in-Maccabim-Re'ut">Modi'in-Maccabim-Re'ut</option><option value="Nahariya">Nahariya</option><option value="Nazareth">Nazareth</option><option value="Nazareth Illit">Nazareth Illit</option><option value="Nesher">Nesher</option><option value="Ness Ziona">Ness Ziona</option><option value="Netanya">Netanya</option><option value="Netivot">Netivot</option><option value="Ofakim">Ofakim</option><option value="Or Akiva">Or Akiva</option><option value="Or Yehuda">Or Yehuda</option><option value="Petah Tikva">Petah Tikva</option><option value="Qalansawe">Qalansawe</option><option value="Ra'anana">Ra'anana</option><option value="Rahat">Rahat</option><option value="Ramat Gan">Ramat Gan</option><option value="Ramat HaSharon">Ramat HaSharon</option><option value="Ramla">Ramla</option><option value="Rehovot">Rehovot</option><option value="Rishon LeZion">Rishon LeZion</option><option value="Rosh HaAyin">Rosh HaAyin</option><option value="Safed">Safed</option><option value="Sakhnin">Sakhnin</option><option value="Sderot">Sderot</option><option value="Shefa-'Amr (Shfar'am)">Shefa-'Amr (Shfar'am)</option><option value="Tamra">Tamra</option><option value="Tayibe">Tayibe</option><option value="Tel Aviv">Tel Aviv</option><option value="Tiberias">Tiberias</option><option value="Tira">Tira</option><option value="Tirat Carmel">Tirat Carmel</option><option value="Umm al-Fahm">Umm al-Fahm</option><option value="Yavne">Yavne</option><option value="Yehud-Monosson">Yehud-Monosson</option><option value="Yokneam">Yokneam</option></select>
+                    <input class="form-control" name="shipper_city" type="text" id="shipper_city">                   
+                </div>           
+            </div>
+            `)
+    }
     else {
         $('#phil-ind-status-value').remove()
         $('#consignee-country-value').remove()
         $('#shipper-country-value').remove()
         $('[name="value-by-tracking"]').remove()
+        $('#city-value').remove()
         $('.phil-ind-value-by-tracking').append(`
             <input class="form-control" type="text" name="value-by-tracking">
             `)
@@ -759,9 +728,23 @@ $('.checkbox-operations form').submit((e)=>{
 let countryCode = "+972";
 if ($('[name="shipper_country"]').val() === 'Germany') countryCode = "+49";
 $('[name="shipper_country"]').on('change', function(){
-    if (location.href.indexOf('phil-ind') !== -1){
-        if ($(this).val() === 'Germany') countryCode = "+49";
-        if ($(this).val() === 'Israel') countryCode = "+972"; 
+    if (location.href.indexOf('phil-ind') !== -1 || location.href.indexOf('courier-eng-draft') !== -1){
+        if ($(this).val() === 'Germany') {
+            countryCode = "+49";
+            console.log('"+49"')
+            $('.choose-city-eng').hide();
+            $('.choose-city-eng [name="shipper_city"]').prop('disabled', true);
+            $('.choose-city-germany').show();
+            $('.choose-city-germany [name="shipper_city"]').prop('disabled', false);
+        }
+        if ($(this).val() === 'Israel') {
+            countryCode = "+972";
+            console.log('"+972"')
+            $('.choose-city-germany').hide();
+            $('.choose-city-germany [name="shipper_city"]').prop('disabled', true);  
+            $('.choose-city-eng').show();
+            $('.choose-city-eng [name="shipper_city"]').prop('disabled', false);        
+        } 
     }   
 });
 
@@ -978,3 +961,35 @@ function forActivation(event)
         location.href = removeURLParameter(href, 'for_active');         
     }
 }
+
+
+// Shipper City list
+$(document).delegate('select[name="choose_city_ru"]', 'change', function(){
+    if ($(this).val() === '1') {
+        $('.choose-city-ru select[name="sender_city"]').show();
+        $('.choose-city-ru select[name="sender_city"]').prop('disabled', false);
+        $('.choose-city-ru input[name="sender_city"]').hide();
+        $('.choose-city-ru input[name="sender_city"]').prop('disabled', true);
+    }  
+    else if ($(this).val() === '2') {
+        $('.choose-city-ru select[name="sender_city"]').hide();
+        $('.choose-city-ru select[name="sender_city"]').prop('disabled', true);
+        $('.choose-city-ru input[name="sender_city"]').show();
+        $('.choose-city-ru input[name="sender_city"]').prop('disabled', false);
+    }                         
+});
+
+$(document).delegate('select[name="choose_city_eng"]', 'change', function(){
+    if ($(this).val() === '1') {
+        $('.choose-city-eng select[name="shipper_city"]').show();
+        $('.choose-city-eng select[name="shipper_city"]').prop('disabled', false);
+        $('.choose-city-eng input[name="shipper_city"]').hide();
+        $('.choose-city-eng input[name="shipper_city"]').prop('disabled', true);
+    }  
+    else if ($(this).val() === '2') {
+        $('.choose-city-eng select[name="shipper_city"]').hide();
+        $('.choose-city-eng select[name="shipper_city"]').prop('disabled', true);
+        $('.choose-city-eng input[name="shipper_city"]').show();
+        $('.choose-city-eng input[name="shipper_city"]').prop('disabled', false);
+    }                         
+});

@@ -297,8 +297,24 @@
 						</div>
 						<div class="form-group">
 							{!! Form::label('sender_city','Город отправителя',['class' => 'col-md-2 control-label'])   !!}
-							<div class="col-md-8">
+							<div class="col-md-4">
+								{!! Form::select('choose_city_ru', ['0' => 'Метод изменения города', '1' => 'Выбрать из списка (автоматически определится Регион)', '2' => 'Ввести вручную (Регион возможно не определится)'],'0',['class' => 'form-control']) !!}
+							</div>
+							<div class="col-md-4 choose-city-ru">
+								@if (in_array($new_worksheet->sender_city, array_keys($israel_cities)))
+								
+								{!! Form::select('sender_city', $israel_cities, isset($new_worksheet->sender_city) ? $new_worksheet->sender_city : '',['class' => 'form-control']) !!}
+
+								{!! Form::text('sender_city',$new_worksheet->sender_city,['class' => 'form-control','style' => 'display:none','disabled' => 'disabled'])!!}
+								
+								@else
+
+								{!! Form::select('sender_city', $israel_cities, isset($new_worksheet->sender_city) ? $new_worksheet->sender_city : '',['class' => 'form-control','style' => 'display:none','disabled' => 'disabled']) !!}
+
 								{!! Form::text('sender_city',$new_worksheet->sender_city,['class' => 'form-control'])!!}
+
+								@endif
+
 							</div>
 						</div>
 						<div class="form-group">
@@ -633,6 +649,8 @@
 						@endcan
 
 							{!! Form::hidden('id',$new_worksheet->id)!!}
+
+							{!! Form::hidden('shipper_region',$new_worksheet->shipper_region)!!}
 
 							{!! Form::hidden('in_trash',$new_worksheet->in_trash)!!}
 

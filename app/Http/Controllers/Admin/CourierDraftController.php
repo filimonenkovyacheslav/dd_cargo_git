@@ -48,8 +48,9 @@ class CourierDraftController extends AdminController
 	{
 		$courier_draft_worksheet = CourierDraftWorksheet::find($id);
 		$title = 'Изменение строки '.$courier_draft_worksheet->id;
+		$israel_cities = $this->israelCities();
 
-		return view('admin.courier_draft.courier_draft_worksheet_update', ['title' => $title,'courier_draft_worksheet' => $courier_draft_worksheet]);
+		return view('admin.courier_draft.courier_draft_worksheet_update',compact('title','courier_draft_worksheet','israel_cities'));
 	}
 
 
@@ -117,6 +118,10 @@ class CourierDraftController extends AdminController
 		}
 		$notification = ReceiptArchive::where('tracking_main', $request->input('tracking_main'))->first();
 		if (!$notification) $check_result = $this->checkReceipt($id, null, 'ru', $request->input('tracking_main'));
+
+		if (in_array($courier_draft_worksheet->sender_city, array_keys($this->israel_cities))) {
+			$courier_draft_worksheet->shipper_region = $this->israel_cities[$courier_draft_worksheet->sender_city];
+		}
 
 		$temp = rtrim($request->input('package_content'), ";");
 		$content_arr = explode(";",$temp);
@@ -322,13 +327,21 @@ class CourierDraftController extends AdminController
     						'status_date' => date('Y-m-d')
     					]);
     				}
+    				
+    				$worksheet = CourierDraftWorksheet::find($row_arr[$i]);
+    				$worksheet->checkCourierTask($worksheet->status);
     			} 
     		}
     		else if ($request->input('site_name')) {
     			CourierDraftWorksheet::whereIn('id', $row_arr)
     			->update([
     				'site_name' => $request->input('site_name')
-    			]);       	
+    			]);  
+
+    			for ($i=0; $i < count($row_arr); $i++) { 
+    				$worksheet = CourierDraftWorksheet::find($row_arr[$i]);
+    				$worksheet->checkCourierTask($worksheet->status);
+    			}     	
     		}
     		else if ($request->input('tariff')) {
     			CourierDraftWorksheet::whereIn('id', $row_arr)
@@ -341,6 +354,24 @@ class CourierDraftController extends AdminController
     			->update([
     				'partner' => $request->input('partner')
     			]);       	
+    		}
+    		else if ($request->input('sender_city')) {
+    			CourierDraftWorksheet::whereIn('id', $row_arr)
+    			->update([
+    				'sender_city' => $request->input('sender_city')
+    			]);  
+
+    			if (in_array($request->input('sender_city'), array_keys($this->israel_cities))) {
+    				CourierDraftWorksheet::whereIn('id', $row_arr)
+    				->update([
+    					'shipper_region' => $this->israel_cities[$request->input('sender_city')]
+    				]);
+    			}
+
+    			for ($i=0; $i < count($row_arr); $i++) { 
+    				$worksheet = CourierDraftWorksheet::find($row_arr[$i]);
+    				$worksheet->checkCourierTask($worksheet->status);
+    			}
     		}
     	}
 

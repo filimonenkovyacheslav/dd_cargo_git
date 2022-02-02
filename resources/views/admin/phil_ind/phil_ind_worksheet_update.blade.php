@@ -250,9 +250,63 @@
 
 						<div class="form-group">
 							{!! Form::label('shipper_city','Shipper\'s city/village',['class' => 'col-md-2 control-label'])   !!}
-							<div class="col-md-8">
-								{!! Form::text('shipper_city',$phil_ind_worksheet->shipper_city,['class' => 'form-control'])!!}
+							
+							@if ($phil_ind_worksheet->shipper_country === 'Israel')
+
+							<div class="col-md-4 choose-city-eng">
+								{!! Form::select('choose_city_eng', ['0' => 'City change method', '1' => 'Select from the list (Region will be automatically determined)', '2' => 'Enter manually (Region may not be determined)'],'0',['class' => 'form-control']) !!}
 							</div>
+							
+							<div class="col-md-4 choose-city-eng">
+								@if (in_array($phil_ind_worksheet->shipper_city, array_keys($israel_cities)))
+								
+								{!! Form::select('shipper_city', $israel_cities, isset($phil_ind_worksheet->shipper_city) ? $phil_ind_worksheet->shipper_city : '',['class' => 'form-control']) !!}
+
+								{!! Form::text('shipper_city',$phil_ind_worksheet->shipper_city,['class' => 'form-control','style' => 'display:none','disabled' => 'disabled'])!!}
+								
+								@else
+
+								{!! Form::select('shipper_city', $israel_cities, isset($phil_ind_worksheet->shipper_city) ? $phil_ind_worksheet->shipper_city : '',['class' => 'form-control','style' => 'display:none','disabled' => 'disabled']) !!}
+
+								{!! Form::text('shipper_city',$phil_ind_worksheet->shipper_city,['class' => 'form-control'])!!}
+
+								@endif
+
+							</div>
+
+							<div class="col-md-8 choose-city-germany" style="display:none">	
+								{!! Form::text('shipper_city',$phil_ind_worksheet->shipper_city,['class' => 'form-control','disabled' => 'disabled'])!!}
+							</div>
+								
+							@elseif ($phil_ind_worksheet->shipper_country === 'Germany')
+
+							<div class="col-md-4 choose-city-eng" style="display:none">
+								{!! Form::select('choose_city_eng', ['0' => 'City change method', '1' => 'Select from the list (Region will be automatically determined)', '2' => 'Enter manually (Region may not be determined)'],'0',['class' => 'form-control']) !!}
+							</div>
+							
+							<div class="col-md-4 choose-city-eng" style="display:none">
+								@if (in_array($phil_ind_worksheet->shipper_city, array_keys($israel_cities)))
+								
+								{!! Form::select('shipper_city', $israel_cities, isset($phil_ind_worksheet->shipper_city) ? $phil_ind_worksheet->shipper_city : '',['class' => 'form-control','disabled' => 'disabled']) !!}
+
+								{!! Form::text('shipper_city',$phil_ind_worksheet->shipper_city,['class' => 'form-control','style' => 'display:none','disabled' => 'disabled'])!!}
+								
+								@else
+
+								{!! Form::select('shipper_city', $israel_cities, isset($phil_ind_worksheet->shipper_city) ? $phil_ind_worksheet->shipper_city : '',['class' => 'form-control','style' => 'display:none','disabled' => 'disabled']) !!}
+
+								{!! Form::text('shipper_city',$phil_ind_worksheet->shipper_city,['class' => 'form-control','disabled' => 'disabled'])!!}
+
+								@endif
+
+							</div>
+							
+							<div class="col-md-8 choose-city-germany">	
+								{!! Form::text('shipper_city',$phil_ind_worksheet->shipper_city,['class' => 'form-control'])!!}
+							</div>	
+								
+							@endif
+							
 						</div>
 
 						<div class="form-group">
@@ -559,6 +613,8 @@
 						@endcan
 
 							{!! Form::hidden('id',$phil_ind_worksheet->id)!!}
+
+							{!! Form::hidden('shipper_region',$phil_ind_worksheet->shipper_region)!!}
 
 							{!! Form::hidden('in_trash',$phil_ind_worksheet->in_trash)!!}
 

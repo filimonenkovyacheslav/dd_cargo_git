@@ -158,27 +158,7 @@ function clickAnswer(elem) {
 		quantityRecipient++;
 		$('[name="quantity_recipient"]').val(quantityRecipient);
 	}
-	
-	/*if (quantityClick == 1) {		
-		setTimeout(
-			()=>{ 
-				$('#addRuParcel .question').text('Ввести те же данные получателя, которые были при предыдущем заказе?');
-				if ($(elem).hasClass('yes')) {
-					$(elem).removeClass('sender').addClass('recipient');
-				}				
-				$('#addRuParcel').modal(); 
-			}, 500);		
-	}
-	else if(quantityClick == 2 && quantityYes > 0) {		
-		setTimeout(
-			()=>{ 
-				$('#addRuParcel .question').text('Введите ваш номер телефона');
-				$('#addRuParcel .yes').hide();
-				$('#addRuParcel .no').hide();
-				$('#addRuParcel .check-phone').show();
-				$('#addRuParcel').modal(); 
-			}, 500);					
-	}*/
+
 	if(quantityClick == 1) {		
 		setTimeout(
 			()=>{ 
@@ -205,26 +185,6 @@ function philIndAnswer(elem) {
 		$('[name="quantity_recipient"]').val(quantityRecipient);
 	}
 	
-	/*if (quantityClick == 1) {		
-		setTimeout(
-			()=>{ 
-				$('#philIndParcel .question').text('Enter the same recipient data that you had on the previous order?');
-				if ($(elem).hasClass('yes')) {
-					$(elem).removeClass('sender').addClass('recipient');
-				}				
-				$('#philIndParcel').modal(); 
-			}, 500);		
-	}
-	else if(quantityClick == 2 && quantityYes > 0) {		
-		setTimeout(
-			()=>{ 
-				$('#philIndParcel .question').text('Enter your phone number');
-				$('#philIndParcel .yes').hide();
-				$('#philIndParcel .no').hide();
-				$('#philIndParcel .check-phone').show();
-				$('#philIndParcel').modal(); 
-			}, 500);					
-	}*/
 	if(quantityClick == 1) {		
 		setTimeout(
 			()=>{ 
@@ -257,45 +217,6 @@ function clickAnswer2(elem) {
 		$('[name="quantity_recipient"]').val(quantityRecipient);
 	}
 	
-	/*if (quantityClick == 1 && quantityYes == 1) {		
-		setTimeout(
-			()=>{ 
-				$('#phoneExist .question').text('Вы хотите отправить тому же получателю?');
-				if ($(elem).hasClass('yes')) {
-					$(elem).removeClass('sender').addClass('recipient');
-				}				
-				$('#phoneExist').modal(); 
-			}, 500);		
-	}
-	else if(quantityClick == 1 && quantityYes == 0) {		
-		setTimeout(
-			()=>{ 
-				$('#phoneExist .question').text('Благодарим за уточнение. Ваш существующий заказ обрабатывается');
-				$('#phoneExist .yes').hide();
-				$('#phoneExist .no').hide();
-				$('#phoneExist').modal(); 
-				quantityClick = 0;
-				quantityYes = 0;
-				quantityNo = 0;
-				quantitySender = 0;
-				quantityRecipient = 0;
-			}, 500);					
-	}
-	else if(quantityClick == 2 && quantityYes == 2) {		
-		setTimeout(
-			()=>{ 
-				$('#phoneExist [name="sender_phone"]').val(phoneNumber);
-				$('#phoneExist .check-phone').submit();				
-			}, 500);					
-	}
-	else if(quantityClick == 2 && quantityYes == 1) {		
-		setTimeout(
-			()=>{ 
-				$('#phoneExist [name="sender_phone"]').val(phoneNumber);
-				$('[name="quantity_recipient"]').val('');
-				$('#phoneExist .check-phone').submit();				
-			}, 500);					
-	}*/
 	if(quantityClick == 1 && quantityYes == 0) {		
 		setTimeout(
 			()=>{ 
@@ -334,45 +255,6 @@ function philIndAnswer2(elem) {
 		$('[name="quantity_recipient"]').val(quantityRecipient);
 	}
 	
-	/*if (quantityClick == 1 && quantityYes == 1) {		
-		setTimeout(
-			()=>{ 
-				$('#phoneExist .question').text('Do you want to ship to the same consignee?');
-				if ($(elem).hasClass('yes')) {
-					$(elem).removeClass('sender').addClass('recipient');
-				}				
-				$('#phoneExist').modal(); 
-			}, 500);		
-	}
-	else if(quantityClick == 1 && quantityYes == 0) {		
-		setTimeout(
-			()=>{ 
-				$('#phoneExist .question').text('Thank you for your clarification. Your existing order is being processed');
-				$('#phoneExist .yes').hide();
-				$('#phoneExist .no').hide();
-				$('#phoneExist').modal(); 
-				quantityClick = 0;
-				quantityYes = 0;
-				quantityNo = 0;
-				quantitySender = 0;
-				quantityRecipient = 0;
-			}, 500);					
-	}
-	else if(quantityClick == 2 && quantityYes == 2) {		
-		setTimeout(
-			()=>{ 
-				$('#phoneExist [name="shipper_phone"]').val(phoneNumber);
-				$('#phoneExist .check-phone').submit();				
-			}, 500);					
-	}
-	else if(quantityClick == 2 && quantityYes == 1) {		
-		setTimeout(
-			()=>{ 
-				$('#phoneExist [name="shipper_phone"]').val(phoneNumber);
-				$('[name="quantity_recipient"]').val('');
-				$('#phoneExist .check-phone').submit();				
-			}, 500);					
-	}*/
 	if(quantityClick == 1 && quantityYes == 0) {		
 		setTimeout(
 			()=>{ 
@@ -402,8 +284,22 @@ function philIndAnswer2(elem) {
 let countryCode = "+972";
 $('[name="shipper_country"]').on('change', function(){
 	if (location.href.indexOf('phil-ind') !== -1 || location.href.indexOf('add-form-en') !== -1){
-		if ($(this).val() === 'Germany') countryCode = "+49";
-		if ($(this).val() === 'Israel') countryCode = "+972";
+		if ($(this).val() === 'Germany') {
+			countryCode = "+49";
+			$('select[name="shipper_city"]').hide();
+			$('label[for="shipper_city"]').hide();
+            $('select[name="shipper_city"]').prop('disabled', true);
+            $('select[name="shipper_city"]').after(`
+                <input placeholder="Shipper's city*" required="required" name="shipper_city" type="text" class="form-control">
+                `);
+		}
+		if ($(this).val() === 'Israel') {
+			countryCode = "+972";
+			$('select[name="shipper_city"]').show();
+			$('label[for="shipper_city"]').show();
+            $('select[name="shipper_city"]').prop('disabled', false);
+            $('input[name="shipper_city"]').remove();
+		}
 		$('.standard-phone').val(countryCode);	
 	}	
 });
@@ -527,5 +423,28 @@ $('.standard-phone').on('input', function() {
 			}
 		}    
 	}        
+});
+
+
+// Shipper City list
+$('select[name="sender_city"]').on('change', function(){
+	if ($(this).val() === 'other') {
+		$('select[name="sender_city"]').hide();
+		$('label[for="sender_city"]').hide();
+		$('select[name="sender_city"]').prop('disabled', true);
+		$('select[name="sender_city"]').after(`
+			<input placeholder="Shipper's city*" required="required" name="sender_city" type="text" class="form-control">
+			`);
+	}							
+});
+$('select[name="shipper_city"]').on('change', function(){
+	if ($(this).val() === 'other') {
+		$('select[name="shipper_city"]').hide();
+		$('label[for="shipper_city"]').hide();
+		$('select[name="shipper_city"]').prop('disabled', true);
+		$('select[name="shipper_city"]').after(`
+			<input placeholder="Shipper's city*" required="required" name="shipper_city" type="text" class="form-control">
+			`);
+	}							
 });
 

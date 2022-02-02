@@ -180,8 +180,14 @@
                         <div class="col-md-6">
                             {!! Form::select('shipper_country', array('Israel' => 'Israel', 'Germany' => 'Germany'), isset($data_parcel->shipper_country) ? $data_parcel->shipper_country : '',['class' => 'form-control']) !!}
                         </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="row">
+                        {!! Form::label('shipper_city','If you failed to find your location name at the dropdown menu please choose the nearest city',['class' => 'col-md-6 control-label'])   !!}
                         <div class="col-md-6">
-                            {!! Form::text('shipper_city',isset($data_parcel->shipper_city) ? $data_parcel->shipper_city : old('shipper_city'),['class' => 'form-control', 'placeholder' => 'Shipper\'s city/village*', 'required'])!!}
+                            {!! Form::select('shipper_city', $israel_cities, isset($data_parcel->shipper_city) ? $data_parcel->shipper_city : '',['class' => 'form-control']) !!}
                         </div>
                     </div>
                 </div>

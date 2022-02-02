@@ -24,7 +24,7 @@
 	<div class="animated fadeIn">
 		<div class="row">
 			<div class="col-md-12">
-				<a href="{{ route('exportExcelCourierTask') }}" style="margin-bottom: 20px;" class="btn btn-success btn-move">Экспорт в Excel</a>
+				<a style="margin-bottom: 20px;" onclick="ConfirmExport(event)" class="btn btn-success btn-move">To Excel</a>
 			</div>
 		</div>
 		<div class="row">
@@ -45,17 +45,44 @@
 					@endphp					
 
 					<div class="btn-move-wrapper" style="display:flex">
+						
+						<form action="{{ route('exportExcelCourierTask') }}" method="GET" id="form-export-field" enctype="multipart/form-data">
+							@csrf
+							<label class="table_columns" style="margin: 0 15px">Выберите регион/Choose region:
+								<select class="form-control" id="export_region" name="export_region">
+									<option value="" selected="selected"></option>
+									<option value="North">North</option>
+									<option value="South">South</option>
+									<option value="Center">Center</option>
+									<option value="Haifa">Haifa</option>
+									<option value="Tel Aviv">Tel Aviv</option> 
+									<option value="Jerusalem">Jerusalem</option>
+									<option value="Eilat">Eilat</option>	
+								</select>
+							</label>
+							<label class="table_columns" style="margin: 0 15px">Выберите сайт/Choose site:
+								<select class="form-control" id="export_site" name="export_site">
+									<option value="" selected="selected"></option>
+									<option value="DD-C">DD-C</option>
+									<option value="For">For</option>
+									<option value="ORE">ORE</option>
+								</select>
+							</label>
+						</form>
+						
 						<form action="{{ route('courierTaskFilter') }}" method="GET" id="form-worksheet-table-filter" enctype="multipart/form-data">
 							@csrf
 							<label class="table_columns" style="margin: 0 15px">Выберите колонку/Choose column:
 								<select class="form-control" id="table_columns" name="table_columns">
 									<option value="" selected="selected"></option>
 									<option value="direction">Направление/Direction</option>
+									<option value="site_name">Сайт/Site</option>
 									<option value="status">Статус/Status</option>
 									<option value="comments_1">Комментарии 1/Comments 1</option>
 									<option value="comments_2">Комментарии 2/Comments 2</option> 
 									<option value="shipper_name">Отправитель/Shipper name</option>
 									<option value="shipper_country">Страна отправителя/Shipper country</option>
+									<option value="shipper_region">Регион отправителя/Shipper region</option>
 									<option value="shipper_city">Город отправителя/Shipper city</option>
 									<option value="shipper_address">Адрес отправителя/Shipper address</option>
 									<option value="standard_phone">Телефон отправителя/Shipper phone</option>
@@ -79,12 +106,15 @@
 										<th>Action</th>
 										<th>№</th>
 										<th>Dir-on</th>
+										<th>Site</th>
 										<th>Статус / Status</th>
 										<th>Qty</th>
+										<th>O/No</th>
 										<th>Комментарии 1 / Comments 1</th>
 										<th>Комментарии 2 / Comments 2</th>
 										<th>Отправитель / Shipper name</th> 
 										<th>Country</th>
+										<th>Region</th>
 										<th>Город отправителя / Shipper city</th>
 										<th>Адрес отправителя / Shipper address</th>
 										<th>Телефон отправителя / Shipper phone</th>
@@ -112,11 +142,17 @@
 										<td title="{{$row->direction}}">
 											<div style="width: 50px">{{$row->direction}}</div>
 										</td>
+										<td title="{{$row->site_name}}">
+											<div class="div-22">{{$row->site_name}}</div>
+										</td>
 										<td title="{{$row->status}}">
 											<div class="div-3">{{$row->status}}</div>
 										</td>
 										<td title="{{$row->parcels_qty}}">
 											<div class="div-number">{{$row->parcels_qty}}</div>
+										</td>
+										<td title="{{$row->order_number}}">
+											<div class="div-number">{{$row->order_number}}</div>
 										</td>
 										<td title="{{$row->comments_1}}">
 											<div class="div-3">{{$row->comments_1}}</div>
@@ -129,6 +165,9 @@
 										</td>
 										<td title="{{$row->shipper_country}}">
 											<div class="div-2">{{$row->shipper_country}}</div>
+										</td>
+										<td title="{{$row->shipper_region}}">
+											<div class="div-2">{{$row->shipper_region}}</div>
 										</td>
 										<td title="{{$row->shipper_city}}">
 											<div class="div-3">{{$row->shipper_city}}</div>
@@ -193,6 +232,16 @@
 		}			
 		else
 			return false;
+	}
+
+
+	function ConfirmExport(event)
+	{
+		const form = document.getElementById('form-export-field')
+		const selectRegion = document.querySelector('select[name="export_region"]')
+		const selectSite = document.querySelector('select[name="export_site"]')
+		if ((selectRegion.value && selectSite.value) || (!selectRegion.value && !selectSite.value)) form.submit()
+		else alert('Make choose!')
 	}
 
 </script>

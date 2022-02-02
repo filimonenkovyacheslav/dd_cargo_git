@@ -128,7 +128,7 @@ Route::group(['prefix' => 'admin','middleware' => 'auth'],function() {
 	Route::get('/courier-import-draft',['uses' => 'Controller@importDraft']);
 
 	// Задания Курьерам/Couriers Tasks
-	//Route::get('/couriers-tasks-import',['uses' => 'Admin\CourierTaskController@import']);
+	Route::get('/couriers-tasks-import',['uses' => 'Admin\CourierTaskController@import']);
 
 	Route::get('/couriers-tasks',['uses' => 'Admin\CourierTaskController@index','as' => 'adminCourierTask']);
 

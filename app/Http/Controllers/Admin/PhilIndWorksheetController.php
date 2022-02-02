@@ -59,8 +59,9 @@ class PhilIndWorksheetController extends AdminController
 		$phil_ind_worksheet = PhilIndWorksheet::find($id);
 		$title = 'Update row '.$phil_ind_worksheet->id;
 		$user = Auth::user();
+		$israel_cities = $this->israelCities();
 
-		return view('admin.phil_ind.phil_ind_worksheet_update', ['title' => $title,'phil_ind_worksheet' => $phil_ind_worksheet, 'user' => $user,'new_column_1' => $arr_columns[0],'new_column_2' => $arr_columns[1],'new_column_3' => $arr_columns[2],'new_column_4' => $arr_columns[3],'new_column_5' => $arr_columns[4]]);
+		return view('admin.phil_ind.phil_ind_worksheet_update', ['title' => $title,'phil_ind_worksheet' => $phil_ind_worksheet, 'user' => $user,'new_column_1' => $arr_columns[0],'new_column_2' => $arr_columns[1],'new_column_3' => $arr_columns[2],'new_column_4' => $arr_columns[3],'new_column_5' => $arr_columns[4],'israel_cities' => $israel_cities]);
 	}
 
 
@@ -156,6 +157,10 @@ class PhilIndWorksheetController extends AdminController
 			elseif ($field === 'operator' && $user->role !== 'admin' && $operator_change) {
 				$phil_ind_worksheet->$field = $request->input($field);
 			}
+		}
+
+		if (in_array($phil_ind_worksheet->shipper_city, array_keys($this->israel_cities))) {
+			$phil_ind_worksheet->shipper_region = $this->israel_cities[$phil_ind_worksheet->shipper_city];
 		}
 
 		$phil_ind_worksheet->direction = $this->createDirection($request->input('shipper_country'), $request->input('consignee_country'));
@@ -621,6 +626,19 @@ class PhilIndWorksheetController extends AdminController
     				'status_he' => $request->input('status_he'),
     				'status_date' => date('Y-m-d')
     			]);
+    		}
+    		else if ($request->input('shipper_city')) {
+    			PhilIndWorksheet::whereIn('tracking_main', $track_arr)
+    			->update([
+    				'shipper_city' => $request->input('shipper_city')
+    			]);  
+
+    			if (in_array($request->input('shipper_city'), array_keys($this->israel_cities))) {
+    				PhilIndWorksheet::whereIn('tracking_main', $track_arr)
+    				->update([
+    					'shipper_region' => $this->israel_cities[$request->input('shipper_city')]
+    				]);
+    			}
     		}    		
     	}
 
@@ -895,7 +913,28 @@ class PhilIndWorksheetController extends AdminController
     						'status_date' => date('Y-m-d')
     					]);
     				}
+    				
+    				$worksheet = PhilIndWorksheet::find($row_arr[$i]);
+    				$worksheet->checkCourierTask($worksheet->status);
     			} 
+    		}
+    		else if ($request->input('shipper_city')) {
+    			PhilIndWorksheet::whereIn('id', $row_arr)
+    			->update([
+    				'shipper_city' => $request->input('shipper_city')
+    			]);  
+
+    			if (in_array($request->input('shipper_city'), array_keys($this->israel_cities))) {
+    				PhilIndWorksheet::whereIn('id', $row_arr)
+    				->update([
+    					'shipper_region' => $this->israel_cities[$request->input('shipper_city')]
+    				]);
+    			}
+
+    			for ($i=0; $i < count($row_arr); $i++) { 
+    				$worksheet = PhilIndWorksheet::find($row_arr[$i]);
+    				$worksheet->checkCourierTask($worksheet->status);
+    			}
     		}
     		else $status_error = 'New fields error!';
     	}

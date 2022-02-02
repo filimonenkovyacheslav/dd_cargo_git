@@ -25,11 +25,14 @@ class CreateCouriersTasksTable extends Migration
             $table->foreign('eng_draft_id')->references('id')->on('courier_eng_draft_worksheet')->onDelete('cascade');
             $table->string('status', 100)->nullable();
             $table->string('direction', 50)->nullable();
+            $table->string('site_name', 10)->nullable();
             $table->unsignedTinyInteger('parcels_qty')->nullable();
+            $table->unsignedTinyInteger('order_number')->nullable();
             $table->text('comments_1')->nullable();
             $table->text('comments_2')->nullable();
             $table->string('shipper_name', 150)->nullable();            
             $table->string('shipper_country', 50)->nullable();
+            $table->string('shipper_region')->nullable();
             $table->string('shipper_city', 100)->nullable();
             $table->text('shipper_address')->nullable();
             $table->string('standard_phone', 50)->nullable();

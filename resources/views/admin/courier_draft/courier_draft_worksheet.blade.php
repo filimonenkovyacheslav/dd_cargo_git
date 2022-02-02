@@ -68,6 +68,7 @@
 									<option value="comments">Комментарии</option>
 									<option value="sender_name">Отправитель</option>
 									<option value="sender_country">Страна отправителя</option>
+									<option value="shipper_region">Регион отправителя</option>
 									<option value="sender_city">Город отправителя</option>
 									<option value="sender_postcode">Индекс отправителя</option>
 									<option value="sender_address">Адрес отправителя</option>
@@ -143,6 +144,7 @@
 										<th>DIR<hr>Комментарии</th>
 										<th>Отправитель</th>
 										<th>Страна отправителя</th>
+										<th>Регион отправителя</th>
 										<th>Город отправителя</th>
 										<th>Индекс отправителя</th>
 										<th>Адрес отправителя</th>
@@ -276,6 +278,9 @@
 										</td>
 										<td title="{{$row->sender_country}}">
 											<div class="div-11">{{$row->sender_country}}</div>
+										</td>
+										<td title="{{$row->shipper_region}}">
+											<div class="div-2">{{$row->shipper_region}}</div>
 										</td>
 										<td title="{{$row->sender_city}}">
 											<div class="div-12">{{$row->sender_city}}</div>
@@ -492,6 +497,9 @@
 										</td>
 										<td title="{{$row->sender_country}}">
 											<div class="div-11">{{$row->sender_country}}</div>
+										</td>
+										<td title="{{$row->shipper_region}}">
+											<div class="div-2">{{$row->shipper_region}}</div>
 										</td>
 										<td title="{{$row->sender_city}}">
 											<div class="div-12">{{$row->sender_city}}</div>

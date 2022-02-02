@@ -65,8 +65,9 @@ class CourierEngDraftController extends AdminController
 	{
 		$courier_eng_draft_worksheet = CourierEngDraftWorksheet::find($id);
 		$title = 'Update row '.$courier_eng_draft_worksheet->id;
+		$israel_cities = $this->israelCities();
 
-		return view('admin.courier_draft.courier_eng_draft_worksheet_update', ['title' => $title,'courier_eng_draft_worksheet' => $courier_eng_draft_worksheet]);
+		return view('admin.courier_draft.courier_eng_draft_worksheet_update', compact('title','courier_eng_draft_worksheet','israel_cities'));
 	}
 
 
@@ -125,14 +126,6 @@ class CourierEngDraftController extends AdminController
 		$courier_eng_draft_worksheet->direction = $this->createDirection($request->input('shipper_country'), $request->input('consignee_country'));
 		// New parcel form
 		if (!$courier_eng_draft_worksheet->consignee_address) $courier_eng_draft_worksheet->consignee_address =  $request->input('consignee_country');
-		/*else{
-			$temp = explode(' ', $courier_eng_draft_worksheet->consignee_address);
-			if ($temp[0] !== $request->input('consignee_country')) {
-				unset($temp[0]);
-				$temp = implode(" ", $temp);
-				$courier_eng_draft_worksheet->consignee_address = $request->input('consignee_country').' '.$temp;
-			}
-		}*/
 
 		if ($old_status !== $courier_eng_draft_worksheet->status) {
 			CourierEngDraftWorksheet::where('id', $id)
@@ -149,6 +142,10 @@ class CourierEngDraftController extends AdminController
 		}
 		$notification = ReceiptArchive::where('tracking_main', $request->input('tracking_main'))->first();
 		if (!$notification) $check_result = $this->checkReceipt($id, null, 'en', $request->input('tracking_main'));
+		
+		if (in_array($courier_eng_draft_worksheet->shipper_city, array_keys($this->israel_cities))) {
+			$courier_eng_draft_worksheet->shipper_region = $this->israel_cities[$courier_eng_draft_worksheet->shipper_city];
+		}		
 		
 		if ($courier_eng_draft_worksheet->save()){
 
@@ -349,15 +346,6 @@ class CourierEngDraftController extends AdminController
     						$worksheet->consignee_address = $value_by;
     						$worksheet->save();
     					}
-    					/*else{
-    						$temp = explode(' ', $worksheet->consignee_address);
-    						if ($temp[0] !== $value_by) {
-    							unset($temp[0]);
-    							$temp = implode(" ", $temp);
-    							$worksheet->consignee_address = $value_by.' '.$temp;
-    							$worksheet->save();
-    						}
-    					}*/
     				}
     			}
 
@@ -416,7 +404,28 @@ class CourierEngDraftController extends AdminController
     						'status_date' => date('Y-m-d')
     					]);
     				}
+    				
+    				$worksheet = CourierEngDraftWorksheet::find($row_arr[$i]);
+    				$worksheet->checkCourierTask($worksheet->status);
     			} 
+    		}
+    		else if ($request->input('shipper_city')) {
+    			CourierEngDraftWorksheet::whereIn('id', $row_arr)
+    			->update([
+    				'shipper_city' => $request->input('shipper_city')
+    			]);  
+
+    			if (in_array($request->input('shipper_city'), array_keys($this->israel_cities))) {
+    				CourierEngDraftWorksheet::whereIn('id', $row_arr)
+    				->update([
+    					'shipper_region' => $this->israel_cities[$request->input('shipper_city')]
+    				]);
+    			}
+
+    			for ($i=0; $i < count($row_arr); $i++) { 
+    				$worksheet = CourierEngDraftWorksheet::find($row_arr[$i]);
+    				$worksheet->checkCourierTask($worksheet->status);
+    			}
     		}
     		else $status_error = 'New fields error!';
     	}

@@ -18,16 +18,12 @@ use DB;
 
 
 class FrontController extends AdminController
-{
-    public function index()
-    {
-               
-    }
-
-
+{    
     public function parcelForm()
     {
-        return view('parcel_form');       
+        $israel_cities = $this->israelCities();
+        $israel_cities['other'] = 'Другой город';
+        return view('parcel_form',compact('israel_cities'));       
     }
 
 
@@ -120,6 +116,9 @@ class FrontController extends AdminController
         }
 
         $new_worksheet->in_trash = false;
+        if (in_array($new_worksheet->sender_city, array_keys($this->israel_cities))) {
+            $new_worksheet->shipper_region = $this->israel_cities[$new_worksheet->sender_city];
+        }        
 
         // New parcel form
         if (null !== $request->input('status_box')) {
@@ -143,15 +142,13 @@ class FrontController extends AdminController
         $new_worksheet->date = date('Y.m.d');
         $new_worksheet->status_date = date('Y-m-d');       
 
-        if ($new_worksheet->save()){
-
-            $new_worksheet->checkCourierTask($new_worksheet->status);
+        if ($new_worksheet->save()){           
 
             $this->addingOrderNumber($new_worksheet->standard_phone, 'ru');
-
-            $work_sheet_id = $new_worksheet->id;
-
+            $work_sheet_id = $new_worksheet->id;       
             $message = 'Заказ посылки успешно создан !';
+            $new_worksheet = CourierDraftWorksheet::find($work_sheet_id);
+            $new_worksheet->checkCourierTask($new_worksheet->status);
 
             // Packing
             $fields_packing = ['payer', 'contract', 'type', 'track_code', 'full_shipper', 'full_consignee', 'country_code', 'postcode', 'region', 'district', 'city', 'street', 'house', 'body', 'room', 'phone', 'tariff', 'tariff_cent', 'weight_kg', 'weight_g', 'service_code', 'amount_1', 'amount_2', 'attachment_number', 'attachment_name', 'amount_3', 'weight_enclosures_kg', 'weight_enclosures_g', 'value_euro', 'value_cent', 'work_sheet_id'];
@@ -480,6 +477,9 @@ class FrontController extends AdminController
             }
 
             $new_worksheet->in_trash = false;
+            if (in_array($new_worksheet->sender_city, array_keys($this->israel_cities))) {
+                $new_worksheet->shipper_region = $this->israel_cities[$new_worksheet->sender_city];
+            }
 
             $new_worksheet->date = date('Y.m.d');
             $new_worksheet->status_date = date('Y-m-d');
@@ -490,13 +490,14 @@ class FrontController extends AdminController
                 $new_worksheet->status = 'Коробка';
             }            
 
-            if($new_worksheet->save()){
-
-                $new_worksheet->checkCourierTask($new_worksheet->status);
+            if($new_worksheet->save()){              
 
                 $this->addingOrderNumber($new_worksheet->standard_phone, 'ru');
+                
                 $work_sheet_id = $new_worksheet->id;
                 $message = 'Заказ посылки успешно создан !';
+                $new_worksheet = CourierDraftWorksheet::find($work_sheet_id);
+                $new_worksheet->checkCourierTask($new_worksheet->status);
 
                 // Packing
                 $fields_packing = ['payer', 'contract', 'type', 'track_code', 'full_shipper', 'full_consignee', 'country_code', 'postcode', 'region', 'district', 'city', 'street', 'house', 'body', 'room', 'phone', 'tariff', 'tariff_cent', 'weight_kg', 'weight_g', 'service_code', 'amount_1', 'amount_2', 'attachment_number', 'attachment_name', 'amount_3', 'weight_enclosures_kg', 'weight_enclosures_g', 'value_euro', 'value_cent', 'work_sheet_id'];
@@ -959,8 +960,10 @@ class FrontController extends AdminController
 
 
     public function philIndParcelForm()
-    {
-        return view('phil_ind_parcel_form');        
+    {  
+        $israel_cities = $this->israelCities();
+        $israel_cities['other'] = 'Other city';
+        return view('phil_ind_parcel_form',compact('israel_cities'));      
     }
 
 
@@ -1022,6 +1025,11 @@ class FrontController extends AdminController
         }
 
         $worksheet->in_trash = false;
+        if ($worksheet->shipper_country === 'Israel') {
+            if (in_array($worksheet->shipper_city, array_keys($this->israel_cities))) {
+                $worksheet->shipper_region = $this->israel_cities[$worksheet->shipper_city];
+            }
+        }        
 
         if (!$worksheet->date) {
             $worksheet->date = date('Y-m-d');
@@ -1036,12 +1044,12 @@ class FrontController extends AdminController
             $worksheet->status = 'Box';
         }                        
 
-        if ($worksheet->save()) {
-
-            $worksheet->checkCourierTask($worksheet->status);
+        if ($worksheet->save()) {          
 
             $this->addingOrderNumber($worksheet->standard_phone, 'en');
             $work_sheet_id = $worksheet->id;
+            $new_worksheet = CourierEngDraftWorksheet::find($work_sheet_id);
+            $new_worksheet->checkCourierTask($new_worksheet->status);
 
             // Packing
             $fields_packing = ['tracking', 'country', 'shipper_name', 'shipper_address', 'shipper_phone', 'shipper_id', 'consignee_name', 'consignee_address', 'consignee_phone', 'consignee_id', 'length', 'width', 'height', 'weight', 'items', 'shipment_val', 'work_sheet_id'];

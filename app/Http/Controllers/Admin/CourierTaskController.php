@@ -5,7 +5,28 @@ namespace App\Http\Controllers\Admin;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Admin\AdminController;
 use App\CourierTask;
-use App\Exports\CourierTaskExport;
+use App\Exports\CourierTaskExport\South\DdcSouthExport;
+use App\Exports\CourierTaskExport\South\ForSouthExport;
+use App\Exports\CourierTaskExport\South\OreSouthExport;
+use App\Exports\CourierTaskExport\Center\DdcCenterExport;
+use App\Exports\CourierTaskExport\Center\ForCenterExport;
+use App\Exports\CourierTaskExport\Center\OreCenterExport;
+use App\Exports\CourierTaskExport\Eilat\DdcEilatExport;
+use App\Exports\CourierTaskExport\Eilat\ForEilatExport;
+use App\Exports\CourierTaskExport\Eilat\OreEilatExport;
+use App\Exports\CourierTaskExport\Haifa\DdcHaifaExport;
+use App\Exports\CourierTaskExport\Haifa\ForHaifaExport;
+use App\Exports\CourierTaskExport\Haifa\OreHaifaExport;
+use App\Exports\CourierTaskExport\Jerusalem\DdcJerusalemExport;
+use App\Exports\CourierTaskExport\Jerusalem\ForJerusalemExport;
+use App\Exports\CourierTaskExport\Jerusalem\OreJerusalemExport;
+use App\Exports\CourierTaskExport\North\DdcNorthExport;
+use App\Exports\CourierTaskExport\North\ForNorthExport;
+use App\Exports\CourierTaskExport\North\OreNorthExport;
+use App\Exports\CourierTaskExport\Telaviv\DdcTelavivExport;
+use App\Exports\CourierTaskExport\Telaviv\ForTelavivExport;
+use App\Exports\CourierTaskExport\Telaviv\OreTelavivExport;
+use App\Exports\CourierTaskExport\CourierTaskExport;
 use Excel;
 
 
@@ -85,9 +106,88 @@ class CourierTaskController extends AdminController
     }
 
 
-	public function exportExcelCourierTask()
+	public function exportExcelCourierTask(Request $request)
 	{
-		return Excel::download(new CourierTaskExport, 'CourierTaskExport.xlsx');
+		if (!$request->export_region && !$request->export_site) {
+			return Excel::download(new CourierTaskExport, 'CourierTaskExport.xlsx');
+		}
+		if ($request->export_region === 'South') {
+			if ($request->export_site === 'DD-C') {
+				return Excel::download(new DdcSouthExport, 'DdcSouthExport.xlsx');
+			}
+			if ($request->export_site === 'For') {
+				return Excel::download(new ForSouthExport, 'ForSouthExport.xlsx');
+			}
+			if ($request->export_site === 'ORE') {
+				return Excel::download(new OreSouthExport, 'OreSouthExport.xlsx');
+			}
+		}
+		if ($request->export_region === 'Center') {
+			if ($request->export_site === 'DD-C') {
+				return Excel::download(new DdcCenterExport, 'DdcCenterExport.xlsx');
+			}
+			if ($request->export_site === 'For') {
+				return Excel::download(new ForCenterExport, 'ForCenterExport.xlsx');
+			}
+			if ($request->export_site === 'ORE') {
+				return Excel::download(new OreCenterExport, 'OreCenterExport.xlsx');
+			}
+		}
+		if ($request->export_region === 'Eilat') {
+			if ($request->export_site === 'DD-C') {
+				return Excel::download(new DdcEilatExport, 'DdcEilatExport.xlsx');
+			}
+			if ($request->export_site === 'For') {
+				return Excel::download(new ForEilatExport, 'ForEilatExport.xlsx');
+			}
+			if ($request->export_site === 'ORE') {
+				return Excel::download(new OreEilatExport, 'OreEilatExport.xlsx');
+			}
+		}
+		if ($request->export_region === 'Haifa') {
+			if ($request->export_site === 'DD-C') {
+				return Excel::download(new DdcHaifaExport, 'DdcHaifaExport.xlsx');
+			}
+			if ($request->export_site === 'For') {
+				return Excel::download(new ForHaifaExport, 'ForHaifaExport.xlsx');
+			}
+			if ($request->export_site === 'ORE') {
+				return Excel::download(new OreHaifaExport, 'OreHaifaExport.xlsx');
+			}
+		}
+		if ($request->export_region === 'Jerusalem') {
+			if ($request->export_site === 'DD-C') {
+				return Excel::download(new DdcJerusalemExport, 'DdcJerusalemExport.xlsx');
+			}
+			if ($request->export_site === 'For') {
+				return Excel::download(new ForJerusalemExport, 'ForJerusalemExport.xlsx');
+			}
+			if ($request->export_site === 'ORE') {
+				return Excel::download(new OreJerusalemExport, 'OreJerusalemExport.xlsx');
+			}
+		}
+		if ($request->export_region === 'North') {
+			if ($request->export_site === 'DD-C') {
+				return Excel::download(new DdcNorthExport, 'DdcNorthExport.xlsx');
+			}
+			if ($request->export_site === 'For') {
+				return Excel::download(new ForNorthExport, 'ForNorthExport.xlsx');
+			}
+			if ($request->export_site === 'ORE') {
+				return Excel::download(new OreNorthExport, 'OreNorthExport.xlsx');
+			}
+		}
+		if ($request->export_region === 'Tel Aviv') {
+			if ($request->export_site === 'DD-C') {
+				return Excel::download(new DdcTelavivExport, 'DdcTelavivExport.xlsx');
+			}
+			if ($request->export_site === 'For') {
+				return Excel::download(new ForTelavivExport, 'ForTelavivExport.xlsx');
+			}
+			if ($request->export_site === 'ORE') {
+				return Excel::download(new OreTelavivExport, 'OreTelavivExport.xlsx');
+			}
+		}		
 	}
 
 }

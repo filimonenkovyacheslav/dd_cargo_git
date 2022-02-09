@@ -155,7 +155,10 @@ class AdminController extends Controller
 
 			$worksheet = NewWorksheet::find($id);
 			if (!$worksheet->tracking_main && !in_array($status, $this->ru_status_arr)) {
-				return 'Status cannot be higher than Pick up without tracking number!';
+				return 'Status cannot be higher than "Забрать" without tracking number!';
+			}
+			elseif ($worksheet->tracking_main && in_array($status, $this->ru_status_arr)) {
+				return 'Status cannot be lower than "Доставляется на склад в стране отправителя" with tracking number!';
 			}
 			else return '';
 		
@@ -165,7 +168,10 @@ class AdminController extends Controller
 
 			$worksheet = PhilIndWorksheet::find($id);
 			if (!$worksheet->tracking_main && !in_array($status, $this->en_status_arr)) {
-				return 'Status cannot be higher than Pick up without tracking number!';
+				return 'Status cannot be higher than "Pick up" without tracking number!';
+			}
+			elseif ($worksheet->tracking_main && in_array($status, $this->en_status_arr)) {
+				return 'Status cannot be lower than "Forwarding to the warehouse in the sender country" with tracking number!';
 			}
 			else return '';
 
@@ -175,7 +181,10 @@ class AdminController extends Controller
 
 			$worksheet = CourierDraftWorksheet::find($id);
 			if (!$worksheet->tracking_main && !in_array($status, $this->ru_status_arr)) {
-				return 'Status cannot be higher than Pick up without tracking number!';
+				return 'Status cannot be higher than "Забрать" without tracking number!';
+			}
+			elseif ($worksheet->tracking_main && in_array($status, $this->ru_status_arr)) {
+				return 'Status cannot be lower than "Доставляется на склад в стране отправителя" with tracking number!';
 			}
 			else return '';
 		
@@ -185,12 +194,165 @@ class AdminController extends Controller
 
 			$worksheet = CourierEngDraftWorksheet::find($id);
 			if (!$worksheet->tracking_main && !in_array($status, $this->en_status_arr)) {
-				return 'Status cannot be higher than Pick up without tracking number!';
+				return 'Status cannot be higher than "Pick up" without tracking number!';
+			}
+			elseif ($worksheet->tracking_main && in_array($status, $this->en_status_arr)) {
+				return 'Status cannot be lower than "Forwarding to the warehouse in the sender country" with tracking number!';
 			}
 			else return '';
 
 			break;
 		}
+	}
+
+
+	protected function checkTracking($table, $tracking, $id)
+	{
+		$status_error = '';
+		if (!$this->trackingValidate($tracking)){
+			$status_error = "Tracking number is not correct.";
+			return $status_error;
+		}
+		
+		switch ($table) {
+			
+			case "new_worksheet":
+
+			$check_tracking = NewWorksheet::where([
+				['tracking_main', '=', $tracking],
+				['id', '<>', $id]
+			])->first();
+
+			if (!$check_tracking) {
+				$check_tracking = CourierDraftWorksheet::where([
+					['tracking_main', '=', $tracking]
+				])->first();
+
+			}
+			
+			if($check_tracking) $status_error = 'ВНИМАНИЕ! В СИСТЕМЕ УЖЕ СУЩЕСТВУЕТ ТАКОЙ ТРЕКИНГ-НОМЕР. ИСПРАВЬТЕ ОШИБОЧНУЮ ЗАПИСЬ ИЛИ ВНЕСИТЕ ДРУГОЙ НОМЕР!';
+			return $status_error;
+		
+			break;
+			
+			case "phil_ind_worksheet":
+			
+			$check_tracking = PhilIndWorksheet::where([
+				['tracking_main', '=', $tracking],
+				['id', '<>', $id]
+			])->first();
+
+			if (!$check_tracking) {
+				$check_tracking = CourierEngDraftWorksheet::where([
+					['tracking_main', '=', $tracking]
+				])->first();
+			}
+			
+			if($check_tracking) $status_error = 'WARNING! THE TRACKING NUMBER ALREADY EXISTS. FIX THE DEFECT RECORD OR CHANGE THE TRACKING NUMBER';
+			return $status_error;
+			
+			break;
+
+			case "courier_draft_worksheet":
+
+			$check_tracking = CourierDraftWorksheet::where([
+				['tracking_main', '=', $tracking],
+				['id', '<>', $id]
+			])->first();
+
+			if (!$check_tracking) {
+				$check_tracking = NewWorksheet::where([
+					['tracking_main', '=', $tracking]
+				])->first();
+
+			}
+			
+			if($check_tracking) $status_error = 'ВНИМАНИЕ! В СИСТЕМЕ УЖЕ СУЩЕСТВУЕТ ТАКОЙ ТРЕКИНГ-НОМЕР. ИСПРАВЬТЕ ОШИБОЧНУЮ ЗАПИСЬ ИЛИ ВНЕСИТЕ ДРУГОЙ НОМЕР!';
+			return $status_error;
+		
+			break;
+			
+			case "courier_eng_draft_worksheet":
+
+			$check_tracking = CourierEngDraftWorksheet::where([
+				['tracking_main', '=', $tracking],
+				['id', '<>', $id]
+			])->first();
+
+			if (!$check_tracking) {
+				$check_tracking = PhilIndWorksheet::where([
+					['tracking_main', '=', $tracking]
+				])->first();
+			}
+			
+			if($check_tracking) $status_error = 'WARNING! THE TRACKING NUMBER ALREADY EXISTS. FIX THE DEFECT RECORD OR CHANGE THE TRACKING NUMBER';
+			return $status_error;
+
+			break;
+		}
+
+		return $status_error;
+	}
+
+
+	protected function updateStatusByTracking($table, $worksheet)
+	{
+		$check_result = '';
+		
+		switch ($table) {
+			
+			case "new_worksheet":
+
+			if (in_array($worksheet->status, $this->ru_status_arr_2)) {
+				$check_result .= "ВНИМАНИЕ! ПРИ ДОБАВЛЕНИИ ТРЕКИНГ-НОМЕРА СТАТУС НЕ МОЖЕТ БЫТЬ - '$worksheet->status'. СТАТУС БУДЕТ ИЗМЕНЕН АВТОМАТИЧЕСКИ!";
+				$worksheet->status = "На складе в стране отправителя";
+				$worksheet->status_en = "At the warehouse in the sender country";
+				$worksheet->status_he = "במחסן במדינת השולח";
+				$worksheet->status_ua = "На складі в країні відправника";
+				$worksheet->save();
+			}
+		
+			break;
+			
+			case "phil_ind_worksheet":
+			
+			if (in_array($worksheet->status, $this->en_status_arr_2)){
+				$check_result .= "WARNING! A STATUS CANNOT BE '$worksheet->status' AFTER ADDING A TRACKING NUMBER. THE STATUS WILL BE UPDATED BY THE SYSTEM!";
+				$worksheet->status = "At the warehouse in the sender country";
+				$worksheet->status_ru = "На складе в стране отправителя";
+				$worksheet->status_he = "במחסן במדינת השולח";
+				$worksheet->save();
+			}
+			
+			break;
+
+			case "courier_draft_worksheet":
+
+			if (in_array($worksheet->status, $this->ru_status_arr_2)) {
+				$check_result .= "ВНИМАНИЕ! ПРИ ДОБАВЛЕНИИ ТРЕКИНГ-НОМЕРА СТАТУС НЕ МОЖЕТ БЫТЬ - '$worksheet->status'. СТАТУС БУДЕТ ИЗМЕНЕН АВТОМАТИЧЕСКИ!";
+				$worksheet->status = "На складе в стране отправителя";
+				$worksheet->status_en = "At the warehouse in the sender country";
+				$worksheet->status_he = "במחסן במדינת השולח";
+				$worksheet->status_ua = "На складі в країні відправника";
+				$worksheet->save();
+			}
+		
+			break;
+			
+			case "courier_eng_draft_worksheet":
+
+			if (in_array($worksheet->status, $this->en_status_arr_2)){
+				$check_result .= "WARNING! A STATUS CANNOT BE '$worksheet->status' AFTER ADDING A TRACKING NUMBER. THE STATUS WILL BE UPDATED BY THE SYSTEM!";
+				$worksheet->status = "At the warehouse in the sender country";
+				$worksheet->status_ru = "На складе в стране отправителя";
+				$worksheet->status_he = "במחסן במדינת השולח";
+				$worksheet->save();
+			}
+
+			break;
+		}
+
+		return $check_result;
 	}
 
 
@@ -543,7 +705,8 @@ class AdminController extends Controller
 		$data = $request->all();
 		$fields = $this->getTableColumns('receipts');
 		$number = $request->input('receipt_number');
-		$range = $request->input('range_number');		
+		$range = $request->input('range_number');
+		$old_tracking = $receipt->tracking_main;		
 		
 		$message = 'Строка успешно обновлена (Row updated successfully)!';
 
@@ -601,6 +764,16 @@ class AdminController extends Controller
 
 		$receipt->save();
 
+		if ($old_tracking && $old_tracking !== $request->input('tracking_main')) {
+			
+			$worksheet = $this->whoseTracking($old_tracking);
+			
+			if ($worksheet) {
+				$worksheet->tracking_main = $request->input('tracking_main');
+				$worksheet->save();
+			}
+		}
+
 		$last_id = ReceiptArchive::where([
 			['receipt_id',$id],
 			['worksheet_id',null]])
@@ -622,6 +795,37 @@ class AdminController extends Controller
 				['which_admin',null]
 			])->delete();
 		return redirect()->to(session('this_previous_url'))->with('status', $message);	
+	}
+
+
+	protected function whoseTracking($tracking)
+	{
+		$worksheet = null;
+		
+		$worksheet = NewWorksheet::where([
+			['tracking_main',$tracking],
+			['in_trash',false]
+		])->first();
+		if (!$worksheet) {
+			$worksheet = PhilIndWorksheet::where([
+			['tracking_main',$tracking],
+			['in_trash',false]
+		])->first();
+		}
+		if (!$worksheet) {
+			$worksheet = CourierDraftWorksheet::where([
+			['tracking_main',$tracking],
+			['in_trash',false]
+		])->first();
+		}
+		if (!$worksheet) {
+			$worksheet = CourierEngDraftWorksheet::where([
+			['tracking_main',$tracking],
+			['in_trash',false]
+		])->first();
+		}
+
+		return $worksheet;
 	}
 
 
@@ -677,46 +881,33 @@ class AdminController extends Controller
 		}		
 
 		// If not double
+		$worksheet = $this->whoseTracking($data['tracking_main']);
 		$pos = strripos($data['tracking_main'], 'CD');
-		if ($pos === false) {
-			$worksheet = PhilIndWorksheet::where('in_trash',false)->where('tracking_main', $data['tracking_main'])->first();
-			$courier_worksheet = CourierEngDraftWorksheet::where('tracking_main', $data['tracking_main'])->first();
-			if ($worksheet) {
-				$worksheet->payment_date_comments = $data['date'];
-				$worksheet->amount_payment = $data['sum'];
-				$worksheet->save();	
+		if ($worksheet && $pos === false) {
+			$worksheet->payment_date_comments = $data['date'];
+			$worksheet->amount_payment = $data['sum'];
+			$worksheet->save();	
 
-				ReceiptArchive::where('tracking_main', $data['tracking_main'])->delete();					
-			}
-			elseif ($courier_worksheet) {
-				ReceiptArchive::where('tracking_main', $data['tracking_main'])->delete();
-			}
-			else{
-				$notification = ReceiptArchive::where('tracking_main', $data['tracking_main'])->first();
-				if (!$notification) {
-					$message = $this->checkReceipt(null, $id, 'en', $data['tracking_main'], $number);
-				}				
-			}
+			ReceiptArchive::where('tracking_main', $data['tracking_main'])->delete();
 		}
-		else{
-			$worksheet = NewWorksheet::where('in_trash',false)->where('tracking_main', $data['tracking_main'])->first();
-			$courier_worksheet = CourierDraftWorksheet::where('tracking_main', $data['tracking_main'])->first();
-			if ($worksheet) {
-				$worksheet->pay_date = $data['date'];
-				$worksheet->pay_sum = $data['sum'];
-				$worksheet->save();	
+		elseif (!$worksheet && $pos === false){
+			$notification = ReceiptArchive::where('tracking_main', $data['tracking_main'])->first();
+			if (!$notification) {
+				$message = $this->checkReceipt(null, $id, 'en', $data['tracking_main'], $number);
+			}				
+		}
+		elseif ($worksheet && $pos !== false){
+			$worksheet->pay_date = $data['date'];
+			$worksheet->pay_sum = $data['sum'];
+			$worksheet->save();	
 
-				ReceiptArchive::where('tracking_main', $data['tracking_main'])->delete();					
-			}
-			elseif ($courier_worksheet) {
-				ReceiptArchive::where('tracking_main', $data['tracking_main'])->delete();
-			}
-			else{
-				$notification = ReceiptArchive::where('tracking_main', $data['tracking_main'])->first();
-				if (!$notification) {
-					$message = $this->checkReceipt(null, $id, 'ru', $data['tracking_main'], $number);
-				}				
-			}
+			ReceiptArchive::where('tracking_main', $data['tracking_main'])->delete();
+		}
+		elseif (!$worksheet && $pos !== false){
+			$notification = ReceiptArchive::where('tracking_main', $data['tracking_main'])->first();
+			if (!$notification) {
+				$message = $this->checkReceipt(null, $id, 'ru', $data['tracking_main'], $number);
+			}				
 		}
 
 		return $message;

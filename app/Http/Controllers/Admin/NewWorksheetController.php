@@ -17,6 +17,7 @@ use App\NewPacking;
 use App\Invoice;
 use App\Manifest;
 use App\ReceiptArchive;
+use App\Receipt;
 use \Dejurin\GoogleTranslateForFree;
 use App\Warehouse;
 
@@ -90,26 +91,8 @@ class NewWorksheetController extends AdminController
 			if($status_error) return $status_error;
 		}
 		
-		if ($request->input('tracking_main')) {
-			
-			if (!$this->trackingValidate($request->input('tracking_main'))){
-				$status_error = "Tracking number is not correct.";
-				return $status_error;
-			}
-			
-			$check_tracking = NewWorksheet::where([
-				['tracking_main', '=', $request->input('tracking_main')],
-				['id', '<>', $id]
-			])
-			->orWhere([
-				['tracking_main', 'like', '%'.', '.$request->input('tracking_main')],
-				['id', '<>', $id]
-			])
-			->orWhere([
-				['tracking_main', 'like', '%'.$request->input('tracking_main').', '.'%'],
-				['id', '<>', $id]
-			])->first();
-			if($check_tracking) $status_error = 'ВНИМАНИЕ! В СИСТЕМЕ УЖЕ СУЩЕСТВУЕТ ТАКОЙ ТРЕКИНГ-НОМЕР. ИСПРАВЬТЕ ОШИБОЧНУЮ ЗАПИСЬ ИЛИ ВНЕСИТЕ ДРУГОЙ НОМЕР!';
+		if ($request->input('tracking_main')) {			
+			$status_error = $this->checkTracking("new_worksheet", $request->input('tracking_main'), $id);
 			if($status_error) return $status_error;
 		}
 		elseif (!$request->input('tracking_main') && ($request->input('batch_number') || $request->input('pallet_number'))){
@@ -169,13 +152,7 @@ class NewWorksheetController extends AdminController
 
 		if ($request->input('tracking_main')){
 
-			if (in_array($new_worksheet->status, $this->status_arr)){
-				$status_error = "ВНИМАНИЕ! ПРИ ДОБАВЛЕНИИ ТРЕКИНГ-НОМЕРА СТАТУС НЕ МОЖЕТ БЫТЬ - '$new_worksheet->status'. СТАТУС БУДЕТ ИЗМЕНЕН АВТОМАТИЧЕСКИ!";
-				$new_worksheet->status = "На складе в стране отправителя";
-				$new_worksheet->status_en = "At the warehouse in the sender country";
-				$new_worksheet->status_he = "במחסן במדינת השולח";
-				$new_worksheet->status_ua = "На складі в країні відправника";
-			}
+			$check_result .= $this->updateStatusByTracking('new_worksheet', $new_worksheet);
 
 			if ($old_batch_number !== $new_worksheet->batch_number) {
 				if (in_array($old_status, $this->status_arr_2)){
@@ -191,11 +168,16 @@ class NewWorksheetController extends AdminController
 				
 				if ($old_tracking && $request->input('tracking_main')) {
 					ReceiptArchive::where('tracking_main', $old_tracking)->delete();
+					if ($old_tracking !== $request->input('tracking_main')) {
+						Receipt::where('tracking_main', $old_tracking)->update(
+							['tracking_main' => $request->input('tracking_main')]
+						);
+					}
 				}
 				
 				$notification = ReceiptArchive::where('tracking_main', $request->input('tracking_main'))->first();
 				if (!$notification) {
-					$check_result = $this->checkReceipt($id, null, 'ru', $request->input('tracking_main'));
+					$check_result .= $this->checkReceipt($id, null, 'ru', $request->input('tracking_main'),null,$old_tracking);
 				}
 				
 				if ($status_error) {
@@ -242,7 +224,7 @@ class NewWorksheetController extends AdminController
 				$this->checkForMissingTracking($request->input('tracking_main'));
 				
 				// Update Warehouse pallet
-				if ($old_pallet !== $request->input('pallet_number')) {
+				if ($old_pallet !== $request->input('pallet_number') || $old_tracking !== $request->input('tracking_main')) {
 					$message = $this->updateWarehousePallet($old_tracking, $request->input('tracking_main'), $old_pallet, $request->input('pallet_number'), $old_batch_number, $new_worksheet->batch_number, 'ru', $new_worksheet);
 					if ($message) {
 						return redirect()->to(session('this_previous_url'))->with('status-error', 'Pallet number is not correct!');
@@ -1010,7 +992,8 @@ class NewWorksheetController extends AdminController
     	$check_column = 'id';
     	$old_lot_arr = [];
     	$old_pallet_arr = [];
-    	$color = $request->input('tr_color');    	
+    	$color = $request->input('tr_color');   
+    	$check_result = ''; 	
 
     	if ($row_arr) {
     		if ($color) {
@@ -1044,6 +1027,19 @@ class NewWorksheetController extends AdminController
     					$worksheet = NewWorksheet::where('id',$row_arr[$i])->first();
     					$old_pallet_arr[] = $worksheet->pallet_number;
     				}
+    			}
+
+    			if ($column === 'tracking_main') {
+    				$validate = $this->trackingValidate($value_by);
+    				if ($validate) {
+    					for ($i=0; $i < count($row_arr); $i++) { 
+    						$worksheet = NewWorksheet::where('id',$row_arr[$i])->first();
+    						$old_tracking = $worksheet->tracking_main;
+    						$notification = ReceiptArchive::where('tracking_main', $value_by)->first();
+    						if (!$notification) $check_result = $this->checkReceipt($worksheet->id, null, 'ru', $value_by,null,$old_tracking);
+    					}
+    				} 
+    				else return redirect()->to(session('this_previous_url'))->with('status-error', 'Tracking number is not correct!');				
     			}
     			
     			NewWorksheet::whereIn('id', $row_arr)
@@ -1151,7 +1147,7 @@ class NewWorksheetController extends AdminController
         	return redirect()->to(session('this_previous_url'))->with('status-error', $status_error);
         }
         else{
-        	return redirect()->to(session('this_previous_url'))->with('status', 'Строки успешно изменены!');
+        	return redirect()->to(session('this_previous_url'))->with('status', 'Строки успешно изменены!'.' '.$check_result);
         }
     }
 

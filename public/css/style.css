@@ -700,3 +700,7 @@ Table tr colors
 .table-striped tbody tr:nth-of-type(odd).tr-green, .table-striped tbody tr.tr-green{
     background-color: rgba(10,245,10,.7);
 }
+
+textarea[name="value-by-tracking"]{
+  margin-bottom: -13px;
+}

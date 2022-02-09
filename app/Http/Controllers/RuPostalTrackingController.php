@@ -178,12 +178,6 @@ class RuPostalTrackingController extends Controller
 						NewWorksheet::where([
 							['tracking_main', '=', $val->tracking_main]
 						])
-						->orWhere([
-							['tracking_main', 'like', '%'.', '.$val->tracking_main]
-						])
-						->orWhere([
-							['tracking_main', 'like', '%'.$val->tracking_main.', '.'%']
-						])
 						->update([
 							'status' => $new_status,
 							'update_status_date' => date('Y-m-d'),
@@ -194,12 +188,6 @@ class RuPostalTrackingController extends Controller
 							NewWorksheet::where([
 								['tracking_main', '=', $val->tracking_main]
 							])
-							->orWhere([
-								['tracking_main', 'like', '%'.', '.$val->tracking_main]
-							])
-							->orWhere([
-								['tracking_main', 'like', '%'.$val->tracking_main.', '.'%']
-							])
 							->update([
 								'status_en' => $this->status_en[$this->status_new[$new_status]],
 								'status_he' => $this->status_he[$this->status_new[$new_status]],
@@ -209,12 +197,6 @@ class RuPostalTrackingController extends Controller
 						else{
 							NewWorksheet::where([
 								['tracking_main', '=', $val->tracking_main]
-							])
-							->orWhere([
-								['tracking_main', 'like', '%'.', '.$val->tracking_main]
-							])
-							->orWhere([
-								['tracking_main', 'like', '%'.$val->tracking_main.', '.'%']
 							])
 							->update([
 								'status_en' => $this->status_en[$new_status],
@@ -227,12 +209,6 @@ class RuPostalTrackingController extends Controller
 						$new_status = 'Доставляется в почтовое отделение';
 						NewWorksheet::where([
 							['tracking_main', '=', $val->tracking_main]
-						])
-						->orWhere([
-							['tracking_main', 'like', '%'.', '.$val->tracking_main]
-						])
-						->orWhere([
-							['tracking_main', 'like', '%'.$val->tracking_main.', '.'%']
 						])
 						->update([
 							'status' => $new_status,
@@ -247,12 +223,6 @@ class RuPostalTrackingController extends Controller
 				else{
 					NewWorksheet::where([
 						['tracking_main', '=', $val->tracking_main]
-					])
-					->orWhere([
-						['tracking_main', 'like', '%'.', '.$val->tracking_main]
-					])
-					->orWhere([
-						['tracking_main', 'like', '%'.$val->tracking_main.', '.'%']
 					])
 					->update([
 						'update_status_date' => date('Y-m-d H:i:s')
@@ -292,12 +262,6 @@ class RuPostalTrackingController extends Controller
 						NewWorksheet::where([
 							['tracking_main', '=', $val->tracking_main]
 						])
-						->orWhere([
-							['tracking_main', 'like', '%'.', '.$val->tracking_main]
-						])
-						->orWhere([
-							['tracking_main', 'like', '%'.$val->tracking_main.', '.'%']
-						])
 						->update([
 							'status' => $new_status,
 							'update_status_date' => date('Y-m-d'),
@@ -308,12 +272,6 @@ class RuPostalTrackingController extends Controller
 							NewWorksheet::where([
 								['tracking_main', '=', $val->tracking_main]
 							])
-							->orWhere([
-								['tracking_main', 'like', '%'.', '.$val->tracking_main]
-							])
-							->orWhere([
-								['tracking_main', 'like', '%'.$val->tracking_main.', '.'%']
-							])
 							->update([
 								'status_en' => $this->status_en[$this->status_new[$new_status]],
 								'status_he' => $this->status_he[$this->status_new[$new_status]],
@@ -323,12 +281,6 @@ class RuPostalTrackingController extends Controller
 						else{
 							NewWorksheet::where([
 								['tracking_main', '=', $val->tracking_main]
-							])
-							->orWhere([
-								['tracking_main', 'like', '%'.', '.$val->tracking_main]
-							])
-							->orWhere([
-								['tracking_main', 'like', '%'.$val->tracking_main.', '.'%']
 							])
 							->update([
 								'status_en' => $this->status_en[$new_status],
@@ -341,12 +293,6 @@ class RuPostalTrackingController extends Controller
 						$new_status = 'Доставляется в почтовое отделение';
 						NewWorksheet::where([
 							['tracking_main', '=', $val->tracking_main]
-						])
-						->orWhere([
-							['tracking_main', 'like', '%'.', '.$val->tracking_main]
-						])
-						->orWhere([
-							['tracking_main', 'like', '%'.$val->tracking_main.', '.'%']
 						])
 						->update([
 							'status' => $new_status,
@@ -361,12 +307,6 @@ class RuPostalTrackingController extends Controller
 				else{
 					NewWorksheet::where([
 						['tracking_main', '=', $val->tracking_main]
-					])
-					->orWhere([
-						['tracking_main', 'like', '%'.', '.$val->tracking_main]
-					])
-					->orWhere([
-						['tracking_main', 'like', '%'.$val->tracking_main.', '.'%']
 					])
 					->update([
 						'update_status_date' => date('Y-m-d H:i:s')

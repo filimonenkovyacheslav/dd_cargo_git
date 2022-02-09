@@ -229,151 +229,151 @@
 											@endcan
 										</td> 										
 										<td title="{{$row->site_name}}">
-											<div class="div-22">{{$row->site_name}}</div>
+											<div data-name="site_name" data-id="{{ $row->id }}" class="div-22">{{$row->site_name}}</div>
 										</td>
 										<td title="{{$row->date}}">
 											<div class="div-1">{{$row->date}}</div>
 										</td>
 										<td title="{{$row->direction}}">
-											<div class="div-2">{{$row->direction}}</div>
+											<div data-name="direction" data-id="{{ $row->id }}" class="div-2">{{$row->direction}}</div>
 										</td>
 										<td title="{{$row->tariff}}">
-											<div class="div-2">{{$row->tariff}}</div>
+											<div data-name="tariff" data-id="{{ $row->id }}" class="div-2">{{$row->tariff}}</div>
 										</td>
 										<td title="{{$row->status}}">
-											<div class="div-3">{{$row->status}}</div>
+											<div data-name="status" data-id="{{ $row->id }}" class="div-3">{{$row->status}}</div>
 										</td>
 										<td title="{{$row->status_date}}">
 											<div class="div-1">{{$row->status_date}}</div>
 										</td>
 										<td title="{{$row->partner}}">
-											<div class="div-3">{{$row->partner}}</div>
+											<div data-name="partner" data-id="{{ $row->id }}" class="div-3">{{$row->partner}}</div>
 										</td>										
 										<td title="{{$row->tracking_main}}">
-											<div class="div-4">{{$row->tracking_main}}</div>
+											<div data-name="tracking_main" data-id="{{ $row->id }}" class="div-4">{{$row->tracking_main}}</div>
 										</td>
 										<td class="td-button" title="{{$row->order_number}}">
 											<div class="div-22">{{$row->order_number}}</div>
 										</td>
 										<td title="{{$row->parcels_qty}}">
-											<div class="div-22">{{$row->parcels_qty}}</div>
+											<div data-name="parcels_qty" data-id="{{ $row->id }}" class="div-22">{{$row->parcels_qty}}</div>
 										</td>
 										<td title="{{$row->tracking_local}}">
-											<div class="div-5">{{$row->tracking_local}}</div>
+											<div data-name="tracking_local" data-id="{{ $row->id }}" class="div-5">{{$row->tracking_local}}</div>
 										</td>
 										<td title="{{$row->tracking_transit}}">
-											<div class="div-6">{{$row->tracking_transit}}</div>
+											<div data-name="tracking_transit" data-id="{{ $row->id }}" class="div-6">{{$row->tracking_transit}}</div>
 										</td>
 										<td title="{{$row->pallet_number}}">
-											<div class="div-7">{{$row->pallet_number}}</div>
+											<div data-name="pallet_number" data-id="{{ $row->id }}" class="div-7">{{$row->pallet_number}}</div>
 										</td>
 										<td title="{{$row->comment_2}}">
-											<div class="div-8">{{$row->comment_2}}</div>
+											<div data-name="comment_2" data-id="{{ $row->id }}" class="div-8">{{$row->comment_2}}</div>
 										</td>
 										<td title="{{$row->comments}}">
-											<div class="div-9">{{$row->comments}}</div>
+											<div data-name="comments" data-id="{{ $row->id }}" class="div-9">{{$row->comments}}</div>
 										</td>
 										<td title="{{$row->sender_name}}">
-											<div class="div-10">{{$row->sender_name}}</div>
+											<div data-name="sender_name" data-id="{{ $row->id }}" class="div-10">{{$row->sender_name}}</div>
 										</td>
 										<td title="{{$row->sender_country}}">
-											<div class="div-11">{{$row->sender_country}}</div>
+											<div data-name="sender_country" data-id="{{ $row->id }}" class="div-11">{{$row->sender_country}}</div>
 										</td>
 										<td title="{{$row->shipper_region}}">
 											<div class="div-2">{{$row->shipper_region}}</div>
 										</td>
 										<td title="{{$row->sender_city}}">
-											<div class="div-12">{{$row->sender_city}}</div>
+											<div data-name="sender_city" data-id="{{ $row->id }}" class="div-12">{{$row->sender_city}}</div>
 										</td>
 										<td title="{{$row->sender_postcode}}">
-											<div class="div-13">{{$row->sender_postcode}}</div>
+											<div data-name="sender_postcode" data-id="{{ $row->id }}" class="div-13">{{$row->sender_postcode}}</div>
 										</td>
 										<td title="{{$row->sender_address}}">
-											<div class="div-14">{{$row->sender_address}}</div>
+											<div data-name="sender_address" data-id="{{ $row->id }}" class="div-14">{{$row->sender_address}}</div>
 										</td>
 										<td title="{{$row->standard_phone}}">
-											<div class="div-15">{{$row->standard_phone}}</div>
+											<div data-name="standard_phone" data-id="{{ $row->id }}" class="div-15">{{$row->standard_phone}}</div>
 										</td>
 										<td title="{{$row->sender_phone}}">
-											<div class="div-15">{{$row->sender_phone}}</div>
+											<div data-name="sender_phone" data-id="{{ $row->id }}" class="div-15">{{$row->sender_phone}}</div>
 										</td>
 										<td title="{{$row->sender_passport}}">
-											<div class="div-16">{{$row->sender_passport}}</div>
+											<div data-name="sender_passport" data-id="{{ $row->id }}" class="div-16">{{$row->sender_passport}}</div>
 										</td>
 										<td title="{{$row->recipient_name}}">
-											<div class="div-17">{{$row->recipient_name}}</div>
+											<div data-name="recipient_name" data-id="{{ $row->id }}" class="div-17">{{$row->recipient_name}}</div>
 										</td>
 										<td title="{{$row->recipient_country}}">
-											<div class="div-18">{{$row->recipient_country}}</div>
+											<div data-name="recipient_country" data-id="{{ $row->id }}" class="div-18">{{$row->recipient_country}}</div>
 										</td>
 										<td title="{{$row->region}}">
-											<div class="div-18">{{$row->region}}</div>
+											<div data-name="region" data-id="{{ $row->id }}" class="div-18">{{$row->region}}</div>
 										</td>
 										<td title="{{$row->district}}">
-											<div class="div-18">{{$row->district}}</div>
+											<div data-name="district" data-id="{{ $row->id }}" class="div-18">{{$row->district}}</div>
 										</td>
 										<td title="{{$row->recipient_city}}">
-											<div class="div-19">{{$row->recipient_city}}</div>
+											<div data-name="recipient_city" data-id="{{ $row->id }}" class="div-19">{{$row->recipient_city}}</div>
 										</td>
 										<td title="{{$row->recipient_postcode}}">
-											<div class="div-20">{{$row->recipient_postcode}}</div>
+											<div data-name="recipient_postcode" data-id="{{ $row->id }}" class="div-20">{{$row->recipient_postcode}}</div>
 										</td>
 										<td title="{{$row->recipient_street}}">
-											<div class="div-21">{{$row->recipient_street}}</div>
+											<div data-name="recipient_street" data-id="{{ $row->id }}" class="div-21">{{$row->recipient_street}}</div>
 										</td>
 										<td title="{{$row->recipient_house}}">
-											<div class="div-22">{{$row->recipient_house}}</div>
+											<div data-name="recipient_house" data-id="{{ $row->id }}" class="div-22">{{$row->recipient_house}}</div>
 										</td>
 										<td title="{{$row->body}}">
-											<div class="div-22">{{$row->body}}</div>
+											<div data-name="body" data-id="{{ $row->id }}" class="div-22">{{$row->body}}</div>
 										</td>
 										<td title="{{$row->recipient_room}}">
-											<div class="div-23">{{$row->recipient_room}}</div>
+											<div data-name="recipient_room" data-id="{{ $row->id }}" class="div-23">{{$row->recipient_room}}</div>
 										</td>
 										<td title="{{$row->recipient_phone}}">
-											<div class="div-24">{{$row->recipient_phone}}</div>
+											<div data-name="recipient_phone" data-id="{{ $row->id }}" class="div-24">{{$row->recipient_phone}}</div>
 										</td>
 										<td title="{{$row->recipient_passport}}">
-											<div class="div-25">{{$row->recipient_passport}}</div>
+											<div data-name="recipient_passport" data-id="{{ $row->id }}" class="div-25">{{$row->recipient_passport}}</div>
 										</td>
 										<td title="{{$row->recipient_email}}">
-											<div class="div-26">{{$row->recipient_email}}</div>
+											<div data-name="recipient_email" data-id="{{ $row->id }}" class="div-26">{{$row->recipient_email}}</div>
 										</td>
 										<td title="{{$row->package_cost}}">
-											<div class="div-27">{{$row->package_cost}}</div>
+											<div data-name="package_cost" data-id="{{ $row->id }}" class="div-27">{{$row->package_cost}}</div>
 										</td>
 										<td title="{{$row->courier}}">
-											<div class="div-28">{{$row->courier}}</div>
+											<div data-name="courier" data-id="{{ $row->id }}" class="div-28">{{$row->courier}}</div>
 										</td>
 										<td title="{{$row->pick_up_date}}">
-											<div class="div-29">{{$row->pick_up_date}}</div>
+											<div data-name="pick_up_date" data-id="{{ $row->id }}" class="div-29">{{$row->pick_up_date}}</div>
 										</td>
 										<td title="{{$row->weight}}">
-											<div class="div-30">{{$row->weight}}</div>
+											<div data-name="weight" data-id="{{ $row->id }}" class="div-30">{{$row->weight}}</div>
 										</td>
 										<td title="{{$row->width}}">
-											<div class="div-31">{{$row->width}}</div>
+											<div data-name="width" data-id="{{ $row->id }}" class="div-31">{{$row->width}}</div>
 										</td>
 										<td title="{{$row->height}}">
-											<div class="div-32">{{$row->height}}</div>
+											<div data-name="height" data-id="{{ $row->id }}" class="div-32">{{$row->height}}</div>
 										</td>
 										<td title="{{$row->length}}">
-											<div class="div-33">{{$row->length}}</div>
+											<div data-name="length" data-id="{{ $row->id }}" class="div-33">{{$row->length}}</div>
 										</td>
 										<td title="{{$row->volume_weight}}">
-											<div class="div-34">{{$row->volume_weight}}</div>
+											<div data-name="volume_weight" data-id="{{ $row->id }}" class="div-34">{{$row->volume_weight}}</div>
 										</td>
 										<td title="{{$row->quantity_things}}">
-											<div class="div-35">{{$row->quantity_things}}</div>
+											<div data-name="quantity_things" data-id="{{ $row->id }}" class="div-35">{{$row->quantity_things}}</div>
 										</td>
 										<td title="{{$row->batch_number}}">
-											<div class="div-36">{{$row->batch_number}}</div>
+											<div data-name="batch_number" data-id="{{ $row->id }}" class="div-36">{{$row->batch_number}}</div>
 										</td>
 										<td title="{{$row->pay_date}}">
-											<div class="div-37">{{$row->pay_date}}</div>
+											<div data-name="pay_date" data-id="{{ $row->id }}" class="div-37">{{$row->pay_date}}</div>
 										</td>
 										<td title="{{$row->pay_sum}}">
-											<div class="div-38">{{$row->pay_sum}}</div>
+											<div data-name="pay_sum" data-id="{{ $row->id }}" class="div-38">{{$row->pay_sum}}</div>
 										</td>
 										<td title="{{$row->status_en}}">
 											<div class="div-39">{{$row->status_en}}</div>
@@ -385,34 +385,34 @@
 											<div class="div-41">{{$row->status_ua}}</div>
 										</td>
 										<td title="{{$row->package_content}}">
-											<div class="div1">{{$row->package_content}}</div>
+											<div data-name="package_content" data-id="{{ $row->id }}" class="div1">{{$row->package_content}}</div>
 										</td>
 										<td title="{{$row->recipient_name_customs}}">
-											<div class="div-17">{{$row->recipient_name_customs}}</div>
+											<div data-name="recipient_name_customs" data-id="{{ $row->id }}" class="div-17">{{$row->recipient_name_customs}}</div>
 										</td>
 										<td title="{{$row->recipient_country_customs}}">
-											<div class="div-18">{{$row->recipient_country_customs}}</div>
+											<div data-name="recipient_country_customs" data-id="{{ $row->id }}" class="div-18">{{$row->recipient_country_customs}}</div>
 										</td>
 										<td title="{{$row->recipient_city_customs}}">
-											<div class="div-19">{{$row->recipient_city_customs}}</div>
+											<div data-name="recipient_city_customs" data-id="{{ $row->id }}" class="div-19">{{$row->recipient_city_customs}}</div>
 										</td>
 										<td title="{{$row->recipient_postcode_customs}}">
-											<div class="div-20">{{$row->recipient_postcode_customs}}</div>
+											<div data-name="recipient_postcode_customs" data-id="{{ $row->id }}" class="div-20">{{$row->recipient_postcode_customs}}</div>
 										</td>
 										<td title="{{$row->recipient_street_customs}}">
-											<div class="div-21">{{$row->recipient_street_customs}}</div>
+											<div data-name="recipient_street_customs" data-id="{{ $row->id }}" class="div-21">{{$row->recipient_street_customs}}</div>
 										</td>
 										<td title="{{$row->recipient_house_customs}}">
-											<div class="div-22">{{$row->recipient_house_customs}}</div>
+											<div data-name="recipient_house_customs" data-id="{{ $row->id }}" class="div-22">{{$row->recipient_house_customs}}</div>
 										</td>
 										<td title="{{$row->recipient_room_customs}}">
-											<div class="div-23">{{$row->recipient_room_customs}}</div>
+											<div data-name="recipient_room_customs" data-id="{{ $row->id }}" class="div-23">{{$row->recipient_room_customs}}</div>
 										</td>
 										<td title="{{$row->recipient_phone_customs}}">
-											<div class="div-24">{{$row->recipient_phone_customs}}</div>
+											<div data-name="recipient_phone_customs" data-id="{{ $row->id }}" class="div-24">{{$row->recipient_phone_customs}}</div>
 										</td>
 										<td title="{{$row->recipient_passport_customs}}">
-											<div class="div-25">{{$row->recipient_passport_customs}}</div>
+											<div data-name="recipient_passport_customs" data-id="{{ $row->id }}" class="div-25">{{$row->recipient_passport_customs}}</div>
 										</td>                                                                  
 									</tr>
 
@@ -448,151 +448,151 @@
 											@endcan
 										</td> 
 										<td title="{{$row->site_name}}">
-											<div class="div-22">{{$row->site_name}}</div>
+											<div data-name="site_name" data-id="{{ $row->id }}" class="div-22">{{$row->site_name}}</div>
 										</td>
 										<td title="{{$row->date}}">
 											<div class="div-1">{{$row->date}}</div>
 										</td>
 										<td title="{{$row->direction}}">
-											<div class="div-2">{{$row->direction}}</div>
+											<div data-name="direction" data-id="{{ $row->id }}" class="div-2">{{$row->direction}}</div>
 										</td>
 										<td title="{{$row->tariff}}">
-											<div class="div-2">{{$row->tariff}}</div>
+											<div data-name="tariff" data-id="{{ $row->id }}" class="div-2">{{$row->tariff}}</div>
 										</td>
 										<td title="{{$row->status}}">
-											<div class="div-3">{{$row->status}}</div>
+											<div data-name="status" data-id="{{ $row->id }}" class="div-3">{{$row->status}}</div>
 										</td>
 										<td title="{{$row->status_date}}">
 											<div class="div-1">{{$row->status_date}}</div>
 										</td>
 										<td title="{{$row->partner}}">
-											<div class="div-3">{{$row->partner}}</div>
-										</td>
+											<div data-name="partner" data-id="{{ $row->id }}" class="div-3">{{$row->partner}}</div>
+										</td>										
 										<td title="{{$row->tracking_main}}">
-											<div class="div-4">{{$row->tracking_main}}</div>
+											<div data-name="tracking_main" data-id="{{ $row->id }}" class="div-4">{{$row->tracking_main}}</div>
 										</td>
 										<td class="td-button" title="{{$row->order_number}}">
 											<div class="div-22">{{$row->order_number}}</div>
 										</td>
 										<td title="{{$row->parcels_qty}}">
-											<div class="div-22">{{$row->parcels_qty}}</div>
+											<div data-name="parcels_qty" data-id="{{ $row->id }}" class="div-22">{{$row->parcels_qty}}</div>
 										</td>
 										<td title="{{$row->tracking_local}}">
-											<div class="div-5">{{$row->tracking_local}}</div>
+											<div data-name="tracking_local" data-id="{{ $row->id }}" class="div-5">{{$row->tracking_local}}</div>
 										</td>
 										<td title="{{$row->tracking_transit}}">
-											<div class="div-6">{{$row->tracking_transit}}</div>
+											<div data-name="tracking_transit" data-id="{{ $row->id }}" class="div-6">{{$row->tracking_transit}}</div>
 										</td>
 										<td title="{{$row->pallet_number}}">
-											<div class="div-7">{{$row->pallet_number}}</div>
+											<div data-name="pallet_number" data-id="{{ $row->id }}" class="div-7">{{$row->pallet_number}}</div>
 										</td>
 										<td title="{{$row->comment_2}}">
-											<div class="div-8">{{$row->comment_2}}</div>
+											<div data-name="comment_2" data-id="{{ $row->id }}" class="div-8">{{$row->comment_2}}</div>
 										</td>
 										<td title="{{$row->comments}}">
-											<div class="div-9">{{$row->comments}}</div>
+											<div data-name="comments" data-id="{{ $row->id }}" class="div-9">{{$row->comments}}</div>
 										</td>
 										<td title="{{$row->sender_name}}">
-											<div class="div-10">{{$row->sender_name}}</div>
+											<div data-name="sender_name" data-id="{{ $row->id }}" class="div-10">{{$row->sender_name}}</div>
 										</td>
 										<td title="{{$row->sender_country}}">
-											<div class="div-11">{{$row->sender_country}}</div>
+											<div data-name="sender_country" data-id="{{ $row->id }}" class="div-11">{{$row->sender_country}}</div>
 										</td>
 										<td title="{{$row->shipper_region}}">
 											<div class="div-2">{{$row->shipper_region}}</div>
 										</td>
 										<td title="{{$row->sender_city}}">
-											<div class="div-12">{{$row->sender_city}}</div>
+											<div data-name="sender_city" data-id="{{ $row->id }}" class="div-12">{{$row->sender_city}}</div>
 										</td>
 										<td title="{{$row->sender_postcode}}">
-											<div class="div-13">{{$row->sender_postcode}}</div>
+											<div data-name="sender_postcode" data-id="{{ $row->id }}" class="div-13">{{$row->sender_postcode}}</div>
 										</td>
 										<td title="{{$row->sender_address}}">
-											<div class="div-14">{{$row->sender_address}}</div>
+											<div data-name="sender_address" data-id="{{ $row->id }}" class="div-14">{{$row->sender_address}}</div>
 										</td>
 										<td title="{{$row->standard_phone}}">
-											<div class="div-15">{{$row->standard_phone}}</div>
+											<div data-name="standard_phone" data-id="{{ $row->id }}" class="div-15">{{$row->standard_phone}}</div>
 										</td>
 										<td title="{{$row->sender_phone}}">
-											<div class="div-15">{{$row->sender_phone}}</div>
+											<div data-name="sender_phone" data-id="{{ $row->id }}" class="div-15">{{$row->sender_phone}}</div>
 										</td>
 										<td title="{{$row->sender_passport}}">
-											<div class="div-16">{{$row->sender_passport}}</div>
+											<div data-name="sender_passport" data-id="{{ $row->id }}" class="div-16">{{$row->sender_passport}}</div>
 										</td>
 										<td title="{{$row->recipient_name}}">
-											<div class="div-17">{{$row->recipient_name}}</div>
+											<div data-name="recipient_name" data-id="{{ $row->id }}" class="div-17">{{$row->recipient_name}}</div>
 										</td>
 										<td title="{{$row->recipient_country}}">
-											<div class="div-18">{{$row->recipient_country}}</div>
+											<div data-name="recipient_country" data-id="{{ $row->id }}" class="div-18">{{$row->recipient_country}}</div>
 										</td>
 										<td title="{{$row->region}}">
-											<div class="div-18">{{$row->region}}</div>
+											<div data-name="region" data-id="{{ $row->id }}" class="div-18">{{$row->region}}</div>
 										</td>
 										<td title="{{$row->district}}">
-											<div class="div-18">{{$row->district}}</div>
+											<div data-name="district" data-id="{{ $row->id }}" class="div-18">{{$row->district}}</div>
 										</td>
 										<td title="{{$row->recipient_city}}">
-											<div class="div-19">{{$row->recipient_city}}</div>
+											<div data-name="recipient_city" data-id="{{ $row->id }}" class="div-19">{{$row->recipient_city}}</div>
 										</td>
 										<td title="{{$row->recipient_postcode}}">
-											<div class="div-20">{{$row->recipient_postcode}}</div>
+											<div data-name="recipient_postcode" data-id="{{ $row->id }}" class="div-20">{{$row->recipient_postcode}}</div>
 										</td>
 										<td title="{{$row->recipient_street}}">
-											<div class="div-21">{{$row->recipient_street}}</div>
+											<div data-name="recipient_street" data-id="{{ $row->id }}" class="div-21">{{$row->recipient_street}}</div>
 										</td>
 										<td title="{{$row->recipient_house}}">
-											<div class="div-22">{{$row->recipient_house}}</div>
+											<div data-name="recipient_house" data-id="{{ $row->id }}" class="div-22">{{$row->recipient_house}}</div>
 										</td>
 										<td title="{{$row->body}}">
-											<div class="div-22">{{$row->body}}</div>
+											<div data-name="body" data-id="{{ $row->id }}" class="div-22">{{$row->body}}</div>
 										</td>
 										<td title="{{$row->recipient_room}}">
-											<div class="div-23">{{$row->recipient_room}}</div>
+											<div data-name="recipient_room" data-id="{{ $row->id }}" class="div-23">{{$row->recipient_room}}</div>
 										</td>
 										<td title="{{$row->recipient_phone}}">
-											<div class="div-24">{{$row->recipient_phone}}</div>
+											<div data-name="recipient_phone" data-id="{{ $row->id }}" class="div-24">{{$row->recipient_phone}}</div>
 										</td>
 										<td title="{{$row->recipient_passport}}">
-											<div class="div-25">{{$row->recipient_passport}}</div>
+											<div data-name="recipient_passport" data-id="{{ $row->id }}" class="div-25">{{$row->recipient_passport}}</div>
 										</td>
 										<td title="{{$row->recipient_email}}">
-											<div class="div-26">{{$row->recipient_email}}</div>
+											<div data-name="recipient_email" data-id="{{ $row->id }}" class="div-26">{{$row->recipient_email}}</div>
 										</td>
 										<td title="{{$row->package_cost}}">
-											<div class="div-27">{{$row->package_cost}}</div>
+											<div data-name="package_cost" data-id="{{ $row->id }}" class="div-27">{{$row->package_cost}}</div>
 										</td>
 										<td title="{{$row->courier}}">
-											<div class="div-28">{{$row->courier}}</div>
+											<div data-name="courier" data-id="{{ $row->id }}" class="div-28">{{$row->courier}}</div>
 										</td>
 										<td title="{{$row->pick_up_date}}">
-											<div class="div-29">{{$row->pick_up_date}}</div>
+											<div data-name="pick_up_date" data-id="{{ $row->id }}" class="div-29">{{$row->pick_up_date}}</div>
 										</td>
 										<td title="{{$row->weight}}">
-											<div class="div-30">{{$row->weight}}</div>
+											<div data-name="weight" data-id="{{ $row->id }}" class="div-30">{{$row->weight}}</div>
 										</td>
 										<td title="{{$row->width}}">
-											<div class="div-31">{{$row->width}}</div>
+											<div data-name="width" data-id="{{ $row->id }}" class="div-31">{{$row->width}}</div>
 										</td>
 										<td title="{{$row->height}}">
-											<div class="div-32">{{$row->height}}</div>
+											<div data-name="height" data-id="{{ $row->id }}" class="div-32">{{$row->height}}</div>
 										</td>
 										<td title="{{$row->length}}">
-											<div class="div-33">{{$row->length}}</div>
+											<div data-name="length" data-id="{{ $row->id }}" class="div-33">{{$row->length}}</div>
 										</td>
 										<td title="{{$row->volume_weight}}">
-											<div class="div-34">{{$row->volume_weight}}</div>
+											<div data-name="volume_weight" data-id="{{ $row->id }}" class="div-34">{{$row->volume_weight}}</div>
 										</td>
 										<td title="{{$row->quantity_things}}">
-											<div class="div-35">{{$row->quantity_things}}</div>
+											<div data-name="quantity_things" data-id="{{ $row->id }}" class="div-35">{{$row->quantity_things}}</div>
 										</td>
 										<td title="{{$row->batch_number}}">
-											<div class="div-36">{{$row->batch_number}}</div>
+											<div data-name="batch_number" data-id="{{ $row->id }}" class="div-36">{{$row->batch_number}}</div>
 										</td>
 										<td title="{{$row->pay_date}}">
-											<div class="div-37">{{$row->pay_date}}</div>
+											<div data-name="pay_date" data-id="{{ $row->id }}" class="div-37">{{$row->pay_date}}</div>
 										</td>
 										<td title="{{$row->pay_sum}}">
-											<div class="div-38">{{$row->pay_sum}}</div>
+											<div data-name="pay_sum" data-id="{{ $row->id }}" class="div-38">{{$row->pay_sum}}</div>
 										</td>
 										<td title="{{$row->status_en}}">
 											<div class="div-39">{{$row->status_en}}</div>
@@ -604,35 +604,35 @@
 											<div class="div-41">{{$row->status_ua}}</div>
 										</td>
 										<td title="{{$row->package_content}}">
-											<div class="div1">{{$row->package_content}}</div>
+											<div data-name="package_content" data-id="{{ $row->id }}" class="div1">{{$row->package_content}}</div>
 										</td>
 										<td title="{{$row->recipient_name_customs}}">
-											<div class="div-17">{{$row->recipient_name_customs}}</div>
+											<div data-name="recipient_name_customs" data-id="{{ $row->id }}" class="div-17">{{$row->recipient_name_customs}}</div>
 										</td>
 										<td title="{{$row->recipient_country_customs}}">
-											<div class="div-18">{{$row->recipient_country_customs}}</div>
+											<div data-name="recipient_country_customs" data-id="{{ $row->id }}" class="div-18">{{$row->recipient_country_customs}}</div>
 										</td>
 										<td title="{{$row->recipient_city_customs}}">
-											<div class="div-19">{{$row->recipient_city_customs}}</div>
+											<div data-name="recipient_city_customs" data-id="{{ $row->id }}" class="div-19">{{$row->recipient_city_customs}}</div>
 										</td>
 										<td title="{{$row->recipient_postcode_customs}}">
-											<div class="div-20">{{$row->recipient_postcode_customs}}</div>
+											<div data-name="recipient_postcode_customs" data-id="{{ $row->id }}" class="div-20">{{$row->recipient_postcode_customs}}</div>
 										</td>
 										<td title="{{$row->recipient_street_customs}}">
-											<div class="div-21">{{$row->recipient_street_customs}}</div>
+											<div data-name="recipient_street_customs" data-id="{{ $row->id }}" class="div-21">{{$row->recipient_street_customs}}</div>
 										</td>
 										<td title="{{$row->recipient_house_customs}}">
-											<div class="div-22">{{$row->recipient_house_customs}}</div>
+											<div data-name="recipient_house_customs" data-id="{{ $row->id }}" class="div-22">{{$row->recipient_house_customs}}</div>
 										</td>
 										<td title="{{$row->recipient_room_customs}}">
-											<div class="div-23">{{$row->recipient_room_customs}}</div>
+											<div data-name="recipient_room_customs" data-id="{{ $row->id }}" class="div-23">{{$row->recipient_room_customs}}</div>
 										</td>
 										<td title="{{$row->recipient_phone_customs}}">
-											<div class="div-24">{{$row->recipient_phone_customs}}</div>
+											<div data-name="recipient_phone_customs" data-id="{{ $row->id }}" class="div-24">{{$row->recipient_phone_customs}}</div>
 										</td>
 										<td title="{{$row->recipient_passport_customs}}">
-											<div class="div-25">{{$row->recipient_passport_customs}}</div>
-										</td>                                                                     
+											<div data-name="recipient_passport_customs" data-id="{{ $row->id }}" class="div-25">{{$row->recipient_passport_customs}}</div>
+										</td>                                                                      
 									</tr>
 
 									@endif
@@ -718,7 +718,7 @@
 									</label>	
 
 									<label class="value-by-tracking checkbox-operations-change">Введите значение:
-										<input class="form-control" type="text" name="value-by-tracking">
+										<textarea class="form-control" name="value-by-tracking"></textarea>
 										<input type="hidden" name="status_en">
 										<input type="hidden" name="status_ua">
 										<input type="hidden" name="status_he">
@@ -744,6 +744,36 @@
 	</div><!-- .animated -->
 </div><!-- .content -->
 
+<!-- Modal -->
+<a id="update-cell" data-toggle="modal" data-target="#updateCellModal"></a>
+
+<div class="modal fade" id="updateCellModal" tabindex="-1" role="dialog" aria-labelledby="updateCellModalLabel" aria-hidden="true" style="background: rgba(0, 0, 0, 0.4);">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title" id="updateCellModalLabel">Update cell</h5>
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+			<form action="{{ route('addCourierDraftDataById') }}" method="POST" enctype="multipart/form-data">
+				@csrf
+				<div class="modal-body">
+					<div class="form-group value-by-tracking">
+						<textarea class="form-control" name="value-by-tracking"></textarea>
+						<input type="hidden" name="status_en">
+						<input type="hidden" name="status_ua">
+						<input type="hidden" name="status_he">
+					</div>					
+				</div>
+				<div class="modal-footer">
+					<button type="submit" class="btn btn-primary" style="font-size:.8rem">SAVE</button>
+				</div>
+			</form>
+		</div>
+	</div>
+</div>
+
 <script>
 
 	let href = location.href;
@@ -751,6 +781,8 @@
 		document.querySelector('.for_active').checked = true;
 		document.querySelector('[name="for_active"]').value = 'for_active';
 	}
+
+	var activateUrl = "{{ url('/admin/courier-draft-activate/') }}";
 
 	
 	function ConfirmDelete(event)
@@ -800,7 +832,7 @@
 						return 0;
 					}
 					else{
-						location.href = '/admin/courier-draft-activate/'+rowId;
+						location.href = activateUrl+'/'+rowId;
 					}
 				},
 				error: function (msg) {

@@ -447,12 +447,12 @@ $('#tracking-columns').change((e)=>{
     const thisVal = $(e.target).val();
     if (thisVal === 'status') {
         $('[name="value-by-tracking"]').remove()
-        $('#site_name').remove()
-        $('#tariff').remove()
-        $('#partner').remove()
-        $('#city-value').remove()
+        $('[name="site_name"]').remove()
+        $('[name="tariff"]').remove()
+        $('[name="partner"]').remove()
+        $('.city-value').remove()
         $('.value-by-tracking').append(`
-            <div id="status-value">
+            <div class="status-value">
                 <select class="form-control" id="status" name="status">
                    <option value="" selected="selected"></option>
                    <option value="Доставляется на склад в стране отправителя">Доставляется на склад в стране отправителя</option>
@@ -475,10 +475,10 @@ $('#tracking-columns').change((e)=>{
     }
     else if(thisVal === 'site_name'){
         $('[name="value-by-tracking"]').remove()
-        $('#status-value').remove()
-        $('#tariff').remove()
-        $('#partner').remove()
-        $('#city-value').remove()
+        $('.status-value').remove()
+        $('[name="tariff"]').remove()
+        $('[name="partner"]').remove()
+        $('.city-value').remove()
         $('.value-by-tracking').append(`
             <select class="form-control" id="site_name" name="site_name">
                <option value="DD-C">DD-C</option>
@@ -488,10 +488,10 @@ $('#tracking-columns').change((e)=>{
     }
     else if(thisVal === 'tariff'){
         $('[name="value-by-tracking"]').remove()
-        $('#status-value').remove()
-        $('#site_name').remove()
-        $('#partner').remove()
-        $('#city-value').remove()
+        $('.status-value').remove()
+        $('[name="site_name"]').remove()
+        $('[name="partner"]').remove()
+        $('.city-value').remove()
         $('.value-by-tracking').append(`
             <select class="form-control" id="tariff" name="tariff">
                <option value="" selected="selected"></option>
@@ -502,10 +502,10 @@ $('#tracking-columns').change((e)=>{
     }
     else if(thisVal === 'partner'){
         $('[name="value-by-tracking"]').remove()
-        $('#status-value').remove()
-        $('#site_name').remove()
-        $('#tariff').remove()
-        $('#city-value').remove()
+        $('.status-value').remove()
+        $('[name="site_name"]').remove()
+        $('[name="tariff"]').remove()
+        $('.city-value').remove()
         $('.value-by-tracking').append(`
             <select class="form-control" id="partner" name="partner">
                <option value="" selected="selected"></option>
@@ -519,12 +519,12 @@ $('#tracking-columns').change((e)=>{
     }
     else if(thisVal === 'sender_city') {
         $('[name="value-by-tracking"]').remove()
-        $('#status-value').remove()
-        $('#site_name').remove()
-        $('#tariff').remove()
-        $('#partner').remove()
+        $('.status-value').remove()
+        $('[name="site_name"]').remove()
+        $('[name="tariff"]').remove()
+        $('[name="partner"]').remove()
         $('.value-by-tracking').append(`
-            <div id="city-value">
+            <div class="city-value">
                 <div class="col-md-4">
                     <select class="form-control" name="choose_city_ru"><option value="0" selected="selected">Метод изменения города</option><option value="1">Выбрать из списка (автоматически определится Регион)</option><option value="2">Ввести вручную (Регион возможно не определится)</option></select>
                 </div>
@@ -537,19 +537,19 @@ $('#tracking-columns').change((e)=>{
             `)
     }
     else {
-        $('#status-value').remove()
-        $('#site_name').remove()
-        $('#tariff').remove()
-        $('#partner').remove()
-        $('#city-value').remove()
+        $('.status-value').remove()
+        $('[name="site_name"]').remove()
+        $('[name="tariff"]').remove()
+        $('[name="partner"]').remove()
+        $('.city-value').remove()
         $('[name="value-by-tracking"]').remove()
         $('.value-by-tracking').append(`
-            <input class="form-control" type="text" name="value-by-tracking">
+            <textarea class="form-control" name="value-by-tracking"></textarea>
             `)
     }
 });
 
-$(document).delegate('#status-value select[name="status"]', 'change',(e)=>{
+$(document).delegate('.status-value select[name="status"]', 'change',(e)=>{
     const key = $(e.target).val();
     $('.value-by-tracking [name="status_en"]').val(enArr[key]);
     $('.value-by-tracking [name="status_he"]').val(heArr[key]);
@@ -749,7 +749,7 @@ $('[name="shipper_country"]').on('change', function(){
 });
 
 let count_error = 0;
-$('.standard-phone').on('input', function() {
+$(document).delegate('.standard-phone','input', function() {
     $('div.error-phone').remove();
     if (location.href.indexOf('phil-ind') == -1 && location.href.indexOf('courier-eng-draft') == -1) {
 
@@ -993,3 +993,46 @@ $(document).delegate('select[name="choose_city_eng"]', 'change', function(){
         $('.choose-city-eng input[name="shipper_city"]').prop('disabled', false);
     }                         
 });
+
+
+// Modals for table cells
+$('table td').not('.td-checkbox, .td-button').click((e)=>{
+    $('#updateCellModal [name="row_id[]"]').remove()
+    $('#updateCellModal [name="tracking-columns"]').remove()
+    $('#updateCellModal select').remove()
+    let id = ''
+    let name = ''
+    let table = ''
+    let value = ''
+    if ($(e.target).prop("tagName") === 'DIV') {
+        id = $(e.target).attr('data-id')
+        name = $(e.target).attr('data-name')
+        value = $(e.target).text()
+    }
+    else if ($(e.target).prop("tagName") === 'TD') {
+        id = $(e.target).children('div').attr('data-id')
+        name = $(e.target).children('div').attr('data-name')
+    }
+    if (id) {       
+        $('#update-cell').click()
+        $('#updateCellModal').addClass('show')
+        $('#updateCellModal').removeAttr('aria-hidden')
+        $('body').addClass('modal-open')
+        $('#tracking-columns').val(name).change()
+        $('#updateCellModal [name="value-by-tracking"]').val(value)
+        $('#updateCellModal select').val(value)
+        if (name === 'standard_phone') {
+            $('#updateCellModal [name="value-by-tracking"]').remove()
+            $('#updateCellModal .value-by-tracking').append(`
+            <input type="text" class="form-control standard-phone" 
+                name="value-by-tracking" value="`+value+`" >
+            `)
+        }
+        $('#updateCellModal .value-by-tracking').append(`
+            <input type="hidden" name="row_id[]" value="`+id+`">
+            <input type="hidden" name="tracking-columns" value="`+name+`">
+            `)
+        
+    }
+    
+})

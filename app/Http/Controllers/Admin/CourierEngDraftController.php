@@ -71,14 +71,12 @@ class CourierEngDraftController extends AdminController
 	}
 
 
-	private function validateUpdate($request)
+	private function validateUpdate($request, $id)
 	{
 		$error_message = '';
 		if ($request->input('tracking_main')) {
-			if (!$this->trackingValidate($request->input('tracking_main'))) {
-				$error_message = 'Tracking number is not correct.';
-				return $error_message;
-			}
+			$error_message = $this->checkTracking("courier_eng_draft_worksheet", $request->input('tracking_main'), $id);
+			return $error_message;
 		}
 		elseif (!$request->input('tracking_main') && !in_array($request->input('status'), $this->status_arr_3)){
 			$error_message = "Status cannot be higher than Pick up without tracking number";
@@ -109,7 +107,10 @@ class CourierEngDraftController extends AdminController
 		$user = Auth::user();	
 		$status_error = '';			
 
-		$status_error = $this->validateUpdate($request);
+		$status_error = $this->validateUpdate($request, $id);
+		if (!$status_error) {
+			$status_error = $this->checkStatus('courier_eng_draft_worksheet', $id, $request->input('status'));
+		}
 		if($status_error) return redirect()->to(session('this_previous_url'))->with('status-error', $status_error);	
 
 		if ($courier_eng_draft_worksheet->operator) $operator_change = false;
@@ -121,6 +122,10 @@ class CourierEngDraftController extends AdminController
 			elseif ($field !== 'created_at' && ($user->role === 'admin' || $user->role === 'office_1')) {
 				$courier_eng_draft_worksheet->$field = $request->input($field);
 			}
+		}
+
+		if ($request->input('tracking_main')) {
+			$check_result .= $this->updateStatusByTracking('courier_eng_draft_worksheet', $courier_eng_draft_worksheet);
 		}
 
 		$courier_eng_draft_worksheet->direction = $this->createDirection($request->input('shipper_country'), $request->input('consignee_country'));
@@ -135,13 +140,15 @@ class CourierEngDraftController extends AdminController
 		}
 
 		if ($old_tracking && $request->input('tracking_main')) {
-			ReceiptArchive::where([
-				['tracking_main', $old_tracking],
-				['worksheet_id','<>',null]
-			])->delete();
+			ReceiptArchive::where('tracking_main', $old_tracking)->delete();	
+			if ($old_tracking !== $request->input('tracking_main')) {
+				Receipt::where('tracking_main', $old_tracking)->update(
+					['tracking_main' => $request->input('tracking_main')]
+				);
+			}		
 		}
 		$notification = ReceiptArchive::where('tracking_main', $request->input('tracking_main'))->first();
-		if (!$notification) $check_result = $this->checkReceipt($id, null, 'en', $request->input('tracking_main'));
+		if (!$notification) $check_result = $this->checkReceipt($id, null, 'en', $request->input('tracking_main'),null,$old_tracking);
 		
 		if (in_array($courier_eng_draft_worksheet->shipper_city, array_keys($this->israel_cities))) {
 			$courier_eng_draft_worksheet->shipper_region = $this->israel_cities[$courier_eng_draft_worksheet->shipper_city];
@@ -185,7 +192,7 @@ class CourierEngDraftController extends AdminController
 				$this->checkForMissingTracking($request->input('tracking_main'));
 				
 				// Update Warehouse pallet
-				if ($old_pallet !== $request->input('pallet_number')) {
+				if ($old_pallet !== $request->input('pallet_number') || $old_tracking !== $request->input('tracking_main')) {
 					$message = $this->updateWarehousePallet($old_tracking, $request->input('tracking_main'), $old_pallet, $request->input('pallet_number'), $old_lot, $courier_eng_draft_worksheet->lot, 'en', $courier_eng_draft_worksheet);
 					if ($message) {
 						return redirect()->to(session('this_previous_url'))->with('status-error', 'Pallet number is not correct!');
@@ -228,6 +235,7 @@ class CourierEngDraftController extends AdminController
     	$old_pallet_arr = [];
     	$this_column = 'id';
     	$status_error = '';
+    	$check_result = '';
 
     	for ($i=0; $i < count($row_arr); $i++) { 
     		$courier_eng_draft_worksheet = CourierEngDraftWorksheet::find($row_arr[$i]);
@@ -258,7 +266,20 @@ class CourierEngDraftController extends AdminController
     					$worksheet = CourierEngDraftWorksheet::where('id',$row_arr[$i])->first();
     					$old_pallet_arr[] = $worksheet->pallet_number;
     				}
-    			}    			
+    			}   
+
+    			if ($column === 'tracking_main') {
+    				$validate = $this->trackingValidate($value_by);
+    				if ($validate) {
+    					for ($i=0; $i < count($row_arr); $i++) { 
+    						$worksheet = CourierEngDraftWorksheet::where('id',$row_arr[$i])->first();
+    						$old_tracking = $worksheet->tracking_main;
+    						$notification = ReceiptArchive::where('tracking_main', $value_by)->first();
+    						if (!$notification) $check_result = $this->checkReceipt($worksheet->id, null, 'en', $value_by,null,$old_tracking);
+    					}
+    				} 
+    				else return redirect()->to(session('this_previous_url'))->with('status-error', 'Tracking number is not correct!');				
+    			} 			
     			
     			if ($column !== 'operator') {
     				CourierEngDraftWorksheet::whereIn('id', $row_arr)
@@ -434,7 +455,7 @@ class CourierEngDraftController extends AdminController
         	return redirect()->to(session('this_previous_url'))->with('status-error', $status_error);
         }
         else{
-        	return redirect()->to(session('this_previous_url'))->with('status', 'Rows updated successfully!');
+        	return redirect()->to(session('this_previous_url'))->with('status', 'Rows updated successfully!'.' '.$check_result);
         }
     }
 

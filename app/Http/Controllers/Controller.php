@@ -57,7 +57,7 @@ class Controller extends BaseController
     protected function trackingValidate($tracking)
     {
         $pattern = '/^[a-z0-9]+$/i';
-        if (preg_match($pattern, $tracking)) {
+        if (preg_match($pattern, $tracking) && (strlen($tracking) >= 4 && strlen($tracking) <= 18)) {
             return true;
         } else {
             return false;
@@ -122,7 +122,7 @@ class Controller extends BaseController
     }
         
 
-    protected function checkReceipt($id, $receipt_id, $which_admin, $tracking_main, $receipt_number = null)
+    protected function checkReceipt($id, $receipt_id, $which_admin, $tracking_main, $receipt_number = null, $old_tracking = null)
     {
         $message = '';
         $receipt = Receipt::where('tracking_main',$tracking_main)->first();
@@ -131,6 +131,13 @@ class Controller extends BaseController
         if ($receipt_id == null) {
             if (!$receipt) {
                 if ($which_admin === 'ru') {
+                    if ($old_tracking) {
+                        ReceiptArchive::where([
+                            ['tracking_main',$old_tracking],
+                            ['worksheet_id',$id],
+                            ['which_admin','ru']
+                        ])->delete();
+                    }
                     $message = 'ВНИМАНИЕ! В ТАБЛИЦЕ «КВИТАНЦИИ» ОСТУСТСТВУЕТ ТРЕКИНГ НОМЕР ...('.$tracking_main.')!';
                     $archive = [
                         'worksheet_id' => $id,
@@ -138,11 +145,18 @@ class Controller extends BaseController
                         'which_admin' => 'ru',
                         'update_date' => $update_date,
                         'status' => false,
-                        'description' => 'ВНИМАНИЕ! В ТАБЛИЦЕ «КВИТАНЦИИ» ОСТУСТСТВУЕТ ТРЕКИНГ НОМЕР ...('.$tracking_main.')!'
+                        'description' => $message
                     ];
                     ReceiptArchive::create($archive);
                 }
                 else if ($which_admin === 'en') {
+                    if ($old_tracking) {
+                        ReceiptArchive::where([
+                            ['tracking_main',$old_tracking],
+                            ['worksheet_id',$id],
+                            ['which_admin','en']
+                        ])->delete();
+                    }
                     $message = 'WARNING! DETECTED TRACKING NUMBERS MISSING IN THE RECEIPTS SHEET ...('.$tracking_main.')!';
                     $archive = [
                         'worksheet_id' => $id,
@@ -150,7 +164,7 @@ class Controller extends BaseController
                         'which_admin' => 'en',
                         'update_date' => $update_date,
                         'status' => false,
-                        'description' => 'WARNING! DETECTED TRACKING NUMBERS MISSING IN THE RECEIPTS SHEET ...('.$tracking_main.')!'
+                        'description' => $message
                     ];
                     ReceiptArchive::create($archive);
                 }
@@ -167,7 +181,7 @@ class Controller extends BaseController
                     'receipt_number' => $receipt_number,
                     'tracking_main' => $tracking_main,
                     'which_admin' => 'en',
-                    'description' => 'WARNING! DETECTED TRACKING NUMBERS MISSING IN THE WORK SHEET ...('.$tracking_main.')!'
+                    'description' => $message
                 ];
                 ReceiptArchive::create($archive);
             }
@@ -178,7 +192,7 @@ class Controller extends BaseController
                     'receipt_number' => $receipt_number,
                     'tracking_main' => $tracking_main,
                     'which_admin' => 'ru',
-                    'description' => 'ВНИМАНИЕ! В РАБОЧЕМ ЛИСТЕ ОСТУСТСТВУЕТ ТРЕКИНГ НОМЕР ...('.$tracking_main.')!'
+                    'description' => $message
                 ];
                 ReceiptArchive::create($archive);
             }
@@ -193,10 +207,7 @@ class Controller extends BaseController
         if (stripos($tracking, 'CD') !== false || stripos($tracking, 'BL') !== false){
             return 'ru';
         }
-        elseif (stripos($tracking, 'IN') !== false || stripos($tracking, 'NE') !== false || stripos($tracking, 'AN') !== false || stripos($tracking, 'AG') !== false || stripos($tracking, 'AD') !== false || stripos($tracking, 'AS') !== false) {
-            return 'en';
-        }
-        else return '';
+        else return 'en';
     }
 
 
@@ -234,7 +245,7 @@ class Controller extends BaseController
             }
 
             // Removing tracking from old pallet
-            if ($old_pallet) {
+            if ($old_pallet && $old_pallet !== $new_pallet) {
                 $this->removeTrackingFromPallet($old_pallet, $tracking_main);                 
             }
 

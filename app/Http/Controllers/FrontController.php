@@ -794,14 +794,6 @@ class FrontController extends AdminController
                 ['tracking_main', '=', $tracking],
                 ['site_name', '=', 'DD-C']
             ])
-            ->orWhere([
-                ['tracking_main', 'like', '%'.', '.$tracking],
-                ['site_name', '=', 'DD-C']
-            ])
-            ->orWhere([
-                ['tracking_main', 'like', '%'.$tracking.', '.'%'],
-                ['site_name', '=', 'DD-C']
-            ])
             ->get();
             if ($row->count()) {
                 foreach ($row as $val) {
@@ -825,8 +817,6 @@ class FrontController extends AdminController
             $row = DB::table('china_worksheet')
             ->select('status','status_he','status_ru')
             ->where('tracking_main', '=', $tracking)
-            ->orWhere('tracking_main', 'like', '%'.', '.$tracking)
-            ->orWhere('tracking_main', 'like', '%'.$tracking.', '.'%')
             ->get();
             if ($row->count()) {
                 foreach ($row as $val) {
@@ -848,8 +838,6 @@ class FrontController extends AdminController
             $row = DB::table('phil_ind_worksheet')
             ->select('status','status_he','status_ru')
             ->where('tracking_main', '=', $tracking)
-            ->orWhere('tracking_main', 'like', '%'.', '.$tracking)
-            ->orWhere('tracking_main', 'like', '%'.$tracking.', '.'%')
             ->get();
             if ($row->count()) {
                 foreach ($row as $val) {
@@ -897,14 +885,6 @@ class FrontController extends AdminController
         ->select('status','status_en','status_he','status_ua')
         ->where([
             ['tracking_main', '=', $tracking],
-            ['site_name', '=', 'For']
-        ])
-        ->orWhere([
-            ['tracking_main', 'like', '%'.', '.$tracking],
-            ['site_name', '=', 'For']
-        ])
-        ->orWhere([
-            ['tracking_main', 'like', '%'.$tracking.', '.'%'],
             ['site_name', '=', 'For']
         ])
         ->get();

@@ -471,6 +471,8 @@
 		document.querySelector('[name="for_active"]').value = 'for_active';
 	}
 
+	var activateUrl = "{{ url('/admin/courier-eng-draft-activate/') }}";
+
 	function ConfirmDelete(event)
 	{
 		event.preventDefault();
@@ -521,10 +523,10 @@
 					}
 					else if (data.phone_exist) {
 						let phone = confirm("A record with the same phone number was added to the database recently. Are you sure you want to add the record/records?");
-						if (phone) location.href = '/admin/courier-eng-draft-activate/'+rowId;						
+						if (phone) location.href = activateUrl+'/'+rowId;						
 					}
 					else{
-						location.href = '/admin/courier-eng-draft-activate/'+rowId;
+						location.href = activateUrl+'/'+rowId;
 					}
 				},
 				error: function (msg) {

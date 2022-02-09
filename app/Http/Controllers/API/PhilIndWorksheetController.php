@@ -50,12 +50,6 @@ class PhilIndWorksheetController extends BaseController
             ->where([
                 ['tracking_main', '=', $tracking]
             ])
-            ->orWhere([
-                ['tracking_main', 'like', '%'.', '.$tracking]
-            ])
-            ->orWhere([
-                ['tracking_main', 'like', '%'.$tracking.', '.'%']
-            ])
             ->get();
 
             if ($row->count()) {
@@ -97,12 +91,6 @@ class PhilIndWorksheetController extends BaseController
             $row = PhilIndWorksheet::select('status','status_ru','status_he')
             ->where([
                 ['tracking_main', '=', $tracking]
-            ])
-            ->orWhere([
-                ['tracking_main', 'like', '%'.', '.$tracking]
-            ])
-            ->orWhere([
-                ['tracking_main', 'like', '%'.$tracking.', '.'%']
             ])
             ->get();
 
@@ -154,12 +142,6 @@ class PhilIndWorksheetController extends BaseController
             if ($input['next_status']) {
                 $row = PhilIndWorksheet::where([
                     ['tracking_main', '=', $tracking]
-                ])
-                ->orWhere([
-                    ['tracking_main', 'like', '%'.', '.$tracking]
-                ])
-                ->orWhere([
-                    ['tracking_main', 'like', '%'.$tracking.', '.'%']
                 ])
                 ->get();
 
@@ -225,12 +207,6 @@ class PhilIndWorksheetController extends BaseController
 
                 $check_tracking = PhilIndWorksheet::where([
                     ['tracking_main', '=', $input['tracking_main']]
-                ])
-                ->orWhere([
-                    ['tracking_main', 'like', '%'.', '.$input['tracking_main']]
-                ])
-                ->orWhere([
-                    ['tracking_main', 'like', '%'.$input['tracking_main'].', '.'%']
                 ])->first();
                 if($check_tracking) return $this->sendError('Main tracking number already exist.', ['tracking_main' => $input['tracking_main']]);
                 
@@ -306,22 +282,10 @@ class PhilIndWorksheetController extends BaseController
 
             $check_tracking = PhilIndWorksheet::where([
                 ['tracking_main', '=', $input['tracking_main']]
-            ])
-            ->orWhere([
-                ['tracking_main', 'like', '%'.', '.$input['tracking_main']]
-            ])
-            ->orWhere([
-                ['tracking_main', 'like', '%'.$input['tracking_main'].', '.'%']
             ])->first();
             if (!$check_tracking) {
                 $check_tracking = CourierEngDraftWorksheet::where([
                     ['tracking_main', '=', $input['tracking_main']]
-                ])
-                ->orWhere([
-                    ['tracking_main', 'like', '%'.', '.$input['tracking_main']]
-                ])
-                ->orWhere([
-                    ['tracking_main', 'like', '%'.$input['tracking_main'].', '.'%']
                 ])->first();
             }
             if($check_tracking) return $this->sendError('Main tracking number already exist.', ['tracking_main' => $input['tracking_main']]);
@@ -422,22 +386,10 @@ class PhilIndWorksheetController extends BaseController
 
             $check_tracking = PhilIndWorksheet::where([
                 ['tracking_main', '=', $input['tracking_main']]
-            ])
-            ->orWhere([
-                ['tracking_main', 'like', '%'.', '.$input['tracking_main']]
-            ])
-            ->orWhere([
-                ['tracking_main', 'like', '%'.$input['tracking_main'].', '.'%']
             ])->first();
             if (!$check_tracking) {
                 $check_tracking = CourierEngDraftWorksheet::where([
                     ['tracking_main', '=', $input['tracking_main']]
-                ])
-                ->orWhere([
-                    ['tracking_main', 'like', '%'.', '.$input['tracking_main']]
-                ])
-                ->orWhere([
-                    ['tracking_main', 'like', '%'.$input['tracking_main'].', '.'%']
                 ])->first();
             }
             if($check_tracking) return $this->sendError('Main tracking number already exist.', ['tracking_main' => $input['tracking_main']]);

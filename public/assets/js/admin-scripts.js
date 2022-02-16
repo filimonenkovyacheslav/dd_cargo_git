@@ -562,11 +562,11 @@ $('#phil-ind-tracking-columns').change((e)=>{
     const thisVal = $(e.target).val();   
     if (thisVal === 'status') {
         $('[name="value-by-tracking"]').remove()
-        $('#consignee-country-value').remove()
-        $('#shipper-country-value').remove()
-        $('#city-value').remove()
+        $('.consignee-country-value').remove()
+        $('.shipper-country-value').remove()
+        $('.city-value').remove()
         $('.phil-ind-value-by-tracking').append(`
-            <div id="phil-ind-status-value">
+            <div class="phil-ind-status-value">
                 <select class="form-control" id="status" name="status">
                    <option value="" selected="selected"></option>
                    <option value="Pending">Pending</option>
@@ -589,11 +589,11 @@ $('#phil-ind-tracking-columns').change((e)=>{
     }
     else if (thisVal === 'shipper_country') {       
         $('[name="value-by-tracking"]').remove()
-        $('#phil-ind-status-value').remove()
-        $('#consignee-country-value').remove()
-        $('#city-value').remove()
+        $('.phil-ind-status-value').remove()
+        $('.consignee-country-value').remove()
+        $('.city-value').remove()
         $('.phil-ind-value-by-tracking').append(`
-            <div id="shipper-country-value">
+            <div class="shipper-country-value">
                 <select class="form-control" id="shipper_country" name="shipper_country">
                     <option value="" selected="selected"></option>
                     <option value="Israel">Israel</option>
@@ -604,11 +604,11 @@ $('#phil-ind-tracking-columns').change((e)=>{
     }
     else if (thisVal === 'consignee_country') {
         $('[name="value-by-tracking"]').remove()
-        $('#phil-ind-status-value').remove()
-        $('#shipper-country-value').remove()
-        $('#city-value').remove()
+        $('.phil-ind-status-value').remove()
+        $('.shipper-country-value').remove()
+        $('.city-value').remove()
         $('.phil-ind-value-by-tracking').append(`
-            <div id="consignee-country-value">
+            <div class="consignee-country-value">
                 <select class="form-control" id="consignee_country" name="consignee_country">
                     <option value="" selected="selected"></option>
                     <option value="India">India</option>
@@ -623,11 +623,11 @@ $('#phil-ind-tracking-columns').change((e)=>{
     }
     else if (thisVal === 'shipper_city') {
         $('[name="value-by-tracking"]').remove()
-        $('#phil-ind-status-value').remove()
-        $('#shipper-country-value').remove()
-        $('#consignee-country-value').remove()
+        $('.phil-ind-status-value').remove()
+        $('.shipper-country-value').remove()
+        $('.consignee-country-value').remove()
         $('.phil-ind-value-by-tracking').append(`
-            <div id="city-value">
+            <div class="city-value">
                 <div class="col-md-4 choose-city-eng">
                     <select class="form-control" name="choose_city_eng"><option value="0" selected="selected">City change method</option><option value="1">Select from the list (Region will be automatically determined)</option><option value="2">Enter manually (Region may not be determined)</option></select>
                 </div>
@@ -640,27 +640,27 @@ $('#phil-ind-tracking-columns').change((e)=>{
             `)
     }
     else {
-        $('#phil-ind-status-value').remove()
-        $('#consignee-country-value').remove()
-        $('#shipper-country-value').remove()
+        $('.phil-ind-status-value').remove()
+        $('.consignee-country-value').remove()
+        $('.shipper-country-value').remove()
         $('[name="value-by-tracking"]').remove()
-        $('#city-value').remove()
+        $('.city-value').remove()
         $('.phil-ind-value-by-tracking').append(`
-            <input class="form-control" type="text" name="value-by-tracking">
+            <textarea class="form-control" name="value-by-tracking"></textarea>
             `)
     }
 })
 
-$(document).delegate('#phil-ind-status-value select[name="status"]', 'change',(e)=>{
+$(document).delegate('.phil-ind-status-value select[name="status"]', 'change',(e)=>{
     const key = $(e.target).val();
     $('.phil-ind-value-by-tracking [name="status_ru"]').val(ruArrChina[key]);
     $('.phil-ind-value-by-tracking [name="status_he"]').val(heArrChina[key]);
 })
 
-$(document).delegate('#shipper-country-value select[name="shipper_country"]', 'change',(e)=>{
+$(document).delegate('.shipper-country-value select[name="shipper_country"]', 'change',(e)=>{
     $('.phil-ind-value-by-tracking [name="shipper_country_val"]').val($(e.target).val());
 })
-$(document).delegate('#consignee-country-value select[name="consignee_country"]', 'change',(e)=>{
+$(document).delegate('.consignee-country-value select[name="consignee_country"]', 'change',(e)=>{
     $('.phil-ind-value-by-tracking [name="consignee_country_val"]').val($(e.target).val());
 })
 /* End Tracking filter checkbox*/
@@ -996,9 +996,10 @@ $(document).delegate('select[name="choose_city_eng"]', 'change', function(){
 
 
 // Modals for table cells
-$('table td').not('.td-checkbox, .td-button').click((e)=>{
+$('table td.allowed-update').not('.td-checkbox, .td-button').click((e)=>{
     $('#updateCellModal [name="row_id[]"]').remove()
     $('#updateCellModal [name="tracking-columns"]').remove()
+    $('#updateCellModal [name="phil-ind-tracking-columns"]').remove()
     $('#updateCellModal select').remove()
     let id = ''
     let name = ''
@@ -1019,6 +1020,7 @@ $('table td').not('.td-checkbox, .td-button').click((e)=>{
         $('#updateCellModal').removeAttr('aria-hidden')
         $('body').addClass('modal-open')
         $('#tracking-columns').val(name).change()
+        $('#phil-ind-tracking-columns').val(name).change()
         $('#updateCellModal [name="value-by-tracking"]').val(value)
         $('#updateCellModal select').val(value)
         if (name === 'standard_phone') {
@@ -1027,10 +1029,18 @@ $('table td').not('.td-checkbox, .td-button').click((e)=>{
             <input type="text" class="form-control standard-phone" 
                 name="value-by-tracking" value="`+value+`" >
             `)
+            $('#updateCellModal .phil-ind-value-by-tracking').append(`
+            <input type="text" class="form-control standard-phone" 
+                name="value-by-tracking" value="`+value+`" >
+            `)
         }
         $('#updateCellModal .value-by-tracking').append(`
             <input type="hidden" name="row_id[]" value="`+id+`">
             <input type="hidden" name="tracking-columns" value="`+name+`">
+            `)
+        $('#updateCellModal .phil-ind-value-by-tracking').append(`
+            <input type="hidden" name="row_id[]" value="`+id+`">
+            <input type="hidden" name="phil-ind-tracking-columns" value="`+name+`">
             `)
         
     }

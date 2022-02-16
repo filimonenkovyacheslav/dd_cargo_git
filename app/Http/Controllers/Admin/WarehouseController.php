@@ -128,7 +128,7 @@ class WarehouseController extends AdminController
 		$tracking = $request->input('tracking');
 
 		if ($tracking) {
-			if (!$this->trackingValidate($request->input('tracking_main'))) return redirect()->to(session('this_previous_url'))->with('status-error', 'Tracking number is not correct.');
+			if (!$this->trackingValidate($tracking)) return redirect()->to(session('this_previous_url'))->with('status-error', 'Tracking number is not correct.');
 		}
 
 		$which_admin = $this->checkWhichAdmin($tracking);
@@ -147,7 +147,9 @@ class WarehouseController extends AdminController
         	return redirect()->to(session('this_previous_url'))->with('status-error', 'Tracking number is not correct!');
         }
         $worksheet_ru = NewWorksheet::where('in_trash',false)->where('tracking_main', $tracking)->first();
+        if (!$worksheet_ru) $worksheet_ru = CourierDraftWorksheet::where('in_trash',false)->where('tracking_main', $tracking)->first();
         $worksheet_en = PhilIndWorksheet::where('in_trash',false)->where('tracking_main', $tracking)->first();
+        if (!$worksheet_en) $worksheet_en = CourierEngDraftWorksheet::where('in_trash',false)->where('tracking_main', $tracking)->first();
 
         if (!$worksheet_ru && !$worksheet_en) {
         	if($warehouse->notifications){

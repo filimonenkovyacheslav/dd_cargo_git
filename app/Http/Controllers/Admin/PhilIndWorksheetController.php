@@ -800,18 +800,37 @@ class PhilIndWorksheetController extends AdminController
     				}
     			}
 
-    			if ($column === 'tracking_main') {
-    				$validate = $this->trackingValidate($value_by);
-    				if ($validate) {
-    					for ($i=0; $i < count($row_arr); $i++) { 
-    						$worksheet = PhilIndWorksheet::where('id',$row_arr[$i])->first();
-    						$old_tracking = $worksheet->tracking_main;
-    						$notification = ReceiptArchive::where('tracking_main', $value_by)->first();
-    						if (!$notification) $check_result = $this->checkReceipt($worksheet->id, null, 'en', $value_by,null,$old_tracking);
+    			if ($column === 'tracking_main') {   				    				
+    				for ($i=0; $i < count($row_arr); $i++) { 
+
+    					$error_message = $this->checkTracking("phil_ind_worksheet", $value_by, $row_arr[$i]);
+    					if($error_message) return redirect()->to(session('this_previous_url'))->with('status-error', $error_message);
+    					
+    					$worksheet = PhilIndWorksheet::where('id',$row_arr[$i])->first();
+    					$old_tracking = $worksheet->tracking_main;
+    					$pallet = $worksheet->pallet_number;
+    					$lot = $worksheet->lot;
+
+    					if ($old_tracking && $old_tracking !== $value_by) {
+    						ReceiptArchive::where('tracking_main', $old_tracking)->delete();
+    						Receipt::where('tracking_main', $old_tracking)->update(
+    							['tracking_main' => $value_by]
+    						);
     					}
-    				} 
-    				else return redirect()->to(session('this_previous_url'))->with('status-error', 'Tracking number is not correct!');				
-    			}
+    					$notification = ReceiptArchive::where('tracking_main', $value_by)->first();
+    					if (!$notification) $check_result .= $this->checkReceipt($worksheet->id, null, 'en', $value_by,null,$old_tracking); 
+
+    					$check_result .= $this->updateStatusByTracking('phil_ind_worksheet', $worksheet);		
+    				}
+
+    				// Check for missing tracking
+    				$this->checkForMissingTracking($value_by);
+    				// Update Warehouse pallet
+    				$message = $this->updateWarehousePallet($old_tracking, $value_by, $pallet, $pallet, $lot, $lot, 'en', $worksheet);
+    				if ($message) {
+    					return redirect()->to(session('this_previous_url'))->with('status-error', 'Pallet number is not correct!');
+    				}					
+    			}	
     			
     			if ($column !== 'operator') {
     				PhilIndWorksheet::whereIn('id', $row_arr)

@@ -220,152 +220,152 @@
 
 											@endcan
 										</td>
-										<td title="{{$row->date}}">
+										<td class="@can('editEngDraft')allowed-update @endcan" title="{{$row->date}}">
 											<div class="div-3">{{$row->date}}</div>
 										</td>
-										<td title="{{$row->direction}}">
+										<td class="@can('editEngDraft')allowed-update @endcan" title="{{$row->direction}}">
 											<div class="div-3">{{$row->direction}}</div>
 										</td>
-										<td title="{{$row->status}}">
-											<div class="div-3">{{$row->status}}</div>
+										<td class="@can('editEngDraft')allowed-update @endcan" title="{{$row->status}}">
+											<div data-name="status" data-id="{{ $row->id }}" class="div-3">{{$row->status}}</div>
 										</td>
-										<td title="{{$row->status_date}}">
+										<td class="@can('editEngDraft')allowed-update @endcan" title="{{$row->status_date}}">
 											<div class="div-1">{{$row->status_date}}</div>
 										</td>
-										<td title="{{$row->tracking_main}}">
-											<div class="div-3">{{$row->tracking_main}}</div>
+										<td class="@can('editEngDraft')allowed-update @endcan" title="{{$row->tracking_main}}">
+											<div data-name="tracking_main" data-id="{{ $row->id }}" class="div-3">{{$row->tracking_main}}</div>
 										</td>
 										<td class="td-button" title="{{$row->order_number}}">
 											<div class="div-22">{{$row->order_number}}</div>
 										</td>
-										<td title="{{$row->parcels_qty}}">
-											<div class="div-22">{{$row->parcels_qty}}</div>
+										<td class="@can('editEngDraft')allowed-update @endcan" title="{{$row->parcels_qty}}">
+											<div data-name="parcels_qty" data-id="{{ $row->id }}" class="div-22">{{$row->parcels_qty}}</div>
 										</td>
-										<td title="{{$row->tracking_local}}">
-											<div class="div-3">{{$row->tracking_local}}</div>
+										<td class="@can('editEngDraft')allowed-update @endcan" title="{{$row->tracking_local}}">
+											<div data-name="tracking_local" data-id="{{ $row->id }}" class="div-3">{{$row->tracking_local}}</div>
 										</td>
-										<td title="{{$row->pallet_number}}">
-											<div class="div-3">{{$row->pallet_number}}</div>
+										<td class="@can('editEngDraft')allowed-update @endcan" title="{{$row->pallet_number}}">
+											<div data-name="pallet_number" data-id="{{ $row->id }}" class="div-3">{{$row->pallet_number}}</div>
 										</td>
-										<td title="{{$row->comments_1}}">
-											<div class="div-3">{{$row->comments_1}}</div>
+										<td class="@can('editEngDraft')allowed-update @endcan" title="{{$row->comments_1}}">
+											<div data-name="comments_1" data-id="{{ $row->id }}" class="div-3">{{$row->comments_1}}</div>
 										</td>
-										<td title="{{$row->comments_2}}">
-											<div class="div-3">{{$row->comments_2}}</div>
+										<td class="@can('editEngDraft')allowed-update @endcan" title="{{$row->comments_2}}">
+											<div data-name="comments_2" data-id="{{ $row->id }}" class="div-3">{{$row->comments_2}}</div>
 										</td>
-										<td title="{{$row->shipper_name}}">
-											<div class="div-3">{{$row->shipper_name}}</div>
+										<td class="@can('editEngDraft')allowed-update @endcan" title="{{$row->shipper_name}}">
+											<div data-name="shipper_name" data-id="{{ $row->id }}" class="div-3">{{$row->shipper_name}}</div>
 										</td>
-										<td title="{{$row->shipper_country}}">
-											<div class="div-3">{{$row->shipper_country}}</div>
+										<td class="@can('editEngDraft')allowed-update @endcan" title="{{$row->shipper_country}}">
+											<div data-name="shipper_country" data-id="{{ $row->id }}" class="div-3">{{$row->shipper_country}}</div>
 										</td>
-										<td title="{{$row->shipper_region}}">
-											<div class="div-2">{{$row->shipper_region}}</div>
+										<td class="@can('editEngDraft')allowed-update @endcan" title="{{$row->shipper_region}}">
+											<div data-name="shipper_region" data-id="{{ $row->id }}" class="div-2">{{$row->shipper_region}}</div>
 										</td>
-										<td title="{{$row->shipper_city}}">
-											<div class="div-3">{{$row->shipper_city}}</div>
+										<td class="@can('editEngDraft')allowed-update @endcan" title="{{$row->shipper_city}}">
+											<div data-name="shipper_city" data-id="{{ $row->id }}" class="div-3">{{$row->shipper_city}}</div>
 										</td>
-										<td title="{{$row->passport_number}}">
-											<div class="div-3">{{$row->passport_number}}</div>
+										<td class="@can('editEngDraft')allowed-update @endcan" title="{{$row->passport_number}}">
+											<div data-name="passport_number" data-id="{{ $row->id }}" class="div-3">{{$row->passport_number}}</div>
 										</td>
-										<td title="{{$row->return_date}}">
-											<div class="div-3">{{$row->return_date}}</div>
+										<td class="@can('editEngDraft')allowed-update @endcan" title="{{$row->return_date}}">
+											<div data-name="return_date" data-id="{{ $row->id }}" class="div-3">{{$row->return_date}}</div>
 										</td>
-										<td title="{{$row->shipper_address}}">
-											<div class="div-3">{{$row->shipper_address}}</div>
+										<td class="@can('editEngDraft')allowed-update @endcan" title="{{$row->shipper_address}}">
+											<div data-name="shipper_address" data-id="{{ $row->id }}" class="div-3">{{$row->shipper_address}}</div>
 										</td>
-										<td title="{{$row->standard_phone}}">
-											<div class="div-4">{{$row->standard_phone}}</div>
+										<td class="@can('editEngDraft')allowed-update @endcan" title="{{$row->standard_phone}}">
+											<div data-name="standard_phone" data-id="{{ $row->id }}" class="div-4">{{$row->standard_phone}}</div>
 										</td>
-										<td title="{{$row->shipper_phone}}">
-											<div class="div-3">{{$row->shipper_phone}}</div>
+										<td class="@can('editEngDraft')allowed-update @endcan" title="{{$row->shipper_phone}}">
+											<div data-name="shipper_phone" data-id="{{ $row->id }}" class="div-3">{{$row->shipper_phone}}</div>
 										</td>
-										<td title="{{$row->shipper_id}}">
-											<div class="div-3">{{$row->shipper_id}}</div>
+										<td class="@can('editEngDraft')allowed-update @endcan" title="{{$row->shipper_id}}">
+											<div data-name="shipper_id" data-id="{{ $row->id }}" class="div-3">{{$row->shipper_id}}</div>
 										</td>
-										<td title="{{$row->consignee_name}}">
-											<div class="div-3">{{$row->consignee_name}}</div>
+										<td class="@can('editEngDraft')allowed-update @endcan" title="{{$row->consignee_name}}">
+											<div data-name="consignee_name" data-id="{{ $row->id }}" class="div-3">{{$row->consignee_name}}</div>
 										</td>
-										<td title="{{$row->consignee_country}}">
-											<div class="div-3">{{$row->consignee_country}}</div>
+										<td class="@can('editEngDraft')allowed-update @endcan" title="{{$row->consignee_country}}">
+											<div data-name="consignee_country" data-id="{{ $row->id }}" class="div-3">{{$row->consignee_country}}</div>
 										</td>
-										<td title="{{$row->house_name}}">
-											<div class="div-3">{{$row->house_name}}</div>
+										<td class="@can('editEngDraft')allowed-update @endcan" title="{{$row->house_name}}">
+											<div data-name="house_name" data-id="{{ $row->id }}" class="div-3">{{$row->house_name}}</div>
 										</td>
-										<td title="{{$row->post_office}}">
-											<div class="div-3">{{$row->post_office}}</div>
+										<td class="@can('editEngDraft')allowed-update @endcan" title="{{$row->post_office}}">
+											<div data-name="post_office" data-id="{{ $row->id }}" class="div-3">{{$row->post_office}}</div>
 										</td>
-										<td title="{{$row->district}}">
-											<div class="div-3">{{$row->district}}</div>
+										<td class="@can('editEngDraft')allowed-update @endcan" title="{{$row->district}}">
+											<div data-name="district" data-id="{{ $row->id }}" class="div-3">{{$row->district}}</div>
 										</td>
-										<td title="{{$row->state_pincode}}">
-											<div class="div-3">{{$row->state_pincode}}</div>
+										<td class="@can('editEngDraft')allowed-update @endcan" title="{{$row->state_pincode}}">
+											<div data-name="state_pincode" data-id="{{ $row->id }}" class="div-3">{{$row->state_pincode}}</div>
 										</td>
-										<td title="{{$row->consignee_address}}">
-											<div class="div-3">{{$row->consignee_address}}</div>
+										<td class="@can('editEngDraft')allowed-update @endcan" title="{{$row->consignee_address}}">
+											<div data-name="consignee_address" data-id="{{ $row->id }}" class="div-3">{{$row->consignee_address}}</div>
 										</td>
-										<td title="{{$row->consignee_phone}}">
-											<div class="div-3">{{$row->consignee_phone}}</div>
+										<td class="@can('editEngDraft')allowed-update @endcan" title="{{$row->consignee_phone}}">
+											<div data-name="consignee_phone" data-id="{{ $row->id }}" class="div-3">{{$row->consignee_phone}}</div>
 										</td>
-										<td title="{{$row->consignee_id}}">
-											<div class="div-3">{{$row->consignee_id}}</div>
+										<td class="@can('editEngDraft')allowed-update @endcan" title="{{$row->consignee_id}}">
+											<div data-name="consignee_id" data-id="{{ $row->id }}" class="div-3">{{$row->consignee_id}}</div>
 										</td>
-										<td title="{{$row->shipped_items}}">
-											<div class="div-3">{{$row->shipped_items}}</div>
+										<td class="@can('editEngDraft')allowed-update @endcan" title="{{$row->shipped_items}}">
+											<div data-name="shipped_items" data-id="{{ $row->id }}" class="div-3">{{$row->shipped_items}}</div>
 										</td>
-										<td title="{{$row->shipment_val}}">
-											<div class="div-3">{{$row->shipment_val}}</div>
+										<td class="@can('editEngDraft')allowed-update @endcan" title="{{$row->shipment_val}}">
+											<div data-name="shipment_val" data-id="{{ $row->id }}" class="div-3">{{$row->shipment_val}}</div>
 										</td>
-										<td title="{{$row->operator}}">
-											<div class="div-3">{{$row->operator}}</div>
+										<td class="@can('editPost')allowed-update @endcan" title="{{$row->operator}}">
+											<div data-name="operator" data-id="{{ $row->id }}" class="div-3">{{$row->operator}}</div>
 										</td>
-										<td title="{{$row->courier}}">
-											<div class="div-3">{{$row->courier}}</div>
+										<td class="@can('editEngDraft')allowed-update @endcan" title="{{$row->courier}}">
+											<div data-name="courier" data-id="{{ $row->id }}" class="div-3">{{$row->courier}}</div>
 										</td>
-										<td title="{{$row->delivery_date_comments}}">
-											<div class="div-3">{{$row->delivery_date_comments}}</div>
+										<td class="@can('editEngDraft')allowed-update @endcan" title="{{$row->delivery_date_comments}}">
+											<div data-name="delivery_date_comments" data-id="{{ $row->id }}" class="div-3">{{$row->delivery_date_comments}}</div>
 										</td>
-										<td title="{{$row->weight}}">
-											<div class="div-3">{{$row->weight}}</div>
+										<td class="@can('editEngDraft')allowed-update @endcan" title="{{$row->weight}}">
+											<div data-name="weight" data-id="{{ $row->id }}" class="div-3">{{$row->weight}}</div>
 										</td>
-										<td title="{{$row->width}}">
-											<div class="div-3">{{$row->width}}</div>
+										<td class="@can('editEngDraft')allowed-update @endcan" title="{{$row->width}}">
+											<div data-name="width" data-id="{{ $row->id }}" class="div-3">{{$row->width}}</div>
 										</td>
-										<td title="{{$row->height}}">
-											<div class="div-3">{{$row->height}}</div>
+										<td class="@can('editEngDraft')allowed-update @endcan" title="{{$row->height}}">
+											<div data-name="height" data-id="{{ $row->id }}" class="div-3">{{$row->height}}</div>
 										</td>
-										<td title="{{$row->length}}">
-											<div class="div-3">{{$row->length}}</div>
+										<td class="@can('editEngDraft')allowed-update @endcan" title="{{$row->length}}">
+											<div data-name="length" data-id="{{ $row->id }}" class="div-3">{{$row->length}}</div>
 										</td>
-										<td title="{{$row->volume_weight}}">
-											<div class="div-3">{{$row->volume_weight}}</div>
+										<td class="@can('editEngDraft')allowed-update @endcan" title="{{$row->volume_weight}}">
+											<div data-name="volume_weight" data-id="{{ $row->id }}" class="div-3">{{$row->volume_weight}}</div>
 										</td>
-										<td title="{{$row->lot}}">
-											<div class="div-3">{{$row->lot}}</div>
+										<td class="@can('editEngDraft')allowed-update @endcan" title="{{$row->lot}}">
+											<div data-name="lot" data-id="{{ $row->id }}" class="div-3">{{$row->lot}}</div>
 										</td>
-										<td title="{{$row->payment_date_comments}}">
-											<div class="div-3">{{$row->payment_date_comments}}</div>
+										<td class="@can('editEngDraft')allowed-update @endcan" title="{{$row->payment_date_comments}}">
+											<div data-name="payment_date_comments" data-id="{{ $row->id }}" class="div-3">{{$row->payment_date_comments}}</div>
 										</td>
-										<td title="{{$row->amount_payment}}">
-											<div class="div-3">{{$row->amount_payment}}</div>
+										<td class="@can('editEngDraft')allowed-update @endcan" title="{{$row->amount_payment}}">
+											<div data-name="amount_payment" data-id="{{ $row->id }}" class="div-3">{{$row->amount_payment}}</div>
 										</td>
-										<td title="{{$row->status_ru}}">
+										<td class="@can('editEngDraft')allowed-update @endcan" title="{{$row->status_ru}}">
 											<div class="div-3">{{$row->status_ru}}</div>
 										</td>
-										<td title="{{$row->status_he}}">
+										<td class="@can('editEngDraft')allowed-update @endcan" title="{{$row->status_he}}">
 											<div class="div-3">{{$row->status_he}}</div>
 										</td>									 
-										<td title="{{$row->consignee_name_customs}}">
-											<div class="div-3">{{$row->consignee_name_customs}}</div>
+										<td class="@can('editEngDraft')allowed-update @endcan" title="{{$row->consignee_name_customs}}">
+											<div data-name="consignee_name_customs" data-id="{{ $row->id }}" class="div-3">{{$row->consignee_name_customs}}</div>
 										</td>
-										<td title="{{$row->consignee_address_customs}}">
-											<div class="div-3">{{$row->consignee_address_customs}}</div>
+										<td class="@can('editEngDraft')allowed-update @endcan" title="{{$row->consignee_address_customs}}">
+											<div data-name="consignee_address_customs" data-id="{{ $row->id }}" class="div-3">{{$row->consignee_address_customs}}</div>
 										</td>
-										<td title="{{$row->consignee_phone_customs}}">
-											<div class="div-3">{{$row->consignee_phone_customs}}</div>
+										<td class="@can('editEngDraft')allowed-update @endcan" title="{{$row->consignee_phone_customs}}">
+											<div data-name="consignee_phone_customs" data-id="{{ $row->id }}" class="div-3">{{$row->consignee_phone_customs}}</div>
 										</td>
-										<td title="{{$row->consignee_id_customs}}">
-											<div class="div-3">{{$row->consignee_id_customs}}</div>
+										<td class="@can('editEngDraft')allowed-update @endcan" title="{{$row->consignee_id_customs}}">
+											<div data-name="consignee_id_customs" data-id="{{ $row->id }}" class="div-3">{{$row->consignee_id_customs}}</div>
 										</td>
                                                                
 									</tr>
@@ -438,7 +438,7 @@
 								</label>	
 
 								<label class="phil-ind-value-by-tracking checkbox-operations-change">Input value:
-									<input class="form-control" type="text" name="value-by-tracking">
+									<textarea class="form-control" name="value-by-tracking"></textarea>
 									<input type="hidden" name="status_ru">
 									<input type="hidden" name="status_he">
 									<input type="hidden" name="shipper_country_val">
@@ -468,6 +468,38 @@
 		
 	</div><!-- .animated -->
 </div><!-- .content -->
+
+
+<!-- Modal -->
+<a id="update-cell" data-toggle="modal" data-target="#updateCellModal"></a>
+
+<div class="modal fade" id="updateCellModal" tabindex="-1" role="dialog" aria-labelledby="updateCellModalLabel" aria-hidden="true" style="background: rgba(0, 0, 0, 0.4);">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title" id="updateCellModalLabel">Update cell</h5>
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+			<form action="{{ route('addCourierEngDraftDataById') }}" method="POST" enctype="multipart/form-data">
+				@csrf
+				<div class="modal-body">
+					<div class="form-group phil-ind-value-by-tracking">
+						<textarea class="form-control" name="value-by-tracking"></textarea>
+						<input type="hidden" name="status_ru">
+						<input type="hidden" name="status_he">
+						<input type="hidden" name="shipper_country_val">
+						<input type="hidden" name="consignee_country_val">
+					</div>					
+				</div>
+				<div class="modal-footer">
+					<button type="submit" class="btn btn-primary" style="font-size:.8rem">SAVE</button>
+				</div>
+			</form>
+		</div>
+	</div>
+</div>
 
 <script>
 

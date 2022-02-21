@@ -21,9 +21,9 @@ use App\Receipt;
 
 class CourierDraftController extends AdminController
 {
-	private $status_arr = ["Доставляется на склад в стране отправителя", "Возврат", "Коробка", "Забрать", "Уточнить", "Думают", "Отмена", "Подготовка"];
-	private $status_arr_2 = ["На таможне в стране отправителя", "На складе в стране отправителя", "Доставляется на склад в стране отправителя", "Возврат", "Коробка", "Забрать", "Уточнить", "Думают", "Отмена", "Подготовка"];
-	private $status_arr_3 = ["Возврат", "Коробка", "Забрать", "Уточнить", "Думают", "Отмена", "Подготовка"];
+	private $status_arr = ["Доставляется на склад в стране отправителя", "Возврат", "Коробка", "Забрать", "Уточнить", "Думают", "Отмена", "Подготовка", "Дубль"];
+	private $status_arr_2 = ["На таможне в стране отправителя", "На складе в стране отправителя", "Доставляется на склад в стране отправителя", "Возврат", "Коробка", "Забрать", "Уточнить", "Думают", "Отмена", "Подготовка", "Дубль"];
+	private $status_arr_3 = ["Возврат", "Коробка", "Забрать", "Уточнить", "Думают", "Отмена", "Подготовка", "Дубль"];
     
 
     public function index(Request $request){
@@ -553,10 +553,6 @@ class CourierDraftController extends AdminController
 			['recipient_passport','<>',$worksheet->recipient_passport],
 			['recipient_email','<>',$worksheet->recipient_email],
 			['site_name','<>',$worksheet->site_name],
-			['status','<>',$worksheet->status],
-			['status_en','<>',$worksheet->status_en],
-			['status_he','<>',$worksheet->status_he],
-			['status_ua','<>',$worksheet->status_ua],
 			['package_content','<>',$worksheet->package_content],
 			['direction','<>',$worksheet->direction]
     	])->get();
@@ -584,10 +580,6 @@ class CourierDraftController extends AdminController
 			['recipient_passport',$worksheet->recipient_passport],
 			['recipient_email',$worksheet->recipient_email],
 			['site_name',$worksheet->site_name],
-			['status',$worksheet->status],
-			['status_en',$worksheet->status_en],
-			['status_he',$worksheet->status_he],
-			['status_ua',$worksheet->status_ua],
 			['package_content',$worksheet->package_content],
 			['direction',$worksheet->direction]
     	])->get();
@@ -614,10 +606,6 @@ class CourierDraftController extends AdminController
     		'recipient_passport' => $worksheet->recipient_passport,
     		'recipient_email' => $worksheet->recipient_email,
     		'site_name' => $worksheet->site_name,
-    		'status' => $worksheet->status,
-    		'status_en' => $worksheet->status_en,
-    		'status_he' => $worksheet->status_he,
-    		'status_ua' => $worksheet->status_ua,
     		'package_content' => $worksheet->package_content,
     		'direction' => $worksheet->direction
     	];   	
@@ -634,6 +622,7 @@ class CourierDraftController extends AdminController
     		CourierDraftWorksheet::find($new_id)
     		->update([
     			'date'=>date('Y.m.d'),
+    			'status' => 'Дубль',
     			'status_date' => date('Y-m-d')
     		]);
     		$this->addingOrderNumber($worksheet->standard_phone, 'ru');

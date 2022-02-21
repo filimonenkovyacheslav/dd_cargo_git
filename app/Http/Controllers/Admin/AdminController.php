@@ -21,10 +21,10 @@ class AdminController extends Controller
 {
 	const ROLES_ARR = array('admin' => 'admin', 'user' => 'user', 'warehouse' => 'warehouse', 'office_1' => 'office_1','office_ru' => 'office_ru', 'office_agent_ru' => 'office_agent_ru', 'viewer' => 'viewer', 'china_admin' => 'china_admin', 'china_viewer' => 'china_viewer', 'office_eng' => 'office_eng', 'office_ind' => 'office_ind', 'viewer_eng' => 'viewer_eng', 'viewer_1' => 'viewer_1', 'viewer_2' => 'viewer_2', 'viewer_3' => 'viewer_3', 'viewer_4' => 'viewer_4', 'viewer_5' => 'viewer_5', 'courier' => 'courier');
 	const VIEWER_ARR = array('viewer_1', 'viewer_2', 'viewer_3', 'viewer_4', 'viewer_5');
-	private $ru_status_arr = ["Возврат", "Коробка", "Забрать", "Уточнить", "Думают", "Отмена", "Подготовка"];
-	private $en_status_arr = ["Pending", "Return", "Box", "Pick up", "Specify", "Think", "Canceled"];
-	private $ru_status_arr_2 = ["Доставляется на склад в стране отправителя", "Возврат", "Коробка", "Забрать", "Уточнить", "Думают", "Отмена", "Подготовка"];
-	private $en_status_arr_2 = ["Forwarding to the warehouse in the sender country", "Pending", "Return", "Box", "Pick up", "Specify", "Think", "Canceled"];
+	private $ru_status_arr = ["Возврат", "Коробка", "Забрать", "Уточнить", "Думают", "Отмена", "Подготовка", "Дубль"];
+	private $en_status_arr = ["Pending", "Return", "Box", "Pick up", "Specify", "Think", "Canceled", "Double"];
+	private $ru_status_arr_2 = ["Доставляется на склад в стране отправителя", "Возврат", "Коробка", "Забрать", "Уточнить", "Думают", "Отмена", "Подготовка", "Дубль"];
+	private $en_status_arr_2 = ["Forwarding to the warehouse in the sender country", "Pending", "Return", "Box", "Pick up", "Specify", "Think", "Canceled", "Double"];
 
 
 	protected function checkExistPhone($request, $table)

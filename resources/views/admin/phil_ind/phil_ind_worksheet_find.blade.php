@@ -59,6 +59,7 @@
 							<label class="table_columns" style="margin: 0 15px">Choose column:
 								<select class="form-control" id="table_columns" name="table_columns">
 									<option value="" selected="selected"></option>
+									<option value="id">Id</option>
 									<option value="date">Date</option>
 									<option value="direction">Direction</option>
 									<option value="status">Status</option>
@@ -119,6 +120,7 @@
 									<tr>
 										<th>V</th>
 										<th>Change</th>
+										<th>Id</th>
 										<th>Date<hr>
 											@can('editPost')
 											<a class="btn btn-primary" target="_blank" href="{{ route('showPhilIndStatusDate') }}">Change</a>
@@ -278,6 +280,9 @@
 											{!! Form::close() !!}
 
 											@endcan
+										</td>
+										<td title="{{$row->id}}">
+											<div class="div-22">{{$row->id}}</div>
 										</td>
 										<td class="@can('editPost')allowed-update @endcan" title="{{$row->date}}">
 											<div class="div-3">{{$row->date}}</div>

@@ -53,6 +53,7 @@
 							<label class="table_columns" style="margin: 0 15px">Выберите колонку:
 								<select class="form-control" id="table_columns" name="table_columns">
 									<option value="" selected="selected"></option>
+									<option value="id">Id</option>
 									<option value="site_name">Сайт</option>
 									<option value="date">Дата</option>
 									<option value="direction">Направление</option>
@@ -125,6 +126,7 @@
 									<tr>
 										<th>V</th>
 										<th>Изменить</th>
+										<th>Id</th>
 										<th>Сайт</th>
 										<th>Дата</th>
 										<th>Off<hr>Направ- ление</th>
@@ -235,7 +237,10 @@
 											{!! Form::close() !!}
 
 											@endcan
-										</td> 										
+										</td> 		
+										<td title="{{$row->id}}">
+											<div class="div-22">{{$row->id}}</div>
+										</td>								
 										<td class="@can('editDraft')allowed-update @endcan" title="{{$row->site_name}}">
 											<div data-name="site_name" data-id="{{ $row->id }}" class="div-22">{{$row->site_name}}</div>
 										</td>
@@ -454,6 +459,9 @@
 											{!! Form::close() !!}
 
 											@endcan
+										</td>
+										<td title="{{$row->id}}">
+											<div class="div-22">{{$row->id}}</div>
 										</td>
 										<td class="@can('editDraft')allowed-update @endcan" title="{{$row->site_name}}">
 											<div data-name="site_name" data-id="{{ $row->id }}" class="div-22">{{$row->site_name}}</div>

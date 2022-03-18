@@ -143,6 +143,12 @@
                         <a href="{{route('adminTrash')}}"><i class="menu-icon fa fa-book "></i> Корзина/Trash</a>
                     </li> 
                     @endcan        
+
+                    @can('update-user')
+                    <li>
+                        <a href="{{route('adminUpdatesArchive')}}"><i class="menu-icon fa fa-book "></i> Updates Archive</a>
+                    </li> 
+                    @endcan 
                 
                 </ul>
             </div><!-- /.navbar-collapse -->

@@ -20,6 +20,7 @@ use \Dejurin\GoogleTranslateForFree;
 use App\Receipt;
 use App\ReceiptArchive;
 use App\Warehouse;
+use App\UpdatesArchive;
 use DB;
 use Auth;
 
@@ -33,6 +34,14 @@ class Controller extends BaseController
     protected $to_country_dir = ['India' => 'IND','Nepal' => 'NEP','Nigeria' => 'NIG','Ghana' => 'GHN','Cote D\'Ivoire' => 'CTD','South Africa' => 'SAR'];
     protected $israel_cities = ['Acre' => 'North','Afula' => 'North','Arad' => 'Eilat','Ariel' => 'Center','Ashdod' => 'South','Ashkelon' => 'South','Baqa-Jatt' => 'Haifa','Bat Yam' => 'Tel Aviv','Beersheba' => 'South','Beit She\'an' => 'North','Beit Shemesh' => 'Jerusalem','Beitar Illit' => 'Jerusalem','Bnei Brak' => 'Tel Aviv','Dimona' => 'Eilat','Eilat' => 'Eilat','El\'ad' => 'Center','Giv\'atayim' => 'Tel Aviv','Giv\'at Shmuel' => 'Center','Hadera' => 'Haifa','Haifa' => 'Haifa','Herzliya' => 'Tel Aviv','Hod HaSharon' => 'Center','Holon' => 'Tel Aviv','Jerusalem' => 'Jerusalem','Karmiel' => 'North','Kafr Qasim' => 'Center','Kfar Saba' => 'Center','Kiryat Ata' => 'Haifa','Kiryat Bialik' => 'Haifa','Kiryat Gat' => 'South','Kiryat Malakhi' => 'South','Kiryat Motzkin' => 'Haifa','Kiryat Ono' => 'Tel Aviv','Kiryat Shmona' => 'North','Kiryat Yam' => 'Haifa','Lod' => 'Center','Ma\'ale Adumim' => 'Jerusalem','Ma\'alot-Tarshiha' => 'North','Migdal HaEmek' => 'North','Modi\'in Illit' => 'Center','Modi\'in-Maccabim-Re\'ut' => 'Center','Nahariya' => 'North','Nazareth' => 'North','Nazareth Illit' => 'North','Nesher' => 'Haifa','Ness Ziona' => 'Center','Netanya' => 'Center','Netivot' => 'South','Ofakim' => 'South','Or Akiva' => 'Haifa','Or Yehuda' => 'Tel Aviv','Petah Tikva' => 'Center','Qalansawe' => 'Center','Ra\'anana' => 'Center','Rahat' => 'South','Ramat Gan' => 'Tel Aviv','Ramat HaSharon' => 'Tel Aviv','Ramla' => 'Center','Rehovot' => 'Center','Rishon LeZion' => 'Center','Rosh HaAyin' => 'Center','Safed' => 'North','Sakhnin' => 'North','Sderot' => 'South','Shefa-\'Amr (Shfar\'am)' => 'North','Tamra' => 'North','Tayibe' => 'Center','Tel Aviv' => 'Tel Aviv','Tiberias' => 'North','Tira' => 'Center','Tirat Carmel' => 'Haifa','Umm al-Fahm' => 'Haifa','Yavne' => 'Center','Yehud-Monosson' => 'Center','Yokneam' => 'North'];
 
+
+    protected function toUpdatesArchive($request,$worksheet,$double = false,$double_create = 0)
+    {
+        $archive = new UpdatesArchive();
+        $archive->createUpdatesArchive($request,$worksheet,$double,$double_create);
+        return true;
+    }
+    
 
     protected function israelCities()
     {

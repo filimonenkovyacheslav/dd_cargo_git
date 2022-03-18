@@ -384,13 +384,16 @@ $('#bootstrap-data-table_paginate').on('click',(e)=>{
     }   
 })
 
-
+const idArr = ['id','worksheet_id','eng_worksheet_id','draft_id','eng_draft_id'];
 $('#table_filter_button').on('click',(e)=>{
     const column = $('#table_columns').val();
     const thisVal = $('[name="table_filter_value"]').val();
     if (thisVal.length > 2) {
         $('#form-worksheet-table-filter').submit()
-    }   
+    } 
+    else if (idArr.indexOf(column) !== -1 && thisVal) {
+        $('#form-worksheet-table-filter').submit()
+    }  
 })
 
 

@@ -620,6 +620,7 @@ $('#phil-ind-tracking-columns').change((e)=>{
                     <option value="Ghana">Ghana</option>
                     <option value="Cote D\'Ivoire">Cote D\'Ivoire</option>
                     <option value="South Africa">South Africa</option>
+                    <option value="Thailand">Thailand</option>
                 </select>                
             </div>
             `)

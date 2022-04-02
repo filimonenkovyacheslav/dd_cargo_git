@@ -284,7 +284,7 @@
 											<div data-name="status" data-id="{{ $row->id }}" class="div-3">{{$row->status}}</div>
 										</td>
 										<td class="@can('editPost')allowed-update @endcan" title="{{$row->status_date}}">
-											<div class="div-1">{{$row->status_date}}</div>
+											<div class="div-3">{{$row->status_date}}</div>
 										</td>
 										<td class="@can('editPost')allowed-update @endcan" title="{{$row->tracking_main}}">
 											<div data-name="tracking_main" data-id="{{ $row->id }}" class="div-3">{{$row->tracking_main}}</div>

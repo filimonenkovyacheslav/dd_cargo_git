@@ -218,7 +218,7 @@
 											<div class="div-3">{{$row->status}}</div>
 										</td>
 										<td title="{{$row->status_date}}">
-											<div class="div-1">{{$row->status_date}}</div>
+											<div class="div-3">{{$row->status_date}}</div>
 										</td>
 										<td title="{{$row->partner}}">
 											<div class="div-3">{{$row->partner}}</div>

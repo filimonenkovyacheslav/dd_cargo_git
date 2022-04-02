@@ -310,7 +310,7 @@
 											<div data-name="status" data-id="{{ $row->id }}" class="div-3">{{$row->status}}</div>
 										</td>
 										<td class="@can('editPost')allowed-update @endcan" title="{{$row->status_date}}">
-											<div class="div-1">{{$row->status_date}}</div>
+											<div class="div-3">{{$row->status_date}}</div>
 										</td>
 										<td class="@can('editPost')allowed-update @endcan" title="{{$row->partner}}">
 											<div data-name="partner" data-id="{{ $row->id }}" class="div-3">{{$row->partner}}</div>
@@ -545,7 +545,7 @@
 											<div data-name="status" data-id="{{ $row->id }}" class="div-3">{{$row->status}}</div>
 										</td>
 										<td class="@can('editPost')allowed-update @endcan" title="{{$row->status_date}}">
-											<div class="div-1">{{$row->status_date}}</div>
+											<div class="div-3">{{$row->status_date}}</div>
 										</td>
 										<td class="@can('editPost')allowed-update @endcan" title="{{$row->partner}}">
 											<div data-name="partner" data-id="{{ $row->id }}" class="div-3">{{$row->partner}}</div>

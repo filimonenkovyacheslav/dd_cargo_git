@@ -720,7 +720,7 @@ class CourierEngDraftController extends AdminController
 			if (stripos($tracking, 'AG') !== false) $country = 'Ghana';
 			if (stripos($tracking, 'AD') !== false) $country = 'Cote D\'Ivoire';
 			if (stripos($tracking, 'AS') !== false) $country = 'South Africa';
-			if (stripos($tracking, 'TH') !== false) $country = 'Thailand';
+			if (stripos($tracking, 'T-') !== false) $country = 'Thailand';
 		}		
 
 		if ($country && $country === 'India') {

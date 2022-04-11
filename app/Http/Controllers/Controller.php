@@ -66,6 +66,7 @@ class Controller extends BaseController
     protected function trackingValidate($tracking)
     {
         $pattern = '/^[a-z0-9]+$/i';
+        $tracking = str_replace("-", "", $tracking);
         if (preg_match($pattern, $tracking) && (strlen($tracking) >= 4 && strlen($tracking) <= 18)) {
             return true;
         } else {

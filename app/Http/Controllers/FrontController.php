@@ -813,7 +813,7 @@ class FrontController extends AdminController
             }
         }
         
-        if (!$row->count()) {            
+        /*if (!$row->count()) {            
             $row = DB::table('china_worksheet')
             ->select('status','status_he','status_ru')
             ->where('tracking_main', '=', $tracking)
@@ -832,13 +832,21 @@ class FrontController extends AdminController
                 }
             }
             $message_arr['ua'] = '';
-        }
+        }*/
 
-        if (!$row->count()) {            
+        if (!$row->count()) {     
+            if (stripos($tracking, 'T') !== false){
+                if (stripos($tracking, 'T-') === false) {
+                    $tracking = preg_replace("/[^0-9]/", '', $tracking);
+                    $tracking = 'T-'.$tracking;
+                }
+            }
+
             $row = DB::table('phil_ind_worksheet')
             ->select('status','status_he','status_ru')
             ->where('tracking_main', '=', $tracking)
-            ->get();
+            ->get();     
+            
             if ($row->count()) {
                 foreach ($row as $val) {
                     if ($val->status) {

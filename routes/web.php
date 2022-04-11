@@ -21,6 +21,10 @@ Route::group(['prefix' => App\Http\Middleware\LocaleMiddleware::getLocale()], fu
 		return view('welcome');
 	})->name('welcome');
 
+	// Form with signature
+	Route::get('/form-with-signature', 'FormWithSignatureController@index');
+	Route::post('/form-with-signature', 'FormWithSignatureController@upload')->name('formWithSignature');
+
 	Route::get('/page-{page_urn}','Admin\FrontPagesController@frontPage')->name('frontPage');
 	
 	Route::get('/parcel-form', 'FrontController@parcelForm')->name('parcelForm');

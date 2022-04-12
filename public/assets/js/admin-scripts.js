@@ -454,6 +454,7 @@ $('#tracking-columns').change((e)=>{
         $('[name="tariff"]').remove()
         $('[name="partner"]').remove()
         $('.city-value').remove()
+        $('[name="status_date"]').remove()
         $('.value-by-tracking').append(`
             <div class="status-value">
                 <select class="form-control" id="status" name="status">
@@ -482,6 +483,7 @@ $('#tracking-columns').change((e)=>{
         $('[name="tariff"]').remove()
         $('[name="partner"]').remove()
         $('.city-value').remove()
+        $('[name="status_date"]').remove()
         $('.value-by-tracking').append(`
             <select class="form-control" id="site_name" name="site_name">
                <option value="DD-C">DD-C</option>
@@ -495,6 +497,7 @@ $('#tracking-columns').change((e)=>{
         $('[name="site_name"]').remove()
         $('[name="partner"]').remove()
         $('.city-value').remove()
+        $('[name="status_date"]').remove()
         $('.value-by-tracking').append(`
             <select class="form-control" id="tariff" name="tariff">
                <option value="" selected="selected"></option>
@@ -509,6 +512,7 @@ $('#tracking-columns').change((e)=>{
         $('[name="site_name"]').remove()
         $('[name="tariff"]').remove()
         $('.city-value').remove()
+        $('[name="status_date"]').remove()
         $('.value-by-tracking').append(`
             <select class="form-control" id="partner" name="partner">
                <option value="" selected="selected"></option>
@@ -526,6 +530,7 @@ $('#tracking-columns').change((e)=>{
         $('[name="site_name"]').remove()
         $('[name="tariff"]').remove()
         $('[name="partner"]').remove()
+        $('[name="status_date"]').remove()
         $('.value-by-tracking').append(`
             <div class="city-value">
                 <div class="col-md-4">
@@ -539,9 +544,21 @@ $('#tracking-columns').change((e)=>{
             </div>
             `)
     }
+    else if(thisVal === 'status_date'){
+        $('[name="value-by-tracking"]').remove()
+        $('[name="site_name"]').remove()
+        $('.status-value').remove()
+        $('[name="tariff"]').remove()
+        $('[name="partner"]').remove()
+        $('.city-value').remove()
+        $('.value-by-tracking').append(`
+            <input class="form-control" type="date" name="status_date">
+            `)
+    }
     else {
         $('.status-value').remove()
         $('[name="site_name"]').remove()
+        $('[name="status_date"]').remove()
         $('[name="tariff"]').remove()
         $('[name="partner"]').remove()
         $('.city-value').remove()
@@ -566,6 +583,7 @@ $('#phil-ind-tracking-columns').change((e)=>{
     if (thisVal === 'status') {
         $('[name="value-by-tracking"]').remove()
         $('.consignee-country-value').remove()
+        $('[name="status_date"]').remove()
         $('.shipper-country-value').remove()
         $('.city-value').remove()
         $('.phil-ind-value-by-tracking').append(`
@@ -594,6 +612,7 @@ $('#phil-ind-tracking-columns').change((e)=>{
         $('[name="value-by-tracking"]').remove()
         $('.phil-ind-status-value').remove()
         $('.consignee-country-value').remove()
+        $('[name="status_date"]').remove()
         $('.city-value').remove()
         $('.phil-ind-value-by-tracking').append(`
             <div class="shipper-country-value">
@@ -609,6 +628,7 @@ $('#phil-ind-tracking-columns').change((e)=>{
         $('[name="value-by-tracking"]').remove()
         $('.phil-ind-status-value').remove()
         $('.shipper-country-value').remove()
+        $('[name="status_date"]').remove()
         $('.city-value').remove()
         $('.phil-ind-value-by-tracking').append(`
             <div class="consignee-country-value">
@@ -630,6 +650,7 @@ $('#phil-ind-tracking-columns').change((e)=>{
         $('.phil-ind-status-value').remove()
         $('.shipper-country-value').remove()
         $('.consignee-country-value').remove()
+        $('[name="status_date"]').remove()
         $('.phil-ind-value-by-tracking').append(`
             <div class="city-value">
                 <div class="col-md-4 choose-city-eng">
@@ -643,10 +664,21 @@ $('#phil-ind-tracking-columns').change((e)=>{
             </div>
             `)
     }
+    else if (thisVal === 'status_date') {       
+        $('[name="value-by-tracking"]').remove()
+        $('.phil-ind-status-value').remove()
+        $('.shipper-country-value').remove()
+        $('.consignee-country-value').remove()
+        $('.city-value').remove()
+        $('.phil-ind-value-by-tracking').append(`
+            <input class="form-control" type="date" name="status_date">
+            `)
+    }
     else {
         $('.phil-ind-status-value').remove()
         $('.consignee-country-value').remove()
         $('.shipper-country-value').remove()
+        $('[name="status_date"]').remove()
         $('[name="value-by-tracking"]').remove()
         $('.city-value').remove()
         $('.phil-ind-value-by-tracking').append(`
@@ -1005,6 +1037,7 @@ $('table td.allowed-update').not('.td-checkbox, .td-button').click((e)=>{
     $('#updateCellModal [name="tracking-columns"]').remove()
     $('#updateCellModal [name="phil-ind-tracking-columns"]').remove()
     $('#updateCellModal select').remove()
+    $('#updateCellModal [name="status_date"]').remove()
     let id = ''
     let name = ''
     let table = ''

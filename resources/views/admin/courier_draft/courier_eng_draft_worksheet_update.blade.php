@@ -42,7 +42,7 @@
 							$courier_eng_draft_worksheet->date = str_replace(".", "-", $courier_eng_draft_worksheet->date);
 						@endphp
 						<div class="form-group">
-							{!! Form::label('date','Дата',['class' => 'col-md-2 control-label'])   !!}
+							{!! Form::label('date','Date',['class' => 'col-md-2 control-label'])   !!}
 							<div class="col-md-8">
 								{!! Form::date('date',$courier_eng_draft_worksheet->date,['class' => 'form-control'])!!}
 							</div>
@@ -63,7 +63,16 @@
 								{!! Form::date('status_date',$courier_eng_draft_worksheet->status_date,['class' => 'form-control'])!!}
 							</div>
 						</div>
-						@endcan						
+						@endcan		
+
+						@can('update-user')
+						<div class="form-group">
+							{!! Form::label('order_date','Order date',['class' => 'col-md-2 control-label'])   !!}
+							<div class="col-md-8">
+								{!! Form::date('order_date',$courier_eng_draft_worksheet->order_date,['class' => 'form-control'])!!}
+							</div>
+						</div>
+						@endcan				
 						
 						<div class="form-group">
 							{!! Form::label('tracking_main','Main tracking number',['class' => 'col-md-2 control-label'])   !!}
@@ -106,6 +115,8 @@
 								{!! Form::text('comments_2',$courier_eng_draft_worksheet->comments_2,['class' => 'form-control'])!!}
 							</div>
 						</div>
+
+						@if (!$courier_eng_draft_worksheet->getLastDocUniq())
 						
 						<div class="form-group">
 							{!! Form::label('shipper_name','Shipper\'s name',['class' => 'col-md-2 control-label'])   !!}
@@ -301,6 +312,8 @@
 							</div>
 						</div>
 
+						@endif
+
 						@can('editPost')
 
 						<div class="form-group">
@@ -441,6 +454,8 @@
 							{!! Form::hidden('status',$courier_eng_draft_worksheet->status,['class' => 'form-control'])!!}
 
 							{!! Form::hidden('status_date',$courier_eng_draft_worksheet->status_date)!!}
+
+							{!! Form::hidden('order_date',$courier_eng_draft_worksheet->order_date)!!}
 
 							{!! Form::hidden('tracking_main',$courier_eng_draft_worksheet->tracking_main,['class' => 'form-control'])!!}
 

@@ -22,9 +22,39 @@ Route::group(['prefix' => App\Http\Middleware\LocaleMiddleware::getLocale()], fu
 	})->name('welcome');
 
 	// Form with signature
-	Route::get('/form-with-signature', 'FormWithSignatureController@index');
-	Route::post('/form-with-signature', 'FormWithSignatureController@upload')->name('formWithSignature');
+	Route::get('/form-with-signature/{id}/{token}', 'SignedDocumentController@formWithSignature')->name('formWithSignature');
+	
+	Route::get('/form-with-signature-eng/{id}/{token}', 'SignedDocumentController@formWithSignatureEng')->name('formWithSignatureEng');
+	
+	Route::get('/signature-page', 'SignedDocumentController@getSignature')->name('getSignature');
+	
+	Route::post('/signature-page', 'SignedDocumentController@setSignature')->name('setSignature');
+	
+	Route::get('/pdfview/{id}', 'SignedDocumentController@pdfview')->name('pdfview');
+	
+	Route::get('/pdfview-forward/{id}', 'SignedDocumentController@pdfviewForward')->name('pdfviewForward');
+	
+	Route::get('/pdfview-ru/{id}', 'SignedDocumentController@pdfviewRu')->name('pdfviewRu');
+	
+	Route::get('/download-pdf/{id}', 'SignedDocumentController@downloadPdf')->name('downloadPdf');
+	
+	Route::post('/download-all-pdf', 'SignedDocumentController@downloadAllPdf')->name('downloadAllPdf');
+	
+	Route::post('/download-directory', 'SignedDocumentController@downloadDirectory')->name('downloadDirectory');
+	
+	Route::post('/cancel-pdf', 'Controller@cancelPdf')->name('cancelPdf');
+	
+	Route::get('/cancel-pdf-id/{type}/{id}', 'Controller@cancelPdfId')->name('cancelPdfId');
+	
+	Route::get('/signature-for-cancel', 'SignedDocumentController@signatureForCancel')->name('signatureForCancel');
+	
+	Route::get('/form-after-cancel/{type}/{id}/{document_id}', 'SignedDocumentController@formAfterCancel')->name('formAfterCancel');
+	
+	Route::post('/form-update-after-cancel', 'SignedDocumentController@formUpdateAfterCancel')->name('formUpdateAfterCancel');
 
+	Route::post('/create-temp-table', 'SignedDocumentController@createTempTable')->name('createTempTable');
+	// End Form with signature
+	
 	Route::get('/page-{page_urn}','Admin\FrontPagesController@frontPage')->name('frontPage');
 	
 	Route::get('/parcel-form', 'FrontController@parcelForm')->name('parcelForm');

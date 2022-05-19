@@ -53,7 +53,7 @@
     </style>
 
     <script src="//cdn.ckeditor.com/4.14.1/standard/ckeditor.js"></script>
-    
+    <script type="text/javascript">var createTableUrl = "{{ url('/create-temp-table') }}"</script>
 </head>
 <body>
     @can('view-post')

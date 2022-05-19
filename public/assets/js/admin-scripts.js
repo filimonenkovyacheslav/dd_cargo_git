@@ -211,26 +211,47 @@ $(document).ready(function() {
         <label class="table-columns">Change column:
             <select class="form-control" id="table-columns" name="table-columns">
                 <option value="" selected="selected"></option>
+                    
                 <option value="0">Date</option>
+                    
                 <option value="1">Tracking number main</option>
+                    
                 <option value="2">Local tracking number</option>
+                    
                 <option value="3">Status</option>
+                    
                 <option value="4">Customer name</option>
+                    
                 <option value="5">Customer address</option>
+                    
                 <option value="6">Customer phone number</option>
+                    
                 <option value="7">Customer email</option>
+                    
                 <option value="8">Supplier name</option>
+                    
                 <option value="9">Supplier address</option>
+                    
                 <option value="10">Supplier phone number</option>
+                    
                 <option value="11">Supplier email</option>
+                    
                 <option value="12">Shipment description</option>
+                    
                 <option value="13">Shipment weight</option>
+                    
                 <option value="14">Shipment length</option>
+                    
                 <option value="15">Shipment width</option>
+                    
                 <option value="16">Shipment height</option>
+                    
                 <option value="17">Lot number</option>
+                    
                 <option value="18">Status He</option>
-                <option value="19">Status Ru</option>                     
+                    
+                <option value="19">Status Ru</option>
+                                         
             </select>
         </label>
         `);              
@@ -240,36 +261,67 @@ $(document).ready(function() {
         <label class="table-columns">Change column:
             <select class="form-control" id="table-columns" name="table-columns">
                 <option value="" selected="selected"></option>
+                    
                 <option value="0">Плательщик</option>
+                    
                 <option value="1">Contract Nr.</option>
+                    
                 <option value="2">Type</option>
+                    
                 <option value="3">Trek-KOD</option>
+                    
                 <option value="4">ФИО Отправителя</option>
+                    
                 <option value="5">ФИО получателя</option>
+                    
                 <option value="6">Код Страны</option>
+                    
                 <option value="7">Индекс</option>
+                    
                 <option value="8">Регион</option>
+                    
                 <option value="9">Район</option>
+                    
                 <option value="10">Город доставки</option>
+                    
                 <option value="11">улица</option>
+                    
                 <option value="12">дом</option>
+                    
                 <option value="13">корпус</option>
+                    
                 <option value="14">квартира</option>
+                    
                 <option value="15">Телефон(+7ххххх)</option>
+                    
                 <option value="16">Tarif €</option>
+                    
                 <option value="17">Tarif €-cent</option>
+                    
                 <option value="18">weight kg</option>
+                    
                 <option value="19">weight g</option>
+                    
                 <option value="20">код услуги</option>
+                    
                 <option value="21">Amount of COD Rbl</option>
+                    
                 <option value="22">Amount of COD kop</option>
+                    
                 <option value="23">номер вложения</option>
+                    
                 <option value="24">Наименования вложения</option>
+                    
                 <option value="25">Количество вложений</option>
+                    
                 <option value="26">weight of enclosures kg</option>
+                    
                 <option value="27">weight of enclosures g</option>
+                    
                 <option value="28">стоимость евро</option>
-                <option value="29">стоимость евроценты</option>                                
+                    
+                <option value="29">стоимость евроценты</option>
+                                                    
             </select>
         </label>
         `); 
@@ -279,22 +331,39 @@ $(document).ready(function() {
         <label class="table-columns">Change column:
             <select class="form-control" id="table-columns" name="table-columns">
                 <option value="" selected="selected"></option>
+                    
                 <option value="0">Tracking Number</option>
+                    
                 <option value="1">Destination Country</option>
+                    
                 <option value="2">Shipper name</option>
+                    
                 <option value="3">Shipper address</option>
+                    
                 <option value="4">Shipper phone no</option>
+                    
                 <option value="5">Shipper ID no</option>
+                    
                 <option value="6">Consignee name</option>
+                    
                 <option value="7">Consignee address</option>
+                    
                 <option value="8">Consignee phone no</option>
+                    
                 <option value="9">Consignee ID no</option>
+                    
                 <option value="10">Dimensions (length)</option>
+                    
                 <option value="11">Dimensions (width)</option>
+                    
                 <option value="12">Dimensions (height)</option>
+                    
                 <option value="13">Weight</option>
-                <option value="14">Items enclosed</option> 
-                <option value="15">Declared Value</option>                                               
+                    
+                <option value="14">Items enclosed</option>
+                     
+                <option value="15">Declared Value</option>
+                                                                   
             </select>
         </label>
         `); 
@@ -307,46 +376,87 @@ $(document).ready(function() {
     <label class="table-columns">Выберите колонку:
         <select class="form-control" id="table-columns" name="table-columns">
             <option value="" selected="selected"></option>
+                    
             <option value="0">Номер</option>
+                    
             <option value="1">Дата</option>
+                    
             <option value="2">Направление</option>
+                    
             <option value="3">Статус</option>
+                    
             <option value="4">Локальный</option>
+                    
             <option value="5">Трекинг</option>
+                    
             <option value="6">Коммент менеджера</option>
+                    
             <option value="7">Коммент</option>
+                    
             <option value="8">Комментарии</option>
+                    
             <option value="9">Отправитель</option>
+                    
             <option value="10">Данные отправителя</option>
+                    
             <option value="11">Получатель</option>
+                    
             <option value="12">Данные получателя</option>
+                    
             <option value="13">E-mail получателя</option>
+                    
             <option value="14">Декларируемая стоимость посылки, $</option>
+                    
             <option value="15">Упаковка</option>
+                    
             <option value="16">Оплачивает посылку</option>
+                    
             <option value="17">Трекинг номер и вес посылки</option>
+                    
             <option value="18">Ширина</option>
+                    
             <option value="19">Высота</option>
+                    
             <option value="20">Длина</option>
+                    
             <option value="21">Номер партии</option>
+                    
             <option value="22">Тип отправления</option>
+                    
             <option value="23">Описание содержимого посылки</option>
+                    
             <option value="24">1. позиция</option>
+                    
             <option value="25">2. позиция</option>
+                    
             <option value="26">3. позиция</option>
+                    
             <option value="27">4. позиция</option>
+                    
             <option value="28">5. позиция</option>
+                    
             <option value="29">6. позиция</option>
+                    
             <option value="30">7. позиция</option>
+                    
             <option value="31">ENG</option>
+                    
             <option value="32">RU</option>
+                    
             <option value="33">HE</option>
+                    
             <option value="34">UA</option>
+                    
             <option value="35">Оплата</option>
+                    
             <option value="36">Физ. вес</option>
+                    
             <option value="37">Объем. вес</option>
+                    
             <option value="38">К-во ед</option>
-            <option value="39">Комментарии</option>       
+                    
+            <option value="39">Комментарии</option>
+                           
         </select>
     </label>
     `);
@@ -456,24 +566,40 @@ $('#tracking-columns').change((e)=>{
         $('[name="partner"]').remove()
         $('.city-value').remove()
         $('[name="status_date"]').remove()
+        $('[name="order_date"]').remove()
         $('.value-by-tracking').append(`
             <div class="status-value">
                 <select class="form-control" id="status" name="status">
                    <option value="" selected="selected"></option>
+                    
                    <option value="Доставляется на склад в стране отправителя">Доставляется на склад в стране отправителя</option>
+                    
                    <option value="На складе в стране отправителя">На складе в стране отправителя</option>
+                    
                    <option value="На таможне в стране отправителя">На таможне в стране отправителя</option>
+                    
                    <option value="Доставляется в страну получателя">Доставляется в страну получателя</option>
+                    
                    <option value="На таможне в стране получателя">На таможне в стране получателя</option>
+                    
                    <option value="Доставляется получателю">Доставляется получателю</option>
+                    
                    <option value="Доставлено">Доставлено</option>
+                    
                    <option value="Подготовка">Подготовка</option>
+                    
                    <option value="Возврат">Возврат</option>
+                    
                    <option value="Коробка">Коробка</option>
+                    
                    <option value="Забрать">Забрать</option>
+                    
                    <option value="Уточнить">Уточнить</option>
+                    
                    <option value="Думают">Думают</option>
+                    
                    <option value="Отмена">Отмена</option>
+                    
                 </select>                
             </div>
             `)
@@ -486,10 +612,13 @@ $('#tracking-columns').change((e)=>{
         $('[name="partner"]').remove()
         $('.city-value').remove()
         $('[name="status_date"]').remove()
+        $('[name="order_date"]').remove()
         $('.value-by-tracking').append(`
             <select class="form-control" id="site_name" name="site_name">
                <option value="DD-C">DD-C</option>
+                    
                <option value="For">For</option>
+                    
             </select>
             `)
     }
@@ -501,11 +630,15 @@ $('#tracking-columns').change((e)=>{
         $('[name="partner"]').remove()
         $('.city-value').remove()
         $('[name="status_date"]').remove()
+        $('[name="order_date"]').remove()
         $('.value-by-tracking').append(`
             <select class="form-control" id="tariff" name="tariff">
                <option value="" selected="selected"></option>
+                    
                <option value="Море">Море</option>
+                    
                <option value="Авиа">Авиа</option>
+                    
             </select>
             `)
     }
@@ -517,14 +650,21 @@ $('#tracking-columns').change((e)=>{
         $('[name="tariff"]').remove()
         $('.city-value').remove()
         $('[name="status_date"]').remove()
+        $('[name="order_date"]').remove()
         $('.value-by-tracking').append(`
             <select class="form-control" id="partner" name="partner">
                <option value="" selected="selected"></option>
+                    
                <option value="viewer_1">viewer_1</option>
+                    
                <option value="viewer_2">viewer_2</option>
+                    
                <option value="viewer_3">viewer_3</option>
+                    
                <option value="viewer_4">viewer_4</option>
+                    
                <option value="viewer_5">viewer_5</option>
+                    
             </select>
             `)
     }
@@ -536,14 +676,98 @@ $('#tracking-columns').change((e)=>{
         $('[name="tariff"]').remove()
         $('[name="partner"]').remove()
         $('[name="status_date"]').remove()
+        $('[name="order_date"]').remove()
         $('.value-by-tracking').append(`
             <div class="city-value">
                 <div class="col-md-4">
-                    <select class="form-control" name="choose_city_ru"><option value="0" selected="selected">Метод изменения города</option><option value="1">Выбрать из списка (автоматически определится Регион)</option><option value="2">Ввести вручную (Регион возможно не определится)</option></select>
+                    <select class="form-control" name="choose_city_ru"><option value="0" selected="selected">Метод изменения города</option>
+                    <option value="1">Выбрать из списка (автоматически определится Регион)</option>
+                    <option value="2">Ввести вручную (Регион возможно не определится)</option>
+                    </select>
                 </div>
 
                 <div class="col-md-4 choose-city-ru">                    
-                    <select class="form-control" style="display:none" disabled="disabled" id="sender_city" name="sender_city"><option value="Acre">Acre</option><option value="Afula">Afula</option><option value="Arad">Arad</option><option value="Ariel">Ariel</option><option value="Ashdod">Ashdod</option><option value="Ashkelon">Ashkelon</option><option value="Baqa-Jatt">Baqa-Jatt</option><option value="Bat Yam">Bat Yam</option><option value="Beersheba">Beersheba</option><option value="Beit She'an">Beit She'an</option><option value="Beit Shemesh">Beit Shemesh</option><option value="Beitar Illit">Beitar Illit</option><option value="Bnei Brak">Bnei Brak</option><option value="Dimona">Dimona</option><option value="Eilat">Eilat</option><option value="El'ad">El'ad</option><option value="Giv'atayim">Giv'atayim</option><option value="Giv'at Shmuel">Giv'at Shmuel</option><option value="Hadera">Hadera</option><option value="Haifa">Haifa</option><option value="Herzliya">Herzliya</option><option value="Hod HaSharon">Hod HaSharon</option><option value="Holon">Holon</option><option value="Jerusalem">Jerusalem</option><option value="Karmiel">Karmiel</option><option value="Kafr Qasim">Kafr Qasim</option><option value="Kfar Saba">Kfar Saba</option><option value="Kiryat Ata">Kiryat Ata</option><option value="Kiryat Bialik">Kiryat Bialik</option><option value="Kiryat Gat">Kiryat Gat</option><option value="Kiryat Malakhi">Kiryat Malakhi</option><option value="Kiryat Motzkin">Kiryat Motzkin</option><option value="Kiryat Ono">Kiryat Ono</option><option value="Kiryat Shmona">Kiryat Shmona</option><option value="Kiryat Yam">Kiryat Yam</option><option value="Lod">Lod</option><option value="Ma'ale Adumim">Ma'ale Adumim</option><option value="Ma'alot-Tarshiha">Ma'alot-Tarshiha</option><option value="Migdal HaEmek">Migdal HaEmek</option><option value="Modi'in Illit">Modi'in Illit</option><option value="Modi'in-Maccabim-Re'ut">Modi'in-Maccabim-Re'ut</option><option value="Nahariya">Nahariya</option><option value="Nazareth">Nazareth</option><option value="Nazareth Illit">Nazareth Illit</option><option value="Nesher">Nesher</option><option value="Ness Ziona">Ness Ziona</option><option value="Netanya">Netanya</option><option value="Netivot">Netivot</option><option value="Ofakim">Ofakim</option><option value="Or Akiva">Or Akiva</option><option value="Or Yehuda">Or Yehuda</option><option value="Petah Tikva">Petah Tikva</option><option value="Qalansawe">Qalansawe</option><option value="Ra'anana">Ra'anana</option><option value="Rahat">Rahat</option><option value="Ramat Gan">Ramat Gan</option><option value="Ramat HaSharon">Ramat HaSharon</option><option value="Ramla">Ramla</option><option value="Rehovot">Rehovot</option><option value="Rishon LeZion">Rishon LeZion</option><option value="Rosh HaAyin">Rosh HaAyin</option><option value="Safed">Safed</option><option value="Sakhnin">Sakhnin</option><option value="Sderot">Sderot</option><option value="Shefa-'Amr (Shfar'am)">Shefa-'Amr (Shfar'am)</option><option value="Tamra">Tamra</option><option value="Tayibe">Tayibe</option><option value="Tel Aviv">Tel Aviv</option><option value="Tiberias">Tiberias</option><option value="Tira">Tira</option><option value="Tirat Carmel">Tirat Carmel</option><option value="Umm al-Fahm">Umm al-Fahm</option><option value="Yavne">Yavne</option><option value="Yehud-Monosson">Yehud-Monosson</option><option value="Yokneam">Yokneam</option></select>
+                    <select class="form-control" style="display:none" disabled="disabled" id="sender_city" name="sender_city">
+                    <option value="Acre">Acre</option>                   
+                    <option value="Afula">Afula</option>                    
+                    <option value="Arad">Arad</option>                    
+                    <option value="Ariel">Ariel</option>                    
+                    <option value="Ashdod">Ashdod</option>                   
+                    <option value="Ashkelon">Ashkelon</option>                    
+                    <option value="Baqa-Jatt">Baqa-Jatt</option>                    
+                    <option value="Bat Yam">Bat Yam</option>                    
+                    <option value="Beersheba">Beersheba</option>                    
+                    <option value="Beit She'an">Beit She'an</option>                   
+                    <option value="Beit Shemesh">Beit Shemesh</option>                    
+                    <option value="Beitar Illit">Beitar Illit</option>
+                    <option value="Binyamina">Binyamina</option>                     
+                    <option value="Bnei Brak">Bnei Brak</option>  
+                    <option value="Caesaria">Caesaria</option>                  
+                    <option value="Dimona">Dimona</option>                    
+                    <option value="Eilat">Eilat</option>                    
+                    <option value="El'ad">El'ad</option>                    
+                    <option value="Giv'atayim">Giv'atayim</option>                    
+                    <option value="Giv'at Shmuel">Giv'at Shmuel</option>                    
+                    <option value="Hadera">Hadera</option>                    
+                    <option value="Haifa">Haifa</option>                    
+                    <option value="Herzliya">Herzliya</option>                    
+                    <option value="Hod HaSharon">Hod HaSharon</option>                    
+                    <option value="Holon">Holon</option>                    
+                    <option value="Jerusalem">Jerusalem</option>                    
+                    <option value="Karmiel">Karmiel</option>                    
+                    <option value="Kafr Qasim">Kafr Qasim</option>                    
+                    <option value="Kfar Saba">Kfar Saba</option>                    
+                    <option value="Kiryat Ata">Kiryat Ata</option>                    
+                    <option value="Kiryat Bialik">Kiryat Bialik</option>                    
+                    <option value="Kiryat Gat">Kiryat Gat</option>                    
+                    <option value="Kiryat Malakhi">Kiryat Malakhi</option>                    
+                    <option value="Kiryat Motzkin">Kiryat Motzkin</option>                    
+                    <option value="Kiryat Ono">Kiryat Ono</option>                   
+                    <option value="Kiryat Shmona">Kiryat Shmona</option>                    
+                    <option value="Kiryat Yam">Kiryat Yam</option>                    
+                    <option value="Lod">Lod</option>                   
+                    <option value="Ma'ale Adumim">Ma'ale Adumim</option>                   
+                    <option value="Ma'alot-Tarshiha">Ma'alot-Tarshiha</option>
+                    <option value="Migdal HaEmek">Migdal HaEmek</option>
+                    <option value="Modi'in Illit">Modi'in Illit</option>
+                    <option value="Modi'in-Maccabim-Re'ut">Modi'in-Maccabim-Re'ut</option>
+                    <option value="Nahariya">Nahariya</option>
+                    <option value="Nazareth">Nazareth</option>
+                    <option value="Nazareth Illit">Nazareth Illit</option>
+                    <option value="Nesher">Nesher</option>
+                    <option value="Ness Ziona">Ness Ziona</option>
+                    <option value="Netanya">Netanya</option>
+                    <option value="Netivot">Netivot</option>
+                    <option value="Ofakim">Ofakim</option>
+                    <option value="Or Akiva">Or Akiva</option>
+                    <option value="Or Yehuda">Or Yehuda</option>
+                    <option value="Pardes Hana">Pardes Hana</option>
+                    <option value="Petah Tikva">Petah Tikva</option>
+                    <option value="Qalansawe">Qalansawe</option>
+                    <option value="Ra'anana">Ra'anana</option>
+                    <option value="Rahat">Rahat</option>
+                    <option value="Ramat Gan">Ramat Gan</option>
+                    <option value="Ramat HaSharon">Ramat HaSharon</option>
+                    <option value="Ramla">Ramla</option>
+                    <option value="Rehovot">Rehovot</option>
+                    <option value="Rishon LeZion">Rishon LeZion</option>
+                    <option value="Rosh HaAyin">Rosh HaAyin</option>
+                    <option value="Safed">Safed</option>
+                    <option value="Sakhnin">Sakhnin</option>
+                    <option value="Sderot">Sderot</option>
+                    <option value="Shefa-'Amr (Shfar'am)">Shefa-'Amr (Shfar'am)</option>
+                    <option value="Tamra">Tamra</option>
+                    <option value="Tayibe">Tayibe</option>
+                    <option value="Tel Aviv">Tel Aviv</option>
+                    <option value="Tiberias">Tiberias</option>
+                    <option value="Tira">Tira</option>
+                    <option value="Tirat Carmel">Tirat Carmel</option>
+                    <option value="Umm al-Fahm">Umm al-Fahm</option>
+                    <option value="Yavne">Yavne</option>
+                    <option value="Yehud-Monosson">Yehud-Monosson</option>
+                    <option value="Yokneam">Yokneam</option>
+                    <option value="Zikhron Yakov">Zikhron Yakov</option>
+                    </select>
                     <input class="form-control" name="sender_city" type="text" id="sender_city">                    
                 </div>
             </div>
@@ -561,6 +785,19 @@ $('#tracking-columns').change((e)=>{
             <input class="form-control" type="date" name="status_date">
             `)
     }
+    else if(thisVal === 'order_date'){
+        $('[name="value-by-tracking"]').remove()
+        $('[name="date"]').remove()
+        $('[name="site_name"]').remove()
+        $('.status-value').remove()
+        $('[name="tariff"]').remove()
+        $('[name="partner"]').remove()
+        $('[name="status_date"]').remove()
+        $('.city-value').remove()
+        $('.value-by-tracking').append(`
+            <input class="form-control" type="date" name="order_date">
+            `)
+    }
     else if(thisVal === 'date'){
         $('[name="value-by-tracking"]').remove()
         $('[name="site_name"]').remove()
@@ -569,6 +806,7 @@ $('#tracking-columns').change((e)=>{
         $('[name="partner"]').remove()
         $('.city-value').remove()
         $('[name="status_date"]').remove()
+        $('[name="order_date"]').remove()
         $('.value-by-tracking').append(`
             <input class="form-control" type="date" name="date">
             `)
@@ -578,6 +816,7 @@ $('#tracking-columns').change((e)=>{
         $('[name="date"]').remove()
         $('[name="site_name"]').remove()
         $('[name="status_date"]').remove()
+        $('[name="order_date"]').remove()
         $('[name="tariff"]').remove()
         $('[name="partner"]').remove()
         $('.city-value').remove()
@@ -604,26 +843,42 @@ $('#phil-ind-tracking-columns').change((e)=>{
         $('[name="date"]').remove()
         $('.consignee-country-value').remove()
         $('[name="status_date"]').remove()
+        $('[name="order_date"]').remove()
         $('.shipper-country-value').remove()
         $('.city-value').remove()
         $('.phil-ind-value-by-tracking').append(`
             <div class="phil-ind-status-value">
                 <select class="form-control" id="status" name="status">
                    <option value="" selected="selected"></option>
+                    
                    <option value="Pending">Pending</option>
+                    
                    <option value="Forwarding to the warehouse in the sender country">Forwarding to the warehouse in the sender country</option>
+                    
                    <option value="At the warehouse in the sender country">At the warehouse in the sender country</option>
+                    
                    <option value="At the customs in the sender country">At the customs in the sender country</option>
+                    
                    <option value="Forwarding to the receiver country">Forwarding to the receiver country</option>
+                    
                    <option value="At the customs in the receiver country">At the customs in the receiver country</option>
+                    
                    <option value="Forwarding to the receiver">Forwarding to the receiver</option>
+                    
                    <option value="Delivered">Delivered</option>
+                    
                    <option value="Return">Return</option>
+                    
                    <option value="Box">Box</option>
+                    
                    <option value="Pick up">Pick up</option>
+                    
                    <option value="Specify">Specify</option>
+                    
                    <option value="Think">Think</option>
+                    
                    <option value="Canceled">Canceled</option>
+                    
                 </select>                
             </div>
             `)
@@ -634,13 +889,17 @@ $('#phil-ind-tracking-columns').change((e)=>{
         $('.phil-ind-status-value').remove()
         $('.consignee-country-value').remove()
         $('[name="status_date"]').remove()
+        $('[name="order_date"]').remove()
         $('.city-value').remove()
         $('.phil-ind-value-by-tracking').append(`
             <div class="shipper-country-value">
                 <select class="form-control" id="shipper_country" name="shipper_country">
                     <option value="" selected="selected"></option>
+                    
                     <option value="Israel">Israel</option>
+                    
                     <option value="Germany">Germany</option>
+                    
                 </select>                
             </div>
             `)
@@ -651,18 +910,27 @@ $('#phil-ind-tracking-columns').change((e)=>{
         $('.phil-ind-status-value').remove()
         $('.shipper-country-value').remove()
         $('[name="status_date"]').remove()
+        $('[name="order_date"]').remove()
         $('.city-value').remove()
         $('.phil-ind-value-by-tracking').append(`
             <div class="consignee-country-value">
                 <select class="form-control" id="consignee_country" name="consignee_country">
                     <option value="" selected="selected"></option>
+                    
                     <option value="India">India</option>
+                    
                     <option value="Nepal">Nepal</option>
+                    
                     <option value="Nigeria">Nigeria</option>
+                    
                     <option value="Ghana">Ghana</option>
+                    
                     <option value="Cote D\'Ivoire">Cote D\'Ivoire</option>
+                    
                     <option value="South Africa">South Africa</option>
+                    
                     <option value="Thailand">Thailand</option>
+                    
                 </select>                
             </div>
             `)
@@ -674,14 +942,97 @@ $('#phil-ind-tracking-columns').change((e)=>{
         $('.shipper-country-value').remove()
         $('.consignee-country-value').remove()
         $('[name="status_date"]').remove()
+        $('[name="order_date"]').remove()
         $('.phil-ind-value-by-tracking').append(`
             <div class="city-value">
                 <div class="col-md-4 choose-city-eng">
-                    <select class="form-control" name="choose_city_eng"><option value="0" selected="selected">City change method</option><option value="1">Select from the list (Region will be automatically determined)</option><option value="2">Enter manually (Region may not be determined)</option></select>
+                    <select class="form-control" name="choose_city_eng"><option value="0" selected="selected">City change method</option>
+                    <option value="1">Select from the list (Region will be automatically determined)</option>
+                    <option value="2">Enter manually (Region may not be determined)</option>
+                    </select>
                 </div>
 
                 <div class="col-md-4 choose-city-eng">                    
-                    <select class="form-control" style="display:none" disabled="disabled" id="shipper_city" name="shipper_city"><option value="Acre">Acre</option><option value="Afula">Afula</option><option value="Arad">Arad</option><option value="Ariel">Ariel</option><option value="Ashdod">Ashdod</option><option value="Ashkelon">Ashkelon</option><option value="Baqa-Jatt">Baqa-Jatt</option><option value="Bat Yam">Bat Yam</option><option value="Beersheba">Beersheba</option><option value="Beit She'an">Beit She'an</option><option value="Beit Shemesh">Beit Shemesh</option><option value="Beitar Illit">Beitar Illit</option><option value="Bnei Brak">Bnei Brak</option><option value="Dimona">Dimona</option><option value="Eilat">Eilat</option><option value="El'ad">El'ad</option><option value="Giv'atayim">Giv'atayim</option><option value="Giv'at Shmuel">Giv'at Shmuel</option><option value="Hadera">Hadera</option><option value="Haifa">Haifa</option><option value="Herzliya">Herzliya</option><option value="Hod HaSharon">Hod HaSharon</option><option value="Holon">Holon</option><option value="Jerusalem">Jerusalem</option><option value="Karmiel">Karmiel</option><option value="Kafr Qasim">Kafr Qasim</option><option value="Kfar Saba">Kfar Saba</option><option value="Kiryat Ata">Kiryat Ata</option><option value="Kiryat Bialik">Kiryat Bialik</option><option value="Kiryat Gat">Kiryat Gat</option><option value="Kiryat Malakhi">Kiryat Malakhi</option><option value="Kiryat Motzkin">Kiryat Motzkin</option><option value="Kiryat Ono">Kiryat Ono</option><option value="Kiryat Shmona">Kiryat Shmona</option><option value="Kiryat Yam">Kiryat Yam</option><option value="Lod">Lod</option><option value="Ma'ale Adumim">Ma'ale Adumim</option><option value="Ma'alot-Tarshiha">Ma'alot-Tarshiha</option><option value="Migdal HaEmek">Migdal HaEmek</option><option value="Modi'in Illit">Modi'in Illit</option><option value="Modi'in-Maccabim-Re'ut">Modi'in-Maccabim-Re'ut</option><option value="Nahariya">Nahariya</option><option value="Nazareth">Nazareth</option><option value="Nazareth Illit">Nazareth Illit</option><option value="Nesher">Nesher</option><option value="Ness Ziona">Ness Ziona</option><option value="Netanya">Netanya</option><option value="Netivot">Netivot</option><option value="Ofakim">Ofakim</option><option value="Or Akiva">Or Akiva</option><option value="Or Yehuda">Or Yehuda</option><option value="Petah Tikva">Petah Tikva</option><option value="Qalansawe">Qalansawe</option><option value="Ra'anana">Ra'anana</option><option value="Rahat">Rahat</option><option value="Ramat Gan">Ramat Gan</option><option value="Ramat HaSharon">Ramat HaSharon</option><option value="Ramla">Ramla</option><option value="Rehovot">Rehovot</option><option value="Rishon LeZion">Rishon LeZion</option><option value="Rosh HaAyin">Rosh HaAyin</option><option value="Safed">Safed</option><option value="Sakhnin">Sakhnin</option><option value="Sderot">Sderot</option><option value="Shefa-'Amr (Shfar'am)">Shefa-'Amr (Shfar'am)</option><option value="Tamra">Tamra</option><option value="Tayibe">Tayibe</option><option value="Tel Aviv">Tel Aviv</option><option value="Tiberias">Tiberias</option><option value="Tira">Tira</option><option value="Tirat Carmel">Tirat Carmel</option><option value="Umm al-Fahm">Umm al-Fahm</option><option value="Yavne">Yavne</option><option value="Yehud-Monosson">Yehud-Monosson</option><option value="Yokneam">Yokneam</option></select>
+                    <select class="form-control" style="display:none" disabled="disabled" id="shipper_city" name="shipper_city"><option value="Acre">Acre</option>
+                    <option value="Afula">Afula</option>
+                    <option value="Arad">Arad</option>
+                    <option value="Ariel">Ariel</option>
+                    <option value="Ashdod">Ashdod</option>
+                    <option value="Ashkelon">Ashkelon</option>
+                    <option value="Baqa-Jatt">Baqa-Jatt</option>
+                    <option value="Bat Yam">Bat Yam</option>
+                    <option value="Beersheba">Beersheba</option>
+                    <option value="Beit She'an">Beit She'an</option>
+                    <option value="Beit Shemesh">Beit Shemesh</option>
+                    <option value="Beitar Illit">Beitar Illit</option>
+                    <option value="Binyamina">Binyamina</option> 
+                    <option value="Bnei Brak">Bnei Brak</option>
+                    <option value="Caesaria">Caesaria</option>
+                    <option value="Dimona">Dimona</option>
+                    <option value="Eilat">Eilat</option>
+                    <option value="El'ad">El'ad</option>
+                    <option value="Giv'atayim">Giv'atayim</option>
+                    <option value="Giv'at Shmuel">Giv'at Shmuel</option>
+                    <option value="Hadera">Hadera</option>
+                    <option value="Haifa">Haifa</option>
+                    <option value="Herzliya">Herzliya</option>
+                    <option value="Hod HaSharon">Hod HaSharon</option>
+                    <option value="Holon">Holon</option>
+                    <option value="Jerusalem">Jerusalem</option>
+                    <option value="Karmiel">Karmiel</option>
+                    <option value="Kafr Qasim">Kafr Qasim</option>
+                    <option value="Kfar Saba">Kfar Saba</option>
+                    <option value="Kiryat Ata">Kiryat Ata</option>
+                    <option value="Kiryat Bialik">Kiryat Bialik</option>
+                    <option value="Kiryat Gat">Kiryat Gat</option>
+                    <option value="Kiryat Malakhi">Kiryat Malakhi</option>
+                    <option value="Kiryat Motzkin">Kiryat Motzkin</option>
+                    <option value="Kiryat Ono">Kiryat Ono</option>
+                    <option value="Kiryat Shmona">Kiryat Shmona</option>
+                    <option value="Kiryat Yam">Kiryat Yam</option>
+                    <option value="Lod">Lod</option>
+                    <option value="Ma'ale Adumim">Ma'ale Adumim</option>
+                    <option value="Ma'alot-Tarshiha">Ma'alot-Tarshiha</option>
+                    <option value="Migdal HaEmek">Migdal HaEmek</option>
+                    <option value="Modi'in Illit">Modi'in Illit</option>
+                    <option value="Modi'in-Maccabim-Re'ut">Modi'in-Maccabim-Re'ut</option>
+                    <option value="Nahariya">Nahariya</option>
+                    <option value="Nazareth">Nazareth</option>
+                    <option value="Nazareth Illit">Nazareth Illit</option>
+                    <option value="Nesher">Nesher</option>
+                    <option value="Ness Ziona">Ness Ziona</option>
+                    <option value="Netanya">Netanya</option>
+                    <option value="Netivot">Netivot</option>
+                    <option value="Ofakim">Ofakim</option>
+                    <option value="Or Akiva">Or Akiva</option>
+                    <option value="Or Yehuda">Or Yehuda</option>
+                    <option value="Pardes Hana">Pardes Hana</option>
+                    <option value="Petah Tikva">Petah Tikva</option>
+                    <option value="Qalansawe">Qalansawe</option>
+                    <option value="Ra'anana">Ra'anana</option>
+                    <option value="Rahat">Rahat</option>
+                    <option value="Ramat Gan">Ramat Gan</option>
+                    <option value="Ramat HaSharon">Ramat HaSharon</option>
+                    <option value="Ramla">Ramla</option>
+                    <option value="Rehovot">Rehovot</option>
+                    <option value="Rishon LeZion">Rishon LeZion</option>
+                    <option value="Rosh HaAyin">Rosh HaAyin</option>
+                    <option value="Safed">Safed</option>
+                    <option value="Sakhnin">Sakhnin</option>
+                    <option value="Sderot">Sderot</option>
+                    <option value="Shefa-'Amr (Shfar'am)">Shefa-'Amr (Shfar'am)</option>
+                    <option value="Tamra">Tamra</option>
+                    <option value="Tayibe">Tayibe</option>
+                    <option value="Tel Aviv">Tel Aviv</option>
+                    <option value="Tiberias">Tiberias</option>
+                    <option value="Tira">Tira</option>
+                    <option value="Tirat Carmel">Tirat Carmel</option>
+                    <option value="Umm al-Fahm">Umm al-Fahm</option>
+                    <option value="Yavne">Yavne</option>
+                    <option value="Yehud-Monosson">Yehud-Monosson</option>
+                    <option value="Yokneam">Yokneam</option>
+                    <option value="Zikhron Yakov">Zikhron Yakov</option>
+                    </select>
                     <input class="form-control" name="shipper_city" type="text" id="shipper_city">                   
                 </div>           
             </div>
@@ -698,9 +1049,22 @@ $('#phil-ind-tracking-columns').change((e)=>{
             <input class="form-control" type="date" name="status_date">
             `)
     }
+    else if (thisVal === 'order_date') {       
+        $('[name="value-by-tracking"]').remove()
+        $('[name="date"]').remove()
+        $('.phil-ind-status-value').remove()
+        $('.shipper-country-value').remove()
+        $('.consignee-country-value').remove()
+        $('[name="status_date"]').remove()
+        $('.city-value').remove()
+        $('.phil-ind-value-by-tracking').append(`
+            <input class="form-control" type="date" name="order_date">
+            `)
+    }
     else if (thisVal === 'date') {       
         $('[name="value-by-tracking"]').remove()
         $('[name="status_date"]').remove()
+        $('[name="order_date"]').remove()
         $('.phil-ind-status-value').remove()
         $('.shipper-country-value').remove()
         $('.consignee-country-value').remove()
@@ -715,6 +1079,7 @@ $('#phil-ind-tracking-columns').change((e)=>{
         $('.consignee-country-value').remove()
         $('.shipper-country-value').remove()
         $('[name="status_date"]').remove()
+        $('[name="order_date"]').remove()
         $('[name="value-by-tracking"]').remove()
         $('.city-value').remove()
         $('.phil-ind-value-by-tracking').append(`
@@ -747,9 +1112,125 @@ $('[name="checkbox_operations_select"]').change((e)=>{
         $('.checkbox-operations-delete').show()
     }
     else if (thisVal === 'change'){
-        $('.checkbox-operations-change').show()
-        $('.checkbox-operations-delete').hide()
-        $('.checkbox-operations-color').hide()
+        if ($('[name="row_id[]"]:checked').length > 1) {
+            $('.checkbox-operations-change').show()
+            $('.checkbox-operations-delete').hide()
+            $('.checkbox-operations-color').hide()
+        }
+        else if ($('[type="checkbox"][name="row_id[]"]:checked').length == 1){
+            let action = $('.checkbox-operations-change-one').attr('action')
+            action += '/'+$('.checkbox-operations-change-one [name="row_id[]"]').val()
+            $('.checkbox-operations-change-one').attr('action',action)
+            $('.checkbox-operations-change-one').submit()
+        }
+    }
+    else if (thisVal === 'double'){
+        if ($('[name="row_id[]"]:checked').length == 1) {
+            const x = confirm("Are you sure you want to duplicate?");
+            if (x){
+                let action = $('.checkbox-operations-double').attr('action')
+                action += '/'+$('.checkbox-operations-double [name="row_id[]"]').val()
+                $('.checkbox-operations-double').attr('action',action)
+                $('.checkbox-operations-double').submit()
+            }
+            else
+                return false;
+            
+        }
+        else{
+            alert('This option is only available with one line!')
+        }
+    }
+    else if (thisVal === 'activate'){
+        $('.alert.alert-danger').remove();
+        if ($('[name="row_id[]"]:checked').length == 1) {
+            const x = confirm("Are you sure you want to activate?");
+            if (x){
+                let action = $('.checkbox-operations-activate').attr('action');
+                const rowId = $('.checkbox-operations-activate [name="row_id[]"]').val();
+                const href = action + '-check-activate/'+rowId;               
+                $.ajax({
+                    url: href,
+                    type: "GET",
+                    headers: {
+                        'X-CSRF-Token': $('meta[name="csrf-token"]').attr('content')
+                    },
+                    success: function (data) {
+                        console.log(data);
+                        if (data.error) {
+                            $('.card-header').after(`
+                                <div class="alert alert-danger">
+                                `+data.error+`                                      
+                                </div>`)
+                            return 0;
+                        }
+                        else if (data.phone_exist) {
+                            let phone = confirm("A record with the same phone number was added to the database recently. Are you sure you want to add the record/records?");
+                            if (phone) {
+                                action += '-activate/'+rowId
+                                $('.checkbox-operations-activate').attr('action',action)
+                                $('.checkbox-operations-activate').submit()
+                            }                       
+                        }
+                        else{
+                            action += '-activate/'+rowId
+                            $('.checkbox-operations-activate').attr('action',action)
+                            $('.checkbox-operations-activate').submit()
+                        }
+                    },
+                    error: function (msg) {
+                        alert('Request error!');
+                    }
+                });                
+            }       
+            else
+                return false;
+            
+        }
+        else{
+            alert('This option is only available with one line!')
+        }
+    }
+    else if (thisVal === 'cancel-pdf'){
+        if ($('[name="row_id[]"]:checked').length == 1) {
+            $('.checkbox-operations-cancel-pdf').submit()            
+        }
+        else{
+            alert('This option is only available with one line!')
+        }
+    }
+    else if (thisVal === 'add-pdf'){
+        if ($('[name="row_id[]"]:checked').length == 1) {
+            let action = $('.checkbox-operations-add-pdf').attr('action')
+            const uId = Date.now().toString(36) + Math.random().toString(36).substr(2);    
+            $.ajax({
+                type:'POST',
+                url:createTableUrl,
+                headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
+                data: {"session_token":uId},
+                success:function(data){
+                    if (data) {
+                        action += '/'+$('.checkbox-operations-add-pdf [name="row_id[]"]').val()+'/'+data
+                        $('.checkbox-operations-add-pdf').attr('action',action)
+                        $('.checkbox-operations-add-pdf').submit() 
+                    }               
+                },
+                error: function (msg){
+                    alert('Error')
+                }
+            });                                 
+        }
+        else{
+            alert('This option is only available with one line!')
+        }
+    }
+    else if (thisVal === 'download-pdf'){
+        if ($('[name="row_id[]"]:checked').length == 1) {
+            $('.checkbox-operations-download-pdf').submit()            
+        }
+        else{
+            alert('This option is only available with one line!')
+        }
     }
     else if (thisVal === 'color'){
         $('.checkbox-operations-change').hide()
@@ -764,22 +1245,24 @@ $('[name="checkbox_operations_select"]').change((e)=>{
     }
 })
 
+
 $('[name="row_id[]"]').change((e)=>{
-    if (e.target.checked === true) {
-        console.log($(e.target).val())
-        const thisVal = $(e.target).val();
+    const thisVal = $(e.target).val();
+    if (e.target.checked === true) {        
         $('.checkbox-operations form').append(`
-            <input type="hidden" name="row_id[]" value="`+$(e.target).val()+`" data-id="`+$(e.target).val()+`">
+            <input type="hidden" name="row_id[]" value="`+thisVal+`" data-id="`+thisVal+`">
             `);
         $('.checkbox-operations form').append(`
             <input type="hidden" name="old_color[]" 
             value="`+$(e.target).siblings('[name="old_color[]"]').val()+`" 
-            data-color="`+$(e.target).val()+`">
+            data-color="`+thisVal+`">
             `);
+        $('.checkbox-operations form .cancel-pdf').val(thisVal)
+        $('.checkbox-operations form .download-pdf').val(thisVal)
     }
     else{
-        $('.checkbox-operations form input[data-id="'+$(e.target).val()+'"]').remove();
-        $('.checkbox-operations form input[data-color="'+$(e.target).val()+'"]').remove();
+        $('.checkbox-operations form input[data-id="'+thisVal+'"]').remove();
+        $('.checkbox-operations form input[data-color="'+thisVal+'"]').remove();
     }
 })
 
@@ -1068,7 +1551,7 @@ $(document).delegate('select[name="choose_city_eng"]', 'change', function(){
 
 
 // Modals for table cells
-$('table td.allowed-update').not('.td-checkbox, .td-button').click((e)=>{
+$('table td.allowed-update').not('.td-checkbox, .td-button, .pdf-file').click((e)=>{
     $('#updateCellModal [name="row_id[]"]').remove()
     $('#updateCellModal [name="tracking-columns"]').remove()
     $('#updateCellModal [name="phil-ind-tracking-columns"]').remove()

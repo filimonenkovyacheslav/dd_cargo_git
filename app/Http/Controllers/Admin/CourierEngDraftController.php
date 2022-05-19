@@ -14,6 +14,7 @@ use DB;
 use App\Exports\CourierEngDraftWorksheetExport;
 use App\ReceiptArchive;
 use App\Receipt;
+use App\SignedDocument;
 
 
 class CourierEngDraftController extends AdminController
@@ -204,6 +205,11 @@ class CourierEngDraftController extends AdminController
 				if ($old_lot !== $courier_eng_draft_worksheet->lot){
 					$this->updateWarehouseLot($request->input('tracking_main'), $courier_eng_draft_worksheet->lot, 'en');	
 				}
+
+				// Activate PDF
+				if (!$old_tracking && $courier_eng_draft_worksheet->getLastDocUniq()) {
+					return redirect('/admin/courier-eng-draft-activate/'.$courier_eng_draft_worksheet->id);
+				}
 			}
 		}	
 		
@@ -318,6 +324,13 @@ class CourierEngDraftController extends AdminController
     					'operator' => $value_by
     				]);
     			} 
+
+    			if ($column === 'tracking_main') {    				
+    				// Activate PDF
+    				if (!$old_tracking && $worksheet->getLastDocUniq()) {
+    					return redirect('/admin/courier-eng-draft-activate/'.$worksheet->id);
+    				}
+    			}
 
     			if ($column === 'pallet_number') {
     				for ($i=0; $i < count($row_arr); $i++) { 
@@ -447,6 +460,12 @@ class CourierEngDraftController extends AdminController
     			CourierEngDraftWorksheet::whereIn('id', $row_arr)
     			->update([
     				'status_date' => $request->input('status_date')
+    			]);       	
+    		}
+    		else if ($request->input('order_date')) {
+    			CourierEngDraftWorksheet::whereIn('id', $row_arr)
+    			->update([
+    				'order_date' => $request->input('order_date')
     			]);       	
     		}
     		else if ($request->input('date')) {
@@ -633,7 +652,6 @@ class CourierEngDraftController extends AdminController
 			['consignee_address','<>',$worksheet->consignee_address],
 			['consignee_phone','<>',$worksheet->consignee_phone],
 			['consignee_id','<>',$worksheet->consignee_id],
-			['shipped_items','<>',$worksheet->shipped_items],
 			['direction','<>',$worksheet->direction]
     	])->get();
     	$other_worksheet_3 = CourierEngDraftWorksheet::where('in_trash',false)->where([
@@ -655,7 +673,6 @@ class CourierEngDraftController extends AdminController
 			['consignee_address',$worksheet->consignee_address],
 			['consignee_phone',$worksheet->consignee_phone],
 			['consignee_id',$worksheet->consignee_id],
-			['shipped_items',$worksheet->shipped_items],
 			['direction',$worksheet->direction]
     	])->get();
     	$worksheet_data = [
@@ -676,7 +693,6 @@ class CourierEngDraftController extends AdminController
 			'consignee_address' => $worksheet->consignee_address,
 			'consignee_phone' => $worksheet->consignee_phone,
 			'consignee_id' => $worksheet->consignee_id,
-			'shipped_items' => $worksheet->shipped_items,
 			'direction' => $worksheet->direction
     	];   	
 
@@ -694,6 +710,7 @@ class CourierEngDraftController extends AdminController
     		->update([
     			'date'=>date('Y-m-d'),
     			'status' => 'Double',
+    			'shipped_items' => 'Empty: 0',
     			'status_date' => date('Y-m-d')
     		]);
     		$this->addingOrderNumber($worksheet->standard_phone, 'en');
@@ -817,7 +834,7 @@ class CourierEngDraftController extends AdminController
 		$worksheet = new PhilIndWorksheet();
 
 		foreach($fields as $field){
-			if ($field !== 'created_at' && $field !== 'id' && $field !== 'parcels_qty') {
+			if ($field !== 'created_at' && $field !== 'id') {
 				$worksheet->$field = $courier_eng_draft_worksheet->$field;
 			}			
 		}
@@ -874,6 +891,13 @@ class CourierEngDraftController extends AdminController
 			if ($worksheet->standard_phone) {
 				$this->addingOrderNumber($worksheet->standard_phone, 'en');
 			}
+
+			// Transfer documents
+            SignedDocument::where('eng_draft_id',$courier_eng_draft_worksheet->id)
+    		->update([
+    			'eng_draft_id' => null,
+    			'eng_worksheet_id' => $worksheet->id
+    		]);	
 			
 			CourierEngDraftWorksheet::where('id', $id)->delete();
 

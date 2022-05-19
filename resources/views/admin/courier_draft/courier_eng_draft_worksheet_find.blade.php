@@ -60,6 +60,7 @@
 									<option value="direction">Direction</option>
 									<option value="status">Status</option>
 									<option value="status_date">Status Date</option>
+									<option value="order_date">Order Date</option>
 									<option value="tracking_main">Main Tracking number</option>
 									<option value="tracking_local">Local tracking number</option>
 									<option value="pallet_number">Pallet number</option>
@@ -123,12 +124,13 @@
 								<thead>
 									<tr>
 										<th>V</th>
-										<th>Change</th>
 										<th>Id</th>
+										<th>Packing List No.</th>
 										<th>Date</th>
 										<th>Direction</th>
 										<th>Status</th>
 										<th>Status Date</th>
+										<th>Order Date</th>
 										<th>Main Tracking number</th> 
 										<th>Order number</th>
 										<th>Parcels qty</th>
@@ -197,33 +199,11 @@
 										<td class="td-checkbox">
 											<input type="checkbox" name="row_id[]" value="{{ $row->id }}">
 										</td>
-										<td class="td-button">
-
-											@can('editEngDraft')
-
-											<a class="btn btn-primary" href="{{ url('/admin/courier-eng-draft-worksheet/'.$row->id) }}">Change</a>
-
-											<a class="btn btn-default" onclick="ConfirmDouble(event)" href="{{ url('/admin/courier-eng-draft-worksheet-double/'.$row->id) }}">Double</a>
-
-											@endcan
-
-											@can('activateEngDraft')
-
-											<a class="btn btn-success" data-id="{{ $row->id }}" onclick="ConfirmActivate(event)" href="{{ url('/admin/courier-eng-draft-check-activate/'.$row->id) }}">Activate</a>
-
-											@endcan
-
-											@can('editPost')
-
-											{!! Form::open(['url'=>route('deleteCourierEngDraftWorksheet'), 'class'=>'form-horizontal','method' => 'POST']) !!}
-											{!! Form::hidden('action',$row->id) !!}
-											{!! Form::button('Delete',['class'=>'btn btn-danger','type'=>'submit','onclick' => 'ConfirmDelete(event)']) !!}
-											{!! Form::close() !!}
-
-											@endcan
-										</td>
 										<td title="{{$row->id}}">
 											<div class="div-22">{{$row->id}}</div>
+										</td>
+										<td title="{{$row->getLastDocUniq()}}">
+											<div class="div-3">{{$row->getLastDocUniq()}}</div>
 										</td>
 										<td class="@can('update-user')allowed-update @endcan" title="{{$row->date}}">
 											<div data-name="date" data-id="{{ $row->id }}" class="div-3">{{$row->date}}</div>
@@ -236,6 +216,9 @@
 										</td>
 										<td class="@can('update-user')allowed-update @endcan" title="{{$row->status_date}}">
 											<div data-name="status_date" data-id="{{ $row->id }}" class="div-3">{{$row->status_date}}</div>
+										</td>
+										<td class="@can('update-user')allowed-update @endcan" title="{{$row->order_date}}">
+											<div data-name="order_date" data-id="{{ $row->id }}" class="div-3">{{$row->order_date}}</div>
 										</td>
 										<td class="@can('editEngDraft')allowed-update @endcan" title="{{$row->tracking_main}}">
 											<div data-name="tracking_main" data-id="{{ $row->id }}" class="div-3">{{$row->tracking_main}}</div>
@@ -258,67 +241,67 @@
 										<td class="@can('editEngDraft')allowed-update @endcan" title="{{$row->comments_2}}">
 											<div data-name="comments_2" data-id="{{ $row->id }}" class="div-3">{{$row->comments_2}}</div>
 										</td>
-										<td class="@can('editEngDraft')allowed-update @endcan" title="{{$row->shipper_name}}">
+										<td class="@can('editEngDraft')allowed-update @endcan @if($row->getLastDocUniq())pdf-file @endif" title="{{$row->shipper_name}}">
 											<div data-name="shipper_name" data-id="{{ $row->id }}" class="div-3">{{$row->shipper_name}}</div>
 										</td>
-										<td class="@can('editEngDraft')allowed-update @endcan" title="{{$row->shipper_country}}">
+										<td class="@can('editEngDraft')allowed-update @endcan @if($row->getLastDocUniq())pdf-file @endif" title="{{$row->shipper_country}}">
 											<div data-name="shipper_country" data-id="{{ $row->id }}" class="div-3">{{$row->shipper_country}}</div>
 										</td>
-										<td class="@can('editEngDraft')allowed-update @endcan" title="{{$row->shipper_region}}">
+										<td class="@can('editEngDraft')allowed-update @endcan @if($row->getLastDocUniq())pdf-file @endif" title="{{$row->shipper_region}}">
 											<div data-name="shipper_region" data-id="{{ $row->id }}" class="div-2">{{$row->shipper_region}}</div>
 										</td>
-										<td class="@can('editEngDraft')allowed-update @endcan" title="{{$row->shipper_city}}">
+										<td class="@can('editEngDraft')allowed-update @endcan @if($row->getLastDocUniq())pdf-file @endif" title="{{$row->shipper_city}}">
 											<div data-name="shipper_city" data-id="{{ $row->id }}" class="div-3">{{$row->shipper_city}}</div>
 										</td>
-										<td class="@can('editEngDraft')allowed-update @endcan" title="{{$row->passport_number}}">
+										<td class="@can('editEngDraft')allowed-update @endcan @if($row->getLastDocUniq())pdf-file @endif" title="{{$row->passport_number}}">
 											<div data-name="passport_number" data-id="{{ $row->id }}" class="div-3">{{$row->passport_number}}</div>
 										</td>
-										<td class="@can('editEngDraft')allowed-update @endcan" title="{{$row->return_date}}">
+										<td class="@can('editEngDraft')allowed-update @endcan @if($row->getLastDocUniq())pdf-file @endif" title="{{$row->return_date}}">
 											<div data-name="return_date" data-id="{{ $row->id }}" class="div-3">{{$row->return_date}}</div>
 										</td>
-										<td class="@can('editEngDraft')allowed-update @endcan" title="{{$row->shipper_address}}">
+										<td class="@can('editEngDraft')allowed-update @endcan @if($row->getLastDocUniq())pdf-file @endif" title="{{$row->shipper_address}}">
 											<div data-name="shipper_address" data-id="{{ $row->id }}" class="div-3">{{$row->shipper_address}}</div>
 										</td>
-										<td class="@can('editEngDraft')allowed-update @endcan" title="{{$row->standard_phone}}">
+										<td class="@can('editEngDraft')allowed-update @endcan @if($row->getLastDocUniq())pdf-file @endif" title="{{$row->standard_phone}}">
 											<div data-name="standard_phone" data-id="{{ $row->id }}" class="div-4">{{$row->standard_phone}}</div>
 										</td>
-										<td class="@can('editEngDraft')allowed-update @endcan" title="{{$row->shipper_phone}}">
+										<td class="@can('editEngDraft')allowed-update @endcan @if($row->getLastDocUniq())pdf-file @endif" title="{{$row->shipper_phone}}">
 											<div data-name="shipper_phone" data-id="{{ $row->id }}" class="div-3">{{$row->shipper_phone}}</div>
 										</td>
-										<td class="@can('editEngDraft')allowed-update @endcan" title="{{$row->shipper_id}}">
+										<td class="@can('editEngDraft')allowed-update @endcan @if($row->getLastDocUniq())pdf-file @endif" title="{{$row->shipper_id}}">
 											<div data-name="shipper_id" data-id="{{ $row->id }}" class="div-3">{{$row->shipper_id}}</div>
 										</td>
-										<td class="@can('editEngDraft')allowed-update @endcan" title="{{$row->consignee_name}}">
+										<td class="@can('editEngDraft')allowed-update @endcan @if($row->getLastDocUniq())pdf-file @endif" title="{{$row->consignee_name}}">
 											<div data-name="consignee_name" data-id="{{ $row->id }}" class="div-3">{{$row->consignee_name}}</div>
 										</td>
-										<td class="@can('editEngDraft')allowed-update @endcan" title="{{$row->consignee_country}}">
+										<td class="@can('editEngDraft')allowed-update @endcan @if($row->getLastDocUniq())pdf-file @endif" title="{{$row->consignee_country}}">
 											<div data-name="consignee_country" data-id="{{ $row->id }}" class="div-3">{{$row->consignee_country}}</div>
 										</td>
-										<td class="@can('editEngDraft')allowed-update @endcan" title="{{$row->house_name}}">
+										<td class="@can('editEngDraft')allowed-update @endcan @if($row->getLastDocUniq())pdf-file @endif" title="{{$row->house_name}}">
 											<div data-name="house_name" data-id="{{ $row->id }}" class="div-3">{{$row->house_name}}</div>
 										</td>
-										<td class="@can('editEngDraft')allowed-update @endcan" title="{{$row->post_office}}">
+										<td class="@can('editEngDraft')allowed-update @endcan @if($row->getLastDocUniq())pdf-file @endif" title="{{$row->post_office}}">
 											<div data-name="post_office" data-id="{{ $row->id }}" class="div-3">{{$row->post_office}}</div>
 										</td>
-										<td class="@can('editEngDraft')allowed-update @endcan" title="{{$row->district}}">
+										<td class="@can('editEngDraft')allowed-update @endcan @if($row->getLastDocUniq())pdf-file @endif" title="{{$row->district}}">
 											<div data-name="district" data-id="{{ $row->id }}" class="div-3">{{$row->district}}</div>
 										</td>
-										<td class="@can('editEngDraft')allowed-update @endcan" title="{{$row->state_pincode}}">
+										<td class="@can('editEngDraft')allowed-update @endcan @if($row->getLastDocUniq())pdf-file @endif" title="{{$row->state_pincode}}">
 											<div data-name="state_pincode" data-id="{{ $row->id }}" class="div-3">{{$row->state_pincode}}</div>
 										</td>
-										<td class="@can('editEngDraft')allowed-update @endcan" title="{{$row->consignee_address}}">
+										<td class="@can('editEngDraft')allowed-update @endcan @if($row->getLastDocUniq())pdf-file @endif" title="{{$row->consignee_address}}">
 											<div data-name="consignee_address" data-id="{{ $row->id }}" class="div-3">{{$row->consignee_address}}</div>
 										</td>
-										<td class="@can('editEngDraft')allowed-update @endcan" title="{{$row->consignee_phone}}">
+										<td class="@can('editEngDraft')allowed-update @endcan @if($row->getLastDocUniq())pdf-file @endif" title="{{$row->consignee_phone}}">
 											<div data-name="consignee_phone" data-id="{{ $row->id }}" class="div-3">{{$row->consignee_phone}}</div>
 										</td>
-										<td class="@can('editEngDraft')allowed-update @endcan" title="{{$row->consignee_id}}">
+										<td class="@can('editEngDraft')allowed-update @endcan @if($row->getLastDocUniq())pdf-file @endif" title="{{$row->consignee_id}}">
 											<div data-name="consignee_id" data-id="{{ $row->id }}" class="div-3">{{$row->consignee_id}}</div>
 										</td>
-										<td class="@can('editEngDraft')allowed-update @endcan" title="{{$row->shipped_items}}">
+										<td class="@can('editEngDraft')allowed-update @endcan @if($row->getLastDocUniq())pdf-file @endif" title="{{$row->shipped_items}}">
 											<div data-name="shipped_items" data-id="{{ $row->id }}" class="div-3">{{$row->shipped_items}}</div>
 										</td>
-										<td class="@can('editEngDraft')allowed-update @endcan" title="{{$row->shipment_val}}">
+										<td class="@can('editEngDraft')allowed-update @endcan @if($row->getLastDocUniq())pdf-file @endif" title="{{$row->shipment_val}}">
 											<div data-name="shipment_val" data-id="{{ $row->id }}" class="div-3">{{$row->shipment_val}}</div>
 										</td>
 										<td class="@can('editPost')allowed-update @endcan" title="{{$row->operator}}">
@@ -397,6 +380,18 @@
 										@endcan
 
 										<option value="change">Change</option>
+										<option value="double">Double</option>	
+
+										@can('activateEngDraft')
+										<option value="activate">Activate</option>
+										@endcan
+
+										@can('update-user')	
+										<option value="cancel-pdf">Cancel PDF</option>
+										<option value="add-pdf">Add PDF</option>
+										<option value="download-pdf">Download PDF</option>
+										@endcan
+									
 									</select>
 								</label>
 
@@ -413,31 +408,16 @@
 										@can('update-user')
 										<option value="status_date">Status Date</option>
 										@endcan
+
+										@can('update-user')
+										<option value="order_date">Order Date</option>
+										@endcan
 										
 										<option value="parcels_qty">Parcels qty</option>
 										<option value="tracking_local">Local tracking number</option>
 										<option value="pallet_number">Pallet number</option>
 										<option value="comments_1">Comments 1</option>
 										<option value="comments_2">Comments 2</option>
-										<option value="shipper_name">Shipper's name</option>
-										<option value="shipper_country">Shipper's country</option>
-										<option value="shipper_city">Shipper\'s city/village</option>
-										<option value="passport_number">GSTN/Passport number</option>
-										<option value="return_date">Estimated return to India date</option>
-										<option value="shipper_address">Shipper's address</option>
-										<option value="shipper_phone">Shipper's phone number</option>
-										<option value="shipper_id">Shipper's ID number</option>
-										<option value="consignee_name">Consignee's name</option>
-										<option value="consignee_country">Consignee's country</option>
-										<option value="house_name">House name</option>
-										<option value="post_office">Local post office</option>
-										<option value="district">District/City</option>
-										<option value="state_pincode">State pincode</option>
-										<option value="consignee_address">Consignee's address</option>
-										<option value="consignee_phone">Consignee's phone number</option>
-										<option value="consignee_id">Consignee's ID number</option>
-										<option value="shipped_items">Shipped items</option>
-										<option value="shipment_val">Shipment's declared value</option>
 										<option value="operator">Operator</option>
 										<option value="courier">Courier</option>
 										<option value="delivery_date_comments">Pick-up/delivery date and comments</option>
@@ -468,6 +448,34 @@
 								{!! Form::open(['url'=>route('deleteCourierEngDraftWorksheetById'),'method' => 'POST']) !!}
 								{!! Form::button('Delete',['class'=>'btn btn-danger  checkbox-operations-delete','type'=>'submit','onclick' => 'ConfirmDelete(event)']) !!}
 								{!! Form::close() !!}
+
+								<form class="checkbox-operations-change-one" action="{{ url('/admin/courier-eng-draft-worksheet/') }}" method="GET">
+									@csrf	
+								</form>
+
+								<form class="checkbox-operations-double" action="{{ url('/admin/courier-eng-draft-worksheet-double/') }}" method="GET">
+									@csrf	
+								</form>
+
+								<form class="checkbox-operations-activate" action="{{ url('/admin/courier-eng-draft') }}" method="GET">
+									@csrf	
+								</form>
+
+								<form class="checkbox-operations-cancel-pdf" action="{{ route('cancelPdf') }}" method="POST">
+									@csrf	
+									<input type="hidden" name="eng_draft_id" class="cancel-pdf">
+								</form>
+
+								<form class="checkbox-operations-add-pdf" action="{{ url('/form-with-signature-eng') }}" method="GET">
+									@csrf	
+									<input type="hidden" name="quantity_sender" value="1">
+								</form>
+
+								<form class="checkbox-operations-download-pdf" action="{{ route('downloadAllPdf') }}" method="POST">
+									@csrf	
+									<input type="hidden" name="id" class="download-pdf">
+									<input type="hidden" name="type" value="eng_draft_id">
+								</form>
 
 								@endcan
 
@@ -535,57 +543,6 @@
 			form.submit();
 		else
 			location.href = '/admin/to-trash?'+data+'&table=courier_eng_draft_worksheet';
-	}
-	
-
-	function ConfirmDouble(event)
-	{
-		event.preventDefault();
-		const href = $(event.target).attr('href');
-		var x = confirm("Are you sure you want to double?");
-		if (x)
-			location.href = href;
-		else
-			return false;
-	}
-
-	
-	function ConfirmActivate(event)
-	{
-		$('.alert.alert-danger').remove();
-		var x = confirm("Are you sure you want to activate?");
-		event.preventDefault();
-		const href = $(event.target).attr('href');
-		const rowId = $(event.target).attr('data-id');
-		if (x){
-			$.ajax({
-				url: href,
-				type: "GET",
-				headers: {
-					'X-CSRF-Token': $('meta[name="csrf-token"]').attr('content')
-				},
-				success: function (data) {
-					console.log(data);
-					if (data.error) {
-						$('.card-header').after(`
-							<div class="alert alert-danger">
-								`+data.error+`										
-							</div>`)
-						return 0;
-					}
-					else if (data.phone_exist) {
-						let phone = confirm("A record with the same phone number was added to the database recently. Are you sure you want to add the record/records?");
-						if (phone) location.href = '/admin/courier-eng-draft-activate/'+rowId;						
-					}
-					else{
-						location.href = '/admin/courier-eng-draft-activate/'+rowId;
-					}
-				},
-				error: function (msg) {
-					alert('Ошибка admin');
-				}
-			});
-		}						
 	}
 
 </script>

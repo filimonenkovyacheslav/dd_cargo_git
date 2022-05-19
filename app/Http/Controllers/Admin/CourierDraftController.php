@@ -17,6 +17,7 @@ use DB;
 use App\Exports\CourierDraftWorksheetExport;
 use App\ReceiptArchive;
 use App\Receipt;
+use App\SignedDocument;
 
 
 class CourierDraftController extends AdminController
@@ -98,7 +99,9 @@ class CourierDraftController extends AdminController
 
 		foreach($fields as $field){						
 			if ($field !== 'created_at' && $field !== 'tracking_main') {
-				$courier_draft_worksheet->$field = $request->input($field);
+				if ($request->has($field)) {
+					$courier_draft_worksheet->$field = $request->input($field);
+				}				
 			}
 			elseif ($field !== 'created_at' && ($user->role === 'admin' || $user->role === 'office_1')){
 				$courier_draft_worksheet->$field = $request->input($field);
@@ -233,8 +236,13 @@ class CourierDraftController extends AdminController
 				if ($old_batch_number !== $courier_draft_worksheet->batch_number){
 					$this->updateWarehouseLot($request->input('tracking_main'), $courier_draft_worksheet->batch_number, 'ru');
 				}
+
+				// Activate PDF
+				if (!$old_tracking && $courier_draft_worksheet->getLastDocUniq()) {
+					return redirect('/admin/courier-draft-activate/'.$courier_draft_worksheet->id);
+				}
 			}
-			
+
 			return redirect()->to(session('this_previous_url'))->with('status', 'Строка успешно обновлена!'.' '.$check_result);
 		}	
 		else{
@@ -313,8 +321,12 @@ class CourierDraftController extends AdminController
     					$notification = ReceiptArchive::where('tracking_main', $value_by)->first();
     					if (!$notification) $check_result .= $this->checkReceipt($worksheet->id, null, 'ru', $value_by,null,$old_tracking); 
 
-    					$check_result .= $this->updateStatusByTracking('courier_draft_worksheet', $worksheet);		
+    					$check_result .= $this->updateStatusByTracking('courier_draft_worksheet', $worksheet);		    					
     				}
+
+    				PackingSea::where('work_sheet_id',$worksheet->id)->update([
+    					'track_code' => $value_by
+    				]);
 
     				// Check for missing tracking
     				$this->checkForMissingTracking($value_by);
@@ -322,13 +334,20 @@ class CourierDraftController extends AdminController
     				$message = $this->updateWarehousePallet($old_tracking, $value_by, $pallet, $pallet, $lot, $lot, 'ru', $worksheet);
     				if ($message) {
     					return redirect()->to(session('this_previous_url'))->with('status-error', 'Pallet number is not correct!');
-    				}					
+    				}	   								
     			}
     			
     			CourierDraftWorksheet::whereIn('id', $row_arr)
     			->update([
     				$column => $value_by
     			]); 
+
+    			if ($column === 'tracking_main') {
+    				// Activate PDF
+    				if (!$old_tracking && $worksheet->getLastDocUniq()) {
+    					return redirect('/admin/courier-draft-activate/'.$worksheet->id);
+    				}
+    			}
 
     			if ($column === 'pallet_number') {
     				for ($i=0; $i < count($row_arr); $i++) { 
@@ -401,6 +420,12 @@ class CourierDraftController extends AdminController
     			CourierDraftWorksheet::whereIn('id', $row_arr)
     			->update([
     				'status_date' => $request->input('status_date')
+    			]);       	
+    		}
+    		else if ($request->input('order_date')) {
+    			CourierDraftWorksheet::whereIn('id', $row_arr)
+    			->update([
+    				'order_date' => $request->input('order_date')
     			]);       	
     		}
     		else if ($request->input('date')) {
@@ -588,7 +613,6 @@ class CourierDraftController extends AdminController
 			['recipient_passport','<>',$worksheet->recipient_passport],
 			['recipient_email','<>',$worksheet->recipient_email],
 			['site_name','<>',$worksheet->site_name],
-			['package_content','<>',$worksheet->package_content],
 			['direction','<>',$worksheet->direction]
     	])->get();
     	$other_worksheet_3 = CourierDraftWorksheet::where('in_trash',false)->where([
@@ -615,7 +639,6 @@ class CourierDraftController extends AdminController
 			['recipient_passport',$worksheet->recipient_passport],
 			['recipient_email',$worksheet->recipient_email],
 			['site_name',$worksheet->site_name],
-			['package_content',$worksheet->package_content],
 			['direction',$worksheet->direction]
     	])->get();
     	$worksheet_data = [
@@ -640,8 +663,7 @@ class CourierDraftController extends AdminController
     		'recipient_phone' => $worksheet->recipient_phone,
     		'recipient_passport' => $worksheet->recipient_passport,
     		'recipient_email' => $worksheet->recipient_email,
-    		'site_name' => $worksheet->site_name,
-    		'package_content' => $worksheet->package_content,
+    		'site_name' => $worksheet->site_name,    		
     		'direction' => $worksheet->direction
     	];   	
 
@@ -659,6 +681,7 @@ class CourierDraftController extends AdminController
     		->update([
     			'date'=>date('Y-m-d'),
     			'status' => 'Дубль',
+    			'package_content' => 'Пусто: 0',
     			'status_date' => date('Y-m-d')
     		]);
     		$this->addingOrderNumber($worksheet->standard_phone, 'ru');
@@ -698,8 +721,8 @@ class CourierDraftController extends AdminController
 		if (!$courier_draft_worksheet->recipient_name) $error_message .= 'Получатель,';
 		if (!$courier_draft_worksheet->recipient_city) $error_message .= 'Город получателя,';
 		if (!$courier_draft_worksheet->recipient_street) $error_message .= 'Улица получателя,';
-		if (!$courier_draft_worksheet->recipient_house) $error_message .= '№ дома пол-ля,';
-		if (!$courier_draft_worksheet->recipient_room) $error_message .= '№ кв. пол-ля,';
+		if (!$courier_draft_worksheet->recipient_house) $error_message .= '№ дома получателя,';
+		if (!$courier_draft_worksheet->recipient_room) $error_message .= '№ кв. получателя,';
 		if (!$courier_draft_worksheet->recipient_phone) $error_message .= 'Телефон получателя,';
 		if (!$courier_draft_worksheet->package_content) $error_message .= 'Содержание,';	
 
@@ -712,7 +735,7 @@ class CourierDraftController extends AdminController
     }
 
 
-    public function courierDraftActivate($id, Request $request)
+    public function courierDraftActivate($id)
 	{
 		$courier_draft_worksheet = CourierDraftWorksheet::find($id);		
 		$new_worksheet = new NewWorksheet();
@@ -726,7 +749,7 @@ class CourierDraftController extends AdminController
 		}			
 
 		foreach($fields as $field){
-			if ($field !== 'created_at' && $field !== 'id' && $field !== 'parcels_qty') {
+			if ($field !== 'created_at' && $field !== 'id') {
 				$new_worksheet->$field = $courier_draft_worksheet->$field;
 			}			
 		}
@@ -776,10 +799,18 @@ class CourierDraftController extends AdminController
 			// Adding order number
             if ($new_worksheet->standard_phone) {
 				$this->addingOrderNumber($new_worksheet->standard_phone, 'ru');               
-            }						
+            }
+
+            // Transfer documents
+            SignedDocument::where('draft_id',$courier_draft_worksheet->id)
+    		->update([
+    			'draft_id' => null,
+    			'worksheet_id' => $new_worksheet->id
+    		]);					
+			
 			CourierDraftWorksheet::where('id', $id)->delete();
 
-			$new_worksheet->checkCourierTask($new_worksheet->status);
+			$new_worksheet->checkCourierTask($new_worksheet->status);			
 			
 			return redirect()->to(session('this_previous_url'))->with('status', 'Строка успешно активирована!'.$message);
 		}

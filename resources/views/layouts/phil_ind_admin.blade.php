@@ -52,6 +52,8 @@
         }
     </style>
 
+    <script type="text/javascript">var createTableUrl = "{{ url('/create-temp-table') }}"</script>
+
 </head>
 <body>
     @can('eng-view-post')

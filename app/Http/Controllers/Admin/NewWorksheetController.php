@@ -963,7 +963,7 @@ class NewWorksheetController extends AdminController
     	// Update Invoice 
     	$tr = new GoogleTranslateForFree();  
 
-    	$invoice_arr = ['weight' => 'weight', 'height' => 'height', 'length' => 'length', 'width' => 'width', 'package_cost' => 'declared_value', 'batch_number' => 'batch_number']; 
+    	$invoice_arr = ['weight' => 'weight', 'height' => 'height', 'length' => 'length', 'width' => 'width', 'package_cost' => 'declared_value', 'batch_number' => 'batch_number', 'tracking_main' => 'tracking']; 
 
     	if (array_key_exists($column, $invoice_arr)) {
     		Invoice::whereIn('work_sheet_id', $row_arr)
@@ -999,7 +999,7 @@ class NewWorksheetController extends AdminController
 		// End Update Invoice
 
 		// Update New Packing	
-    	$new_packing_arr = ['tariff' => 'type', 'sender_name' => 'full_shipper', 'recipient_name' => 'full_consignee', 'recipient_country' => 'country_code', 'recipient_postcode' => 'postcode', 'region' => 'region', 'district' => 'district', 'recipient_city' => 'city', 'recipient_street' => 'street', 'recipient_house' => 'house', 'body' => 'body', 'recipient_room' => 'room', 'recipient_phone' => 'phone', 'weight' => 'weight_kg', 'batch_number' => 'batch_number']; 
+    	$new_packing_arr = ['tariff' => 'type', 'sender_name' => 'full_shipper', 'recipient_name' => 'full_consignee', 'recipient_country' => 'country_code', 'recipient_postcode' => 'postcode', 'region' => 'region', 'district' => 'district', 'recipient_city' => 'city', 'recipient_street' => 'street', 'recipient_house' => 'house', 'body' => 'body', 'recipient_room' => 'room', 'recipient_phone' => 'phone', 'weight' => 'weight_kg', 'batch_number' => 'batch_number', 'tracking_main' => 'track_code']; 
 
     	if (array_key_exists($column, $new_packing_arr)){
     		NewPacking::whereIn('work_sheet_id', $row_arr)
@@ -1010,7 +1010,7 @@ class NewWorksheetController extends AdminController
 		// End Update New Packing
 
 		// Update Manifest
-    	$manifest_arr = ['weight' => 'weight', 'package_cost' => 'cost', 'sender_name' => 'sender_name', 'recipient_name' => 'recipient_name', 'batch_number' => 'batch_number']; 
+    	$manifest_arr = ['weight' => 'weight', 'package_cost' => 'cost', 'sender_name' => 'sender_name', 'recipient_name' => 'recipient_name', 'batch_number' => 'batch_number', 'tracking_main' => 'tracking']; 
     	if (array_key_exists($column, $manifest_arr)){
     		Manifest::whereIn('work_sheet_id', $row_arr)
     		->update([

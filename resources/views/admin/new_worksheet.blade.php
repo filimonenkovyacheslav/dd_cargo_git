@@ -68,6 +68,7 @@
 									<option value="tariff">Тариф</option>
 									<option value="status">Статус</option>
 									<option value="status_date">Дата Статуса</option>
+									<option value="order_date">Дата Заказа</option>
 									<option value="partner">Партнер</option>
 									<option value="tracking_main">Основной</option>
 									<option value="tracking_local">Локальный</option>
@@ -127,8 +128,8 @@
 								<thead>
 									<tr>
 										<th>V</th>
-										<th>Изменить</th>
 										<th>Id</th>
+										<th>№ пакинг-листа</th>
 										<th>Сайт</th>
 										<th>Дата<hr>
 											@can('editPost')
@@ -139,6 +140,7 @@
 										<th>Тариф</th>
 										<th>Статус</th>
 										<th>Дата Статуса</th>
+										<th>Дата Заказа</th>
 										<th>Партнер</th>
 										<th>Трекинг<hr>Основной<hr>
 											@can('editPost')
@@ -146,6 +148,7 @@
 											@endcan
 										</th> 
 										<th>№ заказа</th>
+										<th>Кол-во посылок</th>
 										<th>Трекинг<hr>Локальный</th>
 										<th>Трекинг<hr>Транзитный</th>
 										<th>Номер паллеты</th>
@@ -276,24 +279,13 @@
 										<td class="td-checkbox">
 											<input type="hidden" name="old_color[]" value="{{$row->background}}">
 											<input type="checkbox" name="row_id[]" value="{{ $row->id }}">
-										</td>
-										<td class="td-button">
-											@can('update-post')
-											<a class="btn btn-primary" href="{{ url('/admin/new-worksheet/'.$row->id) }}">Изменить</a>
-											@endcan
-
-											@can('editPost')
-
-											{!! Form::open(['url'=>route('deleteNewWorksheet'), 'class'=>'form-horizontal','method' => 'POST']) !!}
-											{!! Form::hidden('action',$row->id) !!}
-											{!! Form::button('Удалить',['class'=>'btn btn-danger','type'=>'submit','onclick' => 'ConfirmDelete(event)']) !!}
-											{!! Form::close() !!}
-
-											@endcan
-										</td> 	
+										</td>	
 										<td title="{{$row->id}}">
 											<div class="div-22">{{$row->id}}</div>
-										</td>									
+										</td>	
+										<td title="{{$row->getLastDocUniq()}}">
+											<div class="div-3">{{$row->getLastDocUniq()}}</div>
+										</td>								
 										<td class="@can('editPost')allowed-update @endcan" title="{{$row->site_name}}">
 											<div data-name="site_name" data-id="{{ $row->id }}" class="div-22">{{$row->site_name}}</div>
 										</td>
@@ -303,7 +295,7 @@
 										<td class="@can('editPost')allowed-update @endcan" title="{{$row->direction}}">
 											<div data-name="direction" data-id="{{ $row->id }}" class="div-2">{{$row->direction}}</div>
 										</td>
-										<td class="@can('editPost')allowed-update @endcan" title="{{$row->tariff}}">
+										<td class="@can('editPost')allowed-update @endcan @if($row->getLastDocUniq())pdf-file @endif" title="{{$row->tariff}}">
 											<div data-name="tariff" data-id="{{ $row->id }}" class="div-2">{{$row->tariff}}</div>
 										</td>
 										<td class="@can('editPost')allowed-update @endcan" title="{{$row->status}}">
@@ -311,6 +303,9 @@
 										</td>
 										<td class="@can('editPost')allowed-update @endcan" title="{{$row->status_date}}">
 											<div class="div-3">{{$row->status_date}}</div>
+										</td>
+										<td class="@can('update-user')allowed-update @endcan" title="{{$row->order_date}}">
+											<div data-name="order_date" data-id="{{ $row->id }}" class="div-3">{{$row->order_date}}</div>
 										</td>
 										<td class="@can('editPost')allowed-update @endcan" title="{{$row->partner}}">
 											<div data-name="partner" data-id="{{ $row->id }}" class="div-3">{{$row->partner}}</div>
@@ -320,6 +315,9 @@
 										</td>
 										<td class="td-button" title="{{$row->order_number}}">
 											<div class="div-22">{{$row->order_number}}</div>
+										</td>
+										<td class="td-button" title="{{$row->parcels_qty}}">
+											<div class="div-22">{{$row->parcels_qty}}</div>
 										</td>
 										<td class="@can('editPost')allowed-update @endcan" title="{{$row->tracking_local}}">
 											<div data-name="tracking_local" data-id="{{ $row->id }}" class="div-5">{{$row->tracking_local}}</div>
@@ -336,64 +334,64 @@
 										<td class="@can('editColumns-4')allowed-update @endcan" title="{{$row->comments}}">
 											<div data-name="comments" data-id="{{ $row->id }}" class="div-9">{{$row->comments}}</div>
 										</td>
-										<td class="@can('editPost')allowed-update @endcan" title="{{$row->sender_name}}">
+										<td class="@can('editPost')allowed-update @endcan @if($row->getLastDocUniq())pdf-file @endif" title="{{$row->sender_name}}">
 											<div data-name="sender_name" data-id="{{ $row->id }}" class="div-10">{{$row->sender_name}}</div>
 										</td>
-										<td class="@can('editPost')allowed-update @endcan" title="{{$row->sender_country}}">
+										<td class="@can('editPost')allowed-update @endcan @if($row->getLastDocUniq())pdf-file @endif" title="{{$row->sender_country}}">
 											<div data-name="sender_country" data-id="{{ $row->id }}" class="div-11">{{$row->sender_country}}</div>
 										</td>
-										<td class="@can('editPost')allowed-update @endcan" title="{{$row->shipper_region}}">
+										<td class="@can('editPost')allowed-update @endcan @if($row->getLastDocUniq())pdf-file @endif" title="{{$row->shipper_region}}">
 											<div class="div-2">{{$row->shipper_region}}</div>
 										</td>
-										<td class="@can('editPost')allowed-update @endcan" title="{{$row->sender_city}}">
+										<td class="@can('editPost')allowed-update @endcan @if($row->getLastDocUniq())pdf-file @endif" title="{{$row->sender_city}}">
 											<div data-name="sender_city" data-id="{{ $row->id }}" class="div-12">{{$row->sender_city}}</div>
 										</td>
-										<td class="@can('editPost')allowed-update @endcan" title="{{$row->sender_postcode}}">
+										<td class="@can('editPost')allowed-update @endcan @if($row->getLastDocUniq())pdf-file @endif" title="{{$row->sender_postcode}}">
 											<div data-name="sender_postcode" data-id="{{ $row->id }}" class="div-13">{{$row->sender_postcode}}</div>
 										</td>
-										<td class="@can('editPost')allowed-update @endcan" title="{{$row->sender_address}}">
+										<td class="@can('editPost')allowed-update @endcan @if($row->getLastDocUniq())pdf-file @endif title="{{$row->sender_address}}">
 											<div data-name="sender_address" data-id="{{ $row->id }}" class="div-14">{{$row->sender_address}}</div>
 										</td>
-										<td class="@can('editPost')allowed-update @endcan" title="{{$row->standard_phone}}">
+										<td class="@can('editPost')allowed-update @endcan @if($row->getLastDocUniq())pdf-file @endif" title="{{$row->standard_phone}}">
 											<div data-name="standard_phone" data-id="{{ $row->id }}" class="div-15">{{$row->standard_phone}}</div>
 										</td>
-										<td class="@can('editPost')allowed-update @endcan" title="{{$row->sender_phone}}">
+										<td class="@can('editPost')allowed-update @endcan @if($row->getLastDocUniq())pdf-file @endif" title="{{$row->sender_phone}}">
 											<div data-name="sender_phone" data-id="{{ $row->id }}" class="div-15">{{$row->sender_phone}}</div>
 										</td>
 										<td class="@can('editPost')allowed-update @endcan" title="{{$row->sender_passport}}">
 											<div data-name="sender_passport" data-id="{{ $row->id }}" class="div-16">{{$row->sender_passport}}</div>
 										</td>
-										<td class="@can('editPost')allowed-update @endcan" title="{{$row->recipient_name}}">
+										<td class="@can('editPost')allowed-update @endcan @if($row->getLastDocUniq())pdf-file @endif" title="{{$row->recipient_name}}">
 											<div data-name="recipient_name" data-id="{{ $row->id }}" class="div-17">{{$row->recipient_name}}</div>
 										</td>
-										<td class="@can('editPost')allowed-update @endcan" title="{{$row->recipient_country}}">
+										<td class="@can('editPost')allowed-update @endcan @if($row->getLastDocUniq())pdf-file @endif" title="{{$row->recipient_country}}">
 											<div data-name="recipient_country" data-id="{{ $row->id }}" class="div-18">{{$row->recipient_country}}</div>
 										</td>
-										<td class="@can('editPost')allowed-update @endcan" title="{{$row->region}}">
+										<td class="@can('editPost')allowed-update @endcan @if($row->getLastDocUniq())pdf-file @endif" title="{{$row->region}}">
 											<div data-name="region" data-id="{{ $row->id }}" class="div-18">{{$row->region}}</div>
 										</td>
-										<td class="@can('editPost')allowed-update @endcan" title="{{$row->district}}">
+										<td class="@can('editPost')allowed-update @endcan @if($row->getLastDocUniq())pdf-file @endif" title="{{$row->district}}">
 											<div data-name="district" data-id="{{ $row->id }}" class="div-18">{{$row->district}}</div>
 										</td>
-										<td class="@can('editPost')allowed-update @endcan" title="{{$row->recipient_city}}">
+										<td class="@can('editPost')allowed-update @endcan @if($row->getLastDocUniq())pdf-file @endif" title="{{$row->recipient_city}}">
 											<div data-name="recipient_city" data-id="{{ $row->id }}" class="div-19">{{$row->recipient_city}}</div>
 										</td>
-										<td class="@can('editPost')allowed-update @endcan" title="{{$row->recipient_postcode}}">
+										<td class="@can('editPost')allowed-update @endcan @if($row->getLastDocUniq())pdf-file @endif" title="{{$row->recipient_postcode}}">
 											<div data-name="recipient_postcode" data-id="{{ $row->id }}" class="div-20">{{$row->recipient_postcode}}</div>
 										</td>
-										<td class="@can('editPost')allowed-update @endcan" title="{{$row->recipient_street}}">
+										<td class="@can('editPost')allowed-update @endcan @if($row->getLastDocUniq())pdf-file @endif" title="{{$row->recipient_street}}">
 											<div data-name="recipient_street" data-id="{{ $row->id }}" class="div-21">{{$row->recipient_street}}</div>
 										</td>
-										<td class="@can('editPost')allowed-update @endcan" title="{{$row->recipient_house}}">
+										<td class="@can('editPost')allowed-update @endcan @if($row->getLastDocUniq())pdf-file @endif" title="{{$row->recipient_house}}">
 											<div data-name="recipient_house" data-id="{{ $row->id }}" class="div-22">{{$row->recipient_house}}</div>
 										</td>
-										<td class="@can('editPost')allowed-update @endcan" title="{{$row->body}}">
+										<td class="@can('editPost')allowed-update @endcan @if($row->getLastDocUniq())pdf-file @endif" title="{{$row->body}}">
 											<div data-name="body" data-id="{{ $row->id }}" class="div-22">{{$row->body}}</div>
 										</td>
-										<td class="@can('editPost')allowed-update @endcan" title="{{$row->recipient_room}}">
+										<td class="@can('editPost')allowed-update @endcan @if($row->getLastDocUniq())pdf-file @endif" title="{{$row->recipient_room}}">
 											<div data-name="recipient_room" data-id="{{ $row->id }}" class="div-23">{{$row->recipient_room}}</div>
 										</td>
-										<td class="@can('editPost')allowed-update @endcan" title="{{$row->recipient_phone}}">
+										<td class="@can('editPost')allowed-update @endcan @if($row->getLastDocUniq())pdf-file @endif" title="{{$row->recipient_phone}}">
 											<div data-name="recipient_phone" data-id="{{ $row->id }}" class="div-24">{{$row->recipient_phone}}</div>
 										</td>
 										<td class="@can('editPost')allowed-update @endcan" title="{{$row->recipient_passport}}">
@@ -402,7 +400,7 @@
 										<td class="@can('editPost')allowed-update @endcan" title="{{$row->recipient_email}}">
 											<div data-name="recipient_email" data-id="{{ $row->id }}" class="div-26">{{$row->recipient_email}}</div>
 										</td>
-										<td class="@can('editPost')allowed-update @endcan" title="{{$row->package_cost}}">
+										<td class="@can('editPost')allowed-update @endcan @if($row->getLastDocUniq())pdf-file @endif" title="{{$row->package_cost}}">
 											<div data-name="package_cost" data-id="{{ $row->id }}" class="div-27">{{$row->package_cost}}</div>
 										</td>
 										<td class="@can('editPost')allowed-update @endcan" title="{{$row->courier}}">
@@ -473,7 +471,7 @@
 										</td>
 										@endif
 										
-										<td class="@can('editColumns-3')allowed-update @endcan" title="{{$row->package_content}}">
+										<td class="@can('editColumns-3')allowed-update @endcan @if($row->getLastDocUniq())pdf-file @endif" title="{{$row->package_content}}">
 											<div data-name="package_content" data-id="{{ $row->id }}" class="div1">{{$row->package_content}}</div>
 										</td>
 										<td class="@can('editPost')allowed-update @endcan" title="{{$row->recipient_name_customs}}">
@@ -512,23 +510,12 @@
 											<input type="hidden" name="old_color[]" value="{{$row->background}}">
 											<input type="checkbox" name="row_id[]" value="{{ $row->id }}">
 										</td>
-										<td class="td-button">
-											@can('update-post')
-											<a class="btn btn-primary" href="{{ url('/admin/new-worksheet/'.$row->id) }}">Изменить</a>
-											@endcan
-
-											@can('editPost')
-
-											{!! Form::open(['url'=>route('deleteNewWorksheet'), 'class'=>'form-horizontal','method' => 'POST']) !!}
-											{!! Form::hidden('action',$row->id) !!}
-											{!! Form::button('Удалить',['class'=>'btn btn-danger','type'=>'submit','onclick' => 'ConfirmDelete(event)']) !!}
-											{!! Form::close() !!}
-
-											@endcan
-										</td> 
 										<td title="{{$row->id}}">
 											<div class="div-22">{{$row->id}}</div>
-										</td>									
+										</td>		
+										<td title="{{$row->getLastDocUniq()}}">
+											<div class="div-3">{{$row->getLastDocUniq()}}</div>
+										</td>							
 										<td class="@can('editPost')allowed-update @endcan" title="{{$row->site_name}}">
 											<div data-name="site_name" data-id="{{ $row->id }}" class="div-22">{{$row->site_name}}</div>
 										</td>
@@ -538,7 +525,7 @@
 										<td class="@can('editPost')allowed-update @endcan" title="{{$row->direction}}">
 											<div data-name="direction" data-id="{{ $row->id }}" class="div-2">{{$row->direction}}</div>
 										</td>
-										<td class="@can('editPost')allowed-update @endcan" title="{{$row->tariff}}">
+										<td class="@can('editPost')allowed-update @endcan @if($row->getLastDocUniq())pdf-file @endif" title="{{$row->tariff}}">
 											<div data-name="tariff" data-id="{{ $row->id }}" class="div-2">{{$row->tariff}}</div>
 										</td>
 										<td class="@can('editPost')allowed-update @endcan" title="{{$row->status}}">
@@ -546,6 +533,9 @@
 										</td>
 										<td class="@can('editPost')allowed-update @endcan" title="{{$row->status_date}}">
 											<div class="div-3">{{$row->status_date}}</div>
+										</td>
+										<td class="@can('update-user')allowed-update @endcan" title="{{$row->order_date}}">
+											<div data-name="order_date" data-id="{{ $row->id }}" class="div-3">{{$row->order_date}}</div>
 										</td>
 										<td class="@can('editPost')allowed-update @endcan" title="{{$row->partner}}">
 											<div data-name="partner" data-id="{{ $row->id }}" class="div-3">{{$row->partner}}</div>
@@ -555,6 +545,9 @@
 										</td>
 										<td class="td-button" title="{{$row->order_number}}">
 											<div class="div-22">{{$row->order_number}}</div>
+										</td>
+										<td class="td-button" title="{{$row->parcels_qty}}">
+											<div class="div-22">{{$row->parcels_qty}}</div>
 										</td>
 										<td class="@can('editPost')allowed-update @endcan" title="{{$row->tracking_local}}">
 											<div data-name="tracking_local" data-id="{{ $row->id }}" class="div-5">{{$row->tracking_local}}</div>
@@ -571,64 +564,64 @@
 										<td class="@can('editPost')allowed-update @endcan" title="{{$row->comments}}">
 											<div data-name="comments" data-id="{{ $row->id }}" class="div-9">{{$row->comments}}</div>
 										</td>
-										<td class="@can('editPost')allowed-update @endcan" title="{{$row->sender_name}}">
+										<td class="@can('editPost')allowed-update @endcan @if($row->getLastDocUniq())pdf-file @endif" title="{{$row->sender_name}}">
 											<div data-name="sender_name" data-id="{{ $row->id }}" class="div-10">{{$row->sender_name}}</div>
 										</td>
-										<td class="@can('editPost')allowed-update @endcan" title="{{$row->sender_country}}">
+										<td class="@can('editPost')allowed-update @endcan @if($row->getLastDocUniq())pdf-file @endif" title="{{$row->sender_country}}">
 											<div data-name="sender_country" data-id="{{ $row->id }}" class="div-11">{{$row->sender_country}}</div>
 										</td>
-										<td class="@can('editPost')allowed-update @endcan" title="{{$row->shipper_region}}">
+										<td class="@can('editPost')allowed-update @endcan @if($row->getLastDocUniq())pdf-file @endif" title="{{$row->shipper_region}}">
 											<div class="div-2">{{$row->shipper_region}}</div>
 										</td>
-										<td class="@can('editPost')allowed-update @endcan" title="{{$row->sender_city}}">
+										<td class="@can('editPost')allowed-update @endcan @if($row->getLastDocUniq())pdf-file @endif" title="{{$row->sender_city}}">
 											<div data-name="sender_city" data-id="{{ $row->id }}" class="div-12">{{$row->sender_city}}</div>
 										</td>
-										<td class="@can('editPost')allowed-update @endcan" title="{{$row->sender_postcode}}">
+										<td class="@can('editPost')allowed-update @endcan @if($row->getLastDocUniq())pdf-file @endif" title="{{$row->sender_postcode}}">
 											<div data-name="sender_postcode" data-id="{{ $row->id }}" class="div-13">{{$row->sender_postcode}}</div>
 										</td>
-										<td class="@can('editPost')allowed-update @endcan" title="{{$row->sender_address}}">
+										<td class="@can('editPost')allowed-update @endcan @if($row->getLastDocUniq())pdf-file @endif" title="{{$row->sender_address}}">
 											<div data-name="sender_address" data-id="{{ $row->id }}" class="div-14">{{$row->sender_address}}</div>
 										</td>
-										<td class="@can('editPost')allowed-update @endcan" title="{{$row->standard_phone}}">
+										<td class="@can('editPost')allowed-update @endcan @if($row->getLastDocUniq())pdf-file @endif" title="{{$row->standard_phone}}">
 											<div data-name="standard_phone" data-id="{{ $row->id }}" class="div-15">{{$row->standard_phone}}</div>
 										</td>
-										<td class="@can('editPost')allowed-update @endcan" title="{{$row->sender_phone}}">
+										<td class="@can('editPost')allowed-update @endcan @if($row->getLastDocUniq())pdf-file @endif" title="{{$row->sender_phone}}">
 											<div data-name="sender_phone" data-id="{{ $row->id }}" class="div-15">{{$row->sender_phone}}</div>
 										</td>
 										<td class="@can('editPost')allowed-update @endcan" title="{{$row->sender_passport}}">
 											<div data-name="sender_passport" data-id="{{ $row->id }}" class="div-16">{{$row->sender_passport}}</div>
 										</td>
-										<td class="@can('editPost')allowed-update @endcan" title="{{$row->recipient_name}}">
+										<td class="@can('editPost')allowed-update @endcan @if($row->getLastDocUniq())pdf-file @endif" title="{{$row->recipient_name}}">
 											<div data-name="recipient_name" data-id="{{ $row->id }}" class="div-17">{{$row->recipient_name}}</div>
 										</td>
-										<td class="@can('editPost')allowed-update @endcan" title="{{$row->recipient_country}}">
+										<td class="@can('editPost')allowed-update @endcan @if($row->getLastDocUniq())pdf-file @endif" title="{{$row->recipient_country}}">
 											<div data-name="recipient_country" data-id="{{ $row->id }}" class="div-18">{{$row->recipient_country}}</div>
 										</td>
-										<td class="@can('editPost')allowed-update @endcan" title="{{$row->region}}">
+										<td class="@can('editPost')allowed-update @endcan @if($row->getLastDocUniq())pdf-file @endif" title="{{$row->region}}">
 											<div data-name="region" data-id="{{ $row->id }}" class="div-18">{{$row->region}}</div>
 										</td>
-										<td class="@can('editPost')allowed-update @endcan" title="{{$row->district}}">
+										<td class="@can('editPost')allowed-update @endcan @if($row->getLastDocUniq())pdf-file @endif" title="{{$row->district}}">
 											<div data-name="district" data-id="{{ $row->id }}" class="div-18">{{$row->district}}</div>
 										</td>
-										<td class="@can('editPost')allowed-update @endcan" title="{{$row->recipient_city}}">
+										<td class="@can('editPost')allowed-update @endcan @if($row->getLastDocUniq())pdf-file @endif" title="{{$row->recipient_city}}">
 											<div data-name="recipient_city" data-id="{{ $row->id }}" class="div-19">{{$row->recipient_city}}</div>
 										</td>
-										<td class="@can('editPost')allowed-update @endcan" title="{{$row->recipient_postcode}}">
+										<td class="@can('editPost')allowed-update @endcan @if($row->getLastDocUniq())pdf-file @endif" title="{{$row->recipient_postcode}}">
 											<div data-name="recipient_postcode" data-id="{{ $row->id }}" class="div-20">{{$row->recipient_postcode}}</div>
 										</td>
-										<td class="@can('editPost')allowed-update @endcan" title="{{$row->recipient_street}}">
+										<td class="@can('editPost')allowed-update @endcan @if($row->getLastDocUniq())pdf-file @endif" title="{{$row->recipient_street}}">
 											<div data-name="recipient_street" data-id="{{ $row->id }}" class="div-21">{{$row->recipient_street}}</div>
 										</td>
-										<td class="@can('editPost')allowed-update @endcan" title="{{$row->recipient_house}}">
+										<td class="@can('editPost')allowed-update @endcan @if($row->getLastDocUniq())pdf-file @endif" title="{{$row->recipient_house}}">
 											<div data-name="recipient_house" data-id="{{ $row->id }}" class="div-22">{{$row->recipient_house}}</div>
 										</td>
-										<td class="@can('editPost')allowed-update @endcan" title="{{$row->body}}">
+										<td class="@can('editPost')allowed-update @endcan @if($row->getLastDocUniq())pdf-file @endif" title="{{$row->body}}">
 											<div data-name="body" data-id="{{ $row->id }}" class="div-22">{{$row->body}}</div>
 										</td>
-										<td class="@can('editPost')allowed-update @endcan" title="{{$row->recipient_room}}">
+										<td class="@can('editPost')allowed-update @endcan @if($row->getLastDocUniq())pdf-file @endif" title="{{$row->recipient_room}}">
 											<div data-name="recipient_room" data-id="{{ $row->id }}" class="div-23">{{$row->recipient_room}}</div>
 										</td>
-										<td class="@can('editPost')allowed-update @endcan" title="{{$row->recipient_phone}}">
+										<td class="@can('editPost')allowed-update @endcan @if($row->getLastDocUniq())pdf-file @endif" title="{{$row->recipient_phone}}">
 											<div data-name="recipient_phone" data-id="{{ $row->id }}" class="div-24">{{$row->recipient_phone}}</div>
 										</td>
 										<td class="@can('editPost')allowed-update @endcan" title="{{$row->recipient_passport}}">
@@ -637,7 +630,7 @@
 										<td class="@can('editPost')allowed-update @endcan" title="{{$row->recipient_email}}">
 											<div data-name="recipient_email" data-id="{{ $row->id }}" class="div-26">{{$row->recipient_email}}</div>
 										</td>
-										<td class="@can('editPost')allowed-update @endcan" title="{{$row->package_cost}}">
+										<td class="@can('editPost')allowed-update @endcan @if($row->getLastDocUniq())pdf-file @endif" title="{{$row->package_cost}}">
 											<div data-name="package_cost" data-id="{{ $row->id }}" class="div-27">{{$row->package_cost}}</div>
 										</td>
 										<td class="@can('editPost')allowed-update @endcan" title="{{$row->courier}}">
@@ -708,7 +701,7 @@
 										</td>
 										@endif
 										
-										<td class="@can('editPost')allowed-update @endcan" title="{{$row->package_content}}">
+										<td class="@can('editPost')allowed-update @endcan @if($row->getLastDocUniq())pdf-file @endif" title="{{$row->package_content}}">
 											<div data-name="package_content" data-id="{{ $row->id }}" class="div1">{{$row->package_content}}</div>
 										</td>
 										<td class="@can('editPost')allowed-update @endcan" title="{{$row->recipient_name_customs}}">
@@ -769,14 +762,18 @@
 											@can('changeColor')
 											<option value="color">Изменить цвет</option>
 											@endcan
-											
-											@can('update-user')
-											<option value="delete">Удалить</option>
-											@endcan
 
 											@can('editPost')
-											
+											<option value="delete">Удалить</option>
 											<option value="change">Изменить</option>
+											@endcan
+
+											@can('update-user')
+											<option value="cancel-pdf">Отменить PDF</option>
+											<option value="download-pdf">Скачать PDF</option>
+											@endcan
+										
+											@can('editPost')
 										</select>
 									</label>
 									
@@ -785,7 +782,6 @@
 											<option value="" selected="selected"></option>
 											<option value="site_name">Сайт</option>
 											<option value="direction">Направление</option>
-											<option value="tariff">Тариф</option>
 											<option value="status">Статус</option>
 											<option value="partner">Партнер</option>
 											<option value="tracking_local">Локальный</option>
@@ -793,27 +789,9 @@
 											<option value="pallet_number">Номер паллеты</option>
 											<option value="comment_2">Коммент</option>
 											<option value="comments">Комментарии</option>
-											<option value="sender_name">Отправитель</option>
-											<option value="sender_country">Страна отправителя</option>
-											<option value="sender_city">Город отправителя</option>
-											<option value="sender_postcode">Индекс отправителя</option>
-											<option value="sender_address">Адрес отправителя</option>
-											<option value="sender_phone">Телефон отправителя</option>
 											<option value="sender_passport">Номер паспорта отправителя</option>
-											<option value="recipient_name">Получатель</option>
-											<option value="recipient_country">Страна получателя</option>
-											<option value="region">Регион</option>
-											<option value="district">Район</option>
-											<option value="recipient_city">Город получателя</option>
-											<option value="recipient_postcode">Индекс получателя</option>
-											<option value="recipient_street">Улица получателя</option>
-											<option value="recipient_house">№ дома пол-ля</option>
-											<option value="body">корпус</option>
-											<option value="recipient_room">№ кв. пол-ля</option>
-											<option value="recipient_phone">Телефон получателя</option>
 											<option value="recipient_passport">Номер паспорта получателя</option>
 											<option value="recipient_email">E-mail получателя</option>
-											<option value="package_cost">Стоимость посылки</option>
 											<option value="courier">Курьер</option>
 											<option value="pick_up_date">Дата забора и комментарии</option>
 											<option value="weight">Вес посылки</option>
@@ -852,6 +830,21 @@
 								{!! Form::open(['url'=>route('deleteNewWorksheetById'),'method' => 'POST']) !!}
 								{!! Form::button('Удалить',['class'=>'btn btn-danger  checkbox-operations-delete','type'=>'submit','onclick' => 'ConfirmDelete(event)']) !!}
 								{!! Form::close() !!}
+
+								<form class="checkbox-operations-change-one" action="{{ url('/admin/new-worksheet/') }}" method="GET">
+									@csrf	
+								</form>
+
+								<form class="checkbox-operations-cancel-pdf" action="{{ route('cancelPdf') }}" method="POST">
+									@csrf	
+									<input type="hidden" name="worksheet_id" class="cancel-pdf">
+								</form>
+
+								<form class="checkbox-operations-download-pdf" action="{{ route('downloadAllPdf') }}" method="POST">
+									@csrf	
+									<input type="hidden" name="id" class="download-pdf">
+									<input type="hidden" name="type" value="worksheet_id">
+								</form>
 
 							</div>
 

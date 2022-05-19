@@ -340,6 +340,9 @@ ul.navbar-nav>li:hover>ul{
   width: 50%;
   font-family: "open sans", sans-serif;
 }
+.parcel-form.new-form{
+  width: 100%;
+}
 .form-send-parcel button{
   background: #000;
   color: #fff;

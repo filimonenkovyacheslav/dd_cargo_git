@@ -27,30 +27,6 @@ class AdminController extends Controller
 	private $en_status_arr_2 = ["Forwarding to the warehouse in the sender country", "Pending", "Return", "Box", "Pick up", "Specify", "Think", "Canceled", "Double"];
 
 
-	protected function checkExistPhone($request, $table)
-	{
-		$phone = $request->input('standard_phone');
-		switch ($table) {			
-
-			case "courier_draft_worksheet":
-
-			$worksheet = CourierDraftWorksheet::where('standard_phone',$phone)->first();;
-			if ($worksheet) return 'В нашей базе данных уже существует ваш заказ. Вы хотите добавить новый заказ?';
-			else return '';
-		
-			break;
-			
-			case "courier_eng_draft_worksheet":
-
-			$worksheet = CourierEngDraftWorksheet::where('standard_phone',$phone)->first();;
-			if ($worksheet) return 'One of your orders already exists in our database. Would you like to add one more?';
-			else return '';
-
-			break;
-		}
-	}
-
-
     protected function checkRowColor(Request $request)
     {
         $which_admin = $request->input('which_admin');
@@ -69,8 +45,8 @@ class AdminController extends Controller
                     if (!$worksheet->recipient_name) $error_message .= 'Получатель,';
                     if (!$worksheet->recipient_city) $error_message .= 'Город получателя,';
                     if (!$worksheet->recipient_street) $error_message .= 'Улица получателя,';
-                    if (!$worksheet->recipient_house) $error_message .= '№ дома пол-ля,';
-                    if (!$worksheet->recipient_room) $error_message .= '№ кв. пол-ля,';
+                    if (!$worksheet->recipient_house) $error_message .= '№ дома получателя,';
+                    if (!$worksheet->recipient_room) $error_message .= '№ кв. получателя,';
                     if (!$worksheet->recipient_phone) $error_message .= 'Телефон получателя,';
 
                     if ($error_message !== 'Заполните обязателные поля в строке с телефоном отправителя '.$worksheet->standard_phone.': ') {
@@ -232,7 +208,6 @@ class AdminController extends Controller
 			}
 			
 			if($check_tracking) $status_error = 'ВНИМАНИЕ! В СИСТЕМЕ УЖЕ СУЩЕСТВУЕТ ТАКОЙ ТРЕКИНГ-НОМЕР. ИСПРАВЬТЕ ОШИБОЧНУЮ ЗАПИСЬ ИЛИ ВНЕСИТЕ ДРУГОЙ НОМЕР!';
-			return $status_error;
 		
 			break;
 			
@@ -247,10 +222,9 @@ class AdminController extends Controller
 				$check_tracking = CourierEngDraftWorksheet::where([
 					['tracking_main', '=', $tracking]
 				])->first();
-			}
+			}			
 			
 			if($check_tracking) $status_error = 'WARNING! THE TRACKING NUMBER ALREADY EXISTS. FIX THE DEFECT RECORD OR CHANGE THE TRACKING NUMBER';
-			return $status_error;
 			
 			break;
 
@@ -267,9 +241,11 @@ class AdminController extends Controller
 				])->first();
 
 			}
+
+			$worksheet = CourierDraftWorksheet::find($id);
 			
 			if($check_tracking) $status_error = 'ВНИМАНИЕ! В СИСТЕМЕ УЖЕ СУЩЕСТВУЕТ ТАКОЙ ТРЕКИНГ-НОМЕР. ИСПРАВЬТЕ ОШИБОЧНУЮ ЗАПИСЬ ИЛИ ВНЕСИТЕ ДРУГОЙ НОМЕР!';
-			return $status_error;
+			elseif ($worksheet->tracking_main !== $tracking) $this->setTrackingToDocument($worksheet,$tracking);
 		
 			break;
 			
@@ -285,9 +261,11 @@ class AdminController extends Controller
 					['tracking_main', '=', $tracking]
 				])->first();
 			}
+
+			$worksheet = CourierEngDraftWorksheet::find($id);
 			
 			if($check_tracking) $status_error = 'WARNING! THE TRACKING NUMBER ALREADY EXISTS. FIX THE DEFECT RECORD OR CHANGE THE TRACKING NUMBER';
-			return $status_error;
+			elseif ($worksheet->tracking_main !== $tracking) $this->setTrackingToDocument($worksheet,$tracking);
 
 			break;
 		}

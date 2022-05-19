@@ -233,6 +233,8 @@
 						@endcan
 
 						@can('editPost')
+
+						@if (!$phil_ind_worksheet->getLastDocUniq())
 						
 						<div class="form-group">
 							{!! Form::label('shipper_name','Shipper\'s name',['class' => 'col-md-2 control-label'])   !!}
@@ -436,6 +438,8 @@
 							</div>
 						</div>
 
+						@endif
+
 						<div class="form-group">
 							{!! Form::label('operator','Operator',['class' => 'col-md-2 control-label'])   !!}
 							<div class="col-md-8">
@@ -621,6 +625,10 @@
 							{!! Form::hidden('background',$phil_ind_worksheet->background)!!}
 
 							{!! Form::hidden('status_date',$phil_ind_worksheet->status_date)!!}
+
+							{!! Form::hidden('order_date',$phil_ind_worksheet->order_date)!!}
+
+							{!! Form::hidden('parcels_qty',$phil_ind_worksheet->parcels_qty)!!}
 
 							{!! Form::hidden('shipper_city',$phil_ind_worksheet->shipper_city)!!}
 

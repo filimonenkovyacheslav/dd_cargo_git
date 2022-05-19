@@ -2,12 +2,13 @@
 
 @section('content')
 
-@if ($message = Session::get('success'))
+@if (isset($_GET['new_document_id']))
 <div class="alert alert-success  alert-dismissible">
     <button type="button" class="close" data-dismiss="alert">×</button>  
-    <strong>{{ $message }}</strong>
-    @if (session('new_document_id'))
-    <a href="{{ url('/download-pdf/'.session('new_document_id')) }}">Download PDF</a>
+    <strong>File {{ $_GET['pdf_file'] }} signed and saved successfully</strong>
+    <a href="{{ url('/download-pdf/'.$_GET['new_document_id']) }}">Download PDF</a>
+    @if (isset($_GET['old_file']))
+    <strong>Old document file {{ $_GET['old_file'] }}</strong>
     @endif
 </div>
 @endif
@@ -35,35 +36,36 @@
     }    
 </script>
 
-@if (session('worksheet_id'))
+@if (isset($_GET['worksheet_id']))
 <script type="text/javascript">
-    localStorage.setItem('worksheet_id', "{{session('worksheet_id')}}")
+    localStorage.setItem('worksheet_id', "{{$_GET['worksheet_id']}}")
 </script>
-<input type="hidden" name="worksheet_id" id="worksheet_id" value="{{session('worksheet_id')}}">
-@elseif (session('eng_worksheet_id'))
+@elseif (isset($_GET['eng_worksheet_id']))
 <script type="text/javascript">
-    localStorage.setItem('eng_worksheet_id', "{{session('eng_worksheet_id')}}")
+    localStorage.setItem('eng_worksheet_id', "{{$_GET['eng_worksheet_id']}}")
 </script>
-<input type="hidden" name="eng_worksheet_id" id="eng_worksheet_id" value="{{session('eng_worksheet_id')}}">
-@elseif (session('draft_id'))
+@elseif (isset($_GET['draft_id']))
 <script type="text/javascript">
-    localStorage.setItem('draft_id', "{{session('draft_id')}}")
+    localStorage.setItem('draft_id', "{{$_GET['draft_id']}}")
 </script>
-<input type="hidden" name="draft_id" id="draft_id" value="{{session('draft_id')}}">
-@elseif (session('eng_draft_id'))
+@elseif (isset($_GET['eng_draft_id']))
 <script type="text/javascript">
-    localStorage.setItem('eng_draft_id', "{{session('eng_draft_id')}}")
+    localStorage.setItem('eng_draft_id', "{{$_GET['eng_draft_id']}}")
 </script>
-<input type="hidden" name="eng_draft_id" id="eng_draft_id" value="{{session('eng_draft_id')}}">
 @endif 
 
-@if (session('form_screen'))
-<input type="hidden" name="form_screen" value="{{session('form_screen')}}">
+@if (isset($_GET['form_screen']))
+<script type="text/javascript">
+    localStorage.setItem('form_screen', "{{$_GET['form_screen']}}")
+</script>
 @endif 
 
-@if (session('document_id'))
-<input type="hidden" name="document_id" value="{{session('document_id')}}">
+@if (isset($_GET['document_id']))
+<script type="text/javascript">
+    localStorage.setItem('document_id', "{{$_GET['document_id']}}")
+</script>
 @endif 
+<input type="hidden" id="document_id" name="document_id" value="">
 
 </form>
 
@@ -94,6 +96,15 @@
         else if (localStorage.getItem('eng_draft_id')) {
             const textHtml = `<input type="hidden" name="eng_draft_id" id="eng_draft_id" value="`+localStorage.getItem('eng_draft_id')+`">`;            
             document.forms["signedForm"].insertAdjacentHTML('beforeend', textHtml);
+        }
+
+        if (localStorage.getItem('form_screen')) {
+            const textHtml = `<input type="hidden" name="form_screen" value="`+localStorage.getItem('form_screen')+`">`;            
+            document.forms["signedForm"].insertAdjacentHTML('beforeend', textHtml);
+        }
+
+        if (localStorage.getItem('document_id')) {            
+            document.getElementById("document_id").value = localStorage.getItem('document_id');
         }
         
         var phoneExist = null;        

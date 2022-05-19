@@ -89,22 +89,22 @@ class SignedDocument extends BaseModel
         $this_worksheet = null;
         $type = '';
 
-        if ($request->worksheet_id) {
+        if (isset($request->worksheet_id)) {
             $this_worksheet = NewWorksheet::find($request->worksheet_id);
             $type = 'worksheet_id';
         }
-        elseif ($request->eng_worksheet_id) {
+        elseif (isset($request->eng_worksheet_id)) {
             $this_worksheet = PhilIndWorksheet::find($request->eng_worksheet_id);
             $type = 'eng_worksheet_id';
         }
-        elseif ($request->draft_id) {
+        elseif (isset($request->draft_id)) {
             $this_worksheet = CourierDraftWorksheet::find($request->draft_id);
             $type = 'draft_id';
         }
-        elseif ($request->eng_draft_id) {
+        elseif (isset($request->eng_draft_id)) {
             $this_worksheet = CourierEngDraftWorksheet::find($request->eng_draft_id);
             $type = 'eng_draft_id';
-        }
+        };
 
         return ['worksheet'=>$this_worksheet,'type'=>$type];
     }

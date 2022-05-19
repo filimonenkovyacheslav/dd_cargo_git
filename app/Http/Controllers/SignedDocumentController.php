@@ -41,10 +41,13 @@ class SignedDocumentController extends Controller
         $data_parcel = $this->fillResponseDataRu($worksheet, $request, true, true);
         if ($data_parcel) {
             $data_parcel = json_encode($data_parcel);
-            DB::table('table_'.$token)
-            ->insert([
-                'data' => $data_parcel
-            ]);
+            $result = DB::table('table_'.$token)->find(1);
+            if (!$result) {
+                DB::table('table_'.$token)
+                ->insert([
+                    'data' => $data_parcel
+                ]);
+            }           
         }        
 
         return view('pdf.form_with_signature',compact('israel_cities','data_parcel','token','worksheet'));
@@ -58,7 +61,16 @@ class SignedDocumentController extends Controller
         $israel_cities = $this->israelCities();
         $israel_cities['other'] = 'Other city';
         $data_parcel = $this->fillResponseDataEng($worksheet, $request, true, true);
-        $data_parcel = json_encode($data_parcel);
+        if ($data_parcel) {
+            $data_parcel = json_encode($data_parcel);
+            $result = DB::table('table_'.$token)->find(1);
+            if (!$result) {
+                DB::table('table_'.$token)
+                ->insert([
+                    'data' => $data_parcel
+                ]);
+            }           
+        } 
         $domain = $this->getDomainRule();
         
         return view('pdf.form_with_signature_eng',compact('israel_cities','data_parcel','domain','token','worksheet'));       
@@ -113,6 +125,13 @@ class SignedDocumentController extends Controller
     {
         $folderPath = $this->checkDirectory('signatures');
 
+        if (!$request->signed) {
+            $result = [];
+            parse_str($request->getContent(),$result);        
+            $result = (object)$result;
+            $request = $result;
+        }
+        
         $img = $request->signed;
         $img = str_replace('data:image/png;base64,', '', $img);
         $img = str_replace(' ', '+', $img);
@@ -125,14 +144,16 @@ class SignedDocumentController extends Controller
             else $document = $this->updateDocument($request,$file_name);
             $id = $document->id;
             $pdf_file = $this->savePdf($id);
-            return back()->with('success', 'File '.$pdf_file.' signed and saved successfully')->with('new_document_id',$id);
+        
+            return redirect('/signature-page?pdf_file='.$pdf_file.'&new_document_id='.$id);
         }
         elseif ($request->form_screen) {
             if (!$request->document_id) $document = $this->createNewDocument($request,$file_name);
             else $document = $this->updateDocument($request,$file_name);
             $id = $document->id;
             $pdf_file = $this->savePdfRu($id);
-            return back()->with('success', 'File '.$pdf_file.' signed and saved successfully')->with('new_document_id',$id);
+            
+            return redirect('/signature-page?pdf_file='.$pdf_file.'&new_document_id='.$id);
         }
         elseif ($request->cancel){
             if (!$request->document_id) $document = $this->createNewDocument($request,$file_name,true);
@@ -142,12 +163,14 @@ class SignedDocumentController extends Controller
             $pdf_file = $this->savePdfForCancel($document_id,$request->type);
             
             if (!$request->create_new) {
-                return back()->with('success', 'File '.$pdf_file.' signed and saved successfully. Old document file '.$old_document->pdf_file)->with('new_document_id',$document_id);
+
+                return redirect('/signature-page?pdf_file='.$pdf_file.'&new_document_id='.$id.'&old_file='.$old_document->pdf_file);
             }
             else{
                 $id = $request->id;
                 $type = $request->type;
-                return redirect()->route('formAfterCancel',compact('type','id','document_id'));               
+                
+                return redirect()->route('formAfterCancel',compact('type','id','document_id'));
             }
         }               
     }
@@ -479,34 +502,31 @@ class SignedDocumentController extends Controller
     public function addSignedRuForm(Request $request)
     {
         $message = '';
-        dd($request->session_token);
         // For signed forms
-        /*if (!$request->parcels_qty) {
+        if (!$request->parcels_qty) {
             $result = [];
             parse_str($request->getContent(),$result);        
             $result = (object)$result;
             $request = $result;
-        }*/
+        }
         
         if (!$request->phone_exist_checked) {
             $message = $this->checkExistPhone($request,'courier_draft_worksheet');
             if ($message) {
                 if ($request->signature) {
                     return redirect()->route('formWithSignature')->with('phone_exist', $message)->with('phone_number',$request->standard_phone);
-                }
-                else{
-                    return redirect()->route('parcelForm')->with('phone_exist', $message)->with('phone_number',$request->standard_phone);
-                }                 
+                }                
             }
         }
         else{
             $message = $this->createRuParcel($request);
+
             if ($request->signature) {
                 if ($message['id']) {
                     if ($request->session_token)
                         $this->deleteTempTable($request->session_token);
                     $form_screen = $this->formToImg($request);
-                    return redirect()->route('getSignature')->with('draft_id', $message['id'])->with('form_screen', $form_screen);
+                    return redirect('/signature-page?draft_id='.$message['id'].'&form_screen='.$form_screen);
                 }
                 else{
                     return redirect()->route('formWithSignature')->with('status', $message['message']);
@@ -524,15 +544,12 @@ class SignedDocumentController extends Controller
                     if ($request->session_token)
                         $this->deleteTempTable($request->session_token);
                     $form_screen = $this->formToImg($request);
-                    return redirect()->route('getSignature')->with('draft_id', $message['id'])->with('form_screen', $form_screen);
+                    return redirect('/signature-page?draft_id='.$message['id'].'&form_screen='.$form_screen);
                 }
                 else{
                     return redirect()->route('formWithSignature')->with('status', $message['message']);
                 }
-        }
-        else{
-            return redirect()->route('parcelForm')->with('status', $message['message']);
-        }      
+        }    
     }
 
 
@@ -553,41 +570,35 @@ class SignedDocumentController extends Controller
                 $new_worksheet->$field = $request->recipient_first_name.' '.$request->recipient_last_name;
             }
             else if($field === 'package_content'){
-                $content = '';
-                if ($request->clothing_quantity) {
-                    $content .= 'Одежда: '.$request->clothing_quantity.'; ';
-                }
-                if ($request->shoes_quantity) {
-                    $content .= 'Обувь: '.$request->shoes_quantity.'; ';
-                }               
-                if ($request->other_content_1) {
+                $content = '';              
+                if (isset($request->other_content_1)) {
                     $content .= $request->other_content_1.': '.$request->other_quantity_1.'; ';
                 }
-                if ($request->other_content_2) {
+                if (isset($request->other_content_2)) {
                     $content .= $request->other_content_2.': '.$request->other_quantity_2.'; ';
                 }
-                if ($request->other_content_3) {
+                if (isset($request->other_content_3)) {
                     $content .= $request->other_content_3.': '.$request->other_quantity_3.'; ';
                 }
-                if ($request->other_content_4) {
+                if (isset($request->other_content_4)) {
                     $content .= $request->other_content_4.': '.$request->other_quantity_4.'; ';
                 }
-                if ($request->other_content_5) {
+                if (isset($request->other_content_5)) {
                     $content .= $request->other_content_5.': '.$request->other_quantity_5.'; ';
                 }
-                if ($request->other_content_6) {
+                if (isset($request->other_content_6)) {
                     $content .= $request->other_content_6.': '.$request->other_quantity_6.'; ';
                 }
-                if ($request->other_content_7) {
+                if (isset($request->other_content_7)) {
                     $content .= $request->other_content_7.': '.$request->other_quantity_7.'; ';
                 }
-                if ($request->other_content_8) {
+                if (isset($request->other_content_8)) {
                     $content .= $request->other_content_8.': '.$request->other_quantity_8.'; ';
                 }
-                if ($request->other_content_9) {
+                if (isset($request->other_content_9)) {
                     $content .= $request->other_content_9.': '.$request->other_quantity_9.'; ';
                 }
-                if ($request->other_content_10) {
+                if (isset($request->other_content_10)) {
                     $content .= $request->other_content_10.': '.$request->other_quantity_10.'; ';
                 }
                 if(!$content){
@@ -597,11 +608,13 @@ class SignedDocumentController extends Controller
                 $new_worksheet->$field = trim($content);
             }
             else if ($field === 'comment_2'){
-                if ($request->need_box) $new_worksheet->$field = $request->need_box;
-                if ($request->comment_2) $new_worksheet->$field = $request->comment_2;
+                if (isset($request->need_box)) $new_worksheet->$field = $request->need_box;
+                if (isset($request->comment_2)) $new_worksheet->$field = $request->comment_2;
             }
             else if ($field !== 'created_at'){
-                $new_worksheet->$field = $request->$field;
+                if (isset($request->$field)) {
+                    $new_worksheet->$field = $request->$field;
+                }               
             }           
         }
 
@@ -611,7 +624,7 @@ class SignedDocumentController extends Controller
         }        
 
         // New parcel form
-        if (null !== $request->status_box) {
+        if (isset($request->status_box)) {
             if ($request->status_box === 'false') {
                 $new_worksheet->status = 'Забрать';
             } 
@@ -620,7 +633,7 @@ class SignedDocumentController extends Controller
             }
         }
          
-        if (null !== $request->need_box) {
+        if (isset($request->need_box)) {
             if ($request->need_box === 'Мне не нужна коробка') {
                 $new_worksheet->status = 'Забрать';
             }
@@ -647,38 +660,39 @@ class SignedDocumentController extends Controller
             $paking_not_create = true;
 
             for ($i=1; $i < 11; $i++) { 
-                if ($request->other_content_.$i) {
+                $temp = 'other_content_'.$i;
+                if (isset($request->$temp)) {
                     $packing_sea = new PackingSea();
                     foreach($fields_packing as $field){
                         if ($field === 'type') {
-                            $packing_sea->$field = $request->tariff;
+                            $packing_sea->$field = $new_worksheet->tariff;
                         }
                         else if ($field === 'full_shipper') {
-                            $packing_sea->$field = $request->first_name.' '.$request->last_name;
+                            $packing_sea->$field = $new_worksheet->sender_name;
                         }
                         else if ($field === 'full_consignee') {
-                            $packing_sea->$field = $request->recipient_first_name.' '.$request->recipient_last_name;
+                            $packing_sea->$field = $new_worksheet->recipient_name;
                         }
                         else if ($field === 'country_code') {
-                            $packing_sea->$field = $request->recipient_country;
+                            $packing_sea->$field = $new_worksheet->recipient_country;
                         }
                         else if ($field === 'postcode') {
-                            $packing_sea->$field = $request->recipient_postcode;
+                            $packing_sea->$field = $new_worksheet->recipient_postcode;
                         }
                         else if ($field === 'city') {
-                            $packing_sea->$field = $request->recipient_city;
+                            $packing_sea->$field = $new_worksheet->recipient_city;
                         }
                         else if ($field === 'street') {
-                            $packing_sea->$field = $request->recipient_street;
+                            $packing_sea->$field = $new_worksheet->recipient_street;
                         }
                         else if ($field === 'house') {
-                            $packing_sea->$field = $request->recipient_house;
+                            $packing_sea->$field = $new_worksheet->recipient_house;
                         }
                         else if ($field === 'room') {
-                            $packing_sea->$field = $request->recipient_room;
+                            $packing_sea->$field = $new_worksheet->recipient_room;
                         }
                         else if ($field === 'phone') {
-                            $packing_sea->$field = $request->recipient_phone;
+                            $packing_sea->$field = $new_worksheet->recipient_phone;
                         }
                         else if ($field === 'tariff') {
                             $packing_sea->$field = null;
@@ -690,13 +704,16 @@ class SignedDocumentController extends Controller
                             $packing_sea->$field = $j;
                         }
                         else if ($field === 'attachment_name') {
-                            $packing_sea->$field = $request->other_content_.$i;
+                            $packing_sea->$field = $request->$temp;
                         }
                         else if ($field === 'amount_3') {
-                            $packing_sea->$field = $request->other_quantity_.$i;
+                            $temp_2 = 'other_quantity_'.$i;
+                            $packing_sea->$field = $request->$temp_2;
                         }
                         else{
-                            $packing_sea->$field = $request->$field;
+                            if (isset($request->$field)) {
+                                $packing_sea->$field = $request->$field;
+                            }                           
                         }
                     }
                     $j++;
@@ -710,34 +727,34 @@ class SignedDocumentController extends Controller
                 $packing_sea = new PackingSea();
                 foreach($fields_packing as $field){
                     if ($field === 'type') {
-                        $packing_sea->$field = $request->tariff;
+                        $packing_sea->$field = $new_worksheet->tariff;
                     }
                     else if ($field === 'full_shipper') {
-                        $packing_sea->$field = $request->first_name.' '.$request->last_name;
+                        $packing_sea->$field = $new_worksheet->sender_name;
                     }
                     else if ($field === 'full_consignee') {
-                        $packing_sea->$field = $request->recipient_first_name.' '.$request->recipient_last_name;
+                        $packing_sea->$field = $new_worksheet->recipient_name;
                     }
                     else if ($field === 'country_code') {
-                        $packing_sea->$field = $request->recipient_country;
+                        $packing_sea->$field = $new_worksheet->recipient_country;
                     }
                     else if ($field === 'postcode') {
-                        $packing_sea->$field = $request->recipient_postcode;
+                        $packing_sea->$field = $new_worksheet->recipient_postcode;
                     }
                     else if ($field === 'city') {
-                        $packing_sea->$field = $request->recipient_city;
+                        $packing_sea->$field = $new_worksheet->recipient_city;
                     }
                     else if ($field === 'street') {
-                        $packing_sea->$field = $request->recipient_street;
+                        $packing_sea->$field = $new_worksheet->recipient_street;
                     }
                     else if ($field === 'house') {
-                        $packing_sea->$field = $request->recipient_house;
+                        $packing_sea->$field = $new_worksheet->recipient_house;
                     }
                     else if ($field === 'room') {
-                        $packing_sea->$field = $request->recipient_room;
+                        $packing_sea->$field = $new_worksheet->recipient_room;
                     }
                     else if ($field === 'phone') {
-                        $packing_sea->$field = $request->recipient_phone;
+                        $packing_sea->$field = $new_worksheet->recipient_phone;
                     }
                     else if ($field === 'tariff') {
                         $packing_sea->$field = null;
@@ -755,7 +772,9 @@ class SignedDocumentController extends Controller
                         $packing_sea->$field = '0';
                     }
                     else{
-                        $packing_sea->$field = $request->$field;
+                        if (isset($request->$field)) {
+                            $packing_sea->$field = $request->$field;
+                        } 
                     }
                 }
 
@@ -770,10 +789,10 @@ class SignedDocumentController extends Controller
     }
 
 
-    /*public function deleteTempTable($session_token)
+    public function deleteTempTable($session_token)
     {
         if ($session_token) {
             Schema::dropIfExists('table_'.$session_token);
         }       
-    }*/
+    }
 }

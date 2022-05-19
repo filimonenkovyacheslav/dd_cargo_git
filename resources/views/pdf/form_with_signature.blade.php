@@ -151,7 +151,7 @@
             </script>
             @endif             
 
-            {!! Form::open(['url'=>route('addSignedRuForm'),'onsubmit' => 'сonfirmSigned(event)', 'class'=>'form-horizontal form-send-parcel','method' => 'POST']) !!}
+            {!! Form::open(['url'=>route('addSignedRuForm'),'onsubmit' => 'сonfirmSigned(event)', 'class'=>'form-horizontal form-send-parcel','method' => 'POST','accept-charset'=>'UTF-8']) !!}
 
             {!! Form::hidden('phone_exist_checked',isset($data_parcel->phone_exist_checked) ? $data_parcel->phone_exist_checked : '')!!}
 

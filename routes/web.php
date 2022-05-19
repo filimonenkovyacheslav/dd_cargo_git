@@ -28,8 +28,6 @@ Route::group(['prefix' => App\Http\Middleware\LocaleMiddleware::getLocale()], fu
 	
 	Route::get('/signature-page', 'SignedDocumentController@getSignature')->name('getSignature');
 	
-	Route::post('/signature-page', 'SignedDocumentController@setSignature')->name('setSignature');
-	
 	Route::get('/pdfview/{id}', 'SignedDocumentController@pdfview')->name('pdfview');
 	
 	Route::get('/pdfview-forward/{id}', 'SignedDocumentController@pdfviewForward')->name('pdfviewForward');

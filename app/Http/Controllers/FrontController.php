@@ -37,14 +37,6 @@ class FrontController extends AdminController
     {               
         $message = '';
         
-        // For signed forms
-        /*if (!$request->parcels_qty) {
-            $result = [];
-            parse_str($request->getContent(),$result);        
-            $result = (object)$result;
-            $request = $result;
-        }*/
-        
         if (!$request->phone_exist_checked) {
             $message = $this->checkExistPhone($request,'courier_draft_worksheet');
             if ($message) {

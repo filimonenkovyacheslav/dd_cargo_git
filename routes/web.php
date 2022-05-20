@@ -51,6 +51,8 @@ Route::group(['prefix' => App\Http\Middleware\LocaleMiddleware::getLocale()], fu
 	Route::post('/form-update-after-cancel', 'SignedDocumentController@formUpdateAfterCancel')->name('formUpdateAfterCancel');
 
 	Route::post('/create-temp-table', 'SignedDocumentController@createTempTable')->name('createTempTable');
+
+	Route::get('/form-success', 'SignedDocumentController@formSuccess')->name('formSuccess');
 	// End Form with signature
 	
 	Route::get('/page-{page_urn}','Admin\FrontPagesController@frontPage')->name('frontPage');

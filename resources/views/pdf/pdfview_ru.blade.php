@@ -7,8 +7,8 @@
 		text-align: left;
 	}
 	td img{
-		width:120px;
-		height:70px;
+		width:100px;
+		height:55px;
 	}
 </style>
 <center>
@@ -18,7 +18,7 @@
 	<h1 style="color:red">CANCELED</h1>
 	@endif
 	
-	<table>		
+	<table style="font-family: 'DejaVu Sans'">		
 		<tr>			
 			<th><img src="{{ asset('/images/tracking.png') }}"></th>
 			<td>{{ $tracking }}</td>
@@ -33,11 +33,16 @@
 			<th><img src="{{ asset('/images/dimensions.png') }}"></th>
 			<td>{{ $worksheet->width}}x{{$worksheet->height}}x{{$worksheet->length }}</td>
 		</tr>
-	</table>	
-
-	<img src="{{ asset('/upload/ru_forms/'.$document->screen_ru_form) }}" style="width:600px;height:800px">	
-	
-	<table>		
+		<tr>
+			<th>{{ $worksheet->recipient_name }}</th>
+			<td>{{ $worksheet->recipient_city }}</td>
+			<td></td>
+			<th><img src="{{ asset('/images/sender_signature.png') }}"></th>
+			<td><img src="{{ asset('/upload/signatures/'.$document->signature) }}"></td>
+			<!-- <td colspan="5">
+				<img src="{{ asset('/upload/ru_forms/'.$document->screen_ru_form) }}" style="width:600px;height:760px">	
+			</td> -->
+		</tr>		
 		<tr>			
 			<th><img src="{{ asset('/images/sender_name.png') }}"></th>
 			<td>{{ $worksheet->sender_name }}</td>

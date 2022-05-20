@@ -551,6 +551,7 @@ class NewWorksheetController extends AdminController
 	{
 		$id = $request->input('action');
 		$this->removeTrackingFromPalletWorksheet($id, 'ru');
+		$this->deleteUploadFiles('worksheet_id',$id);
 		
 		NewWorksheet::where('id', $id)->delete();
 		NewPacking::where('work_sheet_id', $id)->delete();
@@ -1241,6 +1242,7 @@ class NewWorksheetController extends AdminController
 		$row_arr = $request->input('row_id');
 		for ($i=0; $i < count($row_arr); $i++) { 
 			$this->removeTrackingFromPalletWorksheet($row_arr[$i], 'ru');
+			$this->deleteUploadFiles('worksheet_id',$row_arr[$i]);
 		}
 
 		NewWorksheet::whereIn('id', $row_arr)->delete();

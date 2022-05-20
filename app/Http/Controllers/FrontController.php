@@ -40,46 +40,18 @@ class FrontController extends AdminController
         if (!$request->phone_exist_checked) {
             $message = $this->checkExistPhone($request,'courier_draft_worksheet');
             if ($message) {
-                if ($request->signature) {
-                    return redirect()->route('formWithSignature')->with('phone_exist', $message)->with('phone_number',$request->standard_phone);
-                }
-                else{
-                    return redirect()->route('parcelForm')->with('phone_exist', $message)->with('phone_number',$request->standard_phone);
-                }                 
+                return redirect()->route('parcelForm')->with('phone_exist', $message)->with('phone_number',$request->standard_phone);                
             }
         }
         else{
             $message = $this->__newParcelAdd($request);
-            if ($request->signature) {
-                if ($message['id']) {
-                    if ($request->session_token)
-                        $this->deleteTempTable($request->session_token);
-                    $form_screen = $this->formToImg($request);
-                    return redirect()->route('getSignature')->with('draft_id', $message['id'])->with('form_screen', $form_screen);
-                }
-                else{
-                    return redirect()->route('formWithSignature')->with('status', $message['message']);
-                }
-            }
-            else{
+            if ($message['id']) {
                 return redirect()->route('parcelForm')->with('status', $message['message']);
-            }                      
+            }                    
         }        
         
         $message = $this->__newParcelAdd($request);
-
-        if ($request->signature) {
-            if ($message['id']) {
-                    if ($request->session_token)
-                        $this->deleteTempTable($request->session_token);
-                    $form_screen = $this->formToImg($request);
-                    return redirect()->route('getSignature')->with('draft_id', $message['id'])->with('form_screen', $form_screen);
-                }
-                else{
-                    return redirect()->route('formWithSignature')->with('status', $message['message']);
-                }
-        }
-        else{
+        if ($message['id']) {
             return redirect()->route('parcelForm')->with('status', $message['message']);
         } 
     }

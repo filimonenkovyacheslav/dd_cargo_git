@@ -73,6 +73,89 @@ class Controller extends BaseController
     }
 
 
+    protected function getUploadFiles($type,$id)
+    {
+        switch ($type) {
+
+            case "draft_id":
+
+            $worksheet = CourierDraftWorksheet::find($id);
+
+            break;
+
+            case "eng_draft_id":
+
+            $worksheet = CourierEngDraftWorksheet::find($id);
+
+            break;
+
+            case "worksheet_id":
+
+            $worksheet = NewWorksheet::find($id);
+
+            break;
+
+            case "eng_worksheet_id":
+
+            $worksheet = PhilIndWorksheet::find($id);
+
+            break;
+        }  
+
+        $documents = $worksheet->signedDocuments;
+        $last_doc = $worksheet->getLastDoc();
+        $items = [];
+        if ($documents) {
+            foreach ($documents as $document) { 
+                $signaturesPath = $this->checkDirectory('signatures');
+                $ruFormsPath = $this->checkDirectory('ru_forms');  
+                $ru_form = ($document->screen_ru_form) ? $ruFormsPath.$document->screen_ru_form : '';     
+                if ($document->file_for_cancel) {
+                    $folderPath = $this->checkDirectory('documents_for_cancel');
+                    $file = $document->file_for_cancel;
+                    $items[] = [
+                        'path'=>$folderPath.$file, 
+                        'name'=>$file,
+                        'signature'=>'',
+                        'signature_for_cancel'=>$signaturesPath.$document->signature_for_cancel,
+                        'screen_ru_form'=>''
+                    ];
+                }
+                if ($last_doc->id != $document->id) 
+                    $folderPath = $this->checkDirectory('canceled_documents');
+                else
+                    $folderPath = $this->checkDirectory('documents');
+                $file = $document->pdf_file;
+                $items[] = [
+                    'path'=>$folderPath.$file, 
+                    'name'=>$file,
+                    'signature'=>$signaturesPath.$document->signature,
+                    'signature_for_cancel'=>'',
+                    'screen_ru_form'=>$ru_form
+                ];
+            }
+        }       
+
+        return $items;
+    }
+
+
+    protected function deleteUploadFiles($type,$id)
+    {
+        $items = $this->getUploadFiles($type,$id);
+        if ($items) {
+            foreach($items as $item) {
+                unlink($item['path']);
+                if ($item['signature']) unlink($item['signature']);
+                if ($item['signature_for_cancel']) unlink($item['signature_for_cancel']);
+                if ($item['screen_ru_form']) unlink($item['screen_ru_form']);
+            } 
+            return true;
+        }
+        else return false;             
+    }
+
+
     protected function checkDirectory($name)
     {
         $folderPath = public_path().'/upload/'.$name;

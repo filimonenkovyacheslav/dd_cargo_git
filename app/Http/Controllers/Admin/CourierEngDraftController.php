@@ -221,6 +221,7 @@ class CourierEngDraftController extends AdminController
 	{
 		$id = $request->input('action');
 		$this->removeTrackingFromPalletWorksheet($id, 'en',true);
+		$this->deleteUploadFiles('eng_draft_id',$id);
 
 		CourierEngDraftWorksheet::where('id', $id)->delete();
 		PackingEng::where('work_sheet_id', $id)->delete();
@@ -533,6 +534,7 @@ class CourierEngDraftController extends AdminController
 		$row_arr = $request->input('row_id');
 		for ($i=0; $i < count($row_arr); $i++) { 
 			$this->removeTrackingFromPalletWorksheet($row_arr[$i], 'en',true);
+			$this->deleteUploadFiles('eng_draft_id',$row_arr[$i]);
 		}
 
 		CourierEngDraftWorksheet::whereIn('id', $row_arr)->delete();

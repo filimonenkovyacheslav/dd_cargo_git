@@ -1202,7 +1202,8 @@ $('[name="checkbox_operations_select"]').change((e)=>{
     else if (thisVal === 'add-pdf'){
         if ($('[name="row_id[]"]:checked').length == 1) {
             let action = $('.checkbox-operations-add-pdf').attr('action')
-            const uId = Date.now().toString(36) + Math.random().toString(36).substr(2);    
+            const uId = Date.now().toString(36) + Math.random().toString(36).substr(2);
+            const rowId = $('.checkbox-operations-add-pdf [name="row_id[]"]').val();    
             $.ajax({
                 type:'POST',
                 url:createTableUrl,
@@ -1210,7 +1211,7 @@ $('[name="checkbox_operations_select"]').change((e)=>{
                 data: {"session_token":uId},
                 success:function(data){
                     if (data) {
-                        action += '/'+$('.checkbox-operations-add-pdf [name="row_id[]"]').val()+'/'+data
+                        action += '/'+rowId+'/'+data
                         $('.checkbox-operations-add-pdf').attr('action',action)
                         $('.checkbox-operations-add-pdf').submit() 
                     }               

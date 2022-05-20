@@ -39,7 +39,7 @@ class CourierDraftController extends AdminController
         }
         $data = $request->all();   
         $user = Auth::user();
-        $viewer_arr = parent::VIEWER_ARR;
+        $viewer_arr = parent::VIEWER_ARR;       
         
         return view('admin.courier_draft.courier_draft_worksheet', ['title' => $title,'data' => $data,'courier_draft_worksheet_obj' => $courier_draft_worksheet_obj, 'user' => $user, 'viewer_arr' => $viewer_arr]);
     }
@@ -255,6 +255,7 @@ class CourierDraftController extends AdminController
 	{
 		$id = $request->input('action');
 		$this->removeTrackingFromPalletWorksheet($id, 'ru', true);
+		$this->deleteUploadFiles('draft_id',$id);
 
 		CourierDraftWorksheet::where('id', $id)->delete();
 		PackingSea::where('work_sheet_id', $id)->delete();
@@ -489,6 +490,7 @@ class CourierDraftController extends AdminController
 		$row_arr = $request->input('row_id');
 		for ($i=0; $i < count($row_arr); $i++) { 
 			$this->removeTrackingFromPalletWorksheet($row_arr[$i], 'ru',true);
+			$this->deleteUploadFiles('draft_id',$row_arr[$i]);
 		}
 
 		CourierDraftWorksheet::whereIn('id', $row_arr)->delete();

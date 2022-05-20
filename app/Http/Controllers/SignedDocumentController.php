@@ -32,48 +32,60 @@ class SignedDocumentController extends Controller
     }
 
 
-    public function formWithSignature(Request $request, $id, $token)
-    {       
-        $worksheet = CourierDraftWorksheet::find($id);
-        if ($worksheet->getLastDoc()) return redirect()->to(session('this_previous_url'))->with('status-error', 'Document exists!');
-        $israel_cities = $this->israelCities();
-        $israel_cities['other'] = 'Другой город';
-        $data_parcel = $this->fillResponseDataRu($worksheet, $request, true, true);
-        if ($data_parcel) {
-            $data_parcel = json_encode($data_parcel);
-            $result = DB::table('table_'.$token)->find(1);
-            if (!$result) {
-                DB::table('table_'.$token)
-                ->insert([
-                    'data' => $data_parcel
-                ]);
-            }           
-        }        
+    public function formSuccess()
+    {
+        return view('pdf.form_success');
+    }
 
-        return view('pdf.form_with_signature',compact('israel_cities','data_parcel','token','worksheet'));
+
+    public function formWithSignature(Request $request, $id, $token)
+    {   
+        if (Schema::hasTable('table_'.$token)) {
+            $worksheet = CourierDraftWorksheet::find($id);
+            if ($worksheet->getLastDoc()) return redirect()->to(session('this_previous_url'))->with('status-error', 'Document exists!');
+            $israel_cities = $this->israelCities();
+            $israel_cities['other'] = 'Другой город';
+            $data_parcel = $this->fillResponseDataRu($worksheet, $request, true, true);
+            if ($data_parcel) {
+                $data_parcel = json_encode($data_parcel);            
+                $result = DB::table('table_'.$token)->find(1);
+                if (!$result) {
+                    DB::table('table_'.$token)
+                    ->insert([
+                        'data' => $data_parcel
+                    ]);
+                }           
+            }        
+
+            return view('pdf.form_with_signature',compact('israel_cities','data_parcel','token','worksheet'));
+        }    
+        else return '<h1>Session ended!</h1>';
     }
 
 
     public function formWithSignatureEng(Request $request, $id, $token)
     {
-        $worksheet = CourierEngDraftWorksheet::find($id);
-        if ($worksheet->getLastDoc()) return redirect()->to(session('this_previous_url'))->with('status-error', 'Document exists!'); 
-        $israel_cities = $this->israelCities();
-        $israel_cities['other'] = 'Other city';
-        $data_parcel = $this->fillResponseDataEng($worksheet, $request, true, true);
-        if ($data_parcel) {
-            $data_parcel = json_encode($data_parcel);
-            $result = DB::table('table_'.$token)->find(1);
-            if (!$result) {
-                DB::table('table_'.$token)
-                ->insert([
-                    'data' => $data_parcel
-                ]);
-            }           
-        } 
-        $domain = $this->getDomainRule();
-        
-        return view('pdf.form_with_signature_eng',compact('israel_cities','data_parcel','domain','token','worksheet'));       
+        if (Schema::hasTable('table_'.$token)){
+            $worksheet = CourierEngDraftWorksheet::find($id);
+            if ($worksheet->getLastDoc()) return redirect()->to(session('this_previous_url'))->with('status-error', 'Document exists!'); 
+            $israel_cities = $this->israelCities();
+            $israel_cities['other'] = 'Other city';
+            $data_parcel = $this->fillResponseDataEng($worksheet, $request, true, true);
+            if ($data_parcel) {
+                $data_parcel = json_encode($data_parcel);
+                $result = DB::table('table_'.$token)->find(1);
+                if (!$result) {
+                    DB::table('table_'.$token)
+                    ->insert([
+                        'data' => $data_parcel
+                    ]);
+                }           
+            } 
+            $domain = $this->getDomainRule();
+
+            return view('pdf.form_with_signature_eng',compact('israel_cities','data_parcel','domain','token','worksheet')); 
+        }
+        else return '<h1>Session ended!</h1>';     
     }
 
 
@@ -106,8 +118,7 @@ class SignedDocumentController extends Controller
             }
             elseif($this->getDomainRule() === 'forward'){
                 $pdf = PDF::loadView('pdf.pdfview_forward',compact('worksheet','document','tracking','cancel'));
-            }
-            
+            }           
         }
         else{
             $pdf = PDF::loadView('pdf.pdfview_ru',compact('worksheet','document','tracking','cancel'));
@@ -145,7 +156,7 @@ class SignedDocumentController extends Controller
             $id = $document->id;
             $pdf_file = $this->savePdf($id);
         
-            return redirect('/signature-page?pdf_file='.$pdf_file.'&new_document_id='.$id);
+            return redirect('/form-success?pdf_file='.$pdf_file.'&new_document_id='.$id);
         }
         elseif ($request->form_screen) {
             if (!$request->document_id) $document = $this->createNewDocument($request,$file_name);
@@ -153,7 +164,7 @@ class SignedDocumentController extends Controller
             $id = $document->id;
             $pdf_file = $this->savePdfRu($id);
             
-            return redirect('/signature-page?pdf_file='.$pdf_file.'&new_document_id='.$id);
+            return redirect('/form-success?pdf_file='.$pdf_file.'&new_document_id='.$id);
         }
         elseif ($request->cancel){
             if (!$request->document_id) $document = $this->createNewDocument($request,$file_name,true);
@@ -164,7 +175,7 @@ class SignedDocumentController extends Controller
             
             if (!$request->create_new) {
 
-                return redirect('/signature-page?pdf_file='.$pdf_file.'&new_document_id='.$id.'&old_file='.$old_document->pdf_file);
+                return redirect('/form-success?pdf_file='.$pdf_file.'&new_document_id='.$id.'&old_file='.$old_document->pdf_file);
             }
             else{
                 $id = $request->id;
@@ -373,50 +384,7 @@ class SignedDocumentController extends Controller
 
     public function downloadAllPdf(Request $request)
     {
-        switch ($request->type) {
-
-            case "draft_id":
-
-            $worksheet = CourierDraftWorksheet::find($request->id);
-
-            break;
-
-            case "eng_draft_id":
-
-            $worksheet = CourierEngDraftWorksheet::find($request->id);
-
-            break;
-
-            case "worksheet_id":
-
-            $worksheet = NewWorksheet::find($request->id);
-
-            break;
-
-            case "eng_worksheet_id":
-
-            $worksheet = PhilIndWorksheet::find($request->id);
-
-            break;
-        }  
-
-        $documents = $worksheet->signedDocuments;
-        $last_doc = $worksheet->getLastDoc();
-        $items = [];
-        foreach ($documents as $document) {           
-            if ($document->file_for_cancel) {
-                $folderPath = $this->checkDirectory('documents_for_cancel');
-                $file = $document->file_for_cancel;
-                $items[] = ['path'=>$folderPath.$file, 'name'=>$file];
-            }
-            if ($last_doc->id != $document->id) 
-                $folderPath = $this->checkDirectory('canceled_documents');
-            else
-                $folderPath = $this->checkDirectory('documents');
-            $file = $document->pdf_file;
-            $items[] = ['path'=>$folderPath.$file, 'name'=>$file];
-        }
-
+        $items = $this->getUploadFiles($request->type,$request->id);
         return view('pdf.download_pdf',compact('items'));
     }
 
@@ -451,16 +419,43 @@ class SignedDocumentController extends Controller
         $document = $document->updateSignedDocument($request,$file_name);
         return $document;
     }
+   
+
+    protected function deleteTempTable($session_token)
+    {
+        if ($session_token) {
+            Schema::dropIfExists('table_'.$session_token);
+        }       
+    }
+
+
+    protected function destroyTempTables()
+    {
+        $delete_date = Date('Y-m-d', strtotime('-1 days'));
+        $tables = DB::table('temp_tables')
+        ->where('created_at','<',$delete_date)
+        ->get();
+        foreach ($tables as $table) {
+            if (Schema::hasTable('table_'.$table->name)) $this->deleteTempTable($table->name);
+            DB::table('temp_tables')->where('id',$table->id)->delete();
+        }        
+    }
 
 
     public function createTempTable(Request $request)
     {
+        $this->destroyTempTables();
+        
         if ($request->session_token) {
             Schema::create('table_'.$request->session_token, function (Blueprint $table) {
                 $table->increments('id');
                 $table->text('data')->nullable();
                 $table->timestamps();
             });
+            DB::table('temp_tables')->insert([
+                'name'=>$request->session_token,
+                'created_at'=>date('Y-m-d')
+            ]);
         }  
         return $request->session_token;            
     }
@@ -509,6 +504,8 @@ class SignedDocumentController extends Controller
             $result = (object)$result;
             $request = $result;
         }
+
+        if (!Schema::hasTable('table_'.$request->session_token)) return '<h1>Session ended!</h1>';
         
         if (!$request->phone_exist_checked) {
             $message = $this->checkExistPhone($request,'courier_draft_worksheet');
@@ -788,11 +785,4 @@ class SignedDocumentController extends Controller
         return $message;        
     }
 
-
-    public function deleteTempTable($session_token)
-    {
-        if ($session_token) {
-            Schema::dropIfExists('table_'.$session_token);
-        }       
-    }
 }

@@ -5,7 +5,7 @@
 <form id="signedForm" method="POST" action="{{ route('setSignature') }}">
 @csrf
 <center>
-    <canvas id="canvas" width="700" height="300" style="border:solid black 1px;background: #fff;margin: 10px;">
+    <canvas id="canvas" width="700" height="350" style="border:solid black 1px;background: #fff;margin: 10px;">
         Your browser does not support the element canvas.
     </canvas>
 </center> 
@@ -139,6 +139,7 @@
             else{
                 var el = document.getElementById("canvas");
                 el.width = windowWidth - 20;
+                el.height = (el.width) / 2;
                 el.addEventListener("touchstart", handleStart, false);
                 el.addEventListener("touchend", handleEnd, false);
                 el.addEventListener("touchcancel", handleCancel, false);

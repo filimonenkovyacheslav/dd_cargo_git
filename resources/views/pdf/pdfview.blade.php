@@ -111,11 +111,11 @@
 				<td>{{explode("-", $item)[0]}}</td>
 				<td>{{explode("-", $item)[1]}}</td>
 				<td>{{ $worksheet->shipment_val }}</td>
-			</tr>
+			</tr>			
+			@endif
 			@php
 			$number++;
-			@endphp
-			@endif			
+			@endphp			
 		@endforeach
 		<tr>
 			<th colspan="3">Declared value :</th>	
@@ -140,7 +140,7 @@
 		</tr>
 		<tr>
 			<th>CUSTOMER SIGNATURE</th>	
-			<td colspan="3"><img src="{{ asset('/upload/signatures/'.$document->signature) }}" style="width:120px;height:100px"></td>		
+			<td colspan="3"><img src="{{ asset('/upload/signatures/'.$document->signature) }}" style="width:200px;height:100px"></td>		
 		</tr>
 	</table>
 </center>

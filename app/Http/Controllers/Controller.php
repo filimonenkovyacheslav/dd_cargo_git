@@ -145,7 +145,7 @@ class Controller extends BaseController
         $items = $this->getUploadFiles($type,$id);
         if ($items) {
             foreach($items as $item) {
-                unlink($item['path']);
+                if ($item['path']) unlink($item['path']);
                 if ($item['signature']) unlink($item['signature']);
                 if ($item['signature_for_cancel']) unlink($item['signature_for_cancel']);
                 if ($item['screen_ru_form']) unlink($item['screen_ru_form']);

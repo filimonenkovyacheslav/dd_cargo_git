@@ -297,7 +297,7 @@
 										<td class="td-button" title="{{$row->order_number}}">
 											<div class="div-22">{{$row->order_number}}</div>
 										</td>
-										<td class="td-button" title="{{$row->parcels_qty}}">
+										<td title="{{$row->parcels_qty}}">
 											<div class="div-22">{{$row->parcels_qty}}</div>
 										</td>
 										<td class="@can('editPost')allowed-update @endcan" title="{{$row->tracking_local}}">

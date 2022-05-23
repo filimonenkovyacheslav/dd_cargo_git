@@ -778,54 +778,40 @@ class FrontController extends AdminController
         if ($update_status_date === 0) {
             app()->call('App\Http\Controllers\RuPostalTrackingController@updateStatusFromUser', [$tracking]);
         }       
-
-        $row = DB::table('worksheet')
-            ->select('status','guarantee_text_en','guarantee_text_he','guarantee_text_ua')
-            ->where('tracking', '=', $tracking)
-            ->get();
-
+        
+        $row = DB::table('new_worksheet')
+        ->select('status','status_en','status_he','status_ua')
+        ->where([
+            ['tracking_main', '=', $tracking],
+            ['site_name', '=', 'DD-C']
+        ])->get();
+        
+        if (!$row->count()){
+            $row = DB::table('courier_draft_worksheet')
+            ->select('status','status_en','status_he','status_ua')
+            ->where([
+                ['tracking_main', '=', $tracking],
+                ['site_name', '=', 'DD-C']
+            ])->get();
+        }
+        
         if ($row->count()) {
             foreach ($row as $val) {
                 if ($val->status) {
                     $message_arr['ru'] = $val->status;
                 }
                 if ($val->status) {
-                    $message_arr['en'] = $val->guarantee_text_en;
+                    $message_arr['en'] = $val->status_en;
                 }
                 if ($val->status) {
-                    $message_arr['he'] = $val->guarantee_text_he;
+                    $message_arr['he'] = $val->status_he;
                 }
                 if ($val->status) {
-                    $message_arr['ua'] = $val->guarantee_text_ua;
+                    $message_arr['ua'] = $val->status_ua;
                 }
             }
         }
-        else{
-            $row = DB::table('new_worksheet')
-            ->select('status','status_en','status_he','status_ua')
-            ->where([
-                ['tracking_main', '=', $tracking],
-                ['site_name', '=', 'DD-C']
-            ])
-            ->get();
-            if ($row->count()) {
-                foreach ($row as $val) {
-                    if ($val->status) {
-                        $message_arr['ru'] = $val->status;
-                    }
-                    if ($val->status) {
-                        $message_arr['en'] = $val->status_en;
-                    }
-                    if ($val->status) {
-                        $message_arr['he'] = $val->status_he;
-                    }
-                    if ($val->status) {
-                        $message_arr['ua'] = $val->status_ua;
-                    }
-                }
-            }
-        }
-
+        
         if (!$row->count()) {     
             if (stripos($tracking, 'T') !== false){
                 if (stripos($tracking, 'T-') === false) {
@@ -837,7 +823,13 @@ class FrontController extends AdminController
             $row = DB::table('phil_ind_worksheet')
             ->select('status','status_he','status_ru')
             ->where('tracking_main', '=', $tracking)
-            ->get();     
+            ->get();   
+
+            if (!$row->count())
+                $row = DB::table('courier_eng_draft_worksheet')
+                ->select('status','status_he','status_ru')
+                ->where('tracking_main', '=', $tracking)
+                ->get();  
             
             if ($row->count()) {
                 foreach ($row as $val) {
@@ -885,8 +877,17 @@ class FrontController extends AdminController
         ->where([
             ['tracking_main', '=', $tracking],
             ['site_name', '=', 'For']
-        ])
-        ->get();
+        ])->get();
+
+        if (!$row->count()){
+            $row = DB::table('courier_draft_worksheet')
+            ->select('status','status_en','status_he','status_ua')
+            ->where([
+                ['tracking_main', '=', $tracking],
+                ['site_name', '=', 'For']
+            ])->get();
+        }
+        
         if ($row->count()) {
             foreach ($row as $val) {
                 if ($val->status) {

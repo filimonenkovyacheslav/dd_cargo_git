@@ -172,7 +172,7 @@
                     </script>
                 @endif 
 
-                {!! Form::open(['url'=>route('philIndParcelAdd'),'onsubmit' => 'сonfirmSigned(event)', 'class'=>'form-horizontal form-send-parcel','method' => 'POST']) !!}
+                {!! Form::open(['url'=>route('addSignedEngForm'),'onsubmit' => 'сonfirmSigned(event)', 'class'=>'form-horizontal form-send-parcel','method' => 'POST','accept-charset'=>'UTF-8']) !!}
 
                 {!! Form::hidden('phone_exist_checked',isset($data_parcel->phone_exist_checked) ? $data_parcel->phone_exist_checked : '')!!}
                 {!! Form::hidden('status_box','')!!}
@@ -182,7 +182,18 @@
 
                 @if($worksheet)
                 {!! Form::hidden('worksheet_id', $worksheet->id) !!}  
+                {!! Form::hidden('order_date', $worksheet->order_date) !!}
                 @endif
+
+                @if (isset($token))
+                <input type="hidden" name="session_token" value="{{ $token }}">
+                @endif 
+
+                @if (isset($document_id))
+                <input type="hidden" name="document_id" value="{{ $document_id }}">
+                <input type="hidden" name="type" value="{{ $type }}">
+                <input type="hidden" name="id" value="{{ $id }}">
+                @endif 
 
                 <h3>Shipper’s Data</h3>
                 

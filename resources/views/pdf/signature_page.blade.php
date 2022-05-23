@@ -55,6 +55,7 @@
 </script>
 @endif 
 <input type="hidden" id="document_id" name="document_id" value="">
+<input type="hidden" id="form_screen" name="form_screen" value="">
 
 </form>
 
@@ -87,9 +88,8 @@
             document.forms["signedForm"].insertAdjacentHTML('beforeend', textHtml);
         }
 
-        if (localStorage.getItem('form_screen')) {
-            const textHtml = `<input type="hidden" name="form_screen" value="`+localStorage.getItem('form_screen')+`">`;            
-            document.forms["signedForm"].insertAdjacentHTML('beforeend', textHtml);
+        if (localStorage.getItem('form_screen')) {            
+            document.getElementById("form_screen").value = localStorage.getItem('form_screen');
         }
 
         if (localStorage.getItem('document_id')) {            

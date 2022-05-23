@@ -61,6 +61,7 @@ Route::get('/ru-postal-tracking-from-user/{barcode}', 'RuPostalTrackingControlle
 Route::post('/add-to-temp-table', 'SignedDocumentController@addToTempTable')->name('addToTempTable');
 Route::get('/get-from-temp-table/{id}', 'SignedDocumentController@getFromTempTable')->name('getFromTempTable');
 Route::post('/add-signed-ru-form', 'SignedDocumentController@addSignedRuForm')->name('addSignedRuForm');
+Route::post('/add-signed-eng-form', 'SignedDocumentController@addSignedEngForm')->name('addSignedEngForm');
 Route::post('/signature-page', 'SignedDocumentController@setSignature')->name('setSignature');
 
 // Crone

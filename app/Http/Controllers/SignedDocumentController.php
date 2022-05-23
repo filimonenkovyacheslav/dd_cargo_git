@@ -137,10 +137,7 @@ class SignedDocumentController extends Controller
         $folderPath = $this->checkDirectory('signatures');
 
         if (!$request->signed) {
-            $result = [];
-            parse_str($request->getContent(),$result);        
-            $result = (object)$result;
-            $request = $result;
+            $request = $this->contentToObj($request);
         }
         
         $img = $request->signed;
@@ -494,15 +491,22 @@ class SignedDocumentController extends Controller
     }
 
 
+    private function contentToObj($request)
+    {
+        $result = [];
+        parse_str($request->getContent(),$result);        
+        $result = (object)$result;
+        $request = $result;
+        return $request;
+    }
+
+
     public function addSignedRuForm(Request $request)
     {
         $message = '';
         // For signed forms
         if (!$request->parcels_qty) {
-            $result = [];
-            parse_str($request->getContent(),$result);        
-            $result = (object)$result;
-            $request = $result;
+            $request = $this->contentToObj($request);
         }
 
         if (!Schema::hasTable('table_'.$request->session_token)) return '<h1>Session ended!</h1>';
@@ -528,10 +532,7 @@ class SignedDocumentController extends Controller
                 else{
                     return redirect()->route('formWithSignature')->with('status', $message['message']);
                 }
-            }
-            else{
-                return redirect()->route('parcelForm')->with('status', $message['message']);
-            }                      
+            }                     
         }        
         
         $message = $this->createRuParcel($request);
@@ -641,7 +642,10 @@ class SignedDocumentController extends Controller
 
         $new_worksheet->date = date('Y-m-d');
         $new_worksheet->status_date = date('Y-m-d'); 
-        $new_worksheet->order_date = date('Y-m-d');      
+        if (isset($request->order_date))
+            $new_worksheet->order_date = $request->order_date;
+        else
+            $new_worksheet->order_date = date('Y-m-d');     
 
         if ($new_worksheet->save()){           
 
@@ -783,6 +787,170 @@ class SignedDocumentController extends Controller
         }             
         
         return $message;        
+    }
+
+
+    public function addSignedEngForm(Request $request)
+    {
+        $message = '';
+        // For signed forms
+        if (!$request->parcels_qty) {
+            $request = $this->contentToObj($request);
+        }
+
+        if (!Schema::hasTable('table_'.$request->session_token)) return '<h1>Session ended!</h1>';
+        
+        if (!$request->phone_exist_checked) {
+            $message = $this->checkExistPhone($request,'courier_eng_draft_worksheet');
+            if ($message) {
+                if ($request->signature) {
+                    return redirect()->route('formWithSignatureEng')->with('phone_exist', $message)->with('phone_number',$request->standard_phone);
+                }                
+            }
+        }
+        else{
+            $message = $this->createEngParcel($request);
+
+            if ($request->signature) {
+                if ($message['id']) {
+                    if ($request->session_token)
+                        $this->deleteTempTable($request->session_token);
+                    return redirect('/signature-page?eng_draft_id='.$message['id']);
+                }
+                else{
+                    return redirect()->route('formWithSignatureEng')->with('status', $message['message']);
+                }
+            }                   
+        }        
+        
+        $message = $this->createEngParcel($request);
+
+        if ($request->signature) {
+            if ($message['id']) {
+                    if ($request->session_token)
+                        $this->deleteTempTable($request->session_token);
+                    return redirect('/signature-page?eng_draft_id='.$message['id']);
+                }
+                else{
+                    return redirect()->route('formWithSignatureEng')->with('status', $message['message']);
+                }
+        } 
+    }
+
+
+    private function createEngParcel($request)
+    {
+        $worksheet = new CourierEngDraftWorksheet();
+        $fields = Schema::getColumnListing('courier_eng_draft_worksheet');
+        $message = [];
+
+        foreach($fields as $field){
+            if ($field === 'shipper_name') {
+                $worksheet->$field = $request->first_name.' '.$request->last_name;
+            }
+            else if ($field === 'consignee_name') {
+                $worksheet->$field = $request->consignee_first_name.' '.$request->consignee_last_name;
+            }
+            else if ($field === 'consignee_address') {
+                $worksheet->$field = $request->consignee_country.' '.$request->consignee_address;
+            }
+            else if ($field === 'shipped_items') {
+                $temp = '';
+                for ($i=1; $i < 11; $i++) { 
+                    $var = 'item_'.$i;
+                    $var_2 = 'q_item_'.$i;
+                    if (isset($request->$var)) {
+                        $temp .= $request->$var.': '.$request->$var_2.'; ';
+                    }
+                }
+                $worksheet->$field = $temp;
+            }
+            else if ($field === 'direction') {
+                $worksheet->$field = $this->createDirection($request->shipper_country, $request->consignee_country);
+            }
+            else if ($field !== 'created_at'){
+                if (isset($request->$field)) {
+                    $worksheet->$field = $request->$field;
+                } 
+            }                               
+        }
+
+        $worksheet->in_trash = false;
+        if ($worksheet->shipper_country === 'Israel') {
+            if (in_array($worksheet->shipper_city, array_keys($this->israel_cities))) {
+                $worksheet->shipper_region = $this->israel_cities[$worksheet->shipper_city];
+            }
+        }        
+
+        $worksheet->date = date('Y-m-d');
+        $worksheet->status_date = date('Y-m-d');
+        if (isset($request->order_date))
+            $worksheet->order_date = $request->order_date;
+        else
+            $worksheet->order_date = date('Y-m-d');
+
+        if (isset($request->status_box)) {
+            if (!$request->status_box) {
+                $worksheet->status = 'Pick up';
+            } 
+            else{
+                $worksheet->status = 'Box';
+            }
+        }                               
+
+        if ($worksheet->save()) {          
+
+            $this->addingOrderNumber($worksheet->standard_phone, 'en');
+            $work_sheet_id = $worksheet->id;
+            $new_worksheet = CourierEngDraftWorksheet::find($work_sheet_id);
+            $new_worksheet->checkCourierTask($new_worksheet->status);
+
+            // Packing
+            $fields_packing = ['tracking', 'country', 'shipper_name', 'shipper_address', 'shipper_phone', 'shipper_id', 'consignee_name', 'consignee_address', 'consignee_phone', 'consignee_id', 'length', 'width', 'height', 'weight', 'items', 'shipment_val', 'work_sheet_id'];
+            $packing = new PackingEng;
+            foreach($fields_packing as $field){
+                if ($field === 'country') {
+                    $packing->$field = $request->consignee_country;
+                    $packing->consignee_address = $request->consignee_address;                    
+                }
+                elseif ($field === 'shipper_name') {
+                    $packing->$field = $request->first_name.' '.$request->last_name;
+                }
+                elseif ($field === 'shipper_phone') {
+                    $packing->$field = $request->standard_phone;
+                }
+                elseif ($field === 'consignee_name') {
+                    $packing->$field = $request->consignee_first_name.' '.$request->consignee_last_name;
+                }
+                elseif ($field === 'work_sheet_id') {
+                    $packing->$field = $work_sheet_id;
+                }
+                else if ($field === 'items') {
+                    $temp = '';
+                    for ($i=1; $i < 11; $i++) { 
+                        $var = 'item_'.$i;
+                        $var_2 = 'q_item_'.$i;
+                        if (isset($request->$var)) {
+                            $temp .= $request->$var.': '.$request->$var_2.'; ';
+                        }
+                    }
+                    $packing->$field = $temp;
+                }
+                else{
+                    if (isset($request->$field))
+                        $packing->$field = $request->$field;
+                } 
+            }
+            $packing->save();
+
+            $message['id'] = $work_sheet_id;
+            $message['message'] = 'Shipment order successfully created !';
+        }
+        else{
+            $message['message'] = 'Saving error !';
+        }
+
+        return $message;  
     }
 
 }

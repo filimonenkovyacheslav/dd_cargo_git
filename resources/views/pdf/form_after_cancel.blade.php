@@ -352,7 +352,7 @@
             </ol>
             <p>Подписывая эту форму, я подтверждаю, что я прочитал и понял все письменные и прилагаемые положения и условия</p>
 
-            <input type="hidden" id="form_canvas" name="form_canvas">
+            <input type="hidden" id="form_canvas" name="form_canvas" value="string">
 
             {!! Form::button('Подписать',['class'=>'btn','type'=>'submit']) !!}
             {!! Form::close() !!}                       
@@ -416,13 +416,7 @@
 
         if (trueInput) return false;
 
-        html2canvas(document.querySelector('.form-send-parcel')).then(function(canvas) {
-            document.getElementById('form_canvas').value = canvas.toDataURL('image/jpeg');
-        });
-
-        setTimeout(()=>{
-            form.submit();
-        },500)        
+        form.submit();        
     }
 
 </script>

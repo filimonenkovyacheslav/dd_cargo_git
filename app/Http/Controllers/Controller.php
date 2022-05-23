@@ -172,16 +172,16 @@ class Controller extends BaseController
 
     protected function formToImg($request)
     {
-        $folderPath = $this->checkDirectory('ru_forms');
+        /*$folderPath = $this->checkDirectory('ru_forms');
 
         $img = $request->form_canvas;
         $img = str_replace('data:image/jpeg;base64,', '', $img);
         $img = str_replace(' ', '+', $img);
         $data = base64_decode($img);
         $file_name = uniqid().".jpeg";
-        $success = file_put_contents($folderPath.$file_name, $data);
+        $success = file_put_contents($folderPath.$file_name, $data);*/
 
-        return $file_name;
+        return 'file_name';
     }
 
 

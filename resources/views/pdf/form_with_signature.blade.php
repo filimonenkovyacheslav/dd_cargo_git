@@ -159,6 +159,7 @@
 
             @if($worksheet)
             {!! Form::hidden('worksheet_id', $worksheet->id) !!}  
+            {!! Form::hidden('order_date', $worksheet->order_date) !!}
             @endif
 
             @if (isset($token))
@@ -275,10 +276,10 @@
 
             <div class="form-group">
                 <div class="row">
-                    <div class="col-11">
+                    <div class="col-9">
                         {!! Form::text('other_content_1', isset($data_parcel->item_1) ? $data_parcel->item_1 : old('other_content_1'), ['class' => 'form-control', 'placeholder' => 'Описание 1', 'data-item' => '1'])!!}
                     </div>
-                    <div class="col-1">
+                    <div class="col-3">
                         {!! Form::text('other_quantity_1', isset($data_parcel->q_item_1) ? $data_parcel->q_item_1 : old('other_quantity_1'),['class' => 'form-control', 'placeholder' => 'количество'])!!}
                     </div>
                 </div>
@@ -286,10 +287,10 @@
 
             <div class="form-group">
                 <div class="row">
-                    <div class="col-11">
+                    <div class="col-9">
                         {!! Form::text('other_content_2', isset($data_parcel->item_2) ? $data_parcel->item_2 : old('other_content_2'),['class' => 'form-control', 'placeholder' => 'Описание 2', 'data-item' => '2'])!!}
                     </div>
-                    <div class="col-1">
+                    <div class="col-3">
                         {!! Form::text('other_quantity_2', isset($data_parcel->q_item_2) ? $data_parcel->q_item_2 : old('other_quantity_2'),['class' => 'form-control', 'placeholder' => 'количество'])!!}
                     </div>
                 </div>
@@ -297,10 +298,10 @@
 
             <div class="form-group">
                 <div class="row">
-                    <div class="col-11">
+                    <div class="col-9">
                         {!! Form::text('other_content_3', isset($data_parcel->item_3) ? $data_parcel->item_3 : old('other_content_3'),['class' => 'form-control', 'placeholder' => 'Описание 3', 'data-item' => '3'])!!}
                     </div>
-                    <div class="col-1">
+                    <div class="col-3">
                         {!! Form::text('other_quantity_3', isset($data_parcel->q_item_3) ? $data_parcel->q_item_3 : old('other_quantity_3'),['class' => 'form-control', 'placeholder' => 'количество'])!!}
                     </div>
                 </div>
@@ -308,10 +309,10 @@
 
             <div class="form-group">
                 <div class="row">
-                    <div class="col-11">
+                    <div class="col-9">
                         {!! Form::text('other_content_4', isset($data_parcel->item_4) ? $data_parcel->item_4 : old('other_content_4'),['class' => 'form-control', 'placeholder' => 'Описание 4', 'data-item' => '4'])!!}
                     </div>
-                    <div class="col-1">
+                    <div class="col-3">
                         {!! Form::text('other_quantity_4', isset($data_parcel->q_item_4) ? $data_parcel->q_item_4 : old('other_quantity_4'),['class' => 'form-control', 'placeholder' => 'количество'])!!}
                     </div>
                 </div>
@@ -319,10 +320,10 @@
 
             <div class="form-group">
                 <div class="row">
-                    <div class="col-11">
+                    <div class="col-9">
                         {!! Form::text('other_content_5', isset($data_parcel->item_5) ? $data_parcel->item_5 : old('other_content_5'),['class' => 'form-control', 'placeholder' => 'Описание 5', 'data-item' => '5'])!!}
                     </div>
-                    <div class="col-1">
+                    <div class="col-3">
                         {!! Form::text('other_quantity_5', isset($data_parcel->q_item_5) ? $data_parcel->q_item_5 : old('other_quantity_5'),['class' => 'form-control', 'placeholder' => 'количество'])!!}
                     </div>
                 </div>
@@ -330,10 +331,10 @@
 
             <div class="form-group">
                 <div class="row">
-                    <div class="col-11">
+                    <div class="col-9">
                         {!! Form::text('other_content_6', isset($data_parcel->item_6) ? $data_parcel->item_6 : old('other_content_6'),['class' => 'form-control', 'placeholder' => 'Описание 6', 'data-item' => '6'])!!}
                     </div>
-                    <div class="col-1">
+                    <div class="col-3">
                         {!! Form::text('other_quantity_6', isset($data_parcel->q_item_6) ? $data_parcel->q_item_6 : old('other_quantity_6'),['class' => 'form-control', 'placeholder' => 'количество'])!!}
                     </div>
                 </div>
@@ -341,10 +342,10 @@
 
             <div class="form-group">
                 <div class="row">
-                    <div class="col-11">
+                    <div class="col-9">
                         {!! Form::text('other_content_7', isset($data_parcel->item_7) ? $data_parcel->item_7 : old('other_content_7'),['class' => 'form-control', 'placeholder' => 'Описание 7', 'data-item' => '7'])!!}
                     </div>
-                    <div class="col-1">
+                    <div class="col-3">
                         {!! Form::text('other_quantity_7', isset($data_parcel->q_item_7) ? $data_parcel->q_item_7 : old('other_quantity_7'),['class' => 'form-control', 'placeholder' => 'количество'])!!}
                     </div>
                 </div>
@@ -352,10 +353,10 @@
 
             <div class="form-group">
                 <div class="row">
-                    <div class="col-11">
+                    <div class="col-9">
                         {!! Form::text('other_content_8', isset($data_parcel->item_8) ? $data_parcel->item_8 : old('other_content_8'),['class' => 'form-control', 'placeholder' => 'Описание 8', 'data-item' => '8'])!!}
                     </div>
-                    <div class="col-1">
+                    <div class="col-3">
                         {!! Form::text('other_quantity_8', isset($data_parcel->q_item_8) ? $data_parcel->q_item_8 : old('other_quantity_8'),['class' => 'form-control', 'placeholder' => 'количество'])!!}
                     </div>
                 </div>
@@ -363,10 +364,10 @@
 
             <div class="form-group">
                 <div class="row">
-                    <div class="col-11">
+                    <div class="col-9">
                         {!! Form::text('other_content_9', isset($data_parcel->item_9) ? $data_parcel->item_9 : old('other_content_9'),['class' => 'form-control', 'placeholder' => 'Описание 9', 'data-item' => '9'])!!}
                     </div>
-                    <div class="col-1">
+                    <div class="col-3">
                         {!! Form::text('other_quantity_9', isset($data_parcel->q_item_9) ? $data_parcel->q_item_9 : old('other_quantity_9'),['class' => 'form-control', 'placeholder' => 'количество'])!!}
                     </div>
                 </div>
@@ -374,10 +375,10 @@
 
             <div class="form-group">
                 <div class="row">
-                    <div class="col-11">
+                    <div class="col-9">
                         {!! Form::text('other_content_10', isset($data_parcel->item_10) ? $data_parcel->item_10 : old('other_content_10'),['class' => 'form-control', 'placeholder' => 'Описание 10', 'data-item' => '10'])!!}
                     </div>
-                    <div class="col-1">
+                    <div class="col-3">
                         {!! Form::text('other_quantity_10', isset($data_parcel->q_item_10) ? $data_parcel->q_item_10 : old('other_quantity_10'),['class' => 'form-control', 'placeholder' => 'количество'])!!}
                     </div>
                 </div>
@@ -477,7 +478,7 @@
             </ol>
             <p>Подписывая эту форму, я подтверждаю, что я прочитал и понял все письменные и прилагаемые положения и условия</p>
 
-            <input type="hidden" id="form_canvas" name="form_canvas">
+            <input type="hidden" id="form_canvas" name="form_canvas" value="string">
 
             {!! Form::button('Подписать',['class'=>'btn','type'=>'submit']) !!}
             {!! Form::close() !!}                       
@@ -541,13 +542,7 @@
 
         if (trueInput) return false;
 
-        html2canvas(document.querySelector('.form-send-parcel')).then(function(canvas) {
-            document.getElementById('form_canvas').value = canvas.toDataURL('image/jpeg');
-        });
-
-        setTimeout(()=>{
-            form.submit();
-        },500)        
+        form.submit();      
     }
 
 </script>

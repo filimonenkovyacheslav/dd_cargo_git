@@ -385,10 +385,19 @@
                     I am aware of that the forwarding company is not responsible for any delay in delivery has occurred due to circumstances beyond its control, in particular, due to delays in customs clearance, and agree with this, as the terms of service for the parcel delivery.
                 </p>
                 @endif
+
+                <input type="hidden" id="form_cancel_disabled" name="form_cancel_disabled" value="false">
                                 
                 {!! Form::button('To sign',['class'=>'btn','type'=>'submit']) !!}
-                {!! Form::close() !!}       
-            
+                {!! Form::close() !!}   
+
+                @if(Auth::user())
+                @if(Auth::user()->role === 'office_1' || Auth::user()->role === 'admin')
+                <br>
+                <button class="btn btn-danger" id="cancel-disabled" onclick="cancelDisabled()">To cancel Disabled</button>
+                @endif
+                @endif    
+                
             </div>
         </div>           
     </section><!-- /.app-content -->

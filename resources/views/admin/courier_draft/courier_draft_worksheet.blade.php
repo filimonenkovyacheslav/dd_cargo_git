@@ -641,7 +641,7 @@
 											<option value="activate">Активировать</option>
 											@endcan
 
-											@can('update-user')	
+											@can('editPost')	
 											<option value="cancel-pdf">Отменить PDF</option>
 											<option value="add-pdf">Добавить PDF</option>
 											<option value="download-pdf">Скачать PDF</option>

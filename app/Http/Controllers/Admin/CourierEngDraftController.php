@@ -632,106 +632,78 @@ class CourierEngDraftController extends AdminController
     {
     	$object = (object)[];
     	$worksheet = CourierEngDraftWorksheet::find($id);
-    	$other_worksheet_1 = CourierEngDraftWorksheet::where('in_trash',false)->where([
-    		['id','<>',$id],
+    	$old_delete = false;
+    	$all_worksheet = CourierEngDraftWorksheet::where([
+    		['in_trash',false],
     		['standard_phone',$worksheet->standard_phone]
-    	])->get();
-    	$other_worksheet_2 = CourierEngDraftWorksheet::where('in_trash',false)->where([
-    		['id','<>',$id],
-    		['standard_phone',$worksheet->standard_phone],
-    		['shipper_name','<>',$worksheet->shipper_name],
-			['shipper_country','<>',$worksheet->shipper_country],
-			['shipper_city','<>',$worksheet->shipper_city],
-			['passport_number','<>',$worksheet->passport_number],
-			['shipper_address','<>',$worksheet->shipper_address],
-			['shipper_phone','<>',$worksheet->shipper_phone],
-			['shipper_id','<>',$worksheet->shipper_id],
-			['consignee_name','<>',$worksheet->consignee_name],
-			['consignee_country','<>',$worksheet->consignee_country],
-			['house_name','<>',$worksheet->house_name],
-			['post_office','<>',$worksheet->post_office],
-			['district','<>',$worksheet->district],
-			['state_pincode','<>',$worksheet->state_pincode],
-			['consignee_address','<>',$worksheet->consignee_address],
-			['consignee_phone','<>',$worksheet->consignee_phone],
-			['consignee_id','<>',$worksheet->consignee_id],
-			['direction','<>',$worksheet->direction]
-    	])->get();
-    	$other_worksheet_3 = CourierEngDraftWorksheet::where('in_trash',false)->where([
-    		['id','<>',$id],
-    		['standard_phone',$worksheet->standard_phone],
-    		['shipper_name',$worksheet->shipper_name],
-			['shipper_country',$worksheet->shipper_country],
-			['shipper_city',$worksheet->shipper_city],
-			['passport_number',$worksheet->passport_number],
-			['shipper_address',$worksheet->shipper_address],
-			['shipper_phone',$worksheet->shipper_phone],
-			['shipper_id',$worksheet->shipper_id],
-			['consignee_name',$worksheet->consignee_name],
-			['consignee_country',$worksheet->consignee_country],
-			['house_name',$worksheet->house_name],
-			['post_office',$worksheet->post_office],
-			['district',$worksheet->district],
-			['state_pincode',$worksheet->state_pincode],
-			['consignee_address',$worksheet->consignee_address],
-			['consignee_phone',$worksheet->consignee_phone],
-			['consignee_id',$worksheet->consignee_id],
-			['direction',$worksheet->direction]
     	])->get();
     	$worksheet_data = [
     		'standard_phone' => $worksheet->standard_phone,
     		'shipper_name' => $worksheet->shipper_name,
-			'shipper_country' => $worksheet->shipper_country,
-			'shipper_city' => $worksheet->shipper_city,
-			'passport_number' => $worksheet->passport_number,
-			'shipper_address' => $worksheet->shipper_address,
-			'shipper_phone' => $worksheet->shipper_phone,
-			'shipper_id' => $worksheet->shipper_id,
-			'consignee_name' => $worksheet->consignee_name,
-			'consignee_country' => $worksheet->consignee_country,
-			'house_name' => $worksheet->house_name,
-			'post_office' => $worksheet->post_office,
-			'district' => $worksheet->district,
-			'state_pincode' => $worksheet->state_pincode,
-			'consignee_address' => $worksheet->consignee_address,
-			'consignee_phone' => $worksheet->consignee_phone,
-			'consignee_id' => $worksheet->consignee_id,
-			'direction' => $worksheet->direction
+    		'shipper_country' => $worksheet->shipper_country,
+    		'shipper_city' => $worksheet->shipper_city,
+    		'passport_number' => $worksheet->passport_number,
+    		'shipper_address' => $worksheet->shipper_address,
+    		'shipper_phone' => $worksheet->shipper_phone,
+    		'shipper_id' => $worksheet->shipper_id,
+    		'consignee_name' => $worksheet->consignee_name,
+    		'consignee_country' => $worksheet->consignee_country,
+    		'house_name' => $worksheet->house_name,
+    		'post_office' => $worksheet->post_office,
+    		'district' => $worksheet->district,
+    		'state_pincode' => $worksheet->state_pincode,
+    		'consignee_address' => $worksheet->consignee_address,
+    		'consignee_phone' => $worksheet->consignee_phone,
+    		'consignee_id' => $worksheet->consignee_id,
+    		'order_date' => $worksheet->order_date,
+    		'direction' => $worksheet->direction
     	];   	
 
-    	if ($other_worksheet_1->count() != $other_worksheet_2->count()) {
-    		CourierEngDraftWorksheet::where('in_trash',false)->where([
-    			['id','<>',$id],
+    	if (!$worksheet->getLastDocUniq())
+    		$old_delete = $this->deleteOldWorksheet($id,'eng');
+    	
+    	$qty = $all_worksheet->count();    	  		   		
+    	CourierEngDraftWorksheet::create($worksheet_data);
+    	$new_id = DB::getPdo()->lastInsertId();
+    	CourierEngDraftWorksheet::find($new_id)
+    	->update([
+    		'date' => date('Y-m-d'),
+    		'order_date' => $worksheet->order_date,
+    		'status' => 'Double',
+    		'shipped_items' => 'Empty: 0',
+    		'status_date' => date('Y-m-d')
+    	]);
+
+    	$id_arr = CourierEngDraftWorksheet::where([
+    		['in_trash',false],
+    		['standard_phone',$worksheet->standard_phone]
+    	])->pluck('id');
+    	if (!$old_delete) $qty++;
+    	$last_num = 1;
+    	for ($i=0; $i < count($id_arr); $i++) { 
+    		$worksheet_data['parcels_qty'] = $last_num.' of '.$qty;
+    		CourierEngDraftWorksheet::where([
+    			['id',$id_arr[$i]],
+    			['in_trash',false],
     			['standard_phone',$worksheet->standard_phone]
     		])->update($worksheet_data);
-    		$this->toUpdatesArchive($object,$worksheet,true);
-    	}
-    	if ($other_worksheet_1->count() == $other_worksheet_3->count()){
-    		CourierEngDraftWorksheet::create($worksheet_data);
-    		$new_id = DB::getPdo()->lastInsertId();
-    		CourierEngDraftWorksheet::find($new_id)
-    		->update([
-    			'date'=>date('Y-m-d'),
-    			'status' => 'Double',
-    			'shipped_items' => 'Empty: 0',
-    			'status_date' => date('Y-m-d')
-    		]);
-    		$this->addingOrderNumber($worksheet->standard_phone, 'en');
+    		$last_num++;
+    	} 
+    	$this->addingOrderNumber($worksheet->standard_phone, 'en');
 
-    		$new_worksheet = CourierEngDraftWorksheet::find($new_id);
-    		$new_worksheet->checkCourierTask($new_worksheet->status);
+    	$new_worksheet = CourierEngDraftWorksheet::find($new_id);
+    	$new_worksheet->checkCourierTask($new_worksheet->status);
 
-    		$packing = PackingEng::where('work_sheet_id',$id)->get();
-    		if ($packing) {
-    			$packing->each(function ($item, $key) use($new_id){                                 
-    				$new_packing = $item->replicate();
-    				$new_packing->work_sheet_id = $new_id;
-    				$new_packing->tracking = null;
-    				$new_packing->save();
-    			});
-    		}
-    		$this->toUpdatesArchive($object,$worksheet,true,$new_id);
+    	$packing = PackingEng::where('work_sheet_id',$id)->get();
+    	if ($packing) {
+    		$packing->each(function ($item, $key) use($new_id){                                 
+    			$new_packing = $item->replicate();
+    			$new_packing->work_sheet_id = $new_id;
+    			$new_packing->tracking = null;
+    			$new_packing->save();
+    		});
     	}
+    	$this->toUpdatesArchive($object,$new_worksheet,true,$new_id);   		
     	
     	return redirect()->to(session('this_previous_url'))->with('status', 'Row duplicated successfully!');
     }

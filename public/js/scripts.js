@@ -458,6 +458,22 @@ $('.new-form .form-send-parcel select').on('change',(e)=>{
 	availableNow = true
 })
 
+if ($('#form_cancel_disabled').val() === 'false') {
+	$('.new-form .form-send-parcel input').prop('disabled',true);
+	$('.new-form .form-send-parcel select').prop('disabled',true);
+} 
+else{
+	$('.new-form .form-send-parcel input').prop('disabled',false);
+	$('.new-form .form-send-parcel select').prop('disabled',false);
+}  
+
+function cancelDisabled(){
+	availableNow = true;
+	$('.new-form .form-send-parcel input').prop('disabled',false);
+	$('.new-form .form-send-parcel select').prop('disabled',false);
+	$('#form_cancel_disabled').val('true');
+}
+
 if ($('.new-form .form-send-parcel input').length > 0) {
 	getSignedValue()
 
@@ -534,6 +550,10 @@ function getSignedValue(){
 					}
 					if (prop === 'last_name') {
 						$(".last-name").text(obj[prop])
+					}
+					if (prop === 'form_cancel_disabled' && obj[prop] === 'true') {
+						$('.new-form .form-send-parcel input').prop('disabled',false);
+						$('.new-form .form-send-parcel select').prop('disabled',false);
 					}
 				} 				
 			}			            

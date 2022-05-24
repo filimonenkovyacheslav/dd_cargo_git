@@ -134,7 +134,10 @@ class FrontController extends AdminController
         // New parcel form
         if (null !== $request->status_box) {
             if ($request->status_box === 'false') {
-                $new_worksheet->status = 'Забрать';
+                if(!$request->short_order)
+                    $new_worksheet->status = 'Забрать';
+                else
+                    $new_worksheet->status = 'Подготовка';
             } 
             else{
                 $new_worksheet->status = 'Коробка';
@@ -143,7 +146,10 @@ class FrontController extends AdminController
          
         if (null !== $request->need_box) {
             if ($request->need_box === 'Мне не нужна коробка') {
-                $new_worksheet->status = 'Забрать';
+                if(!$request->short_order)
+                    $new_worksheet->status = 'Забрать';
+                else
+                    $new_worksheet->status = 'Подготовка';
             }
             else{
                 $new_worksheet->status = 'Коробка';
@@ -155,8 +161,8 @@ class FrontController extends AdminController
         $new_worksheet->order_date = date('Y-m-d');      
 
         if ($new_worksheet->save()){           
-
-            $this->addingOrderNumber($new_worksheet->standard_phone, 'ru');
+            if(!$request->short_order)
+                $this->addingOrderNumber($new_worksheet->standard_phone, 'ru');
             $work_sheet_id = $new_worksheet->id;       
             $message = ['message'=>'Заказ посылки успешно создан !','id'=>$work_sheet_id];
             $new_worksheet = CourierDraftWorksheet::find($work_sheet_id);
@@ -497,15 +503,18 @@ class FrontController extends AdminController
             $new_worksheet->status_date = date('Y-m-d');
             $new_worksheet->order_date = date('Y-m-d');
             if ($request->input('need_box') === 'Мне не нужна коробка') {
-                $new_worksheet->status = 'Забрать';
+                if(!$request->short_order)
+                    $new_worksheet->status = 'Забрать';
+                else
+                    $new_worksheet->status = 'Подготовка';
             }
             else{
                 $new_worksheet->status = 'Коробка';
             }            
 
             if($new_worksheet->save()){              
-
-                $this->addingOrderNumber($new_worksheet->standard_phone, 'ru');
+                if(!$request->short_order)
+                    $this->addingOrderNumber($new_worksheet->standard_phone, 'ru');
                 
                 $work_sheet_id = $new_worksheet->id;
                 $message = 'Заказ посылки успешно создан !';
@@ -1045,15 +1054,18 @@ class FrontController extends AdminController
         $worksheet->order_date = date('Y-m-d');
 
         if (!$request->status_box) {
-            $worksheet->status = 'Pick up';
+            if(!$request->short_order)
+                $worksheet->status = 'Pick up';
+            else
+                $worksheet->status = 'Pending';           
         } 
         else{
             $worksheet->status = 'Box';
         }                        
 
         if ($worksheet->save()) {          
-
-            $this->addingOrderNumber($worksheet->standard_phone, 'en');
+            if(!$request->short_order)
+                $this->addingOrderNumber($worksheet->standard_phone, 'en');
             $work_sheet_id = $worksheet->id;
             $new_worksheet = CourierEngDraftWorksheet::find($work_sheet_id);
             $new_worksheet->checkCourierTask($new_worksheet->status);

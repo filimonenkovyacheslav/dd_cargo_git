@@ -63,6 +63,7 @@ Route::get('/get-from-temp-table/{id}', 'SignedDocumentController@getFromTempTab
 Route::post('/add-signed-ru-form', 'SignedDocumentController@addSignedRuForm')->name('addSignedRuForm');
 Route::post('/add-signed-eng-form', 'SignedDocumentController@addSignedEngForm')->name('addSignedEngForm');
 Route::post('/signature-page', 'SignedDocumentController@setSignature')->name('setSignature');
+Route::post('/form-update-after-cancel', 'SignedDocumentController@formUpdateAfterCancel')->name('formUpdateAfterCancel');
 
 // Crone
 Route::get('/ru-postal-tracking-cron', 'RuPostalTrackingController@cronScript')->name('cronScript');

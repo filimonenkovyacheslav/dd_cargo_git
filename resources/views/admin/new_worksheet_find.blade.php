@@ -768,7 +768,7 @@
 											<option value="change">Изменить</option>
 											@endcan
 
-											@can('update-user')
+											@can('editPost')
 											<option value="cancel-pdf">Отменить PDF</option>
 											<option value="download-pdf">Скачать PDF</option>
 											@endcan

@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
-  
+
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\File;
 use App\SignedDocument;
@@ -16,7 +16,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use PDF;
 use DB;
-  
+
 
 class SignedDocumentController extends Controller
 {
@@ -136,7 +136,7 @@ class SignedDocumentController extends Controller
 
         return $document;
     }
-  
+
     
     /**
      *  Create signature image
@@ -161,7 +161,7 @@ class SignedDocumentController extends Controller
             else $document = $this->updateDocument($request,$file_name);
             $id = $document->id;
             $pdf_file = $this->savePdf($id);
-        
+
             return redirect('/form-success?pdf_file='.$pdf_file.'&new_document_id='.$id);
         }
         elseif ($request->form_screen) {
@@ -186,21 +186,35 @@ class SignedDocumentController extends Controller
             else{
                 $id = $request->id;
                 $type = $request->type;
+                $token = $this->generateRandomString(15);
+
+                $this->destroyTempTables();
+                Schema::create('table_'.$token, function (Blueprint $table) {
+                    $table->increments('id');
+                    $table->text('data')->nullable();
+                    $table->timestamps();
+                });
+                DB::table('temp_tables')->insert([
+                    'name'=>$token,
+                    'created_at'=>date('Y-m-d')
+                ]); 
                 
-                return redirect()->route('formAfterCancel',compact('type','id','document_id'));
+                return redirect()->route('formAfterCancel',compact('type','id','document_id','token'));
             }
         }               
     }
 
 
-    public function formAfterCancel($type, $id, $document_id)
+    public function formAfterCancel($type, $id, $document_id, $token)
     {
+        if (!Schema::hasTable('table_'.$token)) return '<h1>Session ended!</h1>';
+        
         $israel_cities = $this->israelCities();
         $worksheet = null;
         $request = (object)[];
         $request->quantity_sender = '1';
         $request->quantity_recipient = '1';
-        $token = $this->generateRandomString(15);
+
         if ($type === 'worksheet_id' || $type === 'draft_id') {
 
             if ($type === 'worksheet_id') $worksheet = NewWorksheet::find($id);
@@ -235,11 +249,12 @@ class SignedDocumentController extends Controller
         
         $document = SignedDocument::find($request->document_id);
         $result = $document->updateWorksheet($request);
+        $this->deleteTempTable($request->session_token);
         
         if ($result) {
 
             switch ($request->type) {
-                
+
                 case "draft_id":
 
                 $form_screen = $this->formToImg($request);
@@ -431,7 +446,7 @@ class SignedDocumentController extends Controller
         $document = $document->updateSignedDocument($request,$file_name);
         return $document;
     }
-   
+
 
     protected function deleteTempTable($session_token)
     {
@@ -485,10 +500,10 @@ class SignedDocumentController extends Controller
             }
             else
                 DB::table('table_'.$request->get('session_token'))
-                ->where('id',1)
-                ->update([
-                    'data' => $request->getContent()
-                ]);
+            ->where('id',1)
+            ->update([
+                'data' => $request->getContent()
+            ]);
         }
         return $request->getContent();
     }
@@ -539,6 +554,8 @@ class SignedDocumentController extends Controller
 
             if ($request->signature) {
                 if ($message['id']) {
+                    if (isset($request->worksheet_id))
+                        $this->deleteOldWorksheet($request->worksheet_id,'ru');
                     if ($request->session_token)
                         $this->deleteTempTable($request->session_token);
                     $form_screen = $this->formToImg($request);
@@ -554,14 +571,16 @@ class SignedDocumentController extends Controller
 
         if ($request->signature) {
             if ($message['id']) {
-                    if ($request->session_token)
-                        $this->deleteTempTable($request->session_token);
-                    $form_screen = $this->formToImg($request);
-                    return redirect('/signature-page?draft_id='.$message['id'].'&form_screen='.$form_screen);
-                }
-                else{
-                    return redirect()->route('formWithSignature')->with('status', $message['message']);
-                }
+                if (isset($request->worksheet_id))
+                        $this->deleteOldWorksheet($request->worksheet_id,'ru');
+                if ($request->session_token)
+                    $this->deleteTempTable($request->session_token);
+                $form_screen = $this->formToImg($request);
+                return redirect('/signature-page?draft_id='.$message['id'].'&form_screen='.$form_screen);
+            }
+            else{
+                return redirect()->route('formWithSignature')->with('status', $message['message']);
+            }
         }    
     }
 
@@ -624,7 +643,7 @@ class SignedDocumentController extends Controller
                 $new_worksheet->status = 'Коробка';
             }
         }
-         
+
         if (isset($request->need_box)) {
             if ($request->need_box === 'Мне не нужна коробка') {
                 $new_worksheet->status = 'Забрать';
@@ -807,6 +826,8 @@ class SignedDocumentController extends Controller
 
             if ($request->signature) {
                 if ($message['id']) {
+                    if (isset($request->worksheet_id))
+                        $this->deleteOldWorksheet($request->worksheet_id,'eng');
                     if ($request->session_token)
                         $this->deleteTempTable($request->session_token);
                     return redirect('/signature-page?eng_draft_id='.$message['id']);
@@ -821,13 +842,15 @@ class SignedDocumentController extends Controller
 
         if ($request->signature) {
             if ($message['id']) {
-                    if ($request->session_token)
-                        $this->deleteTempTable($request->session_token);
-                    return redirect('/signature-page?eng_draft_id='.$message['id']);
-                }
-                else{
-                    return redirect()->route('formWithSignatureEng')->with('status', $message['message']);
-                }
+                if (isset($request->worksheet_id))
+                        $this->deleteOldWorksheet($request->worksheet_id,'eng');
+                if ($request->session_token)
+                    $this->deleteTempTable($request->session_token);               
+                return redirect('/signature-page?eng_draft_id='.$message['id']);
+            }
+            else{
+                return redirect()->route('formWithSignatureEng')->with('status', $message['message']);
+            }
         } 
     }
 

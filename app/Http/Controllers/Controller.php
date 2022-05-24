@@ -310,6 +310,36 @@ class Controller extends BaseController
         $worksheet = $this->messageForCancelPdf($type,$id)[1];
         return view('pdf.form_cancel_pdf',compact('worksheet','type','message'));
     }
+
+
+    protected function deleteOldWorksheet($id, $which_admin)
+    {
+        if ($id) {
+            switch ($which_admin) {
+
+                case "ru":
+
+                $this->removeTrackingFromPalletWorksheet($id, 'ru', true);
+                $this->deleteUploadFiles('draft_id',$id);
+                CourierDraftWorksheet::where('id', $id)->delete();
+                PackingSea::where('work_sheet_id', $id)->delete();
+                ReceiptArchive::where('worksheet_id', $id)->delete();
+
+                break;
+
+                case "eng":
+
+                $this->removeTrackingFromPalletWorksheet($id, 'en',true);
+                $this->deleteUploadFiles('eng_draft_id',$id);
+                CourierEngDraftWorksheet::where('id', $id)->delete();
+                PackingEng::where('work_sheet_id', $id)->delete();
+                ReceiptArchive::where('worksheet_id', $id)->delete();
+
+                break;
+            }
+        }  
+        return true;             
+    }
     
 
     protected function israelCities()

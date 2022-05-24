@@ -46,9 +46,7 @@ Route::group(['prefix' => App\Http\Middleware\LocaleMiddleware::getLocale()], fu
 	
 	Route::get('/signature-for-cancel', 'SignedDocumentController@signatureForCancel')->name('signatureForCancel');
 	
-	Route::get('/form-after-cancel/{type}/{id}/{document_id}', 'SignedDocumentController@formAfterCancel')->name('formAfterCancel');
-	
-	Route::post('/form-update-after-cancel', 'SignedDocumentController@formUpdateAfterCancel')->name('formUpdateAfterCancel');
+	Route::get('/form-after-cancel/{type}/{id}/{document_id}/{token}', 'SignedDocumentController@formAfterCancel')->name('formAfterCancel');
 
 	Route::post('/create-temp-table', 'SignedDocumentController@createTempTable')->name('createTempTable');
 

@@ -587,61 +587,10 @@ class CourierDraftController extends AdminController
     {
     	$object = (object)[];
     	$worksheet = CourierDraftWorksheet::find($id);
-    	$other_worksheet_1 = CourierDraftWorksheet::where('in_trash',false)->where([
-    		['id','<>',$id],
+    	$old_delete = false;
+    	$all_worksheet = CourierDraftWorksheet::where([
+    		['in_trash',false],
     		['standard_phone',$worksheet->standard_phone]
-    	])->get();
-    	$other_worksheet_2 = CourierDraftWorksheet::where('in_trash',false)->where([
-    		['id','<>',$id],
-    		['standard_phone',$worksheet->standard_phone],
-    		['sender_name','<>',$worksheet->sender_name],
-			['sender_country','<>',$worksheet->sender_country],
-			['sender_city','<>',$worksheet->sender_city],
-			['sender_postcode','<>',$worksheet->sender_postcode],
-			['sender_address','<>',$worksheet->sender_address],
-			['sender_phone','<>',$worksheet->sender_phone],
-			['sender_passport','<>',$worksheet->sender_passport],
-			['recipient_name','<>',$worksheet->recipient_name],
-			['recipient_country','<>',$worksheet->recipient_country],
-			['region','<>',$worksheet->region],
-			['district','<>',$worksheet->district],
-			['recipient_city','<>',$worksheet->recipient_city],
-			['recipient_postcode','<>',$worksheet->recipient_postcode],
-			['recipient_street','<>',$worksheet->recipient_street],
-			['recipient_house','<>',$worksheet->recipient_house],
-			['body','<>',$worksheet->body],
-			['recipient_room','<>',$worksheet->recipient_room],
-			['recipient_phone','<>',$worksheet->recipient_phone],
-			['recipient_passport','<>',$worksheet->recipient_passport],
-			['recipient_email','<>',$worksheet->recipient_email],
-			['site_name','<>',$worksheet->site_name],
-			['direction','<>',$worksheet->direction]
-    	])->get();
-    	$other_worksheet_3 = CourierDraftWorksheet::where('in_trash',false)->where([
-    		['id','<>',$id],
-    		['standard_phone',$worksheet->standard_phone],
-    		['sender_name',$worksheet->sender_name],
-			['sender_country',$worksheet->sender_country],
-			['sender_city',$worksheet->sender_city],
-			['sender_postcode',$worksheet->sender_postcode],
-			['sender_address',$worksheet->sender_address],
-			['sender_phone',$worksheet->sender_phone],
-			['sender_passport',$worksheet->sender_passport],
-			['recipient_name',$worksheet->recipient_name],
-			['recipient_country',$worksheet->recipient_country],
-			['region',$worksheet->region],
-			['district',$worksheet->district],
-			['recipient_city',$worksheet->recipient_city],
-			['recipient_postcode',$worksheet->recipient_postcode],
-			['recipient_street',$worksheet->recipient_street],
-			['recipient_house',$worksheet->recipient_house],
-			['body',$worksheet->body],
-			['recipient_room',$worksheet->recipient_room],
-			['recipient_phone',$worksheet->recipient_phone],
-			['recipient_passport',$worksheet->recipient_passport],
-			['recipient_email',$worksheet->recipient_email],
-			['site_name',$worksheet->site_name],
-			['direction',$worksheet->direction]
     	])->get();
     	$worksheet_data = [
     		'standard_phone' => $worksheet->standard_phone,
@@ -665,43 +614,57 @@ class CourierDraftController extends AdminController
     		'recipient_phone' => $worksheet->recipient_phone,
     		'recipient_passport' => $worksheet->recipient_passport,
     		'recipient_email' => $worksheet->recipient_email,
-    		'site_name' => $worksheet->site_name,    		
+    		'site_name' => $worksheet->site_name,  
+    		'order_date' => $worksheet->order_date,  		
     		'direction' => $worksheet->direction
     	];   	
 
-    	if ($other_worksheet_1->count() != $other_worksheet_2->count()) {
-    		CourierDraftWorksheet::where('in_trash',false)->where([
-    			['id','<>',$id],
+    	if (!$worksheet->getLastDocUniq())
+    		$old_delete = $this->deleteOldWorksheet($id,'ru');
+    	
+    	$qty = $all_worksheet->count(); 
+    	CourierDraftWorksheet::create($worksheet_data);
+    	$new_id = DB::getPdo()->lastInsertId();
+    	CourierDraftWorksheet::find($new_id)
+    	->update([
+    		'date'=>date('Y-m-d'),
+    		'status' => 'Дубль',
+    		'package_content' => 'Пусто: 0',
+    		'order_date' => $worksheet->order_date,
+    		'status_date' => date('Y-m-d')
+    	]);
+
+    	$id_arr = CourierDraftWorksheet::where([
+    		['in_trash',false],
+    		['standard_phone',$worksheet->standard_phone]
+    	])->pluck('id');
+    	if (!$old_delete) $qty++;
+    	$last_num = 1;
+    	for ($i=0; $i < count($id_arr); $i++) { 
+    		$worksheet_data['parcels_qty'] = $last_num.' of '.$qty;
+    		CourierDraftWorksheet::where([
+    			['id',$id_arr[$i]],
+    			['in_trash',false],
     			['standard_phone',$worksheet->standard_phone]
     		])->update($worksheet_data);
-    		$this->toUpdatesArchive($object,$worksheet,true);
-    	}
-    	if ($other_worksheet_1->count() == $other_worksheet_3->count()){
-    		CourierDraftWorksheet::create($worksheet_data);
-    		$new_id = DB::getPdo()->lastInsertId();
-    		CourierDraftWorksheet::find($new_id)
-    		->update([
-    			'date'=>date('Y-m-d'),
-    			'status' => 'Дубль',
-    			'package_content' => 'Пусто: 0',
-    			'status_date' => date('Y-m-d')
-    		]);
-    		$this->addingOrderNumber($worksheet->standard_phone, 'ru');
+    		$last_num++;
+    	} 
 
-    		$new_worksheet = CourierDraftWorksheet::find($new_id);
-    		$new_worksheet->checkCourierTask($new_worksheet->status);
-    		
-    		$packing = PackingSea::where('work_sheet_id',$id)->get();
-    		if ($packing) {
-    			$packing->each(function ($item, $key) use($new_id){                                 
-    				$new_packing = $item->replicate();
-    				$new_packing->work_sheet_id = $new_id;
-    				$new_packing->track_code = null;
-    				$new_packing->save();
-    			});
-    		}  
-    		$this->toUpdatesArchive($object,$worksheet,true,$new_id);
-    	}
+    	$this->addingOrderNumber($worksheet->standard_phone, 'ru');
+
+    	$new_worksheet = CourierDraftWorksheet::find($new_id);
+    	$new_worksheet->checkCourierTask($new_worksheet->status);
+
+    	$packing = PackingSea::where('work_sheet_id',$id)->get();
+    	if ($packing) {
+    		$packing->each(function ($item, $key) use($new_id){                                 
+    			$new_packing = $item->replicate();
+    			$new_packing->work_sheet_id = $new_id;
+    			$new_packing->track_code = null;
+    			$new_packing->save();
+    		});
+    	}  
+    	$this->toUpdatesArchive($object,$new_worksheet,true,$new_id);
     	
     	return redirect()->to(session('this_previous_url'))->with('status', 'Строка успешно продублирована!');
     }

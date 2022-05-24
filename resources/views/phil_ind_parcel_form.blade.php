@@ -180,7 +180,7 @@
                         <div class="col-md-6">
                             {!! Form::select('shipper_country', array('Israel' => 'Israel', 'Germany' => 'Germany'), isset($data_parcel->shipper_country) ? $data_parcel->shipper_country : '',['class' => 'form-control']) !!}
                         </div>
-                    </div>
+                    </div>                    
                 </div>
 
                 <div class="form-group">
@@ -211,6 +211,15 @@
                         <div class="col-md-6">
                             {!! Form::text('shipper_address',isset($data_parcel->shipper_address) ? $data_parcel->shipper_address : old('shipper_address'),['class' => 'form-control', 'placeholder' => 'Shipper\'s address*', 'required'])!!}
                         </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="row">
+                        {!! Form::label('consignee_country','Destination County',['class' => 'col-md-6 control-label'])   !!}
+                        <div class="col-md-6">
+                        {!! Form::select('consignee_country', $to_country, isset($data_parcel->consignee_country) ? $data_parcel->consignee_country: '',['class' => 'form-control']) !!}
+                    </div>
                     </div>
                 </div>
 

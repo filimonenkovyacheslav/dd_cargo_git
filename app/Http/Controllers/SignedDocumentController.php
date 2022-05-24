@@ -41,21 +41,25 @@ class SignedDocumentController extends Controller
     public function formWithSignature(Request $request, $id, $token)
     {   
         if (Schema::hasTable('table_'.$token)) {
-            $worksheet = CourierDraftWorksheet::find($id);
-            if ($worksheet->getLastDoc()) return redirect()->to(session('this_previous_url'))->with('status-error', 'Document exists!');
+            $worksheet = null;
+            $data_parcel = null;
+            if ($id !== '0') {
+                $worksheet = CourierDraftWorksheet::find($id);
+                if ($worksheet->getLastDoc()) return redirect()->to(session('this_previous_url'))->with('status-error', 'Document exists!');
+                $data_parcel = $this->fillResponseDataRu($worksheet, $request, true, true);
+                if ($data_parcel) {
+                    $data_parcel = json_encode($data_parcel);            
+                    $result = DB::table('table_'.$token)->find(1);
+                    if (!$result) {
+                        DB::table('table_'.$token)
+                        ->insert([
+                            'data' => $data_parcel
+                        ]);
+                    }           
+                } 
+            }            
             $israel_cities = $this->israelCities();
-            $israel_cities['other'] = 'Другой город';
-            $data_parcel = $this->fillResponseDataRu($worksheet, $request, true, true);
-            if ($data_parcel) {
-                $data_parcel = json_encode($data_parcel);            
-                $result = DB::table('table_'.$token)->find(1);
-                if (!$result) {
-                    DB::table('table_'.$token)
-                    ->insert([
-                        'data' => $data_parcel
-                    ]);
-                }           
-            }        
+            $israel_cities['other'] = 'Другой город';                   
 
             return view('pdf.form_with_signature',compact('israel_cities','data_parcel','token','worksheet'));
         }    
@@ -66,24 +70,29 @@ class SignedDocumentController extends Controller
     public function formWithSignatureEng(Request $request, $id, $token)
     {
         if (Schema::hasTable('table_'.$token)){
-            $worksheet = CourierEngDraftWorksheet::find($id);
-            if ($worksheet->getLastDoc()) return redirect()->to(session('this_previous_url'))->with('status-error', 'Document exists!'); 
+            $worksheet = null;
+            $data_parcel = null;
+            if ($id !== '0') {
+                $worksheet = CourierEngDraftWorksheet::find($id);
+                if ($worksheet->getLastDoc()) return redirect()->to(session('this_previous_url'))->with('status-error', 'Document exists!'); 
+                $data_parcel = $this->fillResponseDataEng($worksheet, $request, true, true);
+                if ($data_parcel) {
+                    $data_parcel = json_encode($data_parcel);
+                    $result = DB::table('table_'.$token)->find(1);
+                    if (!$result) {
+                        DB::table('table_'.$token)
+                        ->insert([
+                            'data' => $data_parcel
+                        ]);
+                    }           
+                } 
+            }            
             $israel_cities = $this->israelCities();
-            $israel_cities['other'] = 'Other city';
-            $data_parcel = $this->fillResponseDataEng($worksheet, $request, true, true);
-            if ($data_parcel) {
-                $data_parcel = json_encode($data_parcel);
-                $result = DB::table('table_'.$token)->find(1);
-                if (!$result) {
-                    DB::table('table_'.$token)
-                    ->insert([
-                        'data' => $data_parcel
-                    ]);
-                }           
-            } 
+            $israel_cities['other'] = 'Other city';  
+            $to_country = $this->to_country_arr;          
             $domain = $this->getDomainRule();
 
-            return view('pdf.form_with_signature_eng',compact('israel_cities','data_parcel','domain','token','worksheet')); 
+            return view('pdf.form_with_signature_eng',compact('israel_cities','data_parcel','domain','token','worksheet','to_country')); 
         }
         else return '<h1>Session ended!</h1>';     
     }
@@ -191,6 +200,7 @@ class SignedDocumentController extends Controller
         $request = (object)[];
         $request->quantity_sender = '1';
         $request->quantity_recipient = '1';
+        $token = $this->generateRandomString(15);
         if ($type === 'worksheet_id' || $type === 'draft_id') {
 
             if ($type === 'worksheet_id') $worksheet = NewWorksheet::find($id);
@@ -200,7 +210,7 @@ class SignedDocumentController extends Controller
             $data_parcel = $this->fillResponseDataRu($worksheet, $request, true, true);
             $data_parcel = json_encode($data_parcel);
             
-            return view('pdf.form_after_cancel',compact('israel_cities','data_parcel','document_id','type','id'));
+            return view('pdf.form_after_cancel',compact('israel_cities','data_parcel','document_id','type','id','token'));
         } 
         elseif ($type === 'eng_worksheet_id' || $type === 'eng_draft_id') {
             if ($type === 'eng_worksheet_id') $worksheet = PhilIndWorksheet::find($id);
@@ -210,14 +220,19 @@ class SignedDocumentController extends Controller
             $data_parcel = $this->fillResponseDataEng($worksheet, $request, true, true);
             $data_parcel = json_encode($data_parcel);
             $domain = $this->getDomainRule();
+            $to_country = $this->to_country_arr;
             
-            return view('pdf.form_after_cancel_eng',compact('israel_cities','data_parcel','document_id','type','id','domain'));
+            return view('pdf.form_after_cancel_eng',compact('israel_cities','data_parcel','document_id','type','id','domain','to_country','token'));
         }
     }
 
 
     public function formUpdateAfterCancel(Request $request)
     {
+        if (!$request->document_id) {
+            $request = $this->contentToObj($request);
+        }
+        
         $document = SignedDocument::find($request->document_id);
         $result = $document->updateWorksheet($request);
         
@@ -228,26 +243,26 @@ class SignedDocumentController extends Controller
                 case "draft_id":
 
                 $form_screen = $this->formToImg($request);
-                return redirect()->route('getSignature')->with('draft_id', $result->id)->with('form_screen', $form_screen)->with('document_id', $request->document_id);
+                return redirect('/signature-page?draft_id='.$result->id.'&form_screen='.$form_screen.'&document_id='.$request->document_id);
 
                 break;
 
                 case "eng_draft_id":
 
-                return redirect()->route('getSignature')->with('eng_draft_id', $result->id)->with('document_id', $request->document_id);
+                return redirect('/signature-page?eng_draft_id='.$result->id.'&document_id='.$request->document_id);
 
                 break;
 
                 case "worksheet_id":
 
                 $form_screen = $this->formToImg($request);
-                return redirect()->route('getSignature')->with('worksheet_id', $result->id)->with('form_screen', $form_screen)->with('document_id', $request->document_id);
+                return redirect('/signature-page?worksheet_id='.$result->id.'&form_screen='.$form_screen.'&document_id='.$request->document_id);
 
                 break;
 
                 case "eng_worksheet_id":
 
-                return redirect()->route('getSignature')->with('eng_worksheet_id', $result->id)->with('document_id', $request->document_id);
+                return redirect('/signature-page?eng_worksheet_id='.$result->id.'&document_id='.$request->document_id);
 
                 break;
             }                      
@@ -568,37 +583,16 @@ class SignedDocumentController extends Controller
                 $new_worksheet->$field = $request->recipient_first_name.' '.$request->recipient_last_name;
             }
             else if($field === 'package_content'){
-                $content = '';              
-                if (isset($request->other_content_1)) {
-                    $content .= $request->other_content_1.': '.$request->other_quantity_1.'; ';
-                }
-                if (isset($request->other_content_2)) {
-                    $content .= $request->other_content_2.': '.$request->other_quantity_2.'; ';
-                }
-                if (isset($request->other_content_3)) {
-                    $content .= $request->other_content_3.': '.$request->other_quantity_3.'; ';
-                }
-                if (isset($request->other_content_4)) {
-                    $content .= $request->other_content_4.': '.$request->other_quantity_4.'; ';
-                }
-                if (isset($request->other_content_5)) {
-                    $content .= $request->other_content_5.': '.$request->other_quantity_5.'; ';
-                }
-                if (isset($request->other_content_6)) {
-                    $content .= $request->other_content_6.': '.$request->other_quantity_6.'; ';
-                }
-                if (isset($request->other_content_7)) {
-                    $content .= $request->other_content_7.': '.$request->other_quantity_7.'; ';
-                }
-                if (isset($request->other_content_8)) {
-                    $content .= $request->other_content_8.': '.$request->other_quantity_8.'; ';
-                }
-                if (isset($request->other_content_9)) {
-                    $content .= $request->other_content_9.': '.$request->other_quantity_9.'; ';
-                }
-                if (isset($request->other_content_10)) {
-                    $content .= $request->other_content_10.': '.$request->other_quantity_10.'; ';
-                }
+                $content = '';       
+                
+                for ($i=1; $i < 11; $i++){
+                    $temp = 'other_content_'.$i;
+                    $temp_2 = 'other_quantity_'.$i;
+                    if (isset($request->$temp) AND !empty($request->$temp)) {
+                        $content .= $request->$temp.': '.$request->$temp_2.'; ';
+                    }
+                }       
+                
                 if(!$content){
                     $content = 'Пусто: 0';
                 }                
@@ -662,7 +656,7 @@ class SignedDocumentController extends Controller
 
             for ($i=1; $i < 11; $i++) { 
                 $temp = 'other_content_'.$i;
-                if (isset($request->$temp)) {
+                if (isset($request->$temp) AND !empty($request->$temp)) {
                     $packing_sea = new PackingSea();
                     foreach($fields_packing as $field){
                         if ($field === 'type') {
@@ -859,7 +853,7 @@ class SignedDocumentController extends Controller
                 for ($i=1; $i < 11; $i++) { 
                     $var = 'item_'.$i;
                     $var_2 = 'q_item_'.$i;
-                    if (isset($request->$var)) {
+                    if (isset($request->$var) AND !empty($request->$var)) {
                         $temp .= $request->$var.': '.$request->$var_2.'; ';
                     }
                 }
@@ -930,7 +924,7 @@ class SignedDocumentController extends Controller
                     for ($i=1; $i < 11; $i++) { 
                         $var = 'item_'.$i;
                         $var_2 = 'q_item_'.$i;
-                        if (isset($request->$var)) {
+                        if (isset($request->$var) AND !empty($request->$var)) {
                             $temp .= $request->$var.': '.$request->$var_2.'; ';
                         }
                     }

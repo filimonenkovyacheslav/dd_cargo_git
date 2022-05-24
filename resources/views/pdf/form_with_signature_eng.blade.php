@@ -289,7 +289,7 @@
                 <div class="form-group">
                     <div class="row">
                         <div class="col-md-6">
-                            {!! Form::select('consignee_country', array('India' => 'India', 'Nepal' => 'Nepal', 'Nigeria' => 'Nigeria', 'Ghana' => 'Ghana', 'Cote D\'Ivoire' => 'Cote D\'Ivoire', 'South Africa' => 'South Africa', 'Thailand' => 'Thailand'), isset($data_parcel->consignee_country) ? $data_parcel->consignee_country: '',['class' => 'form-control']) !!}
+                            {!! Form::select('consignee_country', $to_country, isset($data_parcel->consignee_country) ? $data_parcel->consignee_country: '',['class' => 'form-control']) !!}
                         </div>
                         <div class="col-md-6">
                             {!! Form::text('consignee_address',isset($data_parcel->consignee_address) ? $data_parcel->consignee_address : old('consignee_address'),['class' => 'form-control', 'placeholder' => 'Consignee\'s address*', 'required'])!!}
@@ -464,21 +464,27 @@
                 @if($domain === 'forward')
                 <strong>Hereby by signing this packing list I declare:</strong>
                 <p>
-                1) The goods in this parcel are handed over by me to the transporters and are my personal goods. Courier / Logistics Companies are just facilitators for shipping my cargo / goods - and hold no responsibility for breakage / shortage / damage or content of cargo is my responsibility - and we abide my all laws of local country as there , and well versed for same. 
-                <br>
-                2) Further these used/old if household goods then bear no commercial value and are not for sale. 
-                <br>
-                3) I guarantee that I provided true and complete information about the items shipped in this parcel. In case of any false or incomplete data I recognize my obligation to cover all legal penalties in origin, destination, and transit countries as well as to pay the costs incurred through my fault caused with delays in customs clearance and/or return of the parcel from a warehouse in Israel or from the destination country to me.</p>
+                    1) The goods in this parcel are handed over by me to the transporters and are my personal goods. Courier / Logistics Companies are just facilitators for shipping my cargo / goods - and hold no responsibility for breakage / shortage / damage or content of cargo is my responsibility - and we abide my all laws of local country as there , and well versed for same. 
+                    <br>
+                    2) Further these used/old if household goods then bear no commercial value and are not for sale. 
+                    <br>
+                    3) I guarantee that I provided true and complete information about the items shipped in this parcel. In case of any false or incomplete data I recognize my obligation to cover all legal penalties in origin, destination, and transit countries as well as to pay the costs incurred through my fault caused with delays in customs clearance and/or return of the parcel from a warehouse in Israel or from the destination country to me.
+                    <br>
+                    I am aware of that the forwarding company is not responsible for any delay in delivery has occurred due to circumstances beyond its control, in particular, due to delays in customs clearance, and agree with this, as the terms of service for the parcel delivery.
+                </p>
 
                 @else
                 <strong>Hereby by signing this packing list I declare:</strong>
                 <p>The goods in this parcel are handed over by me to the transporters and are my personal goods. I accept that the transporters hold no responsibility for shortage or damage or content of cargo.
-                <br>
-                This parcel includes goods then bear no commercial value and are not for sale.
-                <br>
-                I guarantee that I received the detailed information on items restricted for shipment to the destianation country. None of the items has been included in the the parcel.
-                <br>
-                I provided true and complete information about the items shipped in this parcsel. In case of any false or incomplete data I recognize my obligation to cover all legal penalties in origin, destination, and transit countries as well as to pay the costs incurred through my fault caused with delays in customs clearance and/or return of the parcel from a warehouse in Israel or from the destination country to me.</p>
+                    <br>
+                    This parcel includes goods then bear no commercial value and are not for sale.
+                    <br>
+                    I guarantee that I received the detailed information on items restricted for shipment to the destianation country. None of the items has been included in the the parcel.
+                    <br>
+                    I provided true and complete information about the items shipped in this parcsel. In case of any false or incomplete data I recognize my obligation to cover all legal penalties in origin, destination, and transit countries as well as to pay the costs incurred through my fault caused with delays in customs clearance and/or return of the parcel from a warehouse in Israel or from the destination country to me.
+                    <br>
+                    I am aware of that the forwarding company is not responsible for any delay in delivery has occurred due to circumstances beyond its control, in particular, due to delays in customs clearance, and agree with this, as the terms of service for the parcel delivery.
+                </p>
                 @endif
                                 
                 {!! Form::button('To sign',['class'=>'btn','type'=>'submit']) !!}

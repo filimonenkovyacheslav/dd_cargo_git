@@ -12,7 +12,7 @@
 		vertical-align: middle;
 	}
 </style>
-<center>	
+<center style="font-family: 'DejaVu Sans'">	
 	@if ($cancel)
 	<h1 style="color:red">CANCELED</h1>
 	@endif
@@ -132,6 +132,8 @@
 				I guarantee that I received the detailed information on items restricted for shipment to the destianation country. None of the items has been included in the the parcel.
 				<br>
 				I provided true and complete information about the items shipped in this parcsel. In case of any false or incomplete data I recognize my obligation to cover all legal penalties in origin, destination, and transit countries as well as to pay the costs incurred through my fault caused with delays in customs clearance and/or return of the parcel from a warehouse in Israel or from the destination country to me.
+				<br>
+				I am aware of that the forwarding company is not responsible for any delay in delivery has occurred due to circumstances beyond its control, in particular, due to delays in customs clearance, and agree with this, as the terms of service for the parcel delivery.
 			</td>
 		</tr>
 		<tr>

@@ -123,6 +123,9 @@
                         <div class="col-md-6">
                             {!! Form::select('shipper_country', array('Israel' => 'Israel', 'Germany' => 'Germany'), isset($data_parcel->shipper_country) ? $data_parcel->shipper_country : '',['class' => 'form-control']) !!}
                         </div>
+                        <div class="col-md-6">
+                            {!! Form::text('shipper_address',isset($data_parcel->shipper_address) ? $data_parcel->shipper_address : old('shipper_address'),['class' => 'form-control', 'placeholder' => 'Shipper\'s address'])!!}
+                        </div>
                     </div>
                 </div>
 
@@ -150,11 +153,9 @@
 
                 <div class="form-group">
                     <div class="row">
+                        {!! Form::label('shipper_city','If you failed to find your location name at the dropdown menu please choose the nearest city',['class' => 'col-md-6 control-label'])   !!}
                         <div class="col-md-6">
-                            {!! Form::text('shipper_city',isset($data_parcel->shipper_city) ? $data_parcel->shipper_city : old('shipper_city'),['class' => 'form-control', 'placeholder' => 'Shipper\'s city/village'])!!}
-                        </div>
-                        <div class="col-md-6">
-                            {!! Form::text('shipper_address',isset($data_parcel->shipper_address) ? $data_parcel->shipper_address : old('shipper_address'),['class' => 'form-control', 'placeholder' => 'Shipper\'s address'])!!}
+                            {!! Form::select('shipper_city', $israel_cities, isset($data_parcel->shipper_city) ? $data_parcel->shipper_city : '',['class' => 'form-control']) !!}
                         </div>
                     </div>
                 </div>
@@ -208,7 +209,7 @@
                 <div class="form-group">
                     <div class="row">
                         <div class="col-md-6">
-                            {!! Form::select('consignee_country', array('India' => 'India', 'Nepal' => 'Nepal', 'Nigeria' => 'Nigeria', 'Ghana' => 'Ghana', 'Cote D\'Ivoire' => 'Cote D\'Ivoire', 'South Africa' => 'South Africa', 'Thailand' => 'Thailand'), isset($data_parcel->consignee_country) ? $data_parcel->consignee_country: '',['class' => 'form-control']) !!}
+                            {!! Form::select('consignee_country', $to_country, isset($data_parcel->consignee_country) ? $data_parcel->consignee_country: '',['class' => 'form-control']) !!}
                         </div>
                         <div class="col-md-6">
                             {!! Form::text('consignee_address',isset($data_parcel->consignee_address) ? $data_parcel->consignee_address : old('consignee_address'),['class' => 'form-control', 'placeholder' => 'Consignee\'s address'])!!}

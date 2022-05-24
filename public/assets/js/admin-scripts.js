@@ -919,15 +919,13 @@ $('#phil-ind-tracking-columns').change((e)=>{
                     
                     <option value="India">India</option>
                     
-                    <option value="Nepal">Nepal</option>
+                    <option value="Ivory Coast">Ivory Coast</option>
                     
                     <option value="Nigeria">Nigeria</option>
                     
                     <option value="Ghana">Ghana</option>
                     
-                    <option value="Cote D\'Ivoire">Cote D\'Ivoire</option>
-                    
-                    <option value="South Africa">South Africa</option>
+                    <option value="Philippines">Philippines</option>
                     
                     <option value="Thailand">Thailand</option>
                     
@@ -1200,10 +1198,13 @@ $('[name="checkbox_operations_select"]').change((e)=>{
         }
     }
     else if (thisVal === 'add-pdf'){
-        if ($('[name="row_id[]"]:checked').length == 1) {
-            let action = $('.checkbox-operations-add-pdf').attr('action')
+        if ($('[name="row_id[]"]:checked').length == 1 || $('[name="row_id[]"]:checked').length == 0) {           
+            let action = $('.checkbox-operations-add-pdf').attr('action');
             const uId = Date.now().toString(36) + Math.random().toString(36).substr(2);
-            const rowId = $('.checkbox-operations-add-pdf [name="row_id[]"]').val();    
+            let rowId = 0;
+            if ($('[name="row_id[]"]:checked').length == 1)
+                rowId = $('.checkbox-operations-add-pdf [name="row_id[]"]').val(); 
+                   
             $.ajax({
                 type:'POST',
                 url:createTableUrl,
@@ -1222,7 +1223,7 @@ $('[name="checkbox_operations_select"]').change((e)=>{
             });                                 
         }
         else{
-            alert('This option is only available with one line!')
+            alert('This option is only available with one or null line!')
         }
     }
     else if (thisVal === 'download-pdf'){
@@ -1269,13 +1270,15 @@ $('[name="row_id[]"]').change((e)=>{
 
 $('.checkbox-operations form').submit((e)=>{
     if (!$('.checkbox-operations form [name="row_id[]"]').length) {
-        if (location.href.indexOf('new-worksheet') == -1) {
-            alert('Select rows!')
-        }
-        else{
-            alert('Выберите строчки!')
-        }
-        return false
+        if ($('[name="checkbox_operations_select"]').val() !== 'add-pdf') {
+            if (location.href.indexOf('new-worksheet') == -1) {
+                alert('Select rows!')
+            }
+            else{
+                alert('Выберите строчки!')
+            }
+            return false
+        }       
     }
 })
 

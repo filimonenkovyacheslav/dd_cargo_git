@@ -39,7 +39,7 @@ class CourierDraftController extends AdminController
         }
         $data = $request->all();   
         $user = Auth::user();
-        $viewer_arr = parent::VIEWER_ARR;       
+        $viewer_arr = parent::VIEWER_ARR;               
         
         return view('admin.courier_draft.courier_draft_worksheet', ['title' => $title,'data' => $data,'courier_draft_worksheet_obj' => $courier_draft_worksheet_obj, 'user' => $user, 'viewer_arr' => $viewer_arr]);
     }

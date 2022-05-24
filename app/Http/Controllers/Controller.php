@@ -37,7 +37,8 @@ class Controller extends BaseController
 
     
     protected $from_country_dir = ['Israel' => 'IL','Germany' => 'GE'];
-    protected $to_country_dir = ['India' => 'IND','Nepal' => 'NEP','Nigeria' => 'NIG','Ghana' => 'GHN','Cote D\'Ivoire' => 'CTD','South Africa' => 'SAR','Thailand' => 'TH'];
+    protected $to_country_dir = ['India' => 'IND','Ivory Coast' => 'IC','Nigeria' => 'NIG','Ghana' => 'GHN','Philippines' => 'PH','Thailand' => 'TH'];
+    protected $to_country_arr = ['India' => 'India','Nigeria' => 'Nigeria','Ghana' => 'Ghana','Ivory Coast' => 'Ivory Coast','Philippines' => 'Philippines','Thailand' => 'Thailand'];
     protected $israel_cities = ['Acre' => 'Nahariya','Afula' => 'Kiryat Shmona','Arad' => 'Eilat','Ariel' => 'Center','Ashdod' => 'South','Ashkelon' => 'South','Baqa-Jatt' => 'Haifa','Bat Yam' => 'Tel Aviv','Beersheba' => 'South','Beit She\'an' => 'Kiryat Shmona','Beit Shemesh' => 'Jerusalem','Beitar Illit' => 'Jerusalem','Binyamina' => 'North','Bnei Brak' => 'Tel Aviv','Caesaria' => 'North','Dimona' => 'Eilat','Eilat' => 'Eilat','El\'ad' => 'Center','Giv\'atayim' => 'Tel Aviv','Giv\'at Shmuel' => 'Center','Hadera' => 'Haifa','Haifa' => 'Haifa','Herzliya' => 'Tel Aviv','Hod HaSharon' => 'Center','Holon' => 'Tel Aviv','Jerusalem' => 'Jerusalem','Karmiel' => 'Nahariya','Kafr Qasim' => 'Center','Kfar Saba' => 'Center','Kiryat Ata' => 'Haifa','Kiryat Bialik' => 'Haifa','Kiryat Gat' => 'South','Kiryat Malakhi' => 'South','Kiryat Motzkin' => 'Haifa','Kiryat Ono' => 'Tel Aviv','Kiryat Shmona' => 'Kiryat Shmona','Kiryat Yam' => 'Haifa','Lod' => 'Center','Ma\'ale Adumim' => 'Jerusalem','Ma\'alot-Tarshiha' => 'Nahariya','Migdal HaEmek' => 'Nahariya','Modi\'in Illit' => 'Center','Modi\'in-Maccabim-Re\'ut' => 'Center','Nahariya' => 'Nahariya','Nazareth' => 'Nahariya','Nazareth Illit' => 'Nahariya','Nesher' => 'Haifa','Ness Ziona' => 'Center','Netanya' => 'Center','Netivot' => 'South','Ofakim' => 'South','Or Akiva' => 'Haifa','Or Yehuda' => 'Tel Aviv','Pardes Hana' => 'North','Petah Tikva' => 'Center','Qalansawe' => 'Center','Ra\'anana' => 'Center','Rahat' => 'South','Ramat Gan' => 'Tel Aviv','Ramat HaSharon' => 'Tel Aviv','Ramla' => 'Center','Rehovot' => 'Center','Rishon LeZion' => 'Center','Rosh HaAyin' => 'Center','Safed' => 'Kiryat Shmona','Sakhnin' => 'Nahariya','Sderot' => 'South','Shefa-\'Amr (Shfar\'am)' => 'Haifa','Tamra' => 'Haifa','Tayibe' => 'Center','Tel Aviv' => 'Tel Aviv','Tiberias' => 'Kiryat Shmona','Tira' => 'Center','Tirat Carmel' => 'Haifa','Umm al-Fahm' => 'Haifa','Yavne' => 'Center','Yehud-Monosson' => 'Center','Yokneam' => 'Haifa','Zikhron Yakov' => 'North'];
 
 
@@ -62,6 +63,11 @@ class Controller extends BaseController
 
             break;
         }
+    }
+
+
+    protected function generateRandomString($length = 10) {
+        return substr(str_shuffle(str_repeat($x='0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ', ceil($length/strlen($x)) )),1,$length);
     }
     
     
@@ -107,9 +113,7 @@ class Controller extends BaseController
         $items = [];
         if ($documents) {
             foreach ($documents as $document) { 
-                $signaturesPath = $this->checkDirectory('signatures');
-                $ruFormsPath = $this->checkDirectory('ru_forms');  
-                $ru_form = ($document->screen_ru_form) ? $ruFormsPath.$document->screen_ru_form : '';     
+                $signaturesPath = $this->checkDirectory('signatures');                    
                 if ($document->file_for_cancel) {
                     $folderPath = $this->checkDirectory('documents_for_cancel');
                     $file = $document->file_for_cancel;
@@ -117,8 +121,7 @@ class Controller extends BaseController
                         'path'=>$folderPath.$file, 
                         'name'=>$file,
                         'signature'=>'',
-                        'signature_for_cancel'=>$signaturesPath.$document->signature_for_cancel,
-                        'screen_ru_form'=>''
+                        'signature_for_cancel'=>$signaturesPath.$document->signature_for_cancel
                     ];
                 }
                 if ($last_doc->id != $document->id) 
@@ -130,8 +133,7 @@ class Controller extends BaseController
                     'path'=>$folderPath.$file, 
                     'name'=>$file,
                     'signature'=>$signaturesPath.$document->signature,
-                    'signature_for_cancel'=>'',
-                    'screen_ru_form'=>$ru_form
+                    'signature_for_cancel'=>''
                 ];
             }
         }       
@@ -148,7 +150,6 @@ class Controller extends BaseController
                 if ($item['path']) unlink($item['path']);
                 if ($item['signature']) unlink($item['signature']);
                 if ($item['signature_for_cancel']) unlink($item['signature_for_cancel']);
-                if ($item['screen_ru_form']) unlink($item['screen_ru_form']);
             } 
             return true;
         }

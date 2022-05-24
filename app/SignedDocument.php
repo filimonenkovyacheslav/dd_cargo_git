@@ -192,9 +192,11 @@ class SignedDocument extends BaseModel
             else if($field === 'package_content'){
                 $content = ''; 
 
-                for ($i=1; $i < 11; $i++) { 
-                    if ($request->other_content_.$i) {
-                        $content .= $request->other_content_.$i.': '.$request->other_quantity_.$i.'; ';
+                for ($i=1; $i < 11; $i++){
+                    $temp = 'other_content_'.$i;
+                    $temp_2 = 'other_quantity_'.$i;
+                    if (isset($request->$temp) AND !empty($request->$temp)) {
+                        $content .= $request->$temp.': '.$request->$temp_2.'; ';
                     }
                 }            
 
@@ -205,12 +207,12 @@ class SignedDocument extends BaseModel
                 $worksheet->$field = trim($content);
             }
             else if ($field === 'comment_2'){
-                if ($request->need_box) $worksheet->$field = $request->need_box;
-                if ($request->comment_2) $worksheet->$field = $request->comment_2;
+                if (isset($request->need_box)) $worksheet->$field = $request->need_box;
+                if (isset($request->comment_2)) $worksheet->$field = $request->comment_2;
             } 
-            elseif ($request->has($field)) {
-                $worksheet->$field = $request->input($field);
-            }
+            elseif (isset($request->$field)) {
+                $worksheet->$field = $request->$field;
+            } 
         }
 
         $israel_cities = static::israelCities();
@@ -241,16 +243,18 @@ class SignedDocument extends BaseModel
             else if ($field === 'shipped_items') {
                 $temp = '';
                 for ($i=1; $i < 11; $i++) { 
-                    if (null !== $request->item_.$i) {
-                        $temp .= $request->item_.$i.' - '.$request->q_item_.$i.'; ';
+                    $var = 'item_'.$i;
+                    $var_2 = 'q_item_'.$i;
+                    if (isset($request->$var) AND !empty($request->$var)) {
+                        $temp .= $request->$var.': '.$request->$var_2.'; ';
                     }
                 }
                 if ($temp) {
                     $worksheet->$field = $temp;
                 }                    
             }
-            else if ($request->has($field)){
-                $worksheet->$field = $request->input($field);
+            else if (isset($request->$field)){
+                $worksheet->$field = $request->$field;
             }                               
         }
 
@@ -362,7 +366,7 @@ class SignedDocument extends BaseModel
             $fields = Schema::getColumnListing('courier_eng_draft_worksheet');
             $worksheet = $this->updateWorksheetEng($request,$worksheet,$fields);
             $packing = PackingEng::where('work_sheet_id',$worksheet->id)->first();
-            if($packing) $this->updatePackingEng($packing,$request);
+            if($packing) $this->updatePackingEng($packing,$worksheet);
 
             break;
 
@@ -392,7 +396,7 @@ class SignedDocument extends BaseModel
             $fields = Schema::getColumnListing('phil_ind_worksheet');
             $worksheet = $this->updateWorksheetEng($request,$worksheet,$fields);
             $packing = PackingEngNew::where('work_sheet_id',$worksheet->id)->first();
-            if($packing) $this->updatePackingEng($packing,$request);
+            if($packing) $this->updatePackingEng($packing,$worksheet);
 
             break;
         }
@@ -401,36 +405,29 @@ class SignedDocument extends BaseModel
     }
 
 
-    private function updatePackingEng($packing,$request)
+    private function updatePackingEng($packing,$worksheet)
     {
         $fields_packing = ['tracking', 'country', 'shipper_name', 'shipper_address', 'shipper_phone', 'shipper_id', 'consignee_name', 'consignee_address', 'consignee_phone', 'consignee_id', 'items', 'shipment_val'];
 
         foreach($fields_packing as $field){
-            if ($field === 'country' && $request->consignee_country) {
-                $packing->$field = $request->consignee_country;
+            if ($field === 'country') {
+                $packing->$field = $worksheet->consignee_country;
             }
-            elseif ($field === 'shipper_name' && $request->first_name && $request->last_name) {
-                $packing->$field = $request->first_name.' '.$request->last_name;
+            elseif ($field === 'shipper_name') {
+                $packing->$field = $worksheet->shipper_name;
             }
-            elseif ($field === 'shipper_phone' && $request->standard_phone) {
-                $packing->$field = $request->standard_phone;
+            elseif ($field === 'shipper_phone') {
+                $packing->$field = $worksheet->standard_phone;
             }
-            elseif ($field === 'consignee_name' && $request->consignee_first_name && $request->consignee_last_name) {
-                $packing->$field = $request->consignee_first_name.' '.$request->consignee_last_name;
+            elseif ($field === 'consignee_name') {
+                $packing->$field = $worksheet->consignee_name;
             }
             else if ($field === 'items') {
-                $temp = '';
-                for ($i=1; $i < 11; $i++) { 
-                    if (null !== $request->item_.$i) {
-                        $temp .= $request->item_.$i.' - '.$request->q_item_.$i.'; ';
-                    }
-                }
-                if ($temp) {
-                    $packing->$field = $temp;
-                }                       
+                    $packing->$field = $worksheet->shipped_items;
+                      
             }
-            elseif ($request->input($field)){
-                $packing->$field = $request->input($field);
+            elseif ($worksheet->$field){
+                $packing->$field = $worksheet->$field;
             } 
         }
         $packing->save();

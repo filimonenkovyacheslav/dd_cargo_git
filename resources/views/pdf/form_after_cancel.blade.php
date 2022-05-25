@@ -265,7 +265,7 @@
             <div class="form-group">
                 <div class="row">
                     <div class="col-3">
-                        {!! Form::hidden('parcels_qty','1') !!}
+                        {!! Form::hidden('parcels_qty',isset($data_parcel->parcels_qty) ? $data_parcel->parcels_qty :'1') !!}
                     </div>
                 </div>
             </div>

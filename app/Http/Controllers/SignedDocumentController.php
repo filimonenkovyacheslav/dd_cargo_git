@@ -47,6 +47,7 @@ class SignedDocumentController extends Controller
                 $worksheet = CourierDraftWorksheet::find($id);
                 if ($worksheet->getLastDoc()) return redirect()->to(session('this_previous_url'))->with('status-error', 'Document exists!');
                 $data_parcel = $this->fillResponseDataRu($worksheet, $request, true, true);
+                $data_parcel['parcels_qty'] = $worksheet->parcels_qty;
                 if ($data_parcel) {
                     $data_parcel = json_encode($data_parcel);            
                     $result = DB::table('table_'.$token)->find(1);
@@ -76,6 +77,7 @@ class SignedDocumentController extends Controller
                 $worksheet = CourierEngDraftWorksheet::find($id);
                 if ($worksheet->getLastDoc()) return redirect()->to(session('this_previous_url'))->with('status-error', 'Document exists!'); 
                 $data_parcel = $this->fillResponseDataEng($worksheet, $request, true, true);
+                $data_parcel['parcels_qty'] = $worksheet->parcels_qty;
                 if ($data_parcel) {
                     $data_parcel = json_encode($data_parcel);
                     $result = DB::table('table_'.$token)->find(1);
@@ -222,6 +224,7 @@ class SignedDocumentController extends Controller
 
             $israel_cities['other'] = 'Другой город';
             $data_parcel = $this->fillResponseDataRu($worksheet, $request, true, true);
+            $data_parcel['parcels_qty'] = $worksheet->parcels_qty;
             $data_parcel = json_encode($data_parcel);
             
             return view('pdf.form_after_cancel',compact('israel_cities','data_parcel','document_id','type','id','token'));
@@ -232,6 +235,7 @@ class SignedDocumentController extends Controller
 
             $israel_cities['other'] = 'Other city';
             $data_parcel = $this->fillResponseDataEng($worksheet, $request, true, true);
+            $data_parcel['parcels_qty'] = $worksheet->parcels_qty;
             $data_parcel = json_encode($data_parcel);
             $domain = $this->getDomainRule();
             $to_country = $this->to_country_arr;

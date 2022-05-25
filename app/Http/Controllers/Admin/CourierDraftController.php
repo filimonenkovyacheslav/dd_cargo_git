@@ -650,7 +650,7 @@ class CourierDraftController extends AdminController
     		$last_num++;
     	} 
 
-    	$this->addingOrderNumber($worksheet->standard_phone, 'ru');
+    	//$this->addingOrderNumber($worksheet->standard_phone, 'ru');
 
     	$new_worksheet = CourierDraftWorksheet::find($new_id);
     	$new_worksheet->checkCourierTask($new_worksheet->status);

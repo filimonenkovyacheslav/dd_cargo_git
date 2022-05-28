@@ -44,7 +44,7 @@
 					@endif
 
 					@php
-						session(['this_previous_url' => url()->full()]);
+					session(['this_previous_url' => url()->full()]);
 					@endphp
 
 					<div class="btn-move-wrapper" style="display:flex">
@@ -117,7 +117,127 @@
 						<label style="margin-top: 30px;margin-left: 30px;">Показывать только записи для активации
 							<input type="checkbox" onclick="forActivation(event)" class="for_active" style="width:20px;height:20px;">
 						</label>
-					
+						
+					</div>
+
+					<div class="checkbox-operations">
+
+						@can('editDraft')
+						
+						{!! Form::open(['url'=>route('addCourierDraftDataById'), 'class'=>'worksheet-add-form','method' => 'POST']) !!}
+						
+						<label>Выберите действие с выбранными строчками:
+							<select class="form-control" name="checkbox_operations_select">
+								<option value=""></option>
+
+								@can('editPost')			
+								<option value="delete">Удалить</option>
+								@endcan
+								
+								<option value="change">Изменить</option>
+								<option value="double">Дубль</option>	
+
+								@can('activateDraft')
+								<option value="activate">Активировать</option>
+								@endcan
+
+								@can('editPost')	
+								<option value="cancel-pdf">Отменить PDF</option>
+								<option value="add-pdf">Добавить PDF</option>
+								<option value="download-pdf">Скачать PDF</option>
+								@endcan
+
+							</select>
+						</label>
+						
+						<label class="checkbox-operations-change">Выберите колонку:
+							<select class="form-control" id="tracking-columns" name="tracking-columns">
+								<option value="" selected="selected"></option>
+								<option value="site_name">Сайт</option>
+								
+								@can('update-user')
+								<option value="date">Дата</option>
+								@endcan
+								
+								<option value="direction">Направление</option>
+								<option value="status">Статус</option>
+								
+								@can('update-user')
+								<option value="status_date">Дата статуса</option>
+								@endcan
+
+								@can('update-user')
+								<option value="order_date">Дата Заказа</option>
+								@endcan
+								
+								<option value="partner">Партнер</option>
+								<option value="parcels_qty">Кол-во посылок</option>
+								<option value="tracking_local">Локальный</option>
+								<option value="tracking_transit">Транзитный</option>
+								<option value="pallet_number">№ паллеты</option>
+								<option value="comment_2">Коммент</option>
+								<option value="comments">Комментарии</option>
+								<option value="sender_passport">Номер паспорта отправителя</option>
+								<option value="recipient_passport">Номер паспорта получателя</option>
+								<option value="recipient_email">E-mail получателя</option>
+								<option value="courier">Курьер</option>
+								<option value="pick_up_date">Дата забора и комментарии</option>
+								<option value="weight">Вес посылки</option>
+								<option value="width">Ширина</option>
+								<option value="height">Высота</option>
+								<option value="length">Длина</option>
+								<option value="volume_weight">Объемный вес</option>
+								<option value="quantity_things">Кол-во предметов</option>
+								<option value="batch_number">Партия</option>
+								<option value="pay_date">Дата оплаты и комментарии</option>
+								<option value="pay_sum">Сумма оплаты</option>  
+							</select>
+						</label>	
+
+						<label class="value-by-tracking checkbox-operations-change">Введите значение:
+							<textarea class="form-control" name="value-by-tracking"></textarea>
+							<input type="hidden" name="status_en">
+							<input type="hidden" name="status_ua">
+							<input type="hidden" name="status_he">
+						</label>									
+
+						{!! Form::button('Сохранить',['class'=>'btn btn-primary checkbox-operations-change','type'=>'submit']) !!}
+						{!! Form::close() !!}
+
+						{!! Form::open(['url'=>route('deleteCourierDraftWorksheetById'),'method' => 'POST']) !!}
+						{!! Form::button('Удалить',['class'=>'btn btn-danger  checkbox-operations-delete','type'=>'submit','onclick' => 'ConfirmDelete(event)']) !!}
+						{!! Form::close() !!}
+
+						<form class="checkbox-operations-change-one" action="{{ url('/admin/courier-draft-worksheet/') }}" method="GET">
+							@csrf	
+						</form>
+
+						<form class="checkbox-operations-double" action="{{ url('/admin/courier-draft-worksheet-double/') }}" method="GET">
+							@csrf	
+						</form>
+
+						<form class="checkbox-operations-activate" action="{{ url('/admin/courier-draft') }}" method="GET">
+							@csrf	
+						</form>
+
+						<form class="checkbox-operations-cancel-pdf" action="{{ route('cancelPdf') }}" method="POST">
+							@csrf	
+							<input type="hidden" name="draft_id" class="cancel-pdf">
+						</form>
+
+						<form class="checkbox-operations-add-pdf" action="{{ url('/form-with-signature') }}" method="GET">
+							@csrf	
+							<input type="hidden" name="quantity_sender" value="1">
+						</form>
+
+						<form class="checkbox-operations-download-pdf" action="{{ route('downloadAllPdf') }}" method="POST">
+							@csrf	
+							<input type="hidden" name="id" class="download-pdf">
+							<input type="hidden" name="type" value="draft_id">
+						</form>
+
+						@endcan
+
 					</div>
 					
 					<div class="card-body new-worksheet">
@@ -621,127 +741,7 @@
 									@endfor
 									@endif
 								</tbody>
-							</table>
-							
-							<div class="checkbox-operations">
-
-								@can('editDraft')
-								
-								{!! Form::open(['url'=>route('addCourierDraftDataById'), 'class'=>'worksheet-add-form','method' => 'POST']) !!}
-									
-									<label>Выберите действие с выбранными строчками:
-										<select class="form-control" name="checkbox_operations_select">
-											<option value=""></option>
-
-											@can('editPost')			
-											<option value="delete">Удалить</option>
-											@endcan
-											
-											<option value="change">Изменить</option>
-											<option value="double">Дубль</option>	
-
-											@can('activateDraft')
-											<option value="activate">Активировать</option>
-											@endcan
-
-											@can('editPost')	
-											<option value="cancel-pdf">Отменить PDF</option>
-											<option value="add-pdf">Добавить PDF</option>
-											<option value="download-pdf">Скачать PDF</option>
-											@endcan
-
-										</select>
-									</label>
-									
-									<label class="checkbox-operations-change">Выберите колонку:
-										<select class="form-control" id="tracking-columns" name="tracking-columns">
-											<option value="" selected="selected"></option>
-											<option value="site_name">Сайт</option>
-											
-											@can('update-user')
-											<option value="date">Дата</option>
-											@endcan
-											
-											<option value="direction">Направление</option>
-											<option value="status">Статус</option>
-																						
-											@can('update-user')
-											<option value="status_date">Дата статуса</option>
-											@endcan
-
-											@can('update-user')
-											<option value="order_date">Дата Заказа</option>
-											@endcan
-											
-											<option value="partner">Партнер</option>
-											<option value="parcels_qty">Кол-во посылок</option>
-											<option value="tracking_local">Локальный</option>
-											<option value="tracking_transit">Транзитный</option>
-											<option value="pallet_number">№ паллеты</option>
-											<option value="comment_2">Коммент</option>
-											<option value="comments">Комментарии</option>
-											<option value="sender_passport">Номер паспорта отправителя</option>
-											<option value="recipient_passport">Номер паспорта получателя</option>
-											<option value="recipient_email">E-mail получателя</option>
-											<option value="courier">Курьер</option>
-											<option value="pick_up_date">Дата забора и комментарии</option>
-											<option value="weight">Вес посылки</option>
-											<option value="width">Ширина</option>
-											<option value="height">Высота</option>
-											<option value="length">Длина</option>
-											<option value="volume_weight">Объемный вес</option>
-											<option value="quantity_things">Кол-во предметов</option>
-											<option value="batch_number">Партия</option>
-											<option value="pay_date">Дата оплаты и комментарии</option>
-											<option value="pay_sum">Сумма оплаты</option>  
-										</select>
-									</label>	
-
-									<label class="value-by-tracking checkbox-operations-change">Введите значение:
-										<textarea class="form-control" name="value-by-tracking"></textarea>
-										<input type="hidden" name="status_en">
-										<input type="hidden" name="status_ua">
-										<input type="hidden" name="status_he">
-									</label>									
-
-								{!! Form::button('Сохранить',['class'=>'btn btn-primary checkbox-operations-change','type'=>'submit']) !!}
-								{!! Form::close() !!}
-
-								{!! Form::open(['url'=>route('deleteCourierDraftWorksheetById'),'method' => 'POST']) !!}
-								{!! Form::button('Удалить',['class'=>'btn btn-danger  checkbox-operations-delete','type'=>'submit','onclick' => 'ConfirmDelete(event)']) !!}
-								{!! Form::close() !!}
-
-								<form class="checkbox-operations-change-one" action="{{ url('/admin/courier-draft-worksheet/') }}" method="GET">
-									@csrf	
-								</form>
-
-								<form class="checkbox-operations-double" action="{{ url('/admin/courier-draft-worksheet-double/') }}" method="GET">
-									@csrf	
-								</form>
-
-								<form class="checkbox-operations-activate" action="{{ url('/admin/courier-draft') }}" method="GET">
-									@csrf	
-								</form>
-
-								<form class="checkbox-operations-cancel-pdf" action="{{ route('cancelPdf') }}" method="POST">
-									@csrf	
-									<input type="hidden" name="draft_id" class="cancel-pdf">
-								</form>
-
-								<form class="checkbox-operations-add-pdf" action="{{ url('/form-with-signature') }}" method="GET">
-									@csrf	
-									<input type="hidden" name="quantity_sender" value="1">
-								</form>
-
-								<form class="checkbox-operations-download-pdf" action="{{ route('downloadAllPdf') }}" method="POST">
-									@csrf	
-									<input type="hidden" name="id" class="download-pdf">
-									<input type="hidden" name="type" value="draft_id">
-								</form>
-
-								@endcan
-
-							</div>
+							</table>														
 
 						</div>
 					</div>

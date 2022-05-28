@@ -44,7 +44,7 @@
 					@endif
 
 					@php
-						session(['this_previous_url' => url()->full()]);
+					session(['this_previous_url' => url()->full()]);
 					@endphp
 					
 					@can('editPost')
@@ -121,6 +121,110 @@
 							<button type="button" id="table_filter_button" style="margin-left:35px" class="btn btn-default">Искать</button>
 						</form>
 					</div>
+
+					@can('editPost')
+					
+					<div class="checkbox-operations">
+						
+						{!! Form::open(['url'=>route('addNewDataById'), 'onsubmit' => 'return CheckColor(event)', 'class'=>'worksheet-add-form','method' => 'POST']) !!}
+
+						<input type="hidden" name="which_admin" value="ru">
+						
+						<label>Выберите действие с выбранными строчками:
+							<select class="form-control" name="checkbox_operations_select">
+								<option value=""></option>
+								@endcan
+								
+								@can('changeColor')
+								<option value="color">Изменить цвет</option>
+								@endcan
+
+								@can('editPost')
+								<option value="delete">Удалить</option>
+								<option value="change">Изменить</option>
+								@endcan
+
+								@can('editPost')
+								<option value="cancel-pdf">Отменить PDF</option>
+								<option value="download-pdf">Скачать PDF</option>
+								@endcan
+								
+								@can('editPost')
+							</select>
+						</label>
+						
+						<label class="checkbox-operations-change">Выберите колонку:
+							<select class="form-control" id="tracking-columns" name="tracking-columns">
+								<option value="" selected="selected"></option>
+								<option value="site_name">Сайт</option>
+								<option value="direction">Направление</option>
+								<option value="status">Статус</option>
+								<option value="partner">Партнер</option>
+								<option value="tracking_local">Локальный</option>
+								<option value="tracking_transit">Транзитный</option>
+								<option value="pallet_number">Номер паллеты</option>
+								<option value="comment_2">Коммент</option>
+								<option value="comments">Комментарии</option>
+								<option value="sender_passport">Номер паспорта отправителя</option>
+								<option value="recipient_passport">Номер паспорта получателя</option>
+								<option value="recipient_email">E-mail получателя</option>
+								<option value="courier">Курьер</option>
+								<option value="pick_up_date">Дата забора и комментарии</option>
+								<option value="weight">Вес посылки</option>
+								<option value="width">Ширина</option>
+								<option value="height">Высота</option>
+								<option value="length">Длина</option>
+								<option value="volume_weight">Объемный вес</option>
+								<option value="quantity_things">Кол-во предметов</option>
+								<option value="batch_number">Партия</option>
+								<option value="pay_date">Дата оплаты и комментарии</option>
+								<option value="pay_sum">Сумма оплаты</option>  
+							</select>
+						</label>	
+
+						<label class="checkbox-operations-color">Выберите цвет:
+							<select class="form-control" name="tr_color">
+								<option value="" selected="selected"></option>
+								<option value="transparent">Нет цвета</option>
+								<option value="tr-orange">Оранжевый</option>
+								<option value="tr-yellow">Желтый</option>
+								<option value="tr-green">Зеленый</option>
+								<option value="tr-blue">Синий</option>
+							</select>
+						</label>
+
+						<label class="value-by-tracking checkbox-operations-change">Введите значение:
+							<textarea class="form-control" name="value-by-tracking"></textarea>
+							<input type="hidden" name="status_en">
+							<input type="hidden" name="status_ua">
+							<input type="hidden" name="status_he">
+						</label>
+						
+						{!! Form::button('Сохранить',['class'=>'btn btn-primary checkbox-operations-change','type'=>'submit']) !!}
+						{!! Form::close() !!}
+
+						{!! Form::open(['url'=>route('deleteNewWorksheetById'),'method' => 'POST']) !!}
+						{!! Form::button('Удалить',['class'=>'btn btn-danger  checkbox-operations-delete','type'=>'submit','onclick' => 'ConfirmDelete(event)']) !!}
+						{!! Form::close() !!}
+
+						<form class="checkbox-operations-change-one" action="{{ url('/admin/new-worksheet/') }}" method="GET">
+							@csrf	
+						</form>
+
+						<form class="checkbox-operations-cancel-pdf" action="{{ route('cancelPdf') }}" method="POST">
+							@csrf	
+							<input type="hidden" name="worksheet_id" class="cancel-pdf">
+						</form>
+
+						<form class="checkbox-operations-download-pdf" action="{{ route('downloadAllPdf') }}" method="POST">
+							@csrf	
+							<input type="hidden" name="id" class="download-pdf">
+							<input type="hidden" name="type" value="worksheet_id">
+						</form>
+
+					</div>
+
+					@endcan
 					
 					<div class="card-body new-worksheet">
 						<div class="table-container">
@@ -744,112 +848,8 @@
 							{{ $new_worksheet_obj->appends($data)->links() }}
 							@else
 							{{ $new_worksheet_obj->links() }}
-							@endif
+							@endif													
 							
-							@can('editPost')
-							
-							<div class="checkbox-operations">
-								
-								{!! Form::open(['url'=>route('addNewDataById'), 'onsubmit' => 'return CheckColor(event)', 'class'=>'worksheet-add-form','method' => 'POST']) !!}
-
-								<input type="hidden" name="which_admin" value="ru">
-									
-									<label>Выберите действие с выбранными строчками:
-										<select class="form-control" name="checkbox_operations_select">
-											<option value=""></option>
-											@endcan
-											
-											@can('changeColor')
-											<option value="color">Изменить цвет</option>
-											@endcan
-
-											@can('editPost')
-											<option value="delete">Удалить</option>
-											<option value="change">Изменить</option>
-											@endcan
-
-											@can('editPost')
-											<option value="cancel-pdf">Отменить PDF</option>
-											<option value="download-pdf">Скачать PDF</option>
-											@endcan
-										
-											@can('editPost')
-										</select>
-									</label>
-									
-									<label class="checkbox-operations-change">Выберите колонку:
-										<select class="form-control" id="tracking-columns" name="tracking-columns">
-											<option value="" selected="selected"></option>
-											<option value="site_name">Сайт</option>
-											<option value="direction">Направление</option>
-											<option value="status">Статус</option>
-											<option value="partner">Партнер</option>
-											<option value="tracking_local">Локальный</option>
-											<option value="tracking_transit">Транзитный</option>
-											<option value="pallet_number">Номер паллеты</option>
-											<option value="comment_2">Коммент</option>
-											<option value="comments">Комментарии</option>
-											<option value="sender_passport">Номер паспорта отправителя</option>
-											<option value="recipient_passport">Номер паспорта получателя</option>
-											<option value="recipient_email">E-mail получателя</option>
-											<option value="courier">Курьер</option>
-											<option value="pick_up_date">Дата забора и комментарии</option>
-											<option value="weight">Вес посылки</option>
-											<option value="width">Ширина</option>
-											<option value="height">Высота</option>
-											<option value="length">Длина</option>
-											<option value="volume_weight">Объемный вес</option>
-											<option value="quantity_things">Кол-во предметов</option>
-											<option value="batch_number">Партия</option>
-											<option value="pay_date">Дата оплаты и комментарии</option>
-											<option value="pay_sum">Сумма оплаты</option>  
-										</select>
-									</label>	
-
-									<label class="checkbox-operations-color">Выберите цвет:
-										<select class="form-control" name="tr_color">
-											<option value="" selected="selected"></option>
-											<option value="transparent">Нет цвета</option>
-											<option value="tr-orange">Оранжевый</option>
-											<option value="tr-yellow">Желтый</option>
-											<option value="tr-green">Зеленый</option>
-											<option value="tr-blue">Синий</option>
-										</select>
-									</label>
-
-									<label class="value-by-tracking checkbox-operations-change">Введите значение:
-										<textarea class="form-control" name="value-by-tracking"></textarea>
-										<input type="hidden" name="status_en">
-										<input type="hidden" name="status_ua">
-										<input type="hidden" name="status_he">
-									</label>
-																										
-								{!! Form::button('Сохранить',['class'=>'btn btn-primary checkbox-operations-change','type'=>'submit']) !!}
-								{!! Form::close() !!}
-
-								{!! Form::open(['url'=>route('deleteNewWorksheetById'),'method' => 'POST']) !!}
-								{!! Form::button('Удалить',['class'=>'btn btn-danger  checkbox-operations-delete','type'=>'submit','onclick' => 'ConfirmDelete(event)']) !!}
-								{!! Form::close() !!}
-
-								<form class="checkbox-operations-change-one" action="{{ url('/admin/new-worksheet/') }}" method="GET">
-									@csrf	
-								</form>
-
-								<form class="checkbox-operations-cancel-pdf" action="{{ route('cancelPdf') }}" method="POST">
-									@csrf	
-									<input type="hidden" name="worksheet_id" class="cancel-pdf">
-								</form>
-
-								<form class="checkbox-operations-download-pdf" action="{{ route('downloadAllPdf') }}" method="POST">
-									@csrf	
-									<input type="hidden" name="id" class="download-pdf">
-									<input type="hidden" name="type" value="worksheet_id">
-								</form>
-
-							</div>
-
-							@endcan
-						
 						</div>
 					</div>
 				</div>

@@ -498,6 +498,15 @@
         const form = event.target;
         
         let trueInput = false;
+
+        if (!document.querySelector('[name="sender_country"]').value){
+            alert('Поле страна обязательное к заполнению !');
+            return false;
+        }
+        if (!document.querySelector('[name="recipient_country"]').value){
+            alert('Поле страна обязательное к заполнению !');
+            return false;
+        }
         
         const phone = document.querySelector('[name="standard_phone"]'); 
         if (phone.value.length < 10 || phone.value.length > 13) {

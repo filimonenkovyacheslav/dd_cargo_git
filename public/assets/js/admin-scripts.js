@@ -915,7 +915,6 @@ $('#phil-ind-tracking-columns').change((e)=>{
         $('.phil-ind-value-by-tracking').append(`
             <div class="consignee-country-value">
                 <select class="form-control" id="consignee_country" name="consignee_country">
-                    <option value="" selected="selected"></option>
                     
                     <option value="India">India</option>
                     

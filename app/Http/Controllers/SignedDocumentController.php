@@ -32,6 +32,23 @@ class SignedDocumentController extends Controller
     }
 
 
+    public function tempLinks()
+    {
+        $items = [];
+        $title = 'Temporary links';
+        $items = DB::table('temp_tables')->select('name')->get();
+        $temp = [];
+        foreach ($items as $item) {
+            if (Schema::hasTable('table_'.$item->name)) {
+                $temp[] = DB::table('table_'.$item->name)->select('link','name')->get();
+            }     
+        }
+        $items = $temp;
+        
+        return view('pdf.temp_links',compact('items','title'));
+    }
+
+
     public function formSuccess()
     {
         return view('pdf.form_success');
@@ -194,6 +211,8 @@ class SignedDocumentController extends Controller
                 Schema::create('table_'.$token, function (Blueprint $table) {
                     $table->increments('id');
                     $table->text('data')->nullable();
+                    $table->string('link')->nullable();
+                    $table->string('name')->nullable();
                     $table->timestamps();
                 });
                 DB::table('temp_tables')->insert([
@@ -225,7 +244,13 @@ class SignedDocumentController extends Controller
             $israel_cities['other'] = 'Другой город';
             $data_parcel = $this->fillResponseDataRu($worksheet, $request, true, true);
             $data_parcel['parcels_qty'] = $worksheet->parcels_qty;
+            $form_link = url('/form-after-cancel/'.$type.'/'.$id.'/'.$document_id.'/'.$token);
+            DB::table('table_'.$token)->insert([
+                'link'=>$form_link,
+                'name'=>$data_parcel['first_name'].' '.$data_parcel['last_name']
+            ]);
             $data_parcel = json_encode($data_parcel);
+            
             
             return view('pdf.form_after_cancel',compact('israel_cities','data_parcel','document_id','type','id','token'));
         } 
@@ -236,6 +261,11 @@ class SignedDocumentController extends Controller
             $israel_cities['other'] = 'Other city';
             $data_parcel = $this->fillResponseDataEng($worksheet, $request, true, true);
             $data_parcel['parcels_qty'] = $worksheet->parcels_qty;
+            $form_link = url('/form-after-cancel/'.$type.'/'.$id.'/'.$document_id.'/'.$token);
+            DB::table('table_'.$token)->insert([
+                'link'=>$form_link,
+                'name'=>$data_parcel['first_name'].' '.$data_parcel['last_name']
+            ]);
             $data_parcel = json_encode($data_parcel);
             $domain = $this->getDomainRule();
             $to_country = $this->to_country_arr;
@@ -481,6 +511,8 @@ class SignedDocumentController extends Controller
             Schema::create('table_'.$request->session_token, function (Blueprint $table) {
                 $table->increments('id');
                 $table->text('data')->nullable();
+                $table->string('link')->nullable();
+                $table->string('name')->nullable();
                 $table->timestamps();
             });
             DB::table('temp_tables')->insert([

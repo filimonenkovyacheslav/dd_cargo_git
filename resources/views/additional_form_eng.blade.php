@@ -401,6 +401,15 @@
             event.preventDefault();
             const form = event.target;
 
+            if (!document.querySelector('[name="shipper_country"]').value){
+                alert('The country field is required !');
+                return false;
+            }
+            if (!document.querySelector('[name="consignee_country"]').value){
+                alert('The country field is required !');
+                return false;
+            }
+
             const phone = document.querySelector('.add-form-eng [name="standard_phone"]'); 
             if (phone.value.length < 10 || phone.value.length > 24) {
                 alert('The number of characters in the standard phone must be from 10 to 24 !');

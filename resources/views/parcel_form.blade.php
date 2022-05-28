@@ -286,6 +286,11 @@
             event.preventDefault();
             const form = event.target;
 
+            if (!document.querySelector('[name="sender_country"]').value){
+                alert('Поле страна обязательное к заполнению !');
+                return false;
+            }
+
             const phone = document.querySelector('[name="standard_phone"]'); 
             if (phone.value.length < 10 || phone.value.length > 24) {
                 alert('Кол-во знаков в телефоне отправителя должно быть от 10 до 13 !');

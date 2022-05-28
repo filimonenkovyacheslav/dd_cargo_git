@@ -2,58 +2,58 @@
 
 @section('content')
 
-    <section class="app-content page-bg">
-        <div class="container">                       
-            <div class="parcel-form">
+<section class="app-content page-bg">
+    <div class="container">                       
+        <div class="parcel-form">
 
-                @if (session('status') === 'The phone number is exist in Draft!')
-                    <div class="alert alert-danger">
-                        {{ session('status') }}
-                    </div>
-                @elseif (session('status'))
-                    <div class="alert alert-success">
-                        {{ session('status') }}
-                    </div>
-                @endif
+            @if (session('status') === 'The phone number is exist in Draft!')
+            <div class="alert alert-danger">
+                {{ session('status') }}
+            </div>
+            @elseif (session('status'))
+            <div class="alert alert-success">
+                {{ session('status') }}
+            </div>
+            @endif
 
-                @php
-                if (session('data_parcel')){
-                    $data_parcel = json_decode(session('data_parcel'));
-                }
-                @endphp
-                
-                @if (session('no_phone'))
-                    <div class="alert alert-danger">
-                        {{ session('no_phone') }}
-                    </div>
-                @endif
-                
-                <h1>ORDER FORM</h1>
-                <h5>Required fields are marked with (*)</h5>
+            @php
+            if (session('data_parcel')){
+                $data_parcel = json_decode(session('data_parcel'));
+            }
+            @endphp
+            
+            @if (session('no_phone'))
+            <div class="alert alert-danger">
+                {{ session('no_phone') }}
+            </div>
+            @endif
+            
+            <h1>ORDER FORM</h1>
+            <h5>Required fields are marked with (*)</h5>
 
-                <div class="form-group">
-                    <label class="control-label">This is not my first order</label>
-                    <input type="checkbox" name="not_first_order">
-                </div>
+            <div class="form-group">
+                <label class="control-label">This is not my first order</label>
+                <input type="checkbox" name="not_first_order">
+            </div>
 
-                <div class="form-group">
-                    <label class="control-label">I need empty box/boxes</label>
-                    <input onclick="clickRadio(this)" type="radio" name="need_box" value="need">
-                    <h6>please specify the boxes types and quantity</h6>
-                    <h6>TYPE - QUANTITY</h6>
-                    <ul class="box-group">
-                        <li style="width: 130px;">
-                            <label class="control-label">Large</label>
-                            <input type="number" name="large" style="width: 40px;float: right;" min="0">
-                        </li>
-                        <li style="width: 130px;">
-                            <label class="control-label">Medium</label>
-                            <input type="number" name="medium" style="width: 40px;float: right;" min="0">
-                        </li>
-                        <li style="width: 130px;">
-                            <label class="control-label">Small</label>
-                            <input type="number" name="small" style="width: 40px;float: right;" min="0">
-                        </li>
+            <div class="form-group">
+                <label class="control-label">I need empty box/boxes</label>
+                <input onclick="clickRadio(this)" type="radio" name="need_box" value="need">
+                <h6>please specify the boxes types and quantity</h6>
+                <h6>TYPE - QUANTITY</h6>
+                <ul class="box-group">
+                    <li style="width: 130px;">
+                        <label class="control-label">Large</label>
+                        <input type="number" name="large" style="width: 40px;float: right;" min="0">
+                    </li>
+                    <li style="width: 130px;">
+                        <label class="control-label">Medium</label>
+                        <input type="number" name="medium" style="width: 40px;float: right;" min="0">
+                    </li>
+                    <li style="width: 130px;">
+                        <label class="control-label">Small</label>
+                        <input type="number" name="small" style="width: 40px;float: right;" min="0">
+                    </li>
                         <!-- <li style="width: 130px;">
                             <label class="control-label">Vacuum Bag</label>
                             <input type="number" name="vacuum" style="width: 40px;float: right;" min="0">
@@ -81,22 +81,22 @@
                                     <button type="button" onclick="philIndAnswer(this)" class="btn btn-primary pull-left yes sender" data-dismiss="modal">Yes</button>
                                     <button type="button" onclick="philIndAnswer(this)" class="btn btn-danger pull-left no" data-dismiss="modal">No</button>
 
-                                        {!! Form::open(['url'=>route('philIndCheckPhone'), 'class'=>'form-horizontal check-phone','method' => 'POST']) !!}
+                                    {!! Form::open(['url'=>route('philIndCheckPhone'), 'class'=>'form-horizontal check-phone','method' => 'POST']) !!}
 
-                                        <div class="form-group">
-                                            <div class="row">
-                                                <div class="col-md-6">
-                                                    {!! Form::text('shipper_phone',old('shipper_phone'),['class' => 'form-control', 'placeholder' => 'Phone*', 'required'])!!}
-                                                    {!! Form::hidden('quantity_sender')!!}
-                                                    {!! Form::hidden('quantity_recipient')!!}
-                                                </div>
-                                                <div class="col-md-6">
-                                                    {!! Form::button('Send',['class'=>'btn btn-success','type'=>'submit']) !!}
-                                                </div>
+                                    <div class="form-group">
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                {!! Form::text('shipper_phone',old('shipper_phone'),['class' => 'form-control', 'placeholder' => 'Phone*', 'required'])!!}
+                                                {!! Form::hidden('quantity_sender')!!}
+                                                {!! Form::hidden('quantity_recipient')!!}
                                             </div>
-                                        </div>                                        
-                                                                                
-                                        {!! Form::close() !!}
+                                            <div class="col-md-6">
+                                                {!! Form::button('Send',['class'=>'btn btn-success','type'=>'submit']) !!}
+                                            </div>
+                                        </div>
+                                    </div>                                        
+                                    
+                                    {!! Form::close() !!}
                                 </div>
                             </div>
                         </div>
@@ -117,28 +117,28 @@
                                     <button type="button" onclick="philIndAnswer2(this)" class="btn btn-primary pull-left yes sender" data-dismiss="modal">Yes</button>
                                     <button type="button" onclick="philIndAnswer2(this)" class="btn btn-danger pull-left no" data-dismiss="modal">No</button>
 
-                                        {!! Form::open(['url'=>route('philIndCheckPhone'), 'class'=>'form-horizontal check-phone','method' => 'POST']) !!}
+                                    {!! Form::open(['url'=>route('philIndCheckPhone'), 'class'=>'form-horizontal check-phone','method' => 'POST']) !!}
 
-                                        <div class="form-group">
-                                            <div class="row">
-                                                <div class="col-md-6">
-                                                    {!! Form::text('shipper_phone',old('shipper_phone'),['class' => 'form-control', 'placeholder' => 'Phone*', 'required'])!!}
-                                                    {!! Form::hidden('quantity_sender')!!}
-                                                    {!! Form::hidden('quantity_recipient')!!}
-                                                    {!! Form::hidden('draft','draft')!!}
-                                                </div>
-                                                <div class="col-md-6">
-                                                    {!! Form::button('Send',['class'=>'btn btn-success','type'=>'submit']) !!}
-                                                </div>
+                                    <div class="form-group">
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                {!! Form::text('shipper_phone',old('shipper_phone'),['class' => 'form-control', 'placeholder' => 'Phone*', 'required'])!!}
+                                                {!! Form::hidden('quantity_sender')!!}
+                                                {!! Form::hidden('quantity_recipient')!!}
+                                                {!! Form::hidden('draft','draft')!!}
                                             </div>
-                                        </div>                                        
-                                                                                
-                                        {!! Form::close() !!}
+                                            <div class="col-md-6">
+                                                {!! Form::button('Send',['class'=>'btn btn-success','type'=>'submit']) !!}
+                                            </div>
+                                        </div>
+                                    </div>                                        
+                                    
+                                    {!! Form::close() !!}
                                 </div>
                             </div>
                         </div>
                     </div>
-                
+                    
                 </div> 
 
                 <!-- Link to open the modal -->
@@ -146,24 +146,24 @@
                 <a href="#phoneExist" class="btn btn-success eng-modal-2" data-toggle="modal"></a>
                 
                 @if (session('add_parcel'))
-                    <script type="text/javascript">
-                        var addParcel = '<?=session("add_parcel")?>'
-                    </script>
+                <script type="text/javascript">
+                    var addParcel = '<?=session("add_parcel")?>'
+                </script>
                 @else
-                    <script type="text/javascript">
-                        var addParcel = ''
-                    </script>
+                <script type="text/javascript">
+                    var addParcel = ''
+                </script>
                 @endif
 
                 @if (session('phone_exist'))
-                    <script type="text/javascript">
-                        var phoneExist = '<?=session("phone_exist")?>';
-                        var phoneNumber = '<?=session("phone_number")?>';
-                    </script>
+                <script type="text/javascript">
+                    var phoneExist = '<?=session("phone_exist")?>';
+                    var phoneNumber = '<?=session("phone_number")?>';
+                </script>
                 @else
-                    <script type="text/javascript">
-                        var phoneExist = ''
-                    </script>
+                <script type="text/javascript">
+                    var phoneExist = ''
+                </script>
                 @endif 
 
                 {!! Form::open(['url'=>route('philIndParcelAdd'),'onsubmit' => 'сonfirmSigned(event)', 'class'=>'form-horizontal form-send-parcel','method' => 'POST']) !!}
@@ -447,10 +447,10 @@
                         </div>
                     </div>
                 </div>
-                                
+                
                 {!! Form::button('Send',['class'=>'btn','type'=>'submit']) !!}
                 {!! Form::close() !!}
-               
+                
                 <!-- временное -->
                 <br>
                 <div class="tracking">
@@ -469,7 +469,7 @@
                     </a>    
                 </div>
                 <!-- /временное -->           
-            
+                
             </div>
         </div>           
     </section><!-- /.app-content -->
@@ -499,6 +499,15 @@
         {
             event.preventDefault();
             const form = event.target;
+
+            if (!document.querySelector('[name="shipper_country"]').value){
+                alert('The country field is required !');
+                return false;
+            }
+            if (!document.querySelector('[name="consignee_country"]').value){
+                alert('The country field is required !');
+                return false;
+            }
 
             const phone = document.querySelector('[name="standard_phone"]'); 
             if (phone.value.length < 10 || phone.value.length > 24) {
@@ -580,4 +589,4 @@
 
     </script>
 
-@endsection
+    @endsection

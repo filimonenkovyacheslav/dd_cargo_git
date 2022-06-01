@@ -137,7 +137,7 @@ class FrontController extends AdminController
                 if(!$request->short_order)
                     $new_worksheet->status = 'Забрать';
                 else
-                    $new_worksheet->status = 'Подготовка';
+                    $new_worksheet->status = 'Пакинг лист';
             } 
             else{
                 $new_worksheet->status = 'Коробка';
@@ -149,7 +149,7 @@ class FrontController extends AdminController
                 if(!$request->short_order)
                     $new_worksheet->status = 'Забрать';
                 else
-                    $new_worksheet->status = 'Подготовка';
+                    $new_worksheet->status = 'Пакинг лист';
             }
             else{
                 $new_worksheet->status = 'Коробка';
@@ -506,7 +506,7 @@ class FrontController extends AdminController
                 if(!$request->short_order)
                     $new_worksheet->status = 'Забрать';
                 else
-                    $new_worksheet->status = 'Подготовка';
+                    $new_worksheet->status = 'Пакинг лист';
             }
             else{
                 $new_worksheet->status = 'Коробка';
@@ -1057,7 +1057,7 @@ class FrontController extends AdminController
             if(!$request->short_order)
                 $worksheet->status = 'Pick up';
             else
-                $worksheet->status = 'Pending';           
+                $worksheet->status = 'Packing list';           
         } 
         else{
             $worksheet->status = 'Box';

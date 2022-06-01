@@ -263,8 +263,34 @@
     <script>
         const boxGroup = document.querySelectorAll('.box-group input');
         boxGroup.forEach(function(item) {
-            item.disabled = true;
+            if (localStorage.getItem('boxString')) 
+                item.disabled = false;
+            else
+                item.disabled = true;                
         })
+
+        setTimeout(()=>{
+            if (localStorage.getItem('boxString')) {
+                const boxString = localStorage.getItem('boxString');
+                const tempArr = boxString.split('; ');
+
+                $('[name="need_box"]').each((k,el)=>{
+                    if ($(el).val() === 'need') 
+                        $(el).prop( "checked", true );
+                    else
+                        $(el).prop( "checked", false );
+                });
+
+                $('.box-group input').each((k,el)=>{
+                    for (let i = 0; i < tempArr.length; i++) {
+                        if ($(el).attr('data-name') === tempArr[i].split(': ')[0]) 
+                            $(el).val(tempArr[i].split(': ')[1])                    
+                    }
+                });
+            }
+        },500)
+        
+
         
         function clickRadio(elem){    
             const boxGroup = document.querySelectorAll('.box-group input');       
@@ -327,10 +353,18 @@
                         }                   
                     })
                     $('[name="comment_2"]').val(boxString);
+
+                    if (!$('[name="phone_exist_checked"]').val()) {
+                        localStorage.setItem('boxString',boxString);
+                    }
+                    else{
+                        localStorage.removeItem('boxString');
+                    }
+                    
                 }            
             }
             else $('[name="status_box"]').val('false');
-            
+
             form.submit();
         }
 

@@ -587,6 +587,8 @@ $('#tracking-columns').change((e)=>{
                    <option value="Доставлено">Доставлено</option>
                     
                    <option value="Подготовка">Подготовка</option>
+
+                   <option value="Пакинг лист">Пакинг лист</option>
                     
                    <option value="Возврат">Возврат</option>
                     
@@ -852,6 +854,8 @@ $('#phil-ind-tracking-columns').change((e)=>{
                    <option value="" selected="selected"></option>
                     
                    <option value="Pending">Pending</option>
+
+                   <option value="Packing list">Packing list</option>
                     
                    <option value="Forwarding to the warehouse in the sender country">Forwarding to the warehouse in the sender country</option>
                     

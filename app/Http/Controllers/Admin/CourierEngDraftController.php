@@ -19,10 +19,10 @@ use App\SignedDocument;
 
 class CourierEngDraftController extends AdminController
 {
-	private $status_arr = ["Forwarding to the warehouse in the sender country", "Pending", "Return", "Box", "Pick up", "Specify", "Think", "Canceled", 'At the warehouse in the sender country', "Double"];
-	private $status_arr_2 = ["At the customs in the sender country", "At the warehouse in the sender country", "Forwarding to the warehouse in the sender country", "Pending", "Return", "Box", "Pick up", "Specify", "Think", "Canceled", "Double"];
-	private $status_arr_3 = ["Pending", "Return", "Box", "Pick up", "Specify", "Think", "Canceled", "Double"];
-	private $status_arr_4 = ["Pending", "Return", "Box", "Specify", "Think", "Canceled", "Double"];
+	private $status_arr = ["Forwarding to the warehouse in the sender country", "Pending", "Return", "Box", "Pick up", "Specify", "Think", "Canceled", 'At the warehouse in the sender country', "Double","Packing list"];
+	private $status_arr_2 = ["At the customs in the sender country", "At the warehouse in the sender country", "Forwarding to the warehouse in the sender country", "Pending", "Return", "Box", "Pick up", "Specify", "Think", "Canceled", "Double","Packing list"];
+	private $status_arr_3 = ["Pending", "Return", "Box", "Pick up", "Specify", "Think", "Canceled", "Double","Packing list"];
+	private $status_arr_4 = ["Pending", "Return", "Box", "Specify", "Think", "Canceled", "Double","Packing list"];
     
 
     public function index(Request $request){

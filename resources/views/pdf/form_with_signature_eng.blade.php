@@ -497,8 +497,9 @@
     <script>
         const boxGroup = document.querySelectorAll('.box-group input');
         boxGroup.forEach(function(item) {
-            item.disabled = true;
+            item.disabled = true; 
         })
+        
         
         function clickRadio(elem){    
             const boxGroup = document.querySelectorAll('.box-group input');       
@@ -592,7 +593,7 @@
                         }                   
                     })
                     $('[name="comments_2"]').val(boxString);
-                }            
+                }          
             }
             
             form.submit();

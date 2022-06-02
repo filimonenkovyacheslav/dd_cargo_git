@@ -75,7 +75,18 @@ class SignedDocumentController extends Controller
                         ]);
                     }           
                 } 
-            }            
+            } 
+            else{
+                $data_parcel = $request->data_parcel;
+                $result = DB::table('table_'.$token)->find(1);
+                if (!$result && $data_parcel) {
+                    DB::table('table_'.$token)
+                    ->insert([
+                        'data' => $data_parcel
+                    ]);
+                }                 
+            }       
+            
             $israel_cities = $this->israelCities();
             $israel_cities['other'] = 'Другой город';                   
 
@@ -105,7 +116,18 @@ class SignedDocumentController extends Controller
                         ]);
                     }           
                 } 
-            }            
+            }   
+            else{
+                $data_parcel = $request->data_parcel;
+                $result = DB::table('table_'.$token)->find(1);
+                if (!$result && $data_parcel) {
+                    DB::table('table_'.$token)
+                    ->insert([
+                        'data' => $data_parcel
+                    ]);
+                }                 
+            } 
+
             $israel_cities = $this->israelCities();
             $israel_cities['other'] = 'Other city';  
             $to_country = $this->to_country_arr;          
@@ -557,16 +579,6 @@ class SignedDocumentController extends Controller
     }
 
 
-    private function contentToObj($request)
-    {
-        $result = [];
-        parse_str($request->getContent(),$result);        
-        $result = (object)$result;
-        $request = $result;
-        return $request;
-    }
-
-
     public function addSignedRuForm(Request $request)
     {
         $message = '';
@@ -608,7 +620,7 @@ class SignedDocumentController extends Controller
         if ($request->signature) {
             if ($message['id']) {
                 if (isset($request->worksheet_id))
-                        $this->deleteOldWorksheet($request->worksheet_id,'ru');
+                    $this->deleteOldWorksheet($request->worksheet_id,'ru');
                 if ($request->session_token)
                     $this->deleteTempTable($request->session_token);
                 $form_screen = $this->formToImg($request);
@@ -879,7 +891,7 @@ class SignedDocumentController extends Controller
         if ($request->signature) {
             if ($message['id']) {
                 if (isset($request->worksheet_id))
-                        $this->deleteOldWorksheet($request->worksheet_id,'eng');
+                    $this->deleteOldWorksheet($request->worksheet_id,'eng');
                 if ($request->session_token)
                     $this->deleteTempTable($request->session_token);               
                 return redirect('/signature-page?eng_draft_id='.$message['id']);
@@ -1004,6 +1016,91 @@ class SignedDocumentController extends Controller
         }
 
         return $message;  
+    }
+
+
+    public function philIndCheckPhoneApi(Request $request)
+    {
+        if (!$request->shipper_phone) {
+            $request = $this->contentToObj($request);
+        }
+        
+        if (isset($request->draft)) {
+            $data = CourierEngDraftWorksheet::where('standard_phone', 'like', '%'.$request->shipper_phone.'%')->get()->last();
+        }
+        else{
+            $data = PhilIndWorksheet::where('shipper_phone',$request->shipper_phone)
+            ->orWhere('standard_phone', 'like', '%'.$request->shipper_phone.'%')
+            ->get()->last();
+
+            if (!$data) {
+                $data = CourierEngDraftWorksheet::where('standard_phone', 'like', '%'.$request->shipper_phone.'%')->get()->last();
+            }
+        }
+        
+        $message = 'This phone number is not available in the system';
+        $add_parcel = 'true';
+        $data_parcel = [];
+        $token = $request->session_token;
+        $id = 0;
+
+        if ($data) {
+            $data_parcel = $this->fillResponseDataEng($data, $request, false, true);
+            $data_parcel = json_encode($data_parcel);
+
+            return redirect('/form-with-signature-eng/'.$id.'/'.$token.'?data_parcel='.$data_parcel);
+        }
+        else{
+            return redirect('/form-with-signature-eng/'.$id.'/'.$token.'?no_phone='.$message);
+        }        
+    }
+
+
+    public function checkPhoneApi(Request $request)
+    {
+        if (!$request->sender_phone) {
+            $request = $this->contentToObj($request);
+        }
+
+        if (isset($request->draft)) {
+            $data = CourierDraftWorksheet::where([
+                ['standard_phone', 'like', '%'.$request->sender_phone.'%'],
+                ['site_name', '=', 'DD-C']
+            ])->get()->last();
+        }
+        else{
+            $data = NewWorksheet::where([
+                ['sender_phone',$request->sender_phone],
+                ['site_name', '=', 'DD-C']
+            ])
+            ->orWhere([
+                ['standard_phone', 'like', '%'.$request->sender_phone.'%'],
+                ['site_name', '=', 'DD-C']
+            ])
+            ->get()->last();
+
+            if (!$data) {
+                $data = CourierDraftWorksheet::where([
+                    ['standard_phone', 'like', '%'.$request->sender_phone.'%'],
+                    ['site_name', '=', 'DD-C']
+                ])->get()->last();
+            }
+        }
+
+        $message = 'Данный номер телефона в системе отсутствует';
+        $add_parcel = 'true';
+        $token = $request->session_token;
+        $id = 0;
+
+        if ($data) {
+            $data_parcel = $this->fillResponseDataRu($data, $request, false, true);
+            $data_parcel = json_encode($data_parcel);
+
+            return redirect('/form-with-signature/'.$id.'/'.$token.'?data_parcel='.$data_parcel);
+        }
+        else{
+            return redirect('/form-with-signature/'.$id.'/'.$token.'?no_phone='.$message);
+        }        
     }
 
 }

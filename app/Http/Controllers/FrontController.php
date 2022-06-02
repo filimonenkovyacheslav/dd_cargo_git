@@ -1297,6 +1297,13 @@ class FrontController extends AdminController
                 ['site_name', '=', 'DD-C']
             ])
             ->get()->last();
+
+            if (!$data) {
+                $data = CourierDraftWorksheet::where([
+                    ['standard_phone', 'like', '%'.$request->sender_phone.'%'],
+                    ['site_name', '=', 'DD-C']
+                ])->get()->last();
+            }
         }
         
         $message = 'Данный номер телефона в системе отсутствует';
@@ -1311,22 +1318,11 @@ class FrontController extends AdminController
                 $data_parcel = $this->fillResponseDataRu($data, $request);
             }
 
-            if ($request->signature) {
-                return redirect()->route('formWithSignature', ['data_parcel' => $data_parcel])->with('add_parcel', $add_parcel)->with('data_parcel', json_encode($data_parcel));
-            }
-            else{
-                return redirect()->route('parcelForm', ['data_parcel' => $data_parcel])->with('add_parcel', $add_parcel)->with('data_parcel', json_encode($data_parcel));
-            }
+            return redirect()->route('parcelForm', ['data_parcel' => $data_parcel])->with('add_parcel', $add_parcel)->with('data_parcel', json_encode($data_parcel));
             
         }
         else{
-            if ($request->signature) {
-                return redirect()->route('formWithSignature')->with('no_phone', $message);
-            }
-            else{
-                return redirect()->route('parcelForm')->with('no_phone', $message);
-            }
-            
+            return redirect()->route('parcelForm')->with('no_phone', $message);            
         }        
     }
 
@@ -1351,6 +1347,13 @@ class FrontController extends AdminController
                     ['site_name', '=', 'For']
                 ])
                 ->get()->last();
+
+                if (!$data) {
+                    $data = CourierDraftWorksheet::where([
+                        ['standard_phone', 'like', '%'.$request->input('sender_phone').'%'],
+                        ['site_name', '=', 'For']
+                    ])->get()->last();
+                }
             }
 
             $message = 'Данный номер телефона в системе отсутствует';
@@ -1431,6 +1434,10 @@ class FrontController extends AdminController
             $data = PhilIndWorksheet::where('shipper_phone',$request->shipper_phone)
             ->orWhere('standard_phone', 'like', '%'.$request->shipper_phone.'%')
             ->get()->last();
+
+            if (!$data) {
+                $data = CourierEngDraftWorksheet::where('standard_phone', 'like', '%'.$request->shipper_phone.'%')->get()->last();
+            }
         }
         
         $message = 'This phone number is not available in the system';
@@ -1445,17 +1452,9 @@ class FrontController extends AdminController
                 $data_parcel = $this->fillResponseDataEng($data, $request);
             }
 
-            if ($request->signature){
-                return redirect()->route('formWithSignatureEng', ['data_parcel' => $data_parcel])->with('add_parcel', $add_parcel)->with('data_parcel', json_encode($data_parcel));
-            }
-            else
             return redirect()->route('philIndParcelForm', ['data_parcel' => $data_parcel])->with('add_parcel', $add_parcel)->with('data_parcel', json_encode($data_parcel));
         }
         else{
-            if ($request->signature){
-                return redirect()->route('formWithSignatureEng')->with('no_phone', $message);
-            }
-            else
             return redirect()->route('philIndParcelForm')->with('no_phone', $message);
         }        
     }

@@ -159,16 +159,26 @@ history.pushState("", document.title, window.location.pathname);
  		$('[name="quantity_recipient"]').val(quantityRecipient);
  	}
 
- 	if(quantityClick == 1) {		
- 		setTimeout(
- 			()=>{ 
- 				$('#addRuParcel .question').text('Введите ваш номер телефона');
- 				$('#addRuParcel .yes').hide();
- 				$('#addRuParcel .no').hide();
- 				$('#addRuParcel .check-phone').show();
- 				$('#addRuParcel').modal(); 
- 			}, 500);					
- 	}
+ 	if (quantityClick == 1) {		
+		setTimeout(
+			()=>{ 
+				$('#addRuParcel .question').text('Ввести те же данные получателя, которые были при предыдущем заказе?');
+				if ($(elem).hasClass('yes')) {
+					$(elem).removeClass('sender').addClass('recipient');
+				}				
+				$('#addRuParcel').modal(); 
+			}, 500);		
+	}
+	else if(quantityClick == 2 && quantityYes > 0) {		
+		setTimeout(
+			()=>{ 
+				$('#addRuParcel .question').text('Введите ваш номер телефона');
+				$('#addRuParcel .yes').hide();
+				$('#addRuParcel .no').hide();
+				$('#addRuParcel .check-phone').show();
+				$('#addRuParcel').modal(); 
+			}, 500);					
+	}
  }
 
 
@@ -185,16 +195,26 @@ history.pushState("", document.title, window.location.pathname);
  		$('[name="quantity_recipient"]').val(quantityRecipient);
  	}
 
- 	if(quantityClick == 1) {		
- 		setTimeout(
- 			()=>{ 
- 				$('#philIndParcel .question').text('Enter your phone number');
- 				$('#philIndParcel .yes').hide();
- 				$('#philIndParcel .no').hide();
- 				$('#philIndParcel .check-phone').show();
- 				$('#philIndParcel').modal(); 
- 			}, 500);					
- 	}
+ 	if (quantityClick == 1) {		
+		setTimeout(
+			()=>{ 
+				$('#philIndParcel .question').text('Enter the same recipient data that you had on the previous order?');
+				if ($(elem).hasClass('yes')) {
+					$(elem).removeClass('sender').addClass('recipient');
+				}				
+				$('#philIndParcel').modal(); 
+			}, 500);		
+	}
+	else if(quantityClick == 2 && quantityYes > 0) {		
+		setTimeout(
+			()=>{ 
+				$('#philIndParcel .question').text('Enter your phone number');
+				$('#philIndParcel .yes').hide();
+				$('#philIndParcel .no').hide();
+				$('#philIndParcel .check-phone').show();
+				$('#philIndParcel').modal(); 
+			}, 500);					
+	}
  }
 
 

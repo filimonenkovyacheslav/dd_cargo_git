@@ -28,10 +28,10 @@
                 }
                 @endphp
                 
-                @if (session('no_phone'))
-                    <div class="alert alert-danger">
-                        {{ session('no_phone') }}
-                    </div>
+                @if (isset($_GET['no_phone']))
+                <div class="alert alert-danger">
+                    {{ $_GET['no_phone'] }}
+                </div>
                 @endif
                 
                 <h1>ORDER FORM</h1>
@@ -83,7 +83,10 @@
                                     <button type="button" onclick="philIndAnswer(this)" class="btn btn-primary pull-left yes sender" data-dismiss="modal">Yes</button>
                                     <button type="button" onclick="philIndAnswer(this)" class="btn btn-danger pull-left no" data-dismiss="modal">No</button>
 
-                                        {!! Form::open(['url'=>route('philIndCheckPhone'), 'class'=>'form-horizontal check-phone','method' => 'POST']) !!}
+                                        {!! Form::open(['url'=>route('philIndCheckPhoneApi'), 'class'=>'form-horizontal check-phone','method' => 'POST']) !!}
+                                        @if (isset($token))
+                                        <input type="hidden" name="session_token" value="{{ $token }}">
+                                        @endif 
 
                                         {!! Form::hidden('signature','signature') !!}
 
@@ -121,7 +124,10 @@
                                     <button type="button" onclick="philIndAnswer2(this)" class="btn btn-primary pull-left yes sender" data-dismiss="modal">Yes</button>
                                     <button type="button" onclick="philIndAnswer2(this)" class="btn btn-danger pull-left no" data-dismiss="modal">No</button>
 
-                                        {!! Form::open(['url'=>route('philIndCheckPhone'), 'class'=>'form-horizontal check-phone','method' => 'POST']) !!}
+                                    {!! Form::open(['url'=>route('philIndCheckPhoneApi'), 'class'=>'form-horizontal check-phone','method' => 'POST']) !!}
+                                    @if (isset($token))
+                                    <input type="hidden" name="session_token" value="{{ $token }}">
+                                    @endif 
 
                                         {!! Form::hidden('signature','signature') !!}
 
@@ -228,7 +234,7 @@
                 <div class="form-group">
                     <div class="row">
                         <div class="col-md-6">
-                            {!! Form::text('standard_phone',isset($data_parcel->standard_phone) ? $data_parcel->standard_phone : old('standard_phone'),['class' => 'form-control standard-phone', 'placeholder' => 'Shipper\'s phone number (standard)*', 'required'])!!}
+                            {!! Form::text('standard_phone',isset($data_parcel->standard_phone) ? trim($data_parcel->standard_phone) : old('standard_phone'),['class' => 'form-control standard-phone', 'placeholder' => 'Shipper\'s phone number (standard)*', 'required'])!!}
                         </div>
 
                         <div class="col-md-6">
@@ -300,7 +306,7 @@
                 <div class="form-group">
                     <div class="row">
                         <div class="col-md-6">
-                            {!! Form::text('consignee_phone',isset($data_parcel->consignee_phone) ? $data_parcel->consignee_phone : old('consignee_phone'),['class' => 'form-control', 'placeholder' => 'Consignee\'s phone number*', 'required'])!!}
+                            {!! Form::text('consignee_phone',isset($data_parcel->consignee_phone) ? trim($data_parcel->consignee_phone) : old('consignee_phone'),['class' => 'form-control', 'placeholder' => 'Consignee\'s phone number*', 'required'])!!}
                         </div>
                     </div>
                 </div>
@@ -524,6 +530,10 @@
             const phone = document.querySelector('[name="standard_phone"]'); 
             if (phone.value.length < 10 || phone.value.length > 24) {
                 alert('The number of characters in the standard phone must be from 10 to 24 !');
+                return false;
+            }
+            else if (phone.value[0] !== '+') {
+                alert('The sender phone must start with "+" !');
                 return false;
             }
 

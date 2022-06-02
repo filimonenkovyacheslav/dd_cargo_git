@@ -30,9 +30,9 @@
             }
             @endphp
 
-            @if (session('no_phone'))
+            @if (isset($_GET['no_phone']))
             <div class="alert alert-danger">
-                {{ session('no_phone') }}
+                {{ $_GET['no_phone'] }}
             </div>
             @endif
 
@@ -62,9 +62,12 @@
                                 <button type="button" onclick="clickAnswer(this)" class="btn btn-primary pull-left yes sender" data-dismiss="modal">Да</button>
                                 <button type="button" onclick="clickAnswer(this)" class="btn btn-danger pull-left no" data-dismiss="modal">Нет</button>
 
-                                {!! Form::open(['url'=>route('checkPhone'), 'class'=>'form-horizontal check-phone','method' => 'POST']) !!}
+                                {!! Form::open(['url'=>route('checkPhoneApi'), 'class'=>'form-horizontal check-phone','method' => 'POST']) !!}
 
                                 {!! Form::hidden('signature','signature') !!}
+                                @if (isset($token))
+                                <input type="hidden" name="session_token" value="{{ $token }}">
+                                @endif 
 
                                 <div class="form-group">
                                     <div class="row">
@@ -100,9 +103,12 @@
                                 <button type="button" onclick="clickAnswer2(this)" class="btn btn-primary pull-left yes sender" data-dismiss="modal">Да</button>
                                 <button type="button" onclick="clickAnswer2(this)" class="btn btn-danger pull-left no" data-dismiss="modal">Нет</button>
 
-                                {!! Form::open(['url'=>route('checkPhone'), 'class'=>'form-horizontal check-phone','method' => 'POST']) !!}
+                                {!! Form::open(['url'=>route('checkPhoneApi'), 'class'=>'form-horizontal check-phone','method' => 'POST']) !!}
 
                                 {!! Form::hidden('signature','signature') !!}
+                                @if (isset($token))
+                                <input type="hidden" name="session_token" value="{{ $token }}">
+                                @endif 
 
                                 <div class="form-group">
                                     <div class="row">
@@ -195,7 +201,7 @@
                         {!! Form::text('last_name',isset($data_parcel->last_name) ? $data_parcel->last_name : old('last_name'),['class' => 'form-control', 'placeholder' => 'Shipper\'s last name*', 'required', 'oninput' => 'document.querySelector(".last-name").innerHTML = this.value'])!!}
                     </div>
                     <div class="col-md-3">
-                        {!! Form::text('standard_phone',isset($data_parcel->standard_phone) ? $data_parcel->standard_phone : old('standard_phone'),['class' => 'form-control standard-phone', 'placeholder' => 'Shipper\'s phone number*', 'required'])!!}
+                        {!! Form::text('standard_phone',isset($data_parcel->standard_phone) ? trim($data_parcel->standard_phone) : old('standard_phone'),['class' => 'form-control standard-phone', 'placeholder' => 'Shipper\'s phone number*', 'required'])!!}
                     </div>
                     <div class="col-md-3">
                         {!! Form::text('sender_address',isset($data_parcel->sender_address) ? $data_parcel->sender_address : old('sender_address'),['class' => 'form-control', 'placeholder' => 'Shipper\'s address*', 'required'])!!}
@@ -258,7 +264,7 @@
                         {!! Form::text('region',isset($data_parcel->region) ? $data_parcel->region : old('region'),['class' => 'form-control', 'placeholder' => 'Регион'])!!}
                     </div>                   
                     <div class="col-md-6">
-                        {!! Form::text('recipient_phone',isset($data_parcel->recipient_phone) ? $data_parcel->recipient_phone : old('recipient_phone'),['class' => 'form-control', 'placeholder' => 'Номер телефона*', 'required'])!!}
+                        {!! Form::text('recipient_phone',isset($data_parcel->recipient_phone) ? trim($data_parcel->recipient_phone) : old('recipient_phone'),['class' => 'form-control', 'placeholder' => 'Номер телефона*', 'required'])!!}
                     </div>
                 </div>
             </div>
@@ -501,6 +507,10 @@
         const phone = document.querySelector('[name="standard_phone"]'); 
         if (phone.value.length < 10 || phone.value.length > 13) {
             alert('Кол-во знаков в телефоне отправителя должно быть от 10 до 13 !');
+            return false;
+        }
+        else if (phone.value[0] !== '+') {
+            alert('Телефон отправителя должен начинаться с "+" !');
             return false;
         }
 

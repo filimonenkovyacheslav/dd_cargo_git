@@ -161,12 +161,18 @@ class SignedDocument extends BaseModel
             $this->save();
             
             if ($request->create_new) {
-                $this->uniq_id = $this->getUniqId($this->id, $from_country);
-                $this->save();
+                $this->updateSignedUniqId($from_country);
             }            
             
             return $this;
         }
+    }
+
+
+    public function updateSignedUniqId($from_country)
+    {
+        $this->uniq_id = $this->getUniqId($this->id, $from_country);
+        $this->save();
     }
 
 

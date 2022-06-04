@@ -1028,11 +1028,15 @@ class FrontController extends AdminController
             else if ($field === 'shipped_items') {
                 $temp = '';
                 for ($i=1; $i < 11; $i++) { 
-                    if (null !== $request->item_.$i) {
-                        $temp .= $request->item_.$i.': '.$request->q_item_.$i.'; ';
+                    $t_1 = 'item_'.$i;
+                    $t_2 = 'q_item_'.$i;
+                    if ($request->$t_1) {
+                        $temp .= $request->$t_1.': '.$request->$t_2.'; ';
                     }
                 }
-                $worksheet->$field = $temp;
+                if ($temp) $worksheet->$field = $temp;
+                else $worksheet->$field = 'Empty: 0';
+
             }
             else if ($field === 'direction') {
                 $worksheet->$field = $this->createDirection($request->shipper_country, $request->consignee_country);
@@ -1094,11 +1098,14 @@ class FrontController extends AdminController
                 else if ($field === 'items') {
                     $temp = '';
                     for ($i=1; $i < 11; $i++) { 
-                        if (null !== $request->item_.$i) {
-                            $temp .= $request->item_.$i.': '.$request->q_item_.$i.'; ';
+                        $t_1 = 'item_'.$i;
+                        $t_2 = 'q_item_'.$i;
+                        if ($request->$t_1) {
+                            $temp .= $request->$t_1.': '.$request->$t_2.'; ';
                         }
                     }
-                    $packing->$field = $temp;
+                    if ($temp) $packing->$field = $temp;
+                    else $packing->$field = 'Empty: 0';
                 }
                 else{
                     $packing->$field = $request->$field;

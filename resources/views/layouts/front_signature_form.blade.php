@@ -15,13 +15,13 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     
 
-    <title>{{__('front.title')}} | DD-CARGO</title>
+    <title>Parcels from/to Israel | DD-CARGO</title>
 
-    <meta name="description" content="Посылки из Израиля и в Израиль морскими контейнерами и авиа с DD-CARGO - это надежно и недорого ">
-    <link rel="canonical" href="https://www.dd-cargo.com?lang=ru">
-    <meta property="og:title" content="Посылки из/в Израиль | DD-CARGO ">
-    <meta property="og:description" content="Посылки из Израиля и в Израиль морскими контейнерами и авиа с DD-CARGO - это надежно и недорого ">
-    <meta property="og:url" content="https://www.dd-cargo.com?lang=ru">
+    <meta name="description" content="Affordable timely shipments of your parcels and documents. We proudly stand behind the commitments we make to our customers.">
+    <link rel="canonical" href="https://www.dd-cargo.com?lang=en">
+    <meta property="og:title" content="Parcels from/to Israel | DD-CARGO ">
+    <meta property="og:description" content="Affordable timely shipments of your parcels and documents. We proudly stand behind the commitments we make to our customers.">
+    <meta property="og:url" content="https://www.dd-cargo.com?lang=en">
     <meta property="og:site_name" content="DD-CARGO ">
     <meta property="og:type" content="website">
     <meta name="google-site-verification" content="_5HGCAqwD5YfD0QIz6s1U-43t6s95u0wqpj5n5ufL7o">

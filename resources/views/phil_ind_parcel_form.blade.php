@@ -230,7 +230,7 @@
                         <h3>Parcels qty</h3>
                     </div>
                     <div class="col-3">
-                        {!! Form::number('parcels_qty',old('parcels_qty'),['class' => 'form-control', 'min' => '1'])!!}
+                        {!! Form::number('parcels_qty',isset($data_parcel->parcels_qty) ? $data_parcel->parcels_qty :'1',['class' => 'form-control', 'min' => '1'])!!}
                     </div>
                 </div>
             </div>
@@ -293,6 +293,13 @@
                         $(el).val(tempArr[i].split(': ')[1])                    
                 }
             });
+        }
+
+        const form = document.querySelector('form.form-send-parcel')
+        const checkPhone = document.querySelector('form.form-send-parcel [name="phone_exist_checked"]').value
+        if (checkPhone) {
+            result = confirm("Do you want to send form ?")
+            if (result) form.submit()
         }
     },500)
     

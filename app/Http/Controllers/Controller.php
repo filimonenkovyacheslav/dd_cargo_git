@@ -127,7 +127,7 @@ class Controller extends BaseController
                 if ($document->file_for_cancel) {
                     $folderPath = $this->checkDirectory('documents_for_cancel');
                     $file = $document->file_for_cancel;
-                    $items[] = [
+                    if ($file) $items[] = [
                         'path'=>$folderPath.$file, 
                         'name'=>$file,
                         'signature'=>'',
@@ -139,7 +139,7 @@ class Controller extends BaseController
                 else
                     $folderPath = $this->checkDirectory('documents');
                 $file = $document->pdf_file;
-                $items[] = [
+                if ($file) $items[] = [
                     'path'=>$folderPath.$file, 
                     'name'=>$file,
                     'signature'=>$signaturesPath.$document->signature,
@@ -265,7 +265,8 @@ class Controller extends BaseController
         }
 
         if ($document) {
-            return redirect("/cancel-pdf-id/$type/$id/");
+            if ($document->uniq_id) return redirect("/cancel-pdf-id/$type/$id/");
+            else return back();
         }
         else return back();        
     }

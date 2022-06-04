@@ -40,7 +40,8 @@ class SignedDocumentController extends Controller
         $temp = [];
         foreach ($items as $item) {
             if (Schema::hasTable('table_'.$item->name)) {
-                $temp[] = DB::table('table_'.$item->name)->select('link','name')->get();
+                $t = DB::table('table_'.$item->name)->where('id',1)->select('link','name')->get();
+                if ($t->count()) $temp[] = $t;
             }     
         }
         $items = $temp;
@@ -62,7 +63,18 @@ class SignedDocumentController extends Controller
             $data_parcel = null;
             if ($id !== '0') {
                 $worksheet = CourierDraftWorksheet::find($id);
-                if ($worksheet->getLastDoc()) return redirect()->to(session('this_previous_url'))->with('status-error', 'Document exists!');
+                if ($worksheet->getLastDocUniq()) return redirect()->to(session('this_previous_url'))->with('status-error', 'Document exists!');
+                else if ($worksheet->getLastDoc()) {
+                    $document = $worksheet->getLastDoc();
+                    $from_country = $worksheet->sender_country;
+                    $document->updateSignedUniqId($from_country);
+                    $document_id = $document->id;
+                    $type = 'draft_id';
+                    $token = $this->generateRandomString(15);
+                    $this->createTempTableAfterCancel($token);
+                    return redirect()->route('formAfterCancel',compact('type','id','document_id','token')); 
+                }
+                
                 $data_parcel = $this->fillResponseDataRu($worksheet, $request, true, true);
                 $data_parcel['parcels_qty'] = $worksheet->parcels_qty;
                 if ($data_parcel) {
@@ -103,7 +115,18 @@ class SignedDocumentController extends Controller
             $data_parcel = null;
             if ($id !== '0') {
                 $worksheet = CourierEngDraftWorksheet::find($id);
-                if ($worksheet->getLastDoc()) return redirect()->to(session('this_previous_url'))->with('status-error', 'Document exists!'); 
+                if ($worksheet->getLastDocUniq()) return redirect()->to(session('this_previous_url'))->with('status-error', 'Document exists!'); 
+                else if ($worksheet->getLastDoc()) {
+                    $document = $worksheet->getLastDoc();
+                    $from_country = $worksheet->shipper_country;
+                    $document->updateSignedUniqId($from_country);
+                    $document_id = $document->id;
+                    $type = 'eng_draft_id';
+                    $token = $this->generateRandomString(15);
+                    $this->createTempTableAfterCancel($token);
+                    return redirect()->route('formAfterCancel',compact('type','id','document_id','token')); 
+                }
+                
                 $data_parcel = $this->fillResponseDataEng($worksheet, $request, true, true);
                 $data_parcel['parcels_qty'] = $worksheet->parcels_qty;
                 if ($data_parcel) {
@@ -222,29 +245,34 @@ class SignedDocumentController extends Controller
             
             if (!$request->create_new) {
 
-                return redirect('/form-success?pdf_file='.$pdf_file.'&new_document_id='.$id.'&old_file='.$old_document->pdf_file);
+                return redirect('/form-success?pdf_file='.$pdf_file.'&new_document_id='.$old_document->id.'&old_file='.$old_document->pdf_file);
             }
             else{
                 $id = $request->id;
                 $type = $request->type;
                 $token = $this->generateRandomString(15);
-
-                $this->destroyTempTables();
-                Schema::create('table_'.$token, function (Blueprint $table) {
-                    $table->increments('id');
-                    $table->text('data')->nullable();
-                    $table->string('link')->nullable();
-                    $table->string('name')->nullable();
-                    $table->timestamps();
-                });
-                DB::table('temp_tables')->insert([
-                    'name'=>$token,
-                    'created_at'=>date('Y-m-d')
-                ]); 
-                
+                $this->createTempTableAfterCancel($token);
                 return redirect()->route('formAfterCancel',compact('type','id','document_id','token'));
             }
         }               
+    }
+
+
+    public function createTempTableAfterCancel($token)
+    {
+        $this->destroyTempTables();
+        Schema::create('table_'.$token, function (Blueprint $table) {
+            $table->increments('id');
+            $table->text('data')->nullable();
+            $table->string('link')->nullable();
+            $table->string('name')->nullable();
+            $table->timestamps();
+        });
+        DB::table('temp_tables')->insert([
+            'name'=>$token,
+            'created_at'=>date('Y-m-d')
+        ]); 
+        return true;        
     }
 
 

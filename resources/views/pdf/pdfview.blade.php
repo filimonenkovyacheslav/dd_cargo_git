@@ -5,7 +5,7 @@
 		padding: 5px;
 	}
 	table{
-		font-size: 12px;
+		font-size: 10px;
 		border-collapse: collapse;
 		border: 2px solid black;
 		text-align: center;
@@ -19,7 +19,7 @@
 	
 	<table>
 		<tr>
-			<th colspan="4" style="font-size:16px">
+			<th colspan="4" style="font-size:14px">
 				PACKING LIST {{ $document->uniq_id }}
 			</th>
 		</tr>

@@ -295,11 +295,11 @@
             });
         }
 
-        const form = document.querySelector('form.form-send-parcel')
+        const button = document.querySelector('form.form-send-parcel button[type="submit"]')
         const checkPhone = document.querySelector('form.form-send-parcel [name="phone_exist_checked"]').value
         if (checkPhone) {
             result = confirm("Do you want to send form ?")
-            if (result) form.submit()
+            if (result) button.click()
         }
     },500)
     

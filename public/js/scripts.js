@@ -481,16 +481,19 @@ $('.new-form .form-send-parcel select').on('change',(e)=>{
 if ($('#form_cancel_disabled').val() === 'false') {
 	$('.new-form .form-send-parcel input').prop('disabled',true);
 	$('.new-form .form-send-parcel select').prop('disabled',true);
+	$('.new-form .form-send-parcel button[type="submit"]').hide();
 } 
 else{
 	$('.new-form .form-send-parcel input').prop('disabled',false);
 	$('.new-form .form-send-parcel select').prop('disabled',false);
+	$('.new-form .form-send-parcel button[type="submit"]').show();
 }  
 
 function cancelDisabled(){
 	availableNow = true;
 	$('.new-form .form-send-parcel input').prop('disabled',false);
 	$('.new-form .form-send-parcel select').prop('disabled',false);
+	$('.new-form .form-send-parcel button[type="submit"]').show();
 	$('#form_cancel_disabled').val('true');
 }
 
@@ -574,6 +577,7 @@ function getSignedValue(){
 					if (prop === 'form_cancel_disabled' && obj[prop] === 'true') {
 						$('.new-form .form-send-parcel input').prop('disabled',false);
 						$('.new-form .form-send-parcel select').prop('disabled',false);
+						$('.new-form .form-send-parcel button[type="submit"]').show();
 					}
 				} 				
 			}			            

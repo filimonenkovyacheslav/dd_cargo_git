@@ -157,9 +157,9 @@ class Controller extends BaseController
         $items = $this->getUploadFiles($type,$id);
         if ($items) {
             foreach($items as $item) {
-                if ($item['path']) unlink($item['path']);
-                if ($item['signature']) unlink($item['signature']);
-                if ($item['signature_for_cancel']) unlink($item['signature_for_cancel']);
+                if (file_exists($item['path'])) unlink($item['path']);
+                if (file_exists($item['signature'])) unlink($item['signature']);
+                if (file_exists($item['signature_for_cancel'])) unlink($item['signature_for_cancel']);
             } 
             return true;
         }
@@ -212,7 +212,7 @@ class Controller extends BaseController
         $document = $worksheet->getLastDoc();
         if ($document) {
             $file_name = $document->pdf_file;
-            unlink($folderPath.$file_name);
+            if (file_exists($folderPath.$file_name))unlink($folderPath.$file_name);
             
             if (!$document->screen_ru_form) {
                 if ($this->getDomainRule() !== 'forward') {

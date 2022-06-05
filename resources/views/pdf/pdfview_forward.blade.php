@@ -80,9 +80,8 @@
 		</tr>
 		<tr>
 			<th>No.</th>
-			<th>Description</th>
-			<th>Quantity</th>	
-			<th>Value of Goods</th>		
+			<th colspan="2">Description</th>
+			<th>Quantity</th>		
 		</tr>
 		@php
 		$number = 1;
@@ -93,16 +92,14 @@
 			@if(strripos($item, ':') !== false)
 			<tr>
 				<td>{{$number}}</td>
-				<td>{{explode(":", $item)[0]}}</td>
+				<td colspan="2">{{explode(":", $item)[0]}}</td>
 				<td>{{explode(":", $item)[1]}}</td>
-				<td>{{ $worksheet->shipment_val }}</td>
 			</tr>
 			@elseif(strripos($item, '-') !== false)
 			<tr>
 				<td>{{$number}}</td>
-				<td>{{explode("-", $item)[0]}}</td>
+				<td colspan="2">{{explode("-", $item)[0]}}</td>
 				<td>{{explode("-", $item)[1]}}</td>
-				<td>{{ $worksheet->shipment_val }}</td>
 			</tr>			
 			@endif	
 			@php

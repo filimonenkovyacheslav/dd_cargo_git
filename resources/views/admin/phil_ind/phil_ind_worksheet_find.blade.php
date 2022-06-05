@@ -135,7 +135,7 @@
 								<option value="change">Change</option>	
 								@endcan
 								
-								@can('editPost')
+								@can('editEngDraft')
 								<option value="cancel-pdf">Cancel PDF</option>
 								<option value="download-pdf">Download PDF</option>
 								@endcan

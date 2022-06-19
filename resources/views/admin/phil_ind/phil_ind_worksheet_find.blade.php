@@ -113,7 +113,7 @@
 						</form>
 					</div>
 
-					@can('editPost')
+					@can('editEngDraft')
 
 					<div class="checkbox-operations">
 						
@@ -124,7 +124,6 @@
 						<label>Select action with selected rows:
 							<select class="form-control" name="checkbox_operations_select">
 								<option value=""></option>
-								@endcan
 
 								@can('changeColor')
 								<option value="color">Change color</option>
@@ -134,14 +133,10 @@
 								<option value="delete">Delete</option>
 								<option value="change">Change</option>	
 								@endcan
-								
-								@can('editEngDraft')
+
 								<option value="cancel-pdf">Cancel PDF</option>
 								<option value="download-pdf">Download PDF</option>
-								@endcan
-								
-								@can('editPost')
-								
+																
 							</select>
 						</label>
 
@@ -165,7 +160,7 @@
 								<option value="payment_date_comments">Payment date and comments</option>
 								<option value="amount_payment">Amount of payment</option>   
 							</select>
-						</label>	
+						</label>
 
 						<label class="checkbox-operations-color">Choose color:
 							<select class="form-control" name="tr_color">
@@ -189,9 +184,13 @@
 						{!! Form::button('Save',['class'=>'btn btn-primary checkbox-operations-change','type'=>'submit']) !!}
 						{!! Form::close() !!}
 
+						@can('editPost')
+
 						{!! Form::open(['url'=>route('deletePhilIndWorksheetById'),'method' => 'POST']) !!}
 						{!! Form::button('Delete',['class'=>'btn btn-danger  checkbox-operations-delete','type'=>'submit','onclick' => 'ConfirmDelete(event)']) !!}
 						{!! Form::close() !!}
+						
+						@endcan
 
 						<form class="checkbox-operations-change-one" action="{{ url('/admin/phil-ind-worksheet/') }}" method="GET">
 							@csrf	

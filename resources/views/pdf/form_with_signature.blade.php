@@ -161,7 +161,13 @@
 
             {!! Form::hidden('phone_exist_checked',isset($data_parcel->phone_exist_checked) ? $data_parcel->phone_exist_checked : '')!!}
 
-            {!! Form::hidden('signature','signature') !!}   
+            {!! Form::hidden('signature','signature') !!} 
+            
+            @if (isset($user_name))  
+            {!! Form::hidden('user_name',$user_name) !!} 
+            @else
+            {!! Form::hidden('user_name','') !!}
+            @endif
 
             @if($worksheet)
             {!! Form::hidden('worksheet_id', $worksheet->id) !!}  
@@ -487,7 +493,14 @@
             <input type="hidden" id="form_canvas" name="form_canvas" value="string">
 
             {!! Form::button('Подписать',['class'=>'btn','type'=>'submit']) !!}
-            {!! Form::close() !!}                       
+            {!! Form::close() !!}          
+
+            @if(Auth::user())
+            @if(Auth::user()->role === 'office_1' || Auth::user()->role === 'admin' || Auth::user()->role === 'office_ru')
+            <hr>
+            <a class="btn btn-success" href="{{ url('/admin/courier-draft-worksheet') }}">To Admin Panel</a>
+            @endif
+            @endif              
             
         </div>
     </div> 
@@ -511,6 +524,15 @@
         }
         else if (phone.value[0] !== '+') {
             alert('Телефон отправителя должен начинаться с "+" !');
+            return false;
+        }
+
+        if (!document.querySelector('[name="sender_country"]').value){
+            alert('Поле страна отправителя обязательное к заполнению !');
+            return false;
+        }
+        if (!document.querySelector('[name="recipient_country"]').value){
+            alert('Поле страна получателя обязательное к заполнению !');
             return false;
         }
 

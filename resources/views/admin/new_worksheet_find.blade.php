@@ -118,7 +118,7 @@
 						</form>
 					</div>
 
-					@can('editPost')
+					@can('editDraft')
 					
 					<div class="checkbox-operations">
 						
@@ -129,24 +129,19 @@
 						<label>Выберите действие с выбранными строчками:
 							<select class="form-control" name="checkbox_operations_select">
 								<option value=""></option>
-								@endcan
-
+								
 								@can('changeColor')
 								<option value="color">Изменить цвет</option>
 								@endcan
-								
+
 								@can('editPost')
 								<option value="delete">Удалить</option>
 								<option value="change">Изменить</option>
 								@endcan
 
-								@can('editDraft')
 								<option value="cancel-pdf">Отменить PDF</option>
 								<option value="download-pdf">Скачать PDF</option>
-								@endcan
-								
-								@can('editPost')
-								
+																
 							</select>
 						</label>
 						
@@ -195,14 +190,18 @@
 							<input type="hidden" name="status_en">
 							<input type="hidden" name="status_ua">
 							<input type="hidden" name="status_he">
-						</label>									
-
+						</label>
+						
 						{!! Form::button('Сохранить',['class'=>'btn btn-primary checkbox-operations-change','type'=>'submit']) !!}
 						{!! Form::close() !!}
+
+						@can('editPost')
 
 						{!! Form::open(['url'=>route('deleteNewWorksheetById'),'method' => 'POST']) !!}
 						{!! Form::button('Удалить',['class'=>'btn btn-danger  checkbox-operations-delete','type'=>'submit','onclick' => 'ConfirmDelete(event)']) !!}
 						{!! Form::close() !!}
+
+						@endcan
 
 						<form class="checkbox-operations-change-one" action="{{ url('/admin/new-worksheet/') }}" method="GET">
 							@csrf	

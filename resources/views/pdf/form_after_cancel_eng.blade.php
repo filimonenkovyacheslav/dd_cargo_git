@@ -392,9 +392,15 @@
                 {!! Form::close() !!}   
 
                 @if(Auth::user())
-                @if(Auth::user()->role === 'office_1' || Auth::user()->role === 'admin')
+                @if(Auth::user()->role === 'office_1' || Auth::user()->role === 'admin' || Auth::user()->role === 'office_eng')
                 <br>
                 <button class="btn btn-danger" id="cancel-disabled" onclick="cancelDisabled()">To cancel Disabled</button>
+                <hr>
+                @if($type === 'eng_draft_id')
+                <a class="btn btn-success" href="{{ url('/admin/courier-eng-draft-worksheet') }}">To Admin Panel</a>
+                @else
+                <a class="btn btn-success" href="{{ url('/admin/phil-ind-worksheet') }}">To Admin Panel</a>
+                @endif
                 @endif
                 @endif    
                 
@@ -431,6 +437,15 @@
             const phone = document.querySelector('[name="standard_phone"]'); 
             if (phone.value.length < 10 || phone.value.length > 24) {
                 alert('The number of characters in the standard phone must be from 10 to 24 !');
+                return false;
+            }
+
+            if (!document.querySelector('[name="shipper_country"]').value){
+                alert('The shipper country field is required !');
+                return false;
+            }
+            if (!document.querySelector('[name="consignee_country"]').value){
+                alert('The consignee country field is required !');
                 return false;
             }
 

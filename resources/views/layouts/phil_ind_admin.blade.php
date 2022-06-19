@@ -52,7 +52,10 @@
         }
     </style>
 
-    <script type="text/javascript">var createTableUrl = "{{ url('/create-temp-table') }}"</script>
+    <script type="text/javascript">
+        var createTableUrl = "{{ url('/create-temp-table') }}"
+        var userName = "{{ Auth::user()->name }}"
+    </script>
 
 </head>
 <body>
@@ -152,7 +155,7 @@
                     </li> 
                     @endcan 
 
-                    @can('editPost')
+                    @can('editEngDraft')
                     <li>
                         <a href="{{route('tempLinks')}}"><i class="menu-icon fa fa-book "></i> Temporary links</a>
                     </li> 
@@ -217,6 +220,25 @@
 
     @yield('content')
 
+    <!-- Modal -->
+    <a id="double-qty" data-toggle="modal" data-target="#doubleQty"></a>
+
+    <div class="modal fade" id="doubleQty" tabindex="-1" role="dialog" aria-labelledby="doubleQtyLabel" aria-hidden="true" style="background: rgba(0, 0, 0, 0.4);">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="doubleQtyLabel">Duplicate qty</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <label>Enter qty
+                    <input type="number" name="double_qty" min="1" value="1">
+                </label>
+                <button id="add_double_qty" class="btn btn-primary">Save</button>
+            </div>
+        </div>
+    </div>
 
 </div><!-- /#right-panel -->
 

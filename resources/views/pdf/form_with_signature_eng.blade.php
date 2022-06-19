@@ -186,6 +186,12 @@
 
                 {!! Form::hidden('signature','signature') !!}
 
+                @if (isset($user_name))  
+                {!! Form::hidden('user_name',$user_name) !!} 
+                @else
+                {!! Form::hidden('user_name','') !!}
+                @endif
+
                 @if($worksheet)
                 {!! Form::hidden('worksheet_id', $worksheet->id) !!}  
                 {!! Form::hidden('order_date', $worksheet->order_date) !!}
@@ -494,7 +500,14 @@
                 @endif
                                 
                 {!! Form::button('To sign',['class'=>'btn','type'=>'submit']) !!}
-                {!! Form::close() !!}       
+                {!! Form::close() !!}      
+
+                @if(Auth::user())
+                @if(Auth::user()->role === 'office_1' || Auth::user()->role === 'admin' || Auth::user()->role === 'office_eng')
+                <hr>
+                <a class="btn btn-success" href="{{ url('/admin/courier-eng-draft-worksheet') }}">To Admin Panel</a>
+                @endif
+                @endif  
             
             </div>
         </div>           
@@ -534,6 +547,15 @@
             }
             else if (phone.value[0] !== '+') {
                 alert('The sender phone must start with "+" !');
+                return false;
+            }
+
+            if (!document.querySelector('[name="shipper_country"]').value){
+                alert('The shipper country field is required !');
+                return false;
+            }
+            if (!document.querySelector('[name="consignee_country"]').value){
+                alert('The consignee country field is required !');
                 return false;
             }
 

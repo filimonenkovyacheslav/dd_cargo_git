@@ -1127,12 +1127,17 @@ $('[name="checkbox_operations_select"]').change((e)=>{
     }
     else if (thisVal === 'double'){
         if ($('[name="row_id[]"]:checked').length == 1) {
-            const x = confirm("Are you sure you want to duplicate?");
+            const x = confirm("You can duplicate only if you have a PDF. Are you sure you want to duplicate?");           
             if (x){
+                $('#double-qty').click()
+                $('#doubleQty').addClass('show')
+                $('#doubleQty').removeAttr('aria-hidden')
+                $('body').addClass('modal-open')
+                $('[name="duplicate_qty"]').val()
+                
                 let action = $('.checkbox-operations-double').attr('action')
                 action += '/'+$('.checkbox-operations-double [name="row_id[]"]').val()
-                $('.checkbox-operations-double').attr('action',action)
-                $('.checkbox-operations-double').submit()
+                $('.checkbox-operations-double').attr('action',action)               
             }
             else
                 return false;
@@ -1215,7 +1220,7 @@ $('[name="checkbox_operations_select"]').change((e)=>{
                 data: {"session_token":uId},
                 success:function(data){
                     if (data) {
-                        action += '/'+rowId+'/'+data
+                        action += '/'+rowId+'/'+data+'/'+userName
                         $('.checkbox-operations-add-pdf').attr('action',action)
                         $('.checkbox-operations-add-pdf').submit() 
                     }               
@@ -1248,6 +1253,12 @@ $('[name="checkbox_operations_select"]').change((e)=>{
         $('.checkbox-operations-delete').hide()
         $('.checkbox-operations-color').hide()
     }
+})
+
+
+$('#add_double_qty').click((e)=>{
+    $('[name="duplicate_qty"]').val($('[name="double_qty"]').val())
+    $('.checkbox-operations-double').submit()
 })
 
 

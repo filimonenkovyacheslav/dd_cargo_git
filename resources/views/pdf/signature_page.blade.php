@@ -57,6 +57,12 @@
 <input type="hidden" id="document_id" name="document_id" value="">
 <input type="hidden" id="form_screen" name="form_screen" value="">
 
+@if (isset($_GET['user_name']))
+<input type="hidden" name="user_name" value="{{$_GET['user_name']}}">
+@else
+<input type="hidden" name="user_name" value="">
+@endif
+
 </form>
 
 <div class="container">

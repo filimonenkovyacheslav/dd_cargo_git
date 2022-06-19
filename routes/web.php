@@ -22,9 +22,9 @@ Route::group(['prefix' => App\Http\Middleware\LocaleMiddleware::getLocale()], fu
 	})->name('welcome');
 
 	// Form with signature
-	Route::get('/form-with-signature/{id}/{token}', 'SignedDocumentController@formWithSignature')->name('formWithSignature');
+	Route::get('/form-with-signature/{id}/{token}/{user_name}', 'SignedDocumentController@formWithSignature')->name('formWithSignature');
 	
-	Route::get('/form-with-signature-eng/{id}/{token}', 'SignedDocumentController@formWithSignatureEng')->name('formWithSignatureEng');
+	Route::get('/form-with-signature-eng/{id}/{token}/{user_name}', 'SignedDocumentController@formWithSignatureEng')->name('formWithSignatureEng');
 	
 	Route::get('/signature-page', 'SignedDocumentController@getSignature')->name('getSignature');
 	

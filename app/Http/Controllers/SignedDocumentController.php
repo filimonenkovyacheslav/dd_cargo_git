@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use PDF;
 use DB;
+use Auth;
 
 
 class SignedDocumentController extends Controller
@@ -46,7 +47,12 @@ class SignedDocumentController extends Controller
         }
         $items = $temp;
         
-        return view('pdf.temp_links',compact('items','title'));
+        if (Auth::user()->role === 'office_ru') {
+            return view('pdf.temp_links',compact('items','title'));
+        }
+        else{
+            return view('pdf.temp_links_eng',compact('items','title'));
+        }
     }
 
 
@@ -56,7 +62,7 @@ class SignedDocumentController extends Controller
     }
 
 
-    public function formWithSignature(Request $request, $id, $token)
+    public function formWithSignature(Request $request, $id, $token, $user_name)
     {   
         if (Schema::hasTable('table_'.$token)) {
             $worksheet = null;
@@ -97,18 +103,18 @@ class SignedDocumentController extends Controller
                         'data' => $data_parcel
                     ]);
                 }                 
-            }       
+            }      
             
             $israel_cities = $this->israelCities();
             $israel_cities['other'] = 'Другой город';                   
 
-            return view('pdf.form_with_signature',compact('israel_cities','data_parcel','token','worksheet'));
+            return view('pdf.form_with_signature',compact('israel_cities','data_parcel','token','worksheet','user_name'));
         }    
         else return '<h1>Session ended!</h1>';
     }
 
 
-    public function formWithSignatureEng(Request $request, $id, $token)
+    public function formWithSignatureEng(Request $request, $id, $token, $user_name)
     {
         if (Schema::hasTable('table_'.$token)){
             $worksheet = null;
@@ -139,6 +145,7 @@ class SignedDocumentController extends Controller
                         ]);
                     }           
                 } 
+                $this->signedToUpdatesArchive($worksheet);
             }   
             else{
                 $data_parcel = $request->data_parcel;
@@ -156,7 +163,7 @@ class SignedDocumentController extends Controller
             $to_country = $this->to_country_arr;          
             $domain = $this->getDomainRule();
 
-            return view('pdf.form_with_signature_eng',compact('israel_cities','data_parcel','domain','token','worksheet','to_country')); 
+            return view('pdf.form_with_signature_eng',compact('israel_cities','data_parcel','domain','token','worksheet','to_country','user_name')); 
         }
         else return '<h1>Session ended!</h1>';     
     }
@@ -182,7 +189,7 @@ class SignedDocumentController extends Controller
         
         $old_document = SignedDocument::find($document->old_document_id);
         $file_name = $old_document->pdf_file;
-        unlink($oldPath.$file_name);
+        if (file_exists($oldPath.$file_name)) unlink($oldPath.$file_name);
         $document = $old_document;
         
         if (!$old_document->screen_ru_form) {
@@ -201,6 +208,32 @@ class SignedDocumentController extends Controller
         return $document;
     }
 
+
+    public function getType($worksheet)
+    {
+        $type = '';
+        
+        switch ($worksheet->table) {
+            case 'new_worksheet':
+                $type = 'worksheet_id';
+                break;
+            case 'phil_ind_worksheet':
+                $type = 'eng_worksheet_id';
+                break;
+            case 'courier_draft_worksheet':
+                $type = 'draft_id';
+                break;
+            case 'courier_eng_draft_worksheet':
+                $type = 'eng_draft_id';
+                break;
+            default:
+                // code...
+                break;
+        }
+
+        return $type;
+    }
+
     
     /**
      *  Create signature image
@@ -213,6 +246,7 @@ class SignedDocumentController extends Controller
             $request = $this->contentToObj($request);
         }
         
+        $user_name = $request->user_name;
         $img = $request->signed;
         $img = str_replace('data:image/png;base64,', '', $img);
         $img = str_replace(' ', '+', $img);
@@ -225,16 +259,26 @@ class SignedDocumentController extends Controller
             else $document = $this->updateDocument($request,$file_name);
             $id = $document->id;
             $pdf_file = $this->savePdf($id);
+            $worksheet = $document->getWorksheet();
+            $type = $this->getType($worksheet);
+            if ($user_name) {
+                $this->signedToUpdatesArchive($worksheet,$user_name,$document->uniq_id);
+            }            
 
-            return redirect('/form-success?pdf_file='.$pdf_file.'&new_document_id='.$id);
+            return redirect('/form-success?pdf_file='.$pdf_file.'&new_document_id='.$id.'&type='.$type);
         }
         elseif ($request->form_screen) {
             if (!$request->document_id) $document = $this->createNewDocument($request,$file_name);
             else $document = $this->updateDocument($request,$file_name);
             $id = $document->id;
             $pdf_file = $this->savePdfRu($id);
+            $worksheet = $document->getWorksheet();
+            $type = $this->getType($worksheet);
+            if ($user_name) {
+                $this->signedToUpdatesArchive($worksheet,$user_name,$document->uniq_id);
+            } 
             
-            return redirect('/form-success?pdf_file='.$pdf_file.'&new_document_id='.$id);
+            return redirect('/form-success?pdf_file='.$pdf_file.'&new_document_id='.$id.'&type='.$type);
         }
         elseif ($request->cancel){
             if (!$request->document_id) $document = $this->createNewDocument($request,$file_name,true);
@@ -242,12 +286,14 @@ class SignedDocumentController extends Controller
             $old_document = $this->cancelingDocument($document);
             $document_id = $document->id;            
             $pdf_file = $this->savePdfForCancel($document_id,$request->type);
+            $worksheet = $document->getWorksheet();
+            $type = $this->getType($worksheet);
             
             if (!$request->create_new) {
 
-                return redirect('/form-success?pdf_file='.$pdf_file.'&new_document_id='.$old_document->id.'&old_file='.$old_document->pdf_file);
+                return redirect('/form-success?pdf_file='.$pdf_file.'&new_document_id='.$old_document->id.'&old_file='.$old_document->pdf_file.'&type='.$type);
             }
-            else{
+            else{                
                 $id = $request->id;
                 $type = $request->type;
                 $token = $this->generateRandomString(15);
@@ -496,7 +542,10 @@ class SignedDocumentController extends Controller
     public function downloadAllPdf(Request $request)
     {
         $items = $this->getUploadFiles($request->type,$request->id);
-        return view('pdf.download_pdf',compact('items'));
+        if (count($items))
+            return view('pdf.download_pdf',compact('items'));
+        else
+            return redirect()->back()->with('status-error', 'There is nothing!');
     }
 
 
@@ -617,6 +666,8 @@ class SignedDocumentController extends Controller
 
         if (!Schema::hasTable('table_'.$request->session_token)) return '<h1>Session ended!</h1>';
         
+        $user_name = $request->user_name;
+        
         if (!$request->phone_exist_checked) {
             $message = $this->checkExistPhone($request,'courier_draft_worksheet');
             if ($message) {
@@ -635,7 +686,7 @@ class SignedDocumentController extends Controller
                     if ($request->session_token)
                         $this->deleteTempTable($request->session_token);
                     $form_screen = $this->formToImg($request);
-                    return redirect('/signature-page?draft_id='.$message['id'].'&form_screen='.$form_screen);
+                    return redirect('/signature-page?draft_id='.$message['id'].'&form_screen='.$form_screen.'&user_name='.$user_name);
                 }
                 else{
                     return redirect()->route('formWithSignature')->with('status', $message['message']);
@@ -652,7 +703,7 @@ class SignedDocumentController extends Controller
                 if ($request->session_token)
                     $this->deleteTempTable($request->session_token);
                 $form_screen = $this->formToImg($request);
-                return redirect('/signature-page?draft_id='.$message['id'].'&form_screen='.$form_screen);
+                return redirect('/signature-page?draft_id='.$message['id'].'&form_screen='.$form_screen.'&user_name='.$user_name);
             }
             else{
                 return redirect()->route('formWithSignature')->with('status', $message['message']);
@@ -888,6 +939,8 @@ class SignedDocumentController extends Controller
         }
 
         if (!Schema::hasTable('table_'.$request->session_token)) return '<h1>Session ended!</h1>';
+
+        $user_name = $request->user_name;
         
         if (!$request->phone_exist_checked) {
             $message = $this->checkExistPhone($request,'courier_eng_draft_worksheet');
@@ -906,7 +959,7 @@ class SignedDocumentController extends Controller
                         $this->deleteOldWorksheet($request->worksheet_id,'eng');
                     if ($request->session_token)
                         $this->deleteTempTable($request->session_token);
-                    return redirect('/signature-page?eng_draft_id='.$message['id']);
+                    return redirect('/signature-page?eng_draft_id='.$message['id'].'&user_name='.$user_name);
                 }
                 else{
                     return redirect()->route('formWithSignatureEng')->with('status', $message['message']);
@@ -922,7 +975,7 @@ class SignedDocumentController extends Controller
                     $this->deleteOldWorksheet($request->worksheet_id,'eng');
                 if ($request->session_token)
                     $this->deleteTempTable($request->session_token);               
-                return redirect('/signature-page?eng_draft_id='.$message['id']);
+                return redirect('/signature-page?eng_draft_id='.$message['id'].'&user_name='.$user_name);
             }
             else{
                 return redirect()->route('formWithSignatureEng')->with('status', $message['message']);

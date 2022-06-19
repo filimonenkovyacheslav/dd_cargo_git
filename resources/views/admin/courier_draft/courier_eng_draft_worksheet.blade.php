@@ -138,11 +138,9 @@
 								<option value="activate">Activate</option>
 								@endcan
 
-								@can('editEngDraft')	
 								<option value="cancel-pdf">Cancel PDF</option>
 								<option value="add-pdf">Add PDF</option>
 								<option value="download-pdf">Download PDF</option>
-								@endcan
 								
 							</select>
 						</label>
@@ -201,12 +199,15 @@
 						{!! Form::button('Delete',['class'=>'btn btn-danger  checkbox-operations-delete','type'=>'submit','onclick' => 'ConfirmDelete(event)']) !!}
 						{!! Form::close() !!}
 
+						@endcan
+
 						<form class="checkbox-operations-change-one" action="{{ url('/admin/courier-eng-draft-worksheet/') }}" method="GET">
 							@csrf	
 						</form>
 
 						<form class="checkbox-operations-double" action="{{ url('/admin/courier-eng-draft-worksheet-double/') }}" method="GET">
 							@csrf	
+							<input type="hidden" name="duplicate_qty" value="1">
 						</form>
 
 						<form class="checkbox-operations-activate" action="{{ url('/admin/courier-eng-draft') }}" method="GET">
@@ -228,9 +229,7 @@
 							<input type="hidden" name="id" class="download-pdf">
 							<input type="hidden" name="type" value="eng_draft_id">
 						</form>
-
-						@endcan
-
+						
 					</div>
 
 					@endcan

@@ -214,6 +214,7 @@
 
 						<form class="checkbox-operations-double" action="{{ url('/admin/courier-draft-worksheet-double/') }}" method="GET">
 							@csrf	
+							<input type="hidden" name="duplicate_qty" value="1">
 						</form>
 
 						<form class="checkbox-operations-activate" action="{{ url('/admin/courier-draft') }}" method="GET">

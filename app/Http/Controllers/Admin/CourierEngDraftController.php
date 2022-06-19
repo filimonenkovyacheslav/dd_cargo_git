@@ -628,15 +628,13 @@ class CourierEngDraftController extends AdminController
     }
 
 
-    public function courierEngDraftWorksheetDouble($id)
+    public function courierEngDraftWorksheetDouble(Request $request,$id)
     {
-    	$object = (object)[];
+    	$duplicate_qty = $request->duplicate_qty;
     	$worksheet = CourierEngDraftWorksheet::find($id);
+    	if (!$worksheet->getLastDocUniq())
+    		return redirect()->to(session('this_previous_url'))->with('status-error', 'You can not duplicate without PDF!');
     	$old_delete = false;
-    	$all_worksheet = CourierEngDraftWorksheet::where([
-    		['in_trash',false],
-    		['standard_phone',$worksheet->standard_phone]
-    	])->get();
     	$worksheet_data = [
     		'standard_phone' => $worksheet->standard_phone,
     		'shipper_name' => $worksheet->shipper_name,
@@ -657,53 +655,61 @@ class CourierEngDraftController extends AdminController
     		'consignee_id' => $worksheet->consignee_id,
     		'order_date' => $worksheet->order_date,
     		'direction' => $worksheet->direction
-    	];   	
-
-    	if (!$worksheet->getLastDocUniq())
-    		$old_delete = $this->deleteOldWorksheet($id,'eng');
+    	]; 
     	
-    	$qty = $all_worksheet->count();    	  		   		
-    	CourierEngDraftWorksheet::create($worksheet_data);
-    	$new_id = DB::getPdo()->lastInsertId();
-    	CourierEngDraftWorksheet::find($new_id)
-    	->update([
-    		'date' => date('Y-m-d'),
-    		'order_date' => $worksheet->order_date,
-    		'status' => 'Double',
-    		'shipped_items' => 'Empty: 0',
-    		'status_date' => date('Y-m-d')
-    	]);
-
-    	$id_arr = CourierEngDraftWorksheet::where([
-    		['in_trash',false],
-    		['standard_phone',$worksheet->standard_phone]
-    	])->pluck('id');
-    	if (!$old_delete) $qty++;
-    	$last_num = 1;
-    	for ($i=0; $i < count($id_arr); $i++) { 
-    		$worksheet_data['parcels_qty'] = $last_num.' of '.$qty;
-    		CourierEngDraftWorksheet::where([
-    			['id',$id_arr[$i]],
+    	for ($j=0; $j < (int)$duplicate_qty; $j++) { 
+    		
+    		$object = (object)[];   	   	
+    		$all_worksheet = CourierEngDraftWorksheet::where([
     			['in_trash',false],
     			['standard_phone',$worksheet->standard_phone]
-    		])->update($worksheet_data);
-    		$last_num++;
-    	} 
-    	//$this->addingOrderNumber($worksheet->standard_phone, 'en');
+    		])->get();   		
 
-    	$new_worksheet = CourierEngDraftWorksheet::find($new_id);
-    	$new_worksheet->checkCourierTask($new_worksheet->status);
+    		if (!$worksheet->getLastDocUniq() && !$old_delete)
+    			$old_delete = $this->deleteOldWorksheet($id,'eng');
 
-    	$packing = PackingEng::where('work_sheet_id',$id)->get();
-    	if ($packing) {
-    		$packing->each(function ($item, $key) use($new_id){                                 
-    			$new_packing = $item->replicate();
-    			$new_packing->work_sheet_id = $new_id;
-    			$new_packing->tracking = null;
-    			$new_packing->save();
-    		});
-    	}
-    	$this->toUpdatesArchive($object,$new_worksheet,true,$new_id);   		
+    		$qty = $all_worksheet->count();    	  		   		
+    		CourierEngDraftWorksheet::create($worksheet_data);
+    		$new_id = DB::getPdo()->lastInsertId();
+    		CourierEngDraftWorksheet::find($new_id)
+    		->update([
+    			'date' => date('Y-m-d'),
+    			'order_date' => $worksheet->order_date,
+    			'status' => 'Double',
+    			'shipped_items' => 'Empty: 0',
+    			'status_date' => date('Y-m-d')
+    		]);
+
+    		$id_arr = CourierEngDraftWorksheet::where([
+    			['in_trash',false],
+    			['standard_phone',$worksheet->standard_phone]
+    		])->pluck('id');
+    		if (!$old_delete) $qty++;
+    		$last_num = 1;
+    		for ($i=0; $i < count($id_arr); $i++) { 
+    			$worksheet_data['parcels_qty'] = $last_num.' of '.$qty;
+    			CourierEngDraftWorksheet::where([
+    				['id',$id_arr[$i]],
+    				['in_trash',false],
+    				['standard_phone',$worksheet->standard_phone]
+    			])->update($worksheet_data);
+    			$last_num++;
+    		} 
+
+    		$new_worksheet = CourierEngDraftWorksheet::find($new_id);
+    		$new_worksheet->checkCourierTask($new_worksheet->status);
+
+    		$packing = PackingEng::where('work_sheet_id',$id)->get();
+    		if ($packing) {
+    			$packing->each(function ($item, $key) use($new_id){                                 
+    				$new_packing = $item->replicate();
+    				$new_packing->work_sheet_id = $new_id;
+    				$new_packing->tracking = null;
+    				$new_packing->save();
+    			});
+    		}
+    		$this->toUpdatesArchive($object,$new_worksheet,true,$new_id);
+    	}   	   		
     	
     	return redirect()->to(session('this_previous_url'))->with('status', 'Row duplicated successfully!');
     }
@@ -715,11 +721,6 @@ class CourierEngDraftController extends AdminController
 		$country = '';
 		$error_message = 'Fill in required fields: ';
 		$user = Auth::user();
-
-		if ((int)$courier_eng_draft_worksheet->parcels_qty > 1) {
-			$error_message = 'You are trying to activate a record related to multiple parcels. Please fix the parcels quantity.';
-			return response()->json(['error' => $error_message]);
-		}
 
 		$country = $courier_eng_draft_worksheet->consignee_country;	
 

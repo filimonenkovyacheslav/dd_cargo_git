@@ -89,6 +89,14 @@ class Controller extends BaseController
     }
 
 
+    protected function signedToUpdatesArchive($worksheet,$user_name = '',$uniq_id = '',$old_uniq_id = '')
+    {
+        $archive = new UpdatesArchive();
+        $archive->signedDocumentToUpdatesArchive($worksheet,$user_name,$uniq_id,$old_uniq_id);
+        return true;
+    }
+
+
     protected function getUploadFiles($type,$id)
     {
         switch ($type) {
@@ -265,7 +273,10 @@ class Controller extends BaseController
         }
 
         if ($document) {
-            if ($document->uniq_id) return redirect("/cancel-pdf-id/$type/$id/");
+            if ($document->uniq_id) {
+                $this->signedToUpdatesArchive($worksheet,'','',$document->uniq_id);
+                return redirect("/cancel-pdf-id/$type/$id/");
+            }
             else return back();
         }
         else return back();        

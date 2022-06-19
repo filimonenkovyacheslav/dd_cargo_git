@@ -791,16 +791,14 @@ class FrontController extends AdminController
         $row = DB::table('new_worksheet')
         ->select('status','status_en','status_he','status_ua')
         ->where([
-            ['tracking_main', '=', $tracking],
-            ['site_name', '=', 'DD-C']
+            ['tracking_main', '=', $tracking]
         ])->get();
         
         if (!$row->count()){
             $row = DB::table('courier_draft_worksheet')
             ->select('status','status_en','status_he','status_ua')
             ->where([
-                ['tracking_main', '=', $tracking],
-                ['site_name', '=', 'DD-C']
+                ['tracking_main', '=', $tracking]
             ])->get();
         }
         
@@ -884,16 +882,14 @@ class FrontController extends AdminController
         $row = DB::table('new_worksheet')
         ->select('status','status_en','status_he','status_ua')
         ->where([
-            ['tracking_main', '=', $tracking],
-            ['site_name', '=', 'For']
+            ['tracking_main', '=', $tracking]
         ])->get();
 
         if (!$row->count()){
             $row = DB::table('courier_draft_worksheet')
             ->select('status','status_en','status_he','status_ua')
             ->where([
-                ['tracking_main', '=', $tracking],
-                ['site_name', '=', 'For']
+                ['tracking_main', '=', $tracking]
             ])->get();
         }
         

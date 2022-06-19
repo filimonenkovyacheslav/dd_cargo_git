@@ -363,9 +363,15 @@
             {!! Form::close() !!}  
 
             @if(Auth::user())
-            @if(Auth::user()->role === 'office_1' || Auth::user()->role === 'admin')
+            @if(Auth::user()->role === 'office_1' || Auth::user()->role === 'admin' || Auth::user()->role === 'office_ru')
             <br>
             <button class="btn btn-danger" id="cancel-disabled" onclick="cancelDisabled()">To cancel Disabled</button>
+            <hr>
+            @if($type === 'draft_id')
+            <a class="btn btn-success" href="{{ url('/admin/courier-draft-worksheet') }}">To Admin Panel</a>
+            @else
+            <a class="btn btn-success" href="{{ url('/admin/new-worksheet') }}">To Admin Panel</a>
+            @endif
             @endif
             @endif                     
             
@@ -404,6 +410,15 @@
         }
         else if (!regexp.test(phoneDigits)) {
             alert('Телефон получателя должен содержать только цифры !');
+            return false;
+        }
+
+        if (!document.querySelector('[name="sender_country"]').value){
+            alert('Поле страна отправителя обязательное к заполнению !');
+            return false;
+        }
+        if (!document.querySelector('[name="recipient_country"]').value){
+            alert('Поле страна получателя обязательное к заполнению !');
             return false;
         }
 

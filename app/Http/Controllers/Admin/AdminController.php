@@ -124,6 +124,9 @@ class AdminController extends Controller
 			if (!$worksheet->tracking_main && !in_array($status, $this->ru_status_arr)) {
 				return 'Status cannot be higher than "Забрать" without tracking number!';
 			}
+			elseif (!$worksheet->getLastDocUniq() && $status === "Забрать") {
+				return 'Status cannot be "Забрать" without PDF!';
+			}			
 			elseif ($worksheet->tracking_main && in_array($status, $this->ru_status_arr)) {
 				return 'Status cannot be lower than "Доставляется на склад в стране отправителя" with tracking number!';
 			}
@@ -136,6 +139,9 @@ class AdminController extends Controller
 			$worksheet = PhilIndWorksheet::find($id);
 			if (!$worksheet->tracking_main && !in_array($status, $this->en_status_arr)) {
 				return 'Status cannot be higher than "Pick up" without tracking number!';
+			}
+			elseif (!$worksheet->getLastDocUniq() && $status === "Pick up") {
+				return 'Status cannot be "Pick up" without PDF!';
 			}
 			elseif ($worksheet->tracking_main && in_array($status, $this->en_status_arr)) {
 				return 'Status cannot be lower than "Forwarding to the warehouse in the sender country" with tracking number!';
@@ -150,6 +156,9 @@ class AdminController extends Controller
 			if (!$worksheet->tracking_main && !in_array($status, $this->ru_status_arr)) {
 				return 'Status cannot be higher than "Забрать" without tracking number!';
 			}
+			elseif (!$worksheet->getLastDocUniq() && $status === "Забрать") {
+				return 'Status cannot be "Забрать" without PDF!';
+			}
 			elseif ($worksheet->tracking_main && in_array($status, $this->ru_status_arr)) {
 				return 'Status cannot be lower than "Доставляется на склад в стране отправителя" with tracking number!';
 			}
@@ -162,6 +171,9 @@ class AdminController extends Controller
 			$worksheet = CourierEngDraftWorksheet::find($id);
 			if (!$worksheet->tracking_main && !in_array($status, $this->en_status_arr)) {
 				return 'Status cannot be higher than "Pick up" without tracking number!';
+			}
+			elseif (!$worksheet->getLastDocUniq() && $status === "Pick up") {
+				return 'Status cannot be "Pick up" without PDF!';
 			}
 			elseif ($worksheet->tracking_main && in_array($status, $this->en_status_arr)) {
 				return 'Status cannot be lower than "Forwarding to the warehouse in the sender country" with tracking number!';

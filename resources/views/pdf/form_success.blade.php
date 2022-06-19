@@ -15,6 +15,28 @@
 </div>
 @endif
 
+@if (isset($_GET['type'])) 
+
+@php
+$type = $_GET['type'];
+@endphp
+
+@if(Auth::user())
+@if(Auth::user()->role === 'office_1' || Auth::user()->role === 'admin' || Auth::user()->role === 'office_eng' || Auth::user()->role === 'office_ru')
+<hr>
+@if($type === 'eng_draft_id')
+<a class="btn btn-success" href="{{ url('/admin/courier-eng-draft-worksheet') }}">To Admin Panel</a>
+@elseif($type === 'draft_id')
+<a class="btn btn-success" href="{{ url('/admin/courier-draft-worksheet') }}">To Admin Panel</a>
+@elseif($type === 'worksheet_id')
+<a class="btn btn-success" href="{{ url('/admin/new-worksheet') }}">To Admin Panel</a>
+@else
+<a class="btn btn-success" href="{{ url('/admin/phil-ind-worksheet') }}">To Admin Panel</a>
+@endif
+@endif
+@endif  
+@endif
+
 </center>
 
 @endsection

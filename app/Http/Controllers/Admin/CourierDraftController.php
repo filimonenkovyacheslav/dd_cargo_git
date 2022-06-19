@@ -583,15 +583,13 @@ class CourierDraftController extends AdminController
     }
 
 
-    public function courierDraftWorksheetDouble($id)
+    public function courierDraftWorksheetDouble(Request $request,$id)
     {
-    	$object = (object)[];
+    	$duplicate_qty = $request->duplicate_qty;
     	$worksheet = CourierDraftWorksheet::find($id);
+    	if (!$worksheet->getLastDocUniq())
+    		return redirect()->to(session('this_previous_url'))->with('status-error', 'You can not duplicate without PDF!');
     	$old_delete = false;
-    	$all_worksheet = CourierDraftWorksheet::where([
-    		['in_trash',false],
-    		['standard_phone',$worksheet->standard_phone]
-    	])->get();
     	$worksheet_data = [
     		'standard_phone' => $worksheet->standard_phone,
     		'sender_name' => $worksheet->sender_name,
@@ -617,54 +615,61 @@ class CourierDraftController extends AdminController
     		'site_name' => $worksheet->site_name,  
     		'order_date' => $worksheet->order_date,  		
     		'direction' => $worksheet->direction
-    	];   	
+    	]; 
 
-    	if (!$worksheet->getLastDocUniq())
-    		$old_delete = $this->deleteOldWorksheet($id,'ru');
-    	
-    	$qty = $all_worksheet->count(); 
-    	CourierDraftWorksheet::create($worksheet_data);
-    	$new_id = DB::getPdo()->lastInsertId();
-    	CourierDraftWorksheet::find($new_id)
-    	->update([
-    		'date'=>date('Y-m-d'),
-    		'status' => 'Дубль',
-    		'package_content' => 'Пусто: 0',
-    		'order_date' => $worksheet->order_date,
-    		'status_date' => date('Y-m-d')
-    	]);
-
-    	$id_arr = CourierDraftWorksheet::where([
-    		['in_trash',false],
-    		['standard_phone',$worksheet->standard_phone]
-    	])->pluck('id');
-    	if (!$old_delete) $qty++;
-    	$last_num = 1;
-    	for ($i=0; $i < count($id_arr); $i++) { 
-    		$worksheet_data['parcels_qty'] = $last_num.' of '.$qty;
-    		CourierDraftWorksheet::where([
-    			['id',$id_arr[$i]],
+    	for ($j=0; $j < (int)$duplicate_qty; $j++) { 
+    		
+    		$object = (object)[];   		
+    		$all_worksheet = CourierDraftWorksheet::where([
     			['in_trash',false],
     			['standard_phone',$worksheet->standard_phone]
-    		])->update($worksheet_data);
-    		$last_num++;
-    	} 
+    		])->get();   		  	
 
-    	//$this->addingOrderNumber($worksheet->standard_phone, 'ru');
+    		if (!$worksheet->getLastDocUniq() && !$old_delete)
+    			$old_delete = $this->deleteOldWorksheet($id,'ru');
 
-    	$new_worksheet = CourierDraftWorksheet::find($new_id);
-    	$new_worksheet->checkCourierTask($new_worksheet->status);
+    		$qty = $all_worksheet->count(); 
+    		CourierDraftWorksheet::create($worksheet_data);
+    		$new_id = DB::getPdo()->lastInsertId();
+    		CourierDraftWorksheet::find($new_id)
+    		->update([
+    			'date'=>date('Y-m-d'),
+    			'status' => 'Дубль',
+    			'package_content' => 'Пусто: 0',
+    			'order_date' => $worksheet->order_date,
+    			'status_date' => date('Y-m-d')
+    		]);
 
-    	$packing = PackingSea::where('work_sheet_id',$id)->get();
-    	if ($packing) {
-    		$packing->each(function ($item, $key) use($new_id){                                 
-    			$new_packing = $item->replicate();
-    			$new_packing->work_sheet_id = $new_id;
-    			$new_packing->track_code = null;
-    			$new_packing->save();
-    		});
-    	}  
-    	$this->toUpdatesArchive($object,$new_worksheet,true,$new_id);
+    		$id_arr = CourierDraftWorksheet::where([
+    			['in_trash',false],
+    			['standard_phone',$worksheet->standard_phone]
+    		])->pluck('id');
+    		if (!$old_delete) $qty++;
+    		$last_num = 1;
+    		for ($i=0; $i < count($id_arr); $i++) { 
+    			$worksheet_data['parcels_qty'] = $last_num.' of '.$qty;
+    			CourierDraftWorksheet::where([
+    				['id',$id_arr[$i]],
+    				['in_trash',false],
+    				['standard_phone',$worksheet->standard_phone]
+    			])->update($worksheet_data);
+    			$last_num++;
+    		} 
+
+    		$new_worksheet = CourierDraftWorksheet::find($new_id);
+    		$new_worksheet->checkCourierTask($new_worksheet->status);
+
+    		$packing = PackingSea::where('work_sheet_id',$id)->get();
+    		if ($packing) {
+    			$packing->each(function ($item, $key) use($new_id){                                 
+    				$new_packing = $item->replicate();
+    				$new_packing->work_sheet_id = $new_id;
+    				$new_packing->track_code = null;
+    				$new_packing->save();
+    			});
+    		}  
+    		$this->toUpdatesArchive($object,$new_worksheet,true,$new_id);
+    	}    	
     	
     	return redirect()->to(session('this_previous_url'))->with('status', 'Строка успешно продублирована!');
     }
@@ -675,11 +680,6 @@ class CourierDraftController extends AdminController
     	$courier_draft_worksheet = CourierDraftWorksheet::find($id);
 		$error_message = 'Заполните обязателные поля: ';
 		$user = Auth::user();
-
-		if ((int)$courier_draft_worksheet->parcels_qty > 1) {
-			$error_message = 'Вы пытаетесь активировать запись, которая относится к нескольким посылкам. Проверьте количество посылок перед активацией.';
-			return response()->json(['error' => $error_message]);
-		}
 
 		if (!$courier_draft_worksheet->sender_name) $error_message .= 'Отправитель,';
 		if (!$courier_draft_worksheet->standard_phone) $error_message .= 'Телефон (стандарт),';

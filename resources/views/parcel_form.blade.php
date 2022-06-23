@@ -189,9 +189,12 @@
             </div>
 
             <div class="form-group">
-                <div class="row">
-                    {!! Form::label('sender_city','Если вы не нашли в списке название вашего населенного пункта, выберите название ближайшего к вам города',['class' => 'col-md-6 control-label'])   !!}
-                    <div class="col-md-6">
+                <div class="row">                   
+                    <div class="col-md-12">
+                        @php
+                        $temp = array('' => 'Выберите название ближайшего к вам города');
+                        $israel_cities = array_merge($temp, $israel_cities);
+                        @endphp
                         {!! Form::select('sender_city', $israel_cities, isset($data_parcel->sender_city) ? $data_parcel->sender_city : '',['class' => 'form-control']) !!}
                     </div>
                 </div>
@@ -321,6 +324,11 @@
 
         if (!document.querySelector('[name="sender_country"]').value){
             alert('Поле страна обязательное к заполнению !');
+            return false;
+        }
+
+        if (!document.querySelector('[name="sender_city"]').value){
+            alert('Поле город обязательное к заполнению !');
             return false;
         }
 

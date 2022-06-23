@@ -97,8 +97,46 @@ class Controller extends BaseController
     }
 
 
-    protected function getUploadFiles($type,$id)
+    protected function checkDocument($type,$id)
     {
+        $items = DB::table('temp_tables')->select('name')->get();
+        if ($items->count()) {
+            foreach ($items as $item) {
+                if (Schema::hasColumn('table_'.$item->name, 'worksheet_id')) {
+                    $t = DB::table('table_'.$item->name)->where([
+                        ['id',1],
+                        ['type',$type],
+                        ['worksheet_id',$id]
+                    ])->first();
+                    if ($t) return true;
+                }     
+            }
+        }
+        return false;
+    }
+
+
+    protected function checkDocument_2($type,$id)
+    {
+        $items = $this->getUploadFiles($type,$id);
+        $worksheet = $this->getWorkSheet($type,$id);
+        $uniq_id = $worksheet->getLastDocUniq();
+        if (count($items) && $uniq_id){
+            foreach($items as $item){
+                if ($uniq_id === $item['uniq_id']) {
+                    return true;
+                }                
+            }           
+        }
+        else
+            return false;
+    }
+
+
+    protected function getWorkSheet($type,$id)
+    {
+        $worksheet = null;
+        
         switch ($type) {
 
             case "draft_id":
@@ -124,8 +162,16 @@ class Controller extends BaseController
             $worksheet = PhilIndWorksheet::find($id);
 
             break;
-        }  
+        }
 
+        return $worksheet;
+    }
+
+
+    protected function getUploadFiles($type,$id)
+    {
+          
+        $worksheet = $this->getWorkSheet($type,$id);
         $documents = $worksheet->signedDocuments;
         $last_doc = $worksheet->getLastDoc();
         $items = [];
@@ -139,6 +185,7 @@ class Controller extends BaseController
                         'path'=>$folderPath.$file, 
                         'name'=>$file,
                         'signature'=>'',
+                        'uniq_id'=>'',                       
                         'signature_for_cancel'=>$signaturesPath.$document->signature_for_cancel
                     ];
                 }
@@ -150,6 +197,7 @@ class Controller extends BaseController
                 if ($file) $items[] = [
                     'path'=>$folderPath.$file, 
                     'name'=>$file,
+                    'uniq_id'=>$document->uniq_id,
                     'signature'=>$signaturesPath.$document->signature,
                     'signature_for_cancel'=>''
                 ];
@@ -327,7 +375,9 @@ class Controller extends BaseController
 
 
     public function cancelPdfId($type,$id)
-    {        
+    {    
+        if ($this->checkDocument($type,$id)) return redirect()->back()->with('status-error', 'There is an unfinished process!'); 
+        if (!$this->checkDocument_2($type,$id)) return redirect()->back()->with('status-error', 'There is nothing to cancel or an unfinished process! Complete the process or recreate the order!');  
         $message = $this->messageForCancelPdf($type,$id)[0];
         $worksheet = $this->messageForCancelPdf($type,$id)[1];
         return view('pdf.form_cancel_pdf',compact('worksheet','type','message'));

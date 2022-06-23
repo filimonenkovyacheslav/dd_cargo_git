@@ -186,8 +186,11 @@
 
             <div class="form-group">
                 <div class="row">
-                    {!! Form::label('shipper_city','If you failed to find your location name at the dropdown menu please choose the nearest city',['class' => 'col-md-6 control-label'])   !!}
-                    <div class="col-md-6">
+                    @php
+                    $temp = array('' => 'Please choose the nearest city');
+                    $israel_cities = array_merge($temp, $israel_cities);
+                    @endphp
+                    <div class="col-md-12">
                         {!! Form::select('shipper_city', $israel_cities, isset($data_parcel->shipper_city) ? $data_parcel->shipper_city : '',['class' => 'form-control']) !!}
                     </div>
                 </div>
@@ -326,6 +329,10 @@
 
         if (!document.querySelector('[name="shipper_country"]').value){
             alert('The country field is required !');
+            return false;
+        }
+        if (!document.querySelector('[name="shipper_city"]').value){
+            alert('The city field is required !');
             return false;
         }
         if (!document.querySelector('[name="consignee_country"]').value){

@@ -280,15 +280,15 @@ class SignedDocumentController extends Controller
             
             return redirect('/form-success?pdf_file='.$pdf_file.'&new_document_id='.$id.'&type='.$type);
         }
-        elseif ($request->cancel){
+        elseif ($request->cancel){    
             if (!$request->document_id) $document = $this->createNewDocument($request,$file_name,true);
-            else $document = $this->updateDocument($request,$file_name);
+            else $document = $this->updateDocument($request,$file_name);        
             $old_document = $this->cancelingDocument($document);
             $document_id = $document->id;            
             $pdf_file = $this->savePdfForCancel($document_id,$request->type);
             $worksheet = $document->getWorksheet();
             $type = $this->getType($worksheet);
-            
+
             if (!$request->create_new) {
 
                 return redirect('/form-success?pdf_file='.$pdf_file.'&new_document_id='.$old_document->id.'&old_file='.$old_document->pdf_file.'&type='.$type);
@@ -299,7 +299,7 @@ class SignedDocumentController extends Controller
                 $token = $this->generateRandomString(15);
                 $this->createTempTableAfterCancel($token);
                 return redirect()->route('formAfterCancel',compact('type','id','document_id','token'));
-            }
+            }          
         }               
     }
 
@@ -312,6 +312,8 @@ class SignedDocumentController extends Controller
             $table->text('data')->nullable();
             $table->string('link')->nullable();
             $table->string('name')->nullable();
+            $table->string('type')->nullable();
+            $table->string('worksheet_id')->nullable();
             $table->timestamps();
         });
         DB::table('temp_tables')->insert([
@@ -343,6 +345,8 @@ class SignedDocumentController extends Controller
             $form_link = url('/form-after-cancel/'.$type.'/'.$id.'/'.$document_id.'/'.$token);
             DB::table('table_'.$token)->insert([
                 'link'=>$form_link,
+                'type'=>$type,
+                'worksheet_id'=>$id,
                 'name'=>$data_parcel['first_name'].' '.$data_parcel['last_name']
             ]);
             $data_parcel = json_encode($data_parcel);
@@ -360,6 +364,8 @@ class SignedDocumentController extends Controller
             $form_link = url('/form-after-cancel/'.$type.'/'.$id.'/'.$document_id.'/'.$token);
             DB::table('table_'.$token)->insert([
                 'link'=>$form_link,
+                'type'=>$type,
+                'worksheet_id'=>$id,
                 'name'=>$data_parcel['first_name'].' '.$data_parcel['last_name']
             ]);
             $data_parcel = json_encode($data_parcel);
@@ -612,6 +618,8 @@ class SignedDocumentController extends Controller
                 $table->text('data')->nullable();
                 $table->string('link')->nullable();
                 $table->string('name')->nullable();
+                $table->string('type')->nullable();
+                $table->string('worksheet_id')->nullable();
                 $table->timestamps();
             });
             DB::table('temp_tables')->insert([

@@ -331,10 +331,19 @@
             alert('The country field is required !');
             return false;
         }
-        if (!document.querySelector('[name="shipper_city"]').value){
-            alert('The city field is required !');
-            return false;
+        if (document.querySelector('[name="shipper_country"]').value !== 'Germany') {
+            if (!document.querySelector('[name="shipper_city"]').value){
+                alert('The city field is required !');
+                return false;
+            }
         }
+        else{
+            if (!document.querySelector('input[name="shipper_city"]').value){
+                alert('The city field is required !');
+                return false;
+            }
+        }
+        
         if (!document.querySelector('[name="consignee_country"]').value){
             alert('The country field is required !');
             return false;

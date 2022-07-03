@@ -969,38 +969,15 @@ class FrontController extends AdminController
         if (!$request->phone_exist_checked) {
             $message = $this->checkExistPhone($request,'courier_eng_draft_worksheet');
             if ($message) {
-                if ($request->signature){
-                    return redirect()->route('formWithSignatureEng')->with('phone_exist', $message)->with('phone_number',$request->standard_phone);
-                } else
                 return redirect()->route('philIndParcelForm')->with('phone_exist', $message)->with('phone_number',$request->standard_phone);
             }
         }  
         else{
             $message = $this->__philIndParcelAdd($request);
-            if ($request->signature) {
-                if ($message['id']) {
-                    if ($request->session_token)
-                        $this->deleteTempTable($request->session_token);
-                    return redirect()->route('getSignature')->with('eng_draft_id', $message['id']);
-                }
-                else{
-                    return redirect()->route('formWithSignatureEng')->with('status', $message['message']);
-                }
-            }else
             return redirect()->route('philIndParcelForm')->with('status', $message['message']);
         }     
         
         $message = $this->__philIndParcelAdd($request);
-        if ($request->signature) {
-            if ($message['id']) {
-                if ($request->session_token)
-                        $this->deleteTempTable($request->session_token);
-                return redirect()->route('getSignature')->with('eng_draft_id', $message['id']);
-            }
-            else{
-                return redirect()->route('formWithSignatureEng')->with('status', $message['message']);
-            }
-        }else
         return redirect()->route('philIndParcelForm')->with('status', $message['message']);
     }
     

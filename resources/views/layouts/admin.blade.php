@@ -180,6 +180,18 @@
                         <a href="{{route('showPalletData')}}"><i class="menu-icon fa fa-book "></i> Pallets </a>
                     </li> 
                     @endcan 
+
+                    @can('changeColor')
+                    <li>
+                        <a href="{{route('adminLog')}}"><i class="menu-icon fa fa-book "></i> Logs</a>
+                    </li> 
+                    @endcan 
+
+                    @can('changeColor')
+                    <li>
+                        <a href="{{route('generalSearchShow')}}"><i class="menu-icon fa fa-book "></i> General Search</a>
+                    </li> 
+                    @endcan 
                 
                 </ul>               
             </div><!-- /.navbar-collapse -->

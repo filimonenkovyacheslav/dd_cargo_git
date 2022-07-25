@@ -43,7 +43,7 @@ class IndexController extends AdminController
         		$new_row->save();
         	}
         }*/
-        if ($role !== 'user' && $role !== 'china_viewer' && $role !== 'china_admin' && $role !== 'office_eng' && $role !== 'viewer_eng') {
+        if ($role !== 'user' && $role !== 'china_viewer' && $role !== 'china_admin' && $role !== 'office_eng' && $role !== 'viewer_eng' && $role !== 'courier') {
             return view('admin.partners', ['title' => $title,'partners' => $partners, 'viewer_arr' => $viewer_arr]);
         }
         elseif ($role === 'china_viewer' || $role === 'china_admin') {
@@ -51,6 +51,9 @@ class IndexController extends AdminController
         }
         elseif ($role === 'office_eng' || $role === 'viewer_eng') {
             return redirect()->route('adminPhilIndIndex');
+        }
+        elseif ($role === 'courier') {
+            return redirect()->route('adminCourierTask');
         }
         else{
             return redirect()->route('welcome');

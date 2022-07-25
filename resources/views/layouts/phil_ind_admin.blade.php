@@ -58,8 +58,7 @@
     </script>
 
 </head>
-<body>
-    @can('eng-view-post')
+<body>   
 
     <!-- Left Panel -->
 
@@ -76,6 +75,9 @@
 
             <div id="main-menu" class="main-menu collapse navbar-collapse">
                 <ul class="nav navbar-nav">
+
+                    @can('eng-view-post')
+                    
                     <li class="active">
                         <a href="{{route('adminPhilIndIndex')}}"> <i class="menu-icon fa fa-dashboard"></i>Control Panel </a>
                     </li>                 
@@ -91,6 +93,8 @@
                     <li>
                         <a href="{{route('adminPhilIndWorksheet')}}"><i class="menu-icon fa fa-archive "></i> Work sheet </a>
                     </li>
+
+                    @endcan
 
                     @can('editPost')
                     <li class="dropdown">
@@ -164,6 +168,18 @@
                     @can('editColumns-2')
                     <li>
                         <a href="{{route('showPalletData')}}"><i class="menu-icon fa fa-book "></i> Pallets </a>
+                    </li> 
+                    @endcan 
+
+                    @can('changeColor')
+                    <li>
+                        <a href="{{route('adminLog')}}"><i class="menu-icon fa fa-book "></i> Logs</a>
+                    </li> 
+                    @endcan 
+
+                    @can('changeColor')
+                    <li>
+                        <a href="{{route('generalSearchShow')}}"><i class="menu-icon fa fa-book "></i> General Search</a>
                     </li> 
                     @endcan 
                 
@@ -271,9 +287,6 @@
 
 <script src="{{ asset('assets/js/admin-scripts.js') }}"></script>
 
-@else
-<h1>You cannot view this page!</h1>
-@endcan
 </body>
 </html>
 

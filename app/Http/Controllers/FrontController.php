@@ -784,9 +784,9 @@ class FrontController extends AdminController
 
         $update_status_date = NewWorksheet::where('update_status_date','=', date('Y-m-d'))->get()->count();
         
-        if ($update_status_date === 0) {
+        /*if ($update_status_date === 0) {
             app()->call('App\Http\Controllers\RuPostalTrackingController@updateStatusFromUser', [$tracking]);
-        }       
+        } */      
         
         $row = DB::table('new_worksheet')
         ->select('status','status_en','status_he','status_ua')
@@ -799,6 +799,22 @@ class FrontController extends AdminController
             ->select('status','status_en','status_he','status_ua')
             ->where([
                 ['tracking_main', '=', $tracking]
+            ])->get();
+        }
+
+        if (!$row->count()){
+            $row = DB::table('new_worksheet')
+            ->select('status','status_en','status_he','status_ua')
+            ->where([
+                ['packing_number', '=', $tracking]
+            ])->get();
+        }
+
+        if (!$row->count()){
+            $row = DB::table('courier_draft_worksheet')
+            ->select('status','status_en','status_he','status_ua')
+            ->where([
+                ['packing_number', '=', $tracking]
             ])->get();
         }
         
@@ -836,7 +852,19 @@ class FrontController extends AdminController
                 $row = DB::table('courier_eng_draft_worksheet')
                 ->select('status','status_he','status_ru')
                 ->where('tracking_main', '=', $tracking)
+                ->get(); 
+
+            if (!$row->count())
+                $row = DB::table('phil_ind_worksheet')
+                ->select('status','status_he','status_ru')
+                ->where('packing_number', '=', $tracking)
                 ->get();  
+
+            if (!$row->count())
+                $row = DB::table('courier_eng_draft_worksheet')
+                ->select('status','status_he','status_ru')
+                ->where('packing_number', '=', $tracking)
+                ->get(); 
             
             if ($row->count()) {
                 foreach ($row as $val) {
@@ -875,9 +903,9 @@ class FrontController extends AdminController
 
         $update_status_date = NewWorksheet::where('update_status_date','=', date('Y-m-d'))->get()->count();
 
-        if ($update_status_date === 0) {
+        /*if ($update_status_date === 0) {
             app()->call('App\Http\Controllers\RuPostalTrackingController@updateStatusFromUser', [$tracking]);
-        }
+        }*/
         
         $row = DB::table('new_worksheet')
         ->select('status','status_en','status_he','status_ua')
@@ -890,6 +918,22 @@ class FrontController extends AdminController
             ->select('status','status_en','status_he','status_ua')
             ->where([
                 ['tracking_main', '=', $tracking]
+            ])->get();
+        }
+
+        if (!$row->count()){
+            $row = DB::table('new_worksheet')
+            ->select('status','status_en','status_he','status_ua')
+            ->where([
+                ['packing_number', '=', $tracking]
+            ])->get();
+        }
+
+        if (!$row->count()){
+            $row = DB::table('courier_draft_worksheet')
+            ->select('status','status_en','status_he','status_ua')
+            ->where([
+                ['packing_number', '=', $tracking]
             ])->get();
         }
         

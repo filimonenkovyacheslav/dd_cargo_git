@@ -127,8 +127,8 @@ class RuPostalTrackingController extends Controller
 		$xml_string = $client->__doRequest($request, "https://tracking.russianpost.ru/rtm34", "PostalOrderEventsForMail", SOAP_1_2);
 		$array = XmlToArray::convert($xml_string);
 
-		//echo '<pre>'.print_r($barcode,TRUE).'</pre>';
-		//echo '<pre>'.print_r($array,TRUE).'</pre>';	
+		/*echo '<pre>'.print_r($barcode,TRUE).'</pre>';
+		echo '<pre>'.print_r($array,TRUE).'</pre>';	*/
 		
 		if (isset($array['S:Body']['ns7:getOperationHistoryResponse']['ns3:OperationHistoryData']['ns3:historyRecord']))
 		{
@@ -320,8 +320,9 @@ class RuPostalTrackingController extends Controller
 
 	public function cronScript(){
 		//$this->updateStatus();
-		//$this->getRuPostalStatus('CD018736056RU');
-		$this->getRuPostalStatus('CD018738573RU');
+		//$this->getRuPostalStatus('CD018745415RU');
+		$result = $this->getRuPostalStatus('CD018855521RU');
+		echo $result;
 		// wget -O - -q -t 1 https://www.ddcargos.com/api/ru-postal-tracking-cron
 	}
 

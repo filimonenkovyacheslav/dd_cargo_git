@@ -18,6 +18,7 @@ use App\EngDraftWorksheet;
 use Validator;
 use App\User;
 use App\ReceiptArchive;
+use App\CourierTask;
 use DB;
 
 
@@ -356,6 +357,50 @@ class BaseController extends Controller
             $qty += PhilIndWorksheet::where('lot',$batch_number)->count();
 
             return $this->sendResponse(['shipment_qty' => $qty], 'Shipment qty retrieved successfully.');
+        }
+        else{
+            return $this->sendError('Token error.');
+        }
+    }
+
+
+    public function getCourierTasks(Request $request)
+    {
+        if ($this->checkToken($request->token) && $request->token) {
+            $input = $request->all();
+            $validator = Validator::make($input, [
+                'role' => 'required',
+                'name' => 'required'
+            ]);
+
+            if($validator->fails()){
+                return $this->sendError('Validation Error.', $validator->errors());       
+            }
+
+            $role = $input['role'];
+            $name = $input['name'];
+
+            if ($role === 'admin') {
+                $result = CourierTask::where('packing_num','<>',null)
+                ->orWhere([
+                    ['packing_num',null],
+                    ['status','Box']
+                ])
+                ->orWhere([
+                    ['packing_num',null],
+                    ['status','Коробка']
+                ])
+                ->get();
+            }
+            elseif ($role === 'courier' || $role === 'agent') {
+                $result = CourierTask::where('courier',$name)->get()->toArray();                
+            }
+            else return $this->sendError('Role error.');
+            
+            if ($result){
+                $result = $result->toArray();
+                return $this->sendResponse($result, 'Courier tasks retrieved successfully.');
+            }
         }
         else{
             return $this->sendError('Token error.');

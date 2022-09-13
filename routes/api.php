@@ -67,5 +67,8 @@ Route::post('/form-update-after-cancel', 'SignedDocumentController@formUpdateAft
 Route::post('/check-phone-api',['uses' => 'SignedDocumentController@checkPhoneApi','as' => 'checkPhoneApi']);
 Route::post('/phil-ind-check-phone-api',['uses' => 'SignedDocumentController@philIndCheckPhoneApi','as' => 'philIndCheckPhoneApi']);
 
+// Courier tasks for application
+Route::get('/get-courier-tasks', 'API\BaseController@getCourierTasks')->name('getCourierTasks');
+
 // Crone
 Route::get('/ru-postal-tracking-cron', 'RuPostalTrackingController@cronScript')->name('cronScript');

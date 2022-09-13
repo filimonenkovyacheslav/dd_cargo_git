@@ -393,7 +393,7 @@ class BaseController extends Controller
                 ->get();
             }
             elseif ($role === 'courier' || $role === 'agent') {
-                $result = CourierTask::where('courier',$name)->get()->toArray();                
+                $result = CourierTask::where('courier',$name)->get();                
             }
             else return $this->sendError('Role error.');
             

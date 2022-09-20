@@ -406,4 +406,31 @@ class BaseController extends Controller
             return $this->sendError('Token error.');
         }
     }
+
+
+    public function updateTaskStatusBox(Request $request)
+    {
+        if ($this->checkToken($request->token) && $request->token) {
+            $input = $request->all();
+            $validator = Validator::make($input, [
+                'id' => 'required'
+            ]);
+
+            if($validator->fails()){
+                return $this->sendError('Validation Error.', $validator->errors());       
+            }
+
+            $task = CourierTask::find($input['id']);
+            if ($task) {
+                $task->taskDone();
+                return $this->sendResponse($task, 'Courier task updated successfully.');
+            }
+            else{
+                return $this->sendError('Data error.');
+            }           
+        }
+        else{
+            return $this->sendError('Token error.');
+        }
+    }
 }

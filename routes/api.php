@@ -69,6 +69,7 @@ Route::post('/phil-ind-check-phone-api',['uses' => 'SignedDocumentController@phi
 
 // Courier tasks for application
 Route::get('/get-courier-tasks', 'API\BaseController@getCourierTasks')->name('getCourierTasks');
+Route::post('/update-task-status-box', 'API\BaseController@updateTaskStatusBox')->name('updateTaskStatusBox');
 
 // Crone
 Route::get('/ru-postal-tracking-cron', 'RuPostalTrackingController@cronScript')->name('cronScript');

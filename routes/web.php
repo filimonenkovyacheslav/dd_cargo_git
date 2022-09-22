@@ -43,7 +43,7 @@ Route::group(['prefix' => App\Http\Middleware\LocaleMiddleware::getLocale()], fu
 	
 	Route::get('/pdfview-ru/{id}', 'SignedDocumentController@pdfviewRu')->name('pdfviewRu');
 	
-	Route::get('/download-pdf/{id}', 'SignedDocumentController@downloadPdf')->name('downloadPdf');
+	Route::get('/download-pdf/{id}/{api?}', 'SignedDocumentController@downloadPdf')->name('downloadPdf');
 	
 	Route::post('/download-all-pdf', 'SignedDocumentController@downloadAllPdf')->name('downloadAllPdf');
 	

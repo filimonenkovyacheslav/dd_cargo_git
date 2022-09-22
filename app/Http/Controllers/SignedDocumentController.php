@@ -532,9 +532,10 @@ class SignedDocumentController extends Controller
     }
 
 
-    public function downloadPdf($id)
+    public function downloadPdf($id, $api = null)
     {
         $document = SignedDocument::find($id);
+        if (!$document && $api) $document = SignedDocument::where('uniq_id',$id)->first();
         $worksheet = $document->getWorksheet();
         $tracking = $worksheet->tracking_main;
         $cancel = null;

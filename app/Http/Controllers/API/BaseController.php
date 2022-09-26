@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\API;
 use Illuminate\Http\Request;
-use App\Http\Controllers\Controller as Controller;
+use App\Http\Controllers\Admin\AdminController;
 use App\CourierDraftWorksheet;
 use App\CourierEngDraftWorksheet;
 use App\PackingSea;

@@ -17,8 +17,9 @@ use App\DraftWorksheet;
 use App\EngDraftWorksheet;
 use Validator;
 use App\User;
-use App\ReceiptArchive;
 use App\CourierTask;
+use App\ReceiptArchive;
+use App\Receipt;
 use DB;
 
 
@@ -451,17 +452,98 @@ class BaseController extends AdminController
             $task = CourierTask::find($input['id']);
             if ($task) {
                 $worksheet = $task->getWorksheet();
-                $error_message = $this->checkTracking("courier_draft_worksheet", $input['tracking'], $worksheet->id);
-                if($error_message) return $this->sendError('Data error.');
-                
-                $worksheet->tracking_main = $input['tracking'];
-                $worksheet->weight = $input['weight'];
-                $worksheet->width = $input['width'];
-                $worksheet->height = $input['height'];
-                $worksheet->length = $input['length'];
-                $worksheet->save();
+                $old_tracking = $worksheet->tracking_main;
+                $pallet = $worksheet->pallet_number;
 
-                $this->updateStatusByTracking('courier_draft_worksheet', $worksheet);
+                switch ($worksheet->table) {
+
+                    case "courier_draft_worksheet":
+
+                    $error_message = $this->checkTracking("courier_draft_worksheet", $input['tracking'], $worksheet->id);
+                    if($error_message) return $this->sendError('Data error.');
+                    
+                    $lot = $worksheet->batch_number;
+
+                    if ($old_tracking && $old_tracking !== $input['tracking']) {
+                        ReceiptArchive::where('tracking_main', $old_tracking)->delete();
+                        Receipt::where('tracking_main', $old_tracking)->update(
+                            ['tracking_main' => $input['tracking']]
+                        );
+                    }
+                    $notification = ReceiptArchive::where('tracking_main', $input['tracking'])->first();
+                    if (!$notification) $this->checkReceipt($worksheet->id, null, 'ru', $input['tracking'],null,$old_tracking); 
+
+                    PackingSea::where('work_sheet_id',$worksheet->id)->update([
+                        'track_code' => $input['tracking']
+                    ]);
+
+                    // Check for missing tracking
+                    $this->checkForMissingTracking($input['tracking']);
+                    // Update Warehouse pallet
+                    $message = $this->updateWarehousePallet($old_tracking, $input['tracking'], $pallet, $pallet, $lot, $lot, 'ru', $worksheet);
+                    if ($message) return $this->sendError('Data error.');
+                                       
+                    $worksheet->pay_sum = $input['amountPayment'];
+                    $worksheet->tracking_main = $input['tracking'];
+                    $worksheet->weight = $input['weight'];
+                    $worksheet->width = $input['width'];
+                    $worksheet->height = $input['height'];
+                    $worksheet->length = $input['length'];
+                    $worksheet->save();
+
+                    $this->updateStatusByTracking('courier_draft_worksheet', $worksheet);
+
+                    // Activate PDF
+                    if (!$old_tracking && $worksheet->getLastDocUniq()) {
+                        return redirect('/admin/courier-draft-activate/'.$worksheet->id);
+                    }
+
+                    break;
+
+                    case "courier_eng_draft_worksheet":
+
+                    $error_message = $this->checkTracking("courier_eng_draft_worksheet", $input['tracking'], $worksheet->id);
+                    if($error_message) return $this->sendError('Data error.');
+
+                    $lot = $worksheet->lot;
+
+                    if ($old_tracking && $old_tracking !== $input['tracking']) {
+                        ReceiptArchive::where('tracking_main', $old_tracking)->delete();
+                        Receipt::where('tracking_main', $old_tracking)->update(
+                            ['tracking_main' => $input['tracking']]
+                        );
+                    }
+                    $notification = ReceiptArchive::where('tracking_main', $input['tracking'])->first();
+                    if (!$notification) $this->checkReceipt($worksheet->id, null, 'en', $input['tracking'],null,$old_tracking); 
+
+                    PackingEng::where('work_sheet_id',$worksheet->id)->update([
+                        'tracking' => $input['tracking']
+                    ]);
+
+                    // Check for missing tracking
+                    $this->checkForMissingTracking($input['tracking']);
+                    // Update Warehouse pallet
+                    $message = $this->updateWarehousePallet($old_tracking, $input['tracking'], $pallet, $pallet, $lot, $lot, 'en', $worksheet);
+                    if ($message) return $this->sendError('Data error.');
+                    
+                    $worksheet->amount_payment = $input['amountPayment'];
+                    $worksheet->tracking_main = $input['tracking'];
+                    $worksheet->weight = $input['weight'];
+                    $worksheet->width = $input['width'];
+                    $worksheet->height = $input['height'];
+                    $worksheet->length = $input['length'];
+                    $worksheet->save();
+                    
+                    $this->updateStatusByTracking('courier_eng_draft_worksheet', $worksheet);
+
+                    // Activate PDF
+                    if (!$old_tracking && $worksheet->getLastDocUniq()) {
+                        return redirect('/admin/courier-eng-draft-activate/'.$worksheet->id);
+                    }
+                    
+                    break;
+                }                              
+                
                 $worksheet->checkCourierTask($worksheet->status);
 
                 return $this->sendResponse($task, 'Courier task updated successfully.');

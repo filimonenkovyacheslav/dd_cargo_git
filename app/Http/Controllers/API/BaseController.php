@@ -22,7 +22,7 @@ use App\CourierTask;
 use DB;
 
 
-class BaseController extends Controller
+class BaseController extends AdminController
 {
     protected $token = 'd1k6Lpr2nxEa0R96jCSI5xxUjNkJOLFo2vGllglbqZ1MTHFNunB5b8wfy2pc';
     
@@ -423,6 +423,47 @@ class BaseController extends Controller
             $task = CourierTask::find($input['id']);
             if ($task) {
                 $task->taskDone();
+                return $this->sendResponse($task, 'Courier task updated successfully.');
+            }
+            else{
+                return $this->sendError('Data error.');
+            }           
+        }
+        else{
+            return $this->sendError('Token error.');
+        }
+    }
+
+
+    public function addDataWithTracking(Request $request)
+    {
+        if ($this->checkToken($request->token) && $request->token) {
+            $input = $request->all();
+            $validator = Validator::make($input, [
+                'id' => 'required',
+                'tracking' => 'required'
+            ]);
+
+            if($validator->fails()){
+                return $this->sendError('Validation Error.', $validator->errors());       
+            }
+
+            $task = CourierTask::find($input['id']);
+            if ($task) {
+                $worksheet = $task->getWorksheet();
+                $error_message = $this->checkTracking("courier_draft_worksheet", $input['tracking'], $worksheet->id);
+                if($error_message) return $this->sendError('Data error.');
+                
+                $worksheet->tracking_main = $input['tracking'];
+                $worksheet->weight = $input['weight'];
+                $worksheet->width = $input['width'];
+                $worksheet->height = $input['height'];
+                $worksheet->length = $input['length'];
+                $worksheet->save();
+
+                $this->updateStatusByTracking('courier_draft_worksheet', $worksheet);
+                $worksheet->checkCourierTask($worksheet->status);
+
                 return $this->sendResponse($task, 'Courier task updated successfully.');
             }
             else{

@@ -790,9 +790,11 @@ class CourierDraftController extends AdminController
 			}			
 		}
 
-		if ($user->role === 'office_1' || $user->role === 'admin') {
-			$new_worksheet->background = 'tr-orange';
-		}				
+		if (!$admin) {
+			if ($user->role === 'office_1' || $user->role === 'admin') {
+				$new_worksheet->background = 'tr-orange';
+			}
+		}						
 
 		$temp = rtrim($courier_draft_worksheet->package_content, ";");
 		$content_arr = explode(";",$temp);

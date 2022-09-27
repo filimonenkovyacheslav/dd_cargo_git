@@ -885,9 +885,11 @@ class CourierEngDraftController extends AdminController
 			}			
 		}
 
-		if ($user->role === 'office_1' || $user->role === 'admin') {
-			$worksheet->background = 'tr-orange';
-		}
+		if (!$admin) {
+			if ($user->role === 'office_1' || $user->role === 'admin') {
+				$worksheet->background = 'tr-orange';
+			}
+		}		
 
 		if ($worksheet->save())	{
 

@@ -442,7 +442,8 @@ class BaseController extends AdminController
             $input = $request->all();
             $validator = Validator::make($input, [
                 'id' => 'required',
-                'tracking' => 'required'
+                'tracking' => 'required',
+                'role' => 'required'
             ]);
 
             if($validator->fails()){
@@ -491,7 +492,8 @@ class BaseController extends AdminController
                     $worksheet->length = $input['length'];
                     $worksheet->save();
 
-                    $this->updateStatusByTracking('courier_draft_worksheet', $worksheet);
+                    if ($input['role'] === 'courier') $this->updateStatusByTracking('courier_draft_worksheet', $worksheet, true);
+                    else $this->updateStatusByTracking('courier_draft_worksheet', $worksheet);
 
                     // Activate PDF
                     if (!$old_tracking && $worksheet->getLastDocUniq()) {
@@ -534,7 +536,8 @@ class BaseController extends AdminController
                     $worksheet->length = $input['length'];
                     $worksheet->save();
                     
-                    $this->updateStatusByTracking('courier_eng_draft_worksheet', $worksheet);
+                    if ($input['role'] === 'courier') $this->updateStatusByTracking('courier_eng_draft_worksheet', $worksheet, true);
+                    else $this->updateStatusByTracking('courier_eng_draft_worksheet', $worksheet);
 
                     // Activate PDF
                     if (!$old_tracking && $worksheet->getLastDocUniq()) {

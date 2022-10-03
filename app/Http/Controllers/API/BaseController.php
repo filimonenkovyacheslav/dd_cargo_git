@@ -461,7 +461,7 @@ class BaseController extends AdminController
                     case "courier_draft_worksheet":
 
                     $error_message = $this->checkTracking("courier_draft_worksheet", $input['tracking'], $worksheet->id);
-                    if($error_message) return $this->sendError('Data error.');
+                    if($error_message) return $this->sendError($error_message);
                     
                     $lot = $worksheet->batch_number;
 
@@ -482,7 +482,7 @@ class BaseController extends AdminController
                     $this->checkForMissingTracking($input['tracking']);
                     // Update Warehouse pallet
                     $message = $this->updateWarehousePallet($old_tracking, $input['tracking'], $pallet, $pallet, $lot, $lot, 'ru', $worksheet);
-                    if ($message) return $this->sendError('Data error.');
+                    if ($message) return $this->sendError($message);
                                        
                     $worksheet->pay_sum = $input['amountPayment'];
                     $worksheet->tracking_main = $input['tracking'];
@@ -505,7 +505,7 @@ class BaseController extends AdminController
                     case "courier_eng_draft_worksheet":
 
                     $error_message = $this->checkTracking("courier_eng_draft_worksheet", $input['tracking'], $worksheet->id);
-                    if($error_message) return $this->sendError('Data error.');
+                    if($error_message) return $this->sendError($error_message);
 
                     $lot = $worksheet->lot;
 
@@ -526,7 +526,7 @@ class BaseController extends AdminController
                     $this->checkForMissingTracking($input['tracking']);
                     // Update Warehouse pallet
                     $message = $this->updateWarehousePallet($old_tracking, $input['tracking'], $pallet, $pallet, $lot, $lot, 'en', $worksheet);
-                    if ($message) return $this->sendError('Data error.');
+                    if ($message) return $this->sendError($message);
                     
                     $worksheet->amount_payment = $input['amountPayment'];
                     $worksheet->tracking_main = $input['tracking'];
@@ -552,7 +552,7 @@ class BaseController extends AdminController
                 return $this->sendResponse($task, 'Courier task updated successfully.');
             }
             else{
-                return $this->sendError('Data error.');
+                return $this->sendError('Task id error.');
             }           
         }
         else{

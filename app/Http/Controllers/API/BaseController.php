@@ -576,7 +576,7 @@ class BaseController extends AdminController
 
             $user = User::where('api_token',$input['token'])->first();
             if ($user) {
-                $link = if ($input['which_admin'] === 'ru') ? '/form-with-signature/' : '/form-with-signature-eng/';
+                $link = ($input['which_admin'] === 'ru') ? '/form-with-signature/' : '/form-with-signature-eng/';
                 $result = app('App\Http\Controllers\SignedDocumentController')->createTempTable($request);
                 if ($result) {
                     $link .= '0/'.$result.'/'.$user->name;

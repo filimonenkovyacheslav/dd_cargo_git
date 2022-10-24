@@ -71,6 +71,7 @@ Route::post('/phil-ind-check-phone-api',['uses' => 'SignedDocumentController@phi
 Route::get('/get-courier-tasks', 'API\BaseController@getCourierTasks')->name('getCourierTasks');
 Route::post('/update-task-status-box', 'API\BaseController@updateTaskStatusBox')->name('updateTaskStatusBox');
 Route::post('/add-data-with-tracking', 'API\BaseController@addDataWithTracking')->name('addDataWithTracking');
+Route::post('/add-new-signed-form', 'API\BaseController@addNewSignedForm')->name('addNewSignedForm');
 
 // Crone
 Route::get('/ru-postal-tracking-cron', 'RuPostalTrackingController@cronScript')->name('cronScript');

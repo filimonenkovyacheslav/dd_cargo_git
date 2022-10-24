@@ -559,4 +559,36 @@ class BaseController extends AdminController
             return $this->sendError('Token error.');
         }
     }
+
+
+    public function addNewSignedForm(Request $request)
+    {
+        if ($this->checkToken($request->token) && $request->token) {
+            $input = $request->all();
+            $validator = Validator::make($input, [
+                'which_admin' => 'required',
+                'session_token' => 'required'
+            ]);
+
+            if($validator->fails()){
+                return $this->sendError('Validation Error.', $validator->errors());       
+            }
+
+            $user = User::where('api_token',$input['token'])->first();
+            if ($user) {
+                $link = if ($input['which_admin'] === 'ru') ? '/form-with-signature/' : '/form-with-signature-eng/';
+                $result = app('App\Http\Controllers\SignedDocumentController')->createTempTable($request);
+                if ($result) {
+                    $link .= '0/'.$result.'/'.$user->name;
+                    return $this->sendResponse(compact('link'), 'Link created successfully.');
+                }               
+            }
+            else{
+                return $this->sendError('Data error.');
+            }           
+        }
+        else{
+            return $this->sendError('Token error.');
+        }
+    }
 }

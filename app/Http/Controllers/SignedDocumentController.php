@@ -87,7 +87,7 @@ class SignedDocumentController extends Controller
                 if ($data_parcel) {
                     $data_parcel = json_encode($data_parcel);            
                     $result = DB::table('table_'.$token)->find(1);
-                    if (!$result) {
+                    if (!$result || $request->api === 'true') {
                         DB::table('table_'.$token)
                         ->insert([
                             'data' => $data_parcel

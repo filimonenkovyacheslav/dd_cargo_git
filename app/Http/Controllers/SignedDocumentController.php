@@ -149,7 +149,12 @@ class SignedDocumentController extends Controller
                         ->insert([
                             'data' => $data_parcel
                         ]);
-                    }           
+                    }  
+                    elseif ($request->api === 'true') {
+                        $result->update([
+                            'data' => $data_parcel
+                        ]);
+                    }         
                 } 
                 $this->signedToUpdatesArchive($worksheet);
             }   

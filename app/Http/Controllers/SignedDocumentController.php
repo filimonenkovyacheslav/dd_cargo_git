@@ -87,12 +87,17 @@ class SignedDocumentController extends Controller
                 if ($data_parcel) {
                     $data_parcel = json_encode($data_parcel);            
                     $result = DB::table('table_'.$token)->find(1);
-                    if (!$result || $request->api === 'true') {
+                    if (!$result) {
                         DB::table('table_'.$token)
                         ->insert([
                             'data' => $data_parcel
                         ]);
-                    }           
+                    }  
+                    elseif ($request->api === 'true') {
+                        $result->update([
+                            'data' => $data_parcel
+                        ]);
+                    }         
                 } 
             } 
             else{
@@ -334,7 +339,7 @@ class SignedDocumentController extends Controller
     }
 
 
-    public function formAfterCancel($type, $id, $document_id, $token,$api = false)
+    public function formAfterCancel($type, $id, $document_id, $token)
     {
         if (!Schema::hasTable('table_'.$token)) return '<h1>Session ended!</h1>';
         
@@ -362,7 +367,7 @@ class SignedDocumentController extends Controller
             $data_parcel = json_encode($data_parcel);
             
             
-            if (!$api) return view('pdf.form_after_cancel',compact('israel_cities','data_parcel','document_id','type','id','token'));
+            return view('pdf.form_after_cancel',compact('israel_cities','data_parcel','document_id','type','id','token'));
         } 
         elseif ($type === 'eng_worksheet_id' || $type === 'eng_draft_id') {
             if ($type === 'eng_worksheet_id') $worksheet = PhilIndWorksheet::find($id);
@@ -382,7 +387,7 @@ class SignedDocumentController extends Controller
             $domain = $this->getDomainRule();
             $to_country = $this->to_country_arr;
             
-            if (!$api) return view('pdf.form_after_cancel_eng',compact('israel_cities','data_parcel','document_id','type','id','domain','to_country','token'));
+            return view('pdf.form_after_cancel_eng',compact('israel_cities','data_parcel','document_id','type','id','domain','to_country','token'));
         }
     }
 

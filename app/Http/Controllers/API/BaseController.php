@@ -621,6 +621,7 @@ class BaseController extends AdminController
                 else{
                     $id = app('App\Http\Controllers\Admin\CourierDraftController')->courierDraftWorksheetDouble($request,$worksheet->id,true);
                 }
+                app('App\Http\Controllers\SignedDocumentController')->createTempTableAfterCancel($input['session_token']);
                 
                 $link = ($which_admin === 'ru') ? '/form-with-signature/' : '/form-with-signature-eng/';
                 $link .= $id.'/'.$input['session_token'].'/'.$user->name;

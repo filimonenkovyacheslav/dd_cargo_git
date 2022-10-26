@@ -614,14 +614,16 @@ class BaseController extends AdminController
             if ($document) {
                 $which_admin = ($document->worksheet_id || $document->draft_id) ? 'ru' : 'eng';
                 $worksheet = $document->getWorksheet();
+                app('App\Http\Controllers\SignedDocumentController')->createTempTableAfterCancel($input['session_token']);
 
                 if ($which_admin !== 'ru') {
                     $id = app('App\Http\Controllers\Admin\CourierEngDraftController')->courierEngDraftWorksheetDouble($request,$worksheet->id,true);
+                    app('App\Http\Controllers\SignedDocumentController')->formAfterCancel($this->getWorkSheetType($worksheet), $id, $document->id, $input['session_token'],true);
                 }
                 else{
                     $id = app('App\Http\Controllers\Admin\CourierDraftController')->courierDraftWorksheetDouble($request,$worksheet->id,true);
-                }
-                app('App\Http\Controllers\SignedDocumentController')->createTempTableAfterCancel($input['session_token']);
+                    app('App\Http\Controllers\SignedDocumentController')->formAfterCancel($this->getWorkSheetType($worksheet), $id, $document->id, $input['session_token'],true);
+                }               
                 
                 $link = ($which_admin === 'ru') ? '/form-with-signature/' : '/form-with-signature-eng/';
                 $link .= $id.'/'.$input['session_token'].'/'.$user->name;

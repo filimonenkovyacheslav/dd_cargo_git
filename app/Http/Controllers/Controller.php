@@ -194,6 +194,41 @@ class Controller extends BaseController
     }
 
 
+    protected function getWorkSheetType($worksheet)
+    {
+        $type = null;
+        
+        switch ($worksheet->table) {
+
+            case "courier_draft_worksheet":
+
+            $type = 'draft_id';
+
+            break;
+
+            case "courier_eng_draft_worksheet":
+
+            $type = 'eng_draft_id';
+
+            break;
+
+            case "new_worksheet":
+
+            $type = 'worksheet_id';
+
+            break;
+
+            case "phil_ind_worksheet":
+
+            $type = 'eng_worksheet_id';
+
+            break;
+        }
+
+        return $type;
+    }
+
+
     protected function getUploadFiles($type,$id)
     {
           

@@ -334,7 +334,7 @@ class SignedDocumentController extends Controller
     }
 
 
-    public function formAfterCancel($type, $id, $document_id, $token)
+    public function formAfterCancel($type, $id, $document_id, $token,$api = false)
     {
         if (!Schema::hasTable('table_'.$token)) return '<h1>Session ended!</h1>';
         
@@ -362,7 +362,7 @@ class SignedDocumentController extends Controller
             $data_parcel = json_encode($data_parcel);
             
             
-            return view('pdf.form_after_cancel',compact('israel_cities','data_parcel','document_id','type','id','token'));
+            if (!$api) return view('pdf.form_after_cancel',compact('israel_cities','data_parcel','document_id','type','id','token'));
         } 
         elseif ($type === 'eng_worksheet_id' || $type === 'eng_draft_id') {
             if ($type === 'eng_worksheet_id') $worksheet = PhilIndWorksheet::find($id);
@@ -382,7 +382,7 @@ class SignedDocumentController extends Controller
             $domain = $this->getDomainRule();
             $to_country = $this->to_country_arr;
             
-            return view('pdf.form_after_cancel_eng',compact('israel_cities','data_parcel','document_id','type','id','domain','to_country','token'));
+            if (!$api) return view('pdf.form_after_cancel_eng',compact('israel_cities','data_parcel','document_id','type','id','domain','to_country','token'));
         }
     }
 

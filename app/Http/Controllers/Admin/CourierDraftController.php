@@ -631,7 +631,7 @@ class CourierDraftController extends AdminController
     }
 
 
-    public function courierDraftWorksheetDouble(Request $request,$id)
+    public function courierDraftWorksheetDouble(Request $request,$id,$api = false)
     {
     	$duplicate_qty = $request->duplicate_qty;
     	$worksheet = CourierDraftWorksheet::find($id);
@@ -719,7 +719,9 @@ class CourierDraftController extends AdminController
     		$this->toUpdatesArchive($object,$new_worksheet,true,$new_id);
     	}    	
     	
-    	return redirect()->to(session('this_previous_url'))->with('status', 'Строка успешно продублирована!');
+    	if ($api) return $new_worksheet->id;
+    	else
+    		return redirect()->to(session('this_previous_url'))->with('status', 'Строка успешно продублирована!');
     }
 
 

@@ -684,7 +684,7 @@ class CourierEngDraftController extends AdminController
     }
 
 
-    public function courierEngDraftWorksheetDouble(Request $request,$id)
+    public function courierEngDraftWorksheetDouble(Request $request,$id,$api = false)
     {
     	$duplicate_qty = $request->duplicate_qty;
     	$worksheet = CourierEngDraftWorksheet::find($id);
@@ -767,7 +767,9 @@ class CourierEngDraftController extends AdminController
     		$this->toUpdatesArchive($object,$new_worksheet,true,$new_id);
     	}   	   		
     	
-    	return redirect()->to(session('this_previous_url'))->with('status', 'Row duplicated successfully!');
+    	if ($api) return $new_worksheet->id;
+    	else
+    		return redirect()->to(session('this_previous_url'))->with('status', 'Row duplicated successfully!');
     }
 
 

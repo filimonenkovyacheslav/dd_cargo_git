@@ -17,6 +17,7 @@ use Illuminate\Database\Schema\Blueprint;
 use PDF;
 use DB;
 use Auth;
+use App\User;
 
 
 class SignedDocumentController extends Controller
@@ -746,6 +747,14 @@ class SignedDocumentController extends Controller
             else if($field === 'recipient_name'){
                 $new_worksheet->$field = $request->recipient_first_name.' '.$request->recipient_last_name;
             }
+            else if($field === 'courier'){
+                $user = User::where('name',$request->user_name)->first();
+                $role_arr = ['agent','courier'];
+                if ($user && in_array($user->role, $role_arr)) {
+                    $user_name = explode('@', $user->email)[0];
+                    $new_worksheet->$field = $user_name;
+                }               
+            }
             else if($field === 'package_content'){
                 $content = '';       
                 
@@ -1017,6 +1026,14 @@ class SignedDocumentController extends Controller
             }
             else if ($field === 'consignee_address') {
                 $worksheet->$field = $request->consignee_country.' '.$request->consignee_address;
+            }
+            else if($field === 'courier'){
+                $user = User::where('name',$request->user_name)->first();
+                $role_arr = ['agent','courier'];
+                if ($user && in_array($user->role, $role_arr)) {
+                    $user_name = explode('@', $user->email)[0];
+                    $worksheet->$field = $user_name;
+                }               
             }
             else if ($field === 'shipped_items') {
                 $temp = '';

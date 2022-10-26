@@ -21,6 +21,7 @@ use App\CourierTask;
 use App\ReceiptArchive;
 use App\Receipt;
 use DB;
+use App\SignedDocument;
 
 
 class BaseController extends AdminController
@@ -585,6 +586,48 @@ class BaseController extends AdminController
             }
             else{
                 return $this->sendError('Data error.');
+            }           
+        }
+        else{
+            return $this->sendError('Token error.');
+        }
+    }
+
+
+    public function addDuplicateSignedForm(Request $request)
+    {
+        if ($this->checkToken($request->token) && $request->token) {
+            $input = $request->all();
+            $validator = Validator::make($input, [
+                'packing_number' => 'required',
+                'session_token' => 'required',
+                'duplicate_qty' => 'required'
+            ]);
+
+            if($validator->fails()){
+                return $this->sendError('Validation Error.', $validator->errors());       
+            }
+
+            $document = SignedDocument::where('uniq_id',$input['packing_number'])->first();
+            $user = User::where('api_token',$input['token'])->first();
+            
+            if ($document) {
+                $which_admin = ($document->worksheet_id || $document->draft_id) ? 'ru' : 'eng';
+                $worksheet = $document->getWorksheet();
+
+                if ($which_admin === 'ru') {
+                    $id = app('App\Http\Controllers\Admin\CourierEngDraftController')->courierEngDraftWorksheetDouble($request,$worksheet->id,true);
+                }
+                else{
+                    $id = app('App\Http\Controllers\Admin\CourierDraftController')->courierDraftWorksheetDouble($request,$worksheet->id,true);
+                }
+                
+                $link = ($which_admin === 'ru') ? '/form-with-signature/' : '/form-with-signature-eng/';
+                $link .= $id.'/'.$input['session_token'].'/'.$user->name;
+                return $this->sendResponse(compact('link'), 'Link created successfully.');
+            }
+            else{
+                return $this->sendError('There is not this packing number.');
             }           
         }
         else{

@@ -764,7 +764,7 @@ class CourierEngDraftController extends AdminController
     				$new_packing->save();
     			});
     		}
-    		$this->toUpdatesArchive($object,$new_worksheet,true,$new_id);
+    		if (!$api) $this->toUpdatesArchive($object,$new_worksheet,true,$new_id);
     	}   	   		
     	
     	if ($api) return $new_worksheet->id;

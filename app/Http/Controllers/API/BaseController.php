@@ -615,7 +615,7 @@ class BaseController extends AdminController
                 $which_admin = ($document->worksheet_id || $document->draft_id) ? 'ru' : 'eng';
                 $worksheet = $document->getWorksheet();
 
-                if ($which_admin === 'ru') {
+                if ($which_admin !== 'ru') {
                     $id = app('App\Http\Controllers\Admin\CourierEngDraftController')->courierEngDraftWorksheetDouble($request,$worksheet->id,true);
                 }
                 else{

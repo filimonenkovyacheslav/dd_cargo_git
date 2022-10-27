@@ -624,7 +624,7 @@ class BaseController extends AdminController
                 }               
                 
                 $link = ($which_admin === 'ru') ? '/form-with-signature/' : '/form-with-signature-eng/';
-                $link .= $id.'/'.$result.'/'.$user->name;
+                $link .= $id.'/'.$result.'/'.$user->name.'?quantity_sender=1&quantity_recipient=1&api=true';
                 return $this->sendResponse(compact('link'), 'Link created successfully.');
             }
             else{

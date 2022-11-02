@@ -224,6 +224,15 @@
 
             <div class="form-group">
                 <div class="row">
+                    {!! Form::label('recipient_country','Страна назначения',['class' => 'col-md-6 control-label'])   !!}
+                    <div class="col-md-6">
+                        {!! Form::select('recipient_country', array('RU' => 'Россия (RU)', 'UA' => 'Украина (UA)', 'BY' => 'Беларусь (BY)', 'KZ' => 'Казахстан (KZ)'), isset($data_parcel->recipient_country) ? $data_parcel->recipient_country: '',['class' => 'form-control']) !!}
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="row">
                     <div class="col-9">
                         <h3>Количество посылок</h3>
                     </div>

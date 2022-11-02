@@ -786,6 +786,9 @@ class SignedDocumentController extends Controller
                 if (isset($request->need_box)) $new_worksheet->$field = $request->need_box;
                 if (isset($request->comment_2)) $new_worksheet->$field = $request->comment_2;
             }
+            else if ($field === 'direction') {
+                $new_worksheet->$field = $this->createRuDirection($request->sender_country, $request->recipient_country);
+            }
             else if ($field !== 'created_at'){
                 if (isset($request->$field)) {
                     $new_worksheet->$field = $request->$field;

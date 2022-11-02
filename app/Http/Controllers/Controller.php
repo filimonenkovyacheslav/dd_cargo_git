@@ -532,6 +532,14 @@ class Controller extends BaseController
         return $from.'-'.$to;        
     }
 
+
+    protected function createRuDirection($from, $to)
+    {
+        $from = ($from) ? $this->from_country_dir[$from] : '';
+        $to = ($to) ? $to : '';
+        return $from.'-'.$to;        
+    }
+
     
     protected function trackingValidate($tracking)
     {

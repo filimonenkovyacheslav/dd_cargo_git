@@ -119,6 +119,8 @@ class CourierDraftController extends AdminController
 			$check_result .= $this->updateStatusByTracking('courier_draft_worksheet', $courier_draft_worksheet);
 		}
 
+		$courier_draft_worksheet->direction = $this->createRuDirection($request->input('sender_country'), $request->input('recipient_country'));
+
 		if ($old_status !== $courier_draft_worksheet->status) {
 			CourierDraftWorksheet::where('id', $id)
 			->update([
@@ -395,7 +397,47 @@ class CourierDraftController extends AdminController
     						$this->updateWarehouseLot($worksheet->tracking_main, $value_by, 'ru');
     					}
     				}
-    			}    			  			      	
+    			}    
+
+    			if ($column === 'sender_country') {
+    				for ($i=0; $i < count($row_arr); $i++) { 
+    					$worksheet = CourierDraftWorksheet::where('id',$row_arr[$i])->first();
+    					if (!$worksheet->direction) {
+    						$worksheet->direction = $this->from_country_dir[$value_by].'-';
+    						$worksheet->save();
+    					}
+    					else{
+    						$temp = explode('-', $worksheet->direction);
+    						if (count($temp) == 2) {
+    							$worksheet->direction = $this->from_country_dir[$value_by].'-'.$temp[1];
+    						}
+    						else{
+    							$worksheet->direction = $this->from_country_dir[$value_by].'-';
+    						} 
+    						$worksheet->save();  						
+    					}
+    				}
+    			}
+
+    			if ($column === 'recipient_country') {
+    				for ($i=0; $i < count($row_arr); $i++) { 
+    					$worksheet = CourierDraftWorksheet::where('id',$row_arr[$i])->first();
+    					if (!$worksheet->direction) {
+    						$worksheet->direction = '-'.$value_by;
+    						$worksheet->save();
+    					}
+    					else{
+    						$temp = explode('-', $worksheet->direction);
+    						if (count($temp) == 2) {
+    							$worksheet->direction = $temp[0].'-'.$value_by;
+    						}
+    						else{
+    							$worksheet->direction = '-'.$value_by;
+    						} 
+    						$worksheet->save();  						
+    					}
+    				}
+    			}			  			      	
     		}
     		else if ($request->input('status')){
     			for ($i=0; $i < count($row_arr); $i++) { 
@@ -490,29 +532,6 @@ class CourierDraftController extends AdminController
     			->update([
     				'courier' => $request->input('courier')
     			]);  
-    		}
-    		else if ($user->role === 'admin' && !$value_by && $column === 'tracking_main') {
-    			for ($i=0; $i < count($row_arr); $i++) { 
-    				$worksheet = CourierDraftWorksheet::find($row_arr[$i]);
-    				$old_tracking = $worksheet->tracking_main;
-    				$this->removeTrackingFromPalletWorksheet($row_arr[$i], 'ru',true);
-    				$this->toUpdatesArchive($request,$worksheet);
-    				ReceiptArchive::where('tracking_main', $old_tracking)->delete();
-    				Receipt::where('tracking_main', $old_tracking)->update(
-    					['tracking_main' => null]
-    				);
-    				$this->setTrackingToDocument($worksheet,$value_by);
-    				PackingSea::where('work_sheet_id',$worksheet->id)->update([
-    					'track_code' => null
-    				]);
-    				$worksheet->status = 'Подготовка';
-					$worksheet->status_en = null;	
-    				$worksheet->status_ua = null;
-    				$worksheet->status_he = null;
-    				$worksheet->status_date = date('Y-m-d');
-    				$worksheet->tracking_main = null;    				
-    				$worksheet->save();
-    			}    			
     		}
     		else $status_error = 'New fields error!';
 

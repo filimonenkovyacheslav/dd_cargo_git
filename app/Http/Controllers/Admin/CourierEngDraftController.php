@@ -544,28 +544,6 @@ class CourierEngDraftController extends AdminController
     				'courier' => $request->input('courier')
     			]);  
     		}
-    		else if ($user->role === 'admin' && !$value_by && $column === 'tracking_main') {
-    			for ($i=0; $i < count($row_arr); $i++) { 
-    				$worksheet = CourierEngDraftWorksheet::find($row_arr[$i]);
-    				$old_tracking = $worksheet->tracking_main;
-    				$this->removeTrackingFromPalletWorksheet($row_arr[$i], 'en',true);
-    				$this->toUpdatesArchive($request,$worksheet);
-    				ReceiptArchive::where('tracking_main', $old_tracking)->delete();
-    				Receipt::where('tracking_main', $old_tracking)->update(
-    					['tracking_main' => null]
-    				);
-    				$this->setTrackingToDocument($worksheet,$value_by);
-    				PackingEng::where('work_sheet_id',$worksheet->id)->update([
-    					'tracking' => null
-    				]);
-    				$worksheet->status = 'Pending';
-    				$worksheet->status_ru = null;
-    				$worksheet->status_he = null;
-    				$worksheet->status_date = date('Y-m-d');
-    				$worksheet->tracking_main = null;    				
-    				$worksheet->save();
-    			}    			
-    		}
     		else $status_error = 'New fields error!';
 
     		for ($i=0; $i < count($row_arr); $i++) { 

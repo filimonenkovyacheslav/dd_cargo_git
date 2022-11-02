@@ -192,6 +192,8 @@
 							<input type="hidden" name="status_en">
 							<input type="hidden" name="status_ua">
 							<input type="hidden" name="status_he">
+							<input type="hidden" name="sender_country_val">
+							<input type="hidden" name="recipient_country_val">
 						</label>
 						
 						{!! Form::button('Сохранить',['class'=>'btn btn-primary checkbox-operations-change','type'=>'submit']) !!}
@@ -409,7 +411,7 @@
 											<div class="div-3">{{$row->date}}</div>
 										</td>
 										<td class="@can('editPost')allowed-update @endcan" title="{{$row->direction}}">
-											<div data-name="direction" data-id="{{ $row->id }}" class="div-2">{{$row->direction}}</div>
+											<div class="div-3">{{$row->direction}}</div>
 										</td>
 										<td class="@can('editPost')allowed-update @endcan @if($row->getLastDocUniq())pdf-file @endif" title="{{$row->tariff}}">
 											<div data-name="tariff" data-id="{{ $row->id }}" class="div-2">{{$row->tariff}}</div>
@@ -639,7 +641,7 @@
 											<div class="div-3">{{$row->date}}</div>
 										</td>
 										<td class="@can('editPost')allowed-update @endcan" title="{{$row->direction}}">
-											<div data-name="direction" data-id="{{ $row->id }}" class="div-2">{{$row->direction}}</div>
+											<div class="div-3">{{$row->direction}}</div>
 										</td>
 										<td class="@can('editPost')allowed-update @endcan @if($row->getLastDocUniq())pdf-file @endif" title="{{$row->tariff}}">
 											<div data-name="tariff" data-id="{{ $row->id }}" class="div-2">{{$row->tariff}}</div>
@@ -887,6 +889,8 @@
 						<input type="hidden" name="status_en">
 						<input type="hidden" name="status_ua">
 						<input type="hidden" name="status_he">
+						<input type="hidden" name="sender_country_val">
+						<input type="hidden" name="recipient_country_val">
 					</div>					
 				</div>
 				<div class="modal-footer">

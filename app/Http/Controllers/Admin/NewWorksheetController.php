@@ -196,6 +196,8 @@ class NewWorksheetController extends AdminController
 			}			
 		}	
 
+		$new_worksheet->direction = $this->createRuDirection($request->input('sender_country'), $request->input('recipient_country'));
+
 		if ($old_status !== $new_worksheet->status) {
 			NewWorksheet::where('id', $id)
 			->update([
@@ -831,6 +833,46 @@ class NewWorksheetController extends AdminController
     					}
     				}
     			} 
+
+    			if ($column === 'sender_country') {
+    				for ($i=0; $i < count($track_arr); $i++) { 
+    					$worksheet = NewWorksheet::where('id',$track_arr[$i])->first();
+    					if (!$worksheet->direction) {
+    						$worksheet->direction = $this->from_country_dir[$value_by].'-';
+    						$worksheet->save();
+    					}
+    					else{
+    						$temp = explode('-', $worksheet->direction);
+    						if (count($temp) == 2) {
+    							$worksheet->direction = $this->from_country_dir[$value_by].'-'.$temp[1];
+    						}
+    						else{
+    							$worksheet->direction = $this->from_country_dir[$value_by].'-';
+    						} 
+    						$worksheet->save();  						
+    					}
+    				}
+    			}
+
+    			if ($column === 'recipient_country') {
+    				for ($i=0; $i < count($track_arr); $i++) { 
+    					$worksheet = NewWorksheet::where('id',$track_arr[$i])->first();
+    					if (!$worksheet->direction) {
+    						$worksheet->direction = '-'.$value_by;
+    						$worksheet->save();
+    					}
+    					else{
+    						$temp = explode('-', $worksheet->direction);
+    						if (count($temp) == 2) {
+    							$worksheet->direction = $temp[0].'-'.$value_by;
+    						}
+    						else{
+    							$worksheet->direction = '-'.$value_by;
+    						} 
+    						$worksheet->save();  						
+    					}
+    				}
+    			}
 				
 				$this->updateAllPackingByTracking($track_arr, $value_by, $column);
 
@@ -1162,6 +1204,46 @@ class NewWorksheetController extends AdminController
     					}
     				}
     			} 
+
+    			if ($column === 'sender_country') {
+    				for ($i=0; $i < count($row_arr); $i++) { 
+    					$worksheet = NewWorksheet::where('id',$row_arr[$i])->first();
+    					if (!$worksheet->direction) {
+    						$worksheet->direction = $this->from_country_dir[$value_by].'-';
+    						$worksheet->save();
+    					}
+    					else{
+    						$temp = explode('-', $worksheet->direction);
+    						if (count($temp) == 2) {
+    							$worksheet->direction = $this->from_country_dir[$value_by].'-'.$temp[1];
+    						}
+    						else{
+    							$worksheet->direction = $this->from_country_dir[$value_by].'-';
+    						} 
+    						$worksheet->save();  						
+    					}
+    				}
+    			}
+
+    			if ($column === 'recipient_country') {
+    				for ($i=0; $i < count($row_arr); $i++) { 
+    					$worksheet = NewWorksheet::where('id',$row_arr[$i])->first();
+    					if (!$worksheet->direction) {
+    						$worksheet->direction = '-'.$value_by;
+    						$worksheet->save();
+    					}
+    					else{
+    						$temp = explode('-', $worksheet->direction);
+    						if (count($temp) == 2) {
+    							$worksheet->direction = $temp[0].'-'.$value_by;
+    						}
+    						else{
+    							$worksheet->direction = '-'.$value_by;
+    						} 
+    						$worksheet->save();  						
+    					}
+    				}
+    			}
 
     			$this->updateAllPackingById($row_arr, $value_by, $column);    	
     		}

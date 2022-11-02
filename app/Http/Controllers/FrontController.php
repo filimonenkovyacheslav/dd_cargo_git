@@ -73,6 +73,9 @@ class FrontController extends AdminController
             else if($field === 'recipient_name'){
                 $new_worksheet->$field = $request->recipient_first_name.' '.$request->recipient_last_name;
             }
+            else if ($field === 'direction') {
+                $new_worksheet->$field = $this->createRuDirection($request->sender_country, $request->recipient_country);
+            }
             else if($field === 'package_content'){
                 $content = '';
                 if ($request->clothing_quantity) {
@@ -447,6 +450,9 @@ class FrontController extends AdminController
                 }
                 else if($field === 'recipient_name'){
                     $new_worksheet->$field = $request->input('recipient_first_name').' '.$request->input('recipient_last_name');
+                }
+                else if ($field === 'direction') {
+                    $new_worksheet->$field = $this->createRuDirection($request->sender_country, $request->recipient_country);
                 }
                 else if($field === 'package_content'){
                     $content = '';

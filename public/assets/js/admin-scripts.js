@@ -568,6 +568,8 @@ $('#tracking-columns').change((e)=>{
         $('[name="courier"]').remove()
         $('[name="status_date"]').remove()
         $('[name="order_date"]').remove()
+        $('[name="sender_country"]').remove()
+        $('[name="recipient_country"]').remove()
         $('.value-by-tracking').append(`
             <div class="status-value">
                 <select class="form-control" id="status" name="status">
@@ -617,11 +619,63 @@ $('#tracking-columns').change((e)=>{
         $('[name="status_date"]').remove()
         $('[name="order_date"]').remove()
         $('[name="courier"]').remove()
+        $('[name="sender_country"]').remove()
+        $('[name="recipient_country"]').remove()
         $('.value-by-tracking').append(`
             <select class="form-control" id="site_name" name="site_name">
                <option value="DD-C">DD-C</option>
                     
                <option value="For">For</option>
+                    
+            </select>
+            `)
+    }
+    else if(thisVal === 'sender_country'){
+        $('[name="value-by-tracking"]').remove()
+        $('[name="date"]').remove()
+        $('.status-value').remove()
+        $('[name="tariff"]').remove()
+        $('[name="partner"]').remove()
+        $('.city-value').remove()
+        $('[name="status_date"]').remove()
+        $('[name="order_date"]').remove()
+        $('[name="courier"]').remove()
+        $('[name="site_name"]').remove()
+        $('[name="recipient_country"]').remove()
+        $('.value-by-tracking').append(`
+            <select class="form-control" id="sender_country" name="sender_country">
+               <option value="" selected="selected"></option>
+                
+                <option value="Israel">Israel</option>
+                
+                <option value="Germany">Germany</option>
+                    
+            </select>
+            `)
+    }
+    else if(thisVal === 'recipient_country'){
+        $('[name="value-by-tracking"]').remove()
+        $('[name="date"]').remove()
+        $('.status-value').remove()
+        $('[name="tariff"]').remove()
+        $('[name="partner"]').remove()
+        $('.city-value').remove()
+        $('[name="status_date"]').remove()
+        $('[name="order_date"]').remove()
+        $('[name="courier"]').remove()
+        $('[name="site_name"]').remove()
+        $('[name="sender_country"]').remove()
+        $('.value-by-tracking').append(`
+            <select class="form-control" id="recipient_country" name="recipient_country">
+               <option value="" selected="selected"></option>
+                
+                <option value="RU">Россия (RU)</option>
+                
+                <option value="UA">Украина (UA)</option>
+
+                <option value="BY">Беларусь (BY)</option>
+                
+                <option value="KZ">Казахстан (KZ)</option>
                     
             </select>
             `)
@@ -642,6 +696,8 @@ $('#tracking-columns').change((e)=>{
         $('.city-value').remove()
         $('[name="status_date"]').remove()
         $('[name="order_date"]').remove()
+        $('[name="sender_country"]').remove()
+        $('[name="recipient_country"]').remove()
         $('.value-by-tracking').append(html)
     }
     else if(thisVal === 'tariff'){
@@ -654,6 +710,8 @@ $('#tracking-columns').change((e)=>{
         $('[name="courier"]').remove()
         $('[name="status_date"]').remove()
         $('[name="order_date"]').remove()
+        $('[name="sender_country"]').remove()
+        $('[name="recipient_country"]').remove()
         $('.value-by-tracking').append(`
             <select class="form-control" id="tariff" name="tariff">
                <option value="" selected="selected"></option>
@@ -675,6 +733,8 @@ $('#tracking-columns').change((e)=>{
         $('[name="courier"]').remove()
         $('[name="status_date"]').remove()
         $('[name="order_date"]').remove()
+        $('[name="sender_country"]').remove()
+        $('[name="recipient_country"]').remove()
         $('.value-by-tracking').append(`
             <select class="form-control" id="partner" name="partner">
                <option value="" selected="selected"></option>
@@ -702,6 +762,8 @@ $('#tracking-columns').change((e)=>{
         $('[name="courier"]').remove()
         $('[name="status_date"]').remove()
         $('[name="order_date"]').remove()
+        $('[name="sender_country"]').remove()
+        $('[name="recipient_country"]').remove()
         $('.value-by-tracking').append(`
             <div class="city-value">
                 <div class="col-md-4">
@@ -807,6 +869,8 @@ $('#tracking-columns').change((e)=>{
         $('[name="courier"]').remove()
         $('[name="partner"]').remove()
         $('.city-value').remove()
+        $('[name="sender_country"]').remove()
+        $('[name="recipient_country"]').remove()
         $('.value-by-tracking').append(`
             <input class="form-control" type="date" name="status_date">
             `)
@@ -821,6 +885,8 @@ $('#tracking-columns').change((e)=>{
         $('[name="partner"]').remove()
         $('[name="status_date"]').remove()
         $('.city-value').remove()
+        $('[name="sender_country"]').remove()
+        $('[name="recipient_country"]').remove()
         $('.value-by-tracking').append(`
             <input class="form-control" type="date" name="order_date">
             `)
@@ -835,6 +901,8 @@ $('#tracking-columns').change((e)=>{
         $('.city-value').remove()
         $('[name="status_date"]').remove()
         $('[name="order_date"]').remove()
+        $('[name="sender_country"]').remove()
+        $('[name="recipient_country"]').remove()
         $('.value-by-tracking').append(`
             <input class="form-control" type="date" name="date">
             `)
@@ -849,6 +917,8 @@ $('#tracking-columns').change((e)=>{
         $('[name="tariff"]').remove()
         $('[name="partner"]').remove()
         $('.city-value').remove()
+        $('[name="sender_country"]').remove()
+        $('[name="recipient_country"]').remove()
         $('[name="value-by-tracking"]').remove()
         $('.value-by-tracking').append(`
             <textarea class="form-control" name="value-by-tracking"></textarea>
@@ -861,6 +931,12 @@ $(document).delegate('.status-value select[name="status"]', 'change',(e)=>{
     $('.value-by-tracking [name="status_en"]').val(enArr[key]);
     $('.value-by-tracking [name="status_he"]').val(heArr[key]);
     $('.value-by-tracking [name="status_ua"]').val(uaArr[key]);
+})
+$(document).delegate('select[name="sender_country"]', 'change',(e)=>{
+    $('.value-by-tracking [name="sender_country_val"]').val($(e.target).val());
+})
+$(document).delegate('select[name="recipient_country"]', 'change',(e)=>{
+    $('.value-by-tracking [name="recipient_country_val"]').val($(e.target).val());
 })
 
 
@@ -1153,6 +1229,7 @@ $(document).delegate('.shipper-country-value select[name="shipper_country"]', 'c
 $(document).delegate('.consignee-country-value select[name="consignee_country"]', 'change',(e)=>{
     $('.phil-ind-value-by-tracking [name="consignee_country_val"]').val($(e.target).val());
 })
+
 /* End Tracking filter checkbox*/
 
 

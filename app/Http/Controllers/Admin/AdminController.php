@@ -349,6 +349,7 @@ class AdminController extends Controller
 				$worksheet->status_en = "At the warehouse in the sender country";
 				$worksheet->status_he = "במחסן במדינת השולח";
 				$worksheet->status_ua = "На складі в країні відправника";
+				$worksheet->status_date = date('Y-m-d');
 				$worksheet->save();
 			}
 		
@@ -361,6 +362,7 @@ class AdminController extends Controller
 				$worksheet->status = "At the warehouse in the sender country";
 				$worksheet->status_ru = "На складе в стране отправителя";
 				$worksheet->status_he = "במחסן במדינת השולח";
+				$worksheet->status_date = date('Y-m-d');
 				$worksheet->save();
 			}
 			
@@ -374,6 +376,7 @@ class AdminController extends Controller
 				$worksheet->status_en = "At the warehouse in the sender country";
 				$worksheet->status_he = "במחסן במדינת השולח";
 				$worksheet->status_ua = "На складі в країні відправника";
+				$worksheet->status_date = date('Y-m-d');
 				$worksheet->save();
 			}
 			elseif (in_array($worksheet->status, $this->ru_status_arr_2) && $api){
@@ -381,6 +384,7 @@ class AdminController extends Controller
 				$worksheet->status_en = "Forwarding to the warehouse in the sender country";
 				$worksheet->status_he = "נשלח למחסן במדינת השולח";
 				$worksheet->status_ua = "Доставляється до складу в країні відправника";
+				$worksheet->status_date = date('Y-m-d');
 				$worksheet->save();
 			}
 		
@@ -393,12 +397,14 @@ class AdminController extends Controller
 				$worksheet->status = "At the warehouse in the sender country";
 				$worksheet->status_ru = "На складе в стране отправителя";
 				$worksheet->status_he = "במחסן במדינת השולח";
+				$worksheet->status_date = date('Y-m-d');
 				$worksheet->save();
 			}
 			elseif (in_array($worksheet->status, $this->en_status_arr_2) && $api) {
 				$worksheet->status = "Forwarding to the warehouse in the sender country";
 				$worksheet->status_ru = "Доставляется на склад в стране отправителя";
 				$worksheet->status_he = "נשלח למחסן במדינת השולח";
+				$worksheet->status_date = date('Y-m-d');
 				$worksheet->save();
 			}
 

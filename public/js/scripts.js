@@ -356,8 +356,16 @@ $('.standard-phone').on('input', function() {
 		if ($(this).val()[0] !== '+' && $(this).val().length == 1) {
 			$(this).val(countryCode);
 		}
-		else if($(this).val().length > 16){
-			if ($(this).val().length == 17) {
+		else if($(this).val().length > 13 && countryCode === "+972"){
+			if ($(this).val().length == 14) {
+				$(this).val($(this).val().slice(0, -1));
+			}
+			else{
+				$(this).val(countryCode);
+			}
+		}
+		else if($(this).val().length > 14 && countryCode === "+49"){
+			if ($(this).val().length == 15) {
 				$(this).val($(this).val().slice(0, -1));
 			}
 			else{
@@ -417,8 +425,16 @@ $('.standard-phone').on('input', function() {
 		if ($(this).val()[0] !== '+' && $(this).val().length == 1) {
 			$(this).val(countryCode);
 		}
-		else if($(this).val().length > 16){
-			if ($(this).val().length == 17) {
+		else if($(this).val().length > 13 && countryCode === "+972"){
+			if ($(this).val().length == 14) {
+				$(this).val($(this).val().slice(0, -1));
+			}
+			else{
+				$(this).val(countryCode);
+			}
+		}
+		else if($(this).val().length > 14 && countryCode === "+49"){
+			if ($(this).val().length == 15) {
 				$(this).val($(this).val().slice(0, -1));
 			}
 			else{
@@ -464,6 +480,7 @@ $('.standard-phone').on('input', function() {
 		}    
 	}        
 });
+
 
 
 // Shipper City list

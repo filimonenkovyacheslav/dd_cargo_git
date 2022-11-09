@@ -716,9 +716,9 @@ $('#tracking-columns').change((e)=>{
             <select class="form-control" id="tariff" name="tariff">
                <option value="" selected="selected"></option>
                     
-               <option value="Море">Море</option>
+               <option value="Обычный">Обычный</option>
                     
-               <option value="Авиа">Авиа</option>
+               <option value="Экспресс">Экспресс</option>
                     
             </select>
             `)

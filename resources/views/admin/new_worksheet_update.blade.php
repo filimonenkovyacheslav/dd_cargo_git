@@ -208,7 +208,7 @@
 						<div class="form-group">
 							{!! Form::label('tariff','Тариф',['class' => 'col-md-2 control-label'])   !!}
 							<div class="col-md-8">
-								{!! Form::select('tariff', array('' => '', 'Море' => 'Море', 'Авиа' => 'Авиа'), $new_worksheet->tariff,['class' => 'form-control']) !!}
+								{!! Form::select('tariff', array('' => '', 'Обычный' => 'Обычный', 'Экспресс' => 'Экспресс'), $new_worksheet->tariff,['class' => 'form-control']) !!}
 							</div>
 						</div>
 

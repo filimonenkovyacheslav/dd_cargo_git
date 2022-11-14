@@ -184,6 +184,12 @@
                 {!! Form::hidden('status_box','')!!}
                 {!! Form::hidden('comments_2','')!!}
 
+                @if ($id === '0')
+                <script type="text/javascript">
+                    $('[name="phone_exist_checked"]').val('true')
+                </script>
+                @endif 
+
                 {!! Form::hidden('signature','signature') !!}
 
                 @if (isset($user_name))  

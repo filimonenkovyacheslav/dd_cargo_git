@@ -635,4 +635,51 @@ class BaseController extends AdminController
             return $this->sendError('Token error.');
         }
     }
+
+
+    public function addNewSignedFormForUser(Request $request)
+    {
+        $input = $request->all();
+        $validator = Validator::make($input, [
+            'user' => 'required'
+        ]);
+
+        if($validator->fails()){
+            return $this->sendError('Validation Error.', $validator->errors());       
+        }
+
+        $user = $input['user'];
+        $session_token = $this->generateRandomString(15);
+        $request->request->add(['session_token' => $session_token]);
+        $link = '/form-with-signature/';
+        $result = app('App\Http\Controllers\SignedDocumentController')->createTempTable($request);
+        if ($result) {
+            $link .= '0/'.$result.'/'.$user;
+            return redirect()->to($link);
+        }                         
+    }
+
+
+    public function addNewSignedFormForUserEng(Request $request)
+    {
+        $input = $request->all();
+        $validator = Validator::make($input, [
+            'user' => 'required'
+        ]);
+
+        if($validator->fails()){
+            return $this->sendError('Validation Error.', $validator->errors());       
+        }
+
+        $user = $input['user'];
+        $session_token = $this->generateRandomString(15);
+        $request->request->add(['session_token' => $session_token]);
+        $link = '/form-with-signature-eng/';
+        $result = app('App\Http\Controllers\SignedDocumentController')->createTempTable($request);
+        if ($result) {
+            $link .= '0/'.$result.'/'.$user;
+            return redirect()->to($link);
+        }                         
+    }
+
 }

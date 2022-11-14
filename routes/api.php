@@ -74,5 +74,9 @@ Route::post('/add-data-with-tracking', 'API\BaseController@addDataWithTracking')
 Route::post('/add-new-signed-form', 'API\BaseController@addNewSignedForm')->name('addNewSignedForm');
 Route::post('/add-duplicate-signed-form', 'API\BaseController@addDuplicateSignedForm')->name('addDuplicateSignedForm');
 
+// PDF for simple users
+Route::get('/add-new-signed-form-for-user', 'API\BaseController@addNewSignedForm')->name('addNewSignedForm');
+Route::get('/add-new-signed-form-for-user-eng', 'API\BaseController@addNewSignedForm')->name('addNewSignedForm');
+
 // Crone
 Route::get('/ru-postal-tracking-cron', 'RuPostalTrackingController@cronScript')->name('cronScript');

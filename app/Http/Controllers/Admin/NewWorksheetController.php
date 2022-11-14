@@ -1287,6 +1287,24 @@ class NewWorksheetController extends AdminController
     				$worksheet->checkCourierTask($worksheet->status);
     			}    	
     		}
+    		else if ($request->input('status_date')) {
+    			NewWorksheet::whereIn('id', $row_arr)
+    			->update([
+    				'status_date' => $request->input('status_date')
+    			]);       	
+    		}
+    		else if ($request->input('order_date')) {
+    			NewWorksheet::whereIn('id', $row_arr)
+    			->update([
+    				'order_date' => $request->input('order_date')
+    			]);       	
+    		}
+    		else if ($request->input('date')) {
+    			NewWorksheet::whereIn('id', $row_arr)
+    			->update([
+    				'date' => $request->input('date')
+    			]);       	
+    		}
     		else if ($request->input('tariff')) {
     			NewWorksheet::whereIn('id', $row_arr)
     			->update([

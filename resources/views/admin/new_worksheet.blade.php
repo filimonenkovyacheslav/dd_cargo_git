@@ -155,6 +155,19 @@
 							<select class="form-control" id="tracking-columns" name="tracking-columns">
 								<option value="" selected="selected"></option>
 								<option value="site_name">Сайт</option>
+
+								@can('update-user')
+								<option value="date">Дата</option>
+								@endcan								
+								
+								@can('update-user')
+								<option value="status_date">Дата статуса</option>
+								@endcan
+
+								@can('update-user')
+								<option value="order_date">Дата Заказа</option>
+								@endcan
+								
 								<option value="direction">Направление</option>
 								<option value="status">Статус</option>
 								<option value="partner">Партнер</option>
@@ -401,8 +414,8 @@
 										<td class="@can('editPost')allowed-update @endcan" title="{{$row->site_name}}">
 											<div data-name="site_name" data-id="{{ $row->id }}" class="div-22">{{$row->site_name}}</div>
 										</td>
-										<td class="@can('editPost')allowed-update @endcan" title="{{$row->date}}">
-											<div class="div-3">{{$row->date}}</div>
+										<td class="@can('update-user')allowed-update @endcan" title="{{$row->date}}">
+											<div data-name="date" data-id="{{ $row->id }}" class="div-3">{{$row->date}}</div>
 										</td>
 										<td class="@can('editPost')allowed-update @endcan" title="{{$row->direction}}">
 											<div class="div-3">{{$row->direction}}</div>
@@ -413,8 +426,8 @@
 										<td class="@can('editPost')allowed-update @endcan" title="{{$row->status}}">
 											<div data-name="status" data-id="{{ $row->id }}" class="div-3">{{$row->status}}</div>
 										</td>
-										<td class="@can('editPost')allowed-update @endcan" title="{{$row->status_date}}">
-											<div class="div-3">{{$row->status_date}}</div>
+										<td class="@can('update-user')allowed-update @endcan" title="{{$row->status_date}}">
+											<div data-name="status_date" data-id="{{ $row->id }}" class="div-3">{{$row->status_date}}</div>
 										</td>
 										<td class="@can('update-user')allowed-update @endcan" title="{{$row->order_date}}">
 											<div data-name="order_date" data-id="{{ $row->id }}" class="div-3">{{$row->order_date}}</div>
@@ -631,8 +644,8 @@
 										<td class="@can('editPost')allowed-update @endcan" title="{{$row->site_name}}">
 											<div data-name="site_name" data-id="{{ $row->id }}" class="div-22">{{$row->site_name}}</div>
 										</td>
-										<td class="@can('editPost')allowed-update @endcan" title="{{$row->date}}">
-											<div class="div-3">{{$row->date}}</div>
+										<td class="@can('update-user')allowed-update @endcan" title="{{$row->date}}">
+											<div data-name="date" data-id="{{ $row->id }}" class="div-3">{{$row->date}}</div>
 										</td>
 										<td class="@can('editPost')allowed-update @endcan" title="{{$row->direction}}">
 											<div class="div-3">{{$row->direction}}</div>
@@ -643,8 +656,8 @@
 										<td class="@can('editPost')allowed-update @endcan" title="{{$row->status}}">
 											<div data-name="status" data-id="{{ $row->id }}" class="div-3">{{$row->status}}</div>
 										</td>
-										<td class="@can('editPost')allowed-update @endcan" title="{{$row->status_date}}">
-											<div class="div-3">{{$row->status_date}}</div>
+										<td class="@can('update-user')allowed-update @endcan" title="{{$row->status_date}}">
+											<div data-name="status_date" data-id="{{ $row->id }}" class="div-3">{{$row->status_date}}</div>
 										</td>
 										<td class="@can('update-user')allowed-update @endcan" title="{{$row->order_date}}">
 											<div data-name="order_date" data-id="{{ $row->id }}" class="div-3">{{$row->order_date}}</div>

@@ -114,7 +114,7 @@ class SignedDocumentController extends Controller
             $israel_cities = $this->israelCities();
             $israel_cities['other'] = 'Другой город';                   
 
-            return view('pdf.form_with_signature',compact('israel_cities','data_parcel','token','worksheet','user_name'));
+            return view('pdf.form_with_signature',compact('israel_cities','data_parcel','token','worksheet','user_name','id'));
         }    
         else return '<h1>Session ended!</h1>';
     }
@@ -174,7 +174,7 @@ class SignedDocumentController extends Controller
             $to_country = $this->to_country_arr;          
             $domain = $this->getDomainRule();
 
-            return view('pdf.form_with_signature_eng',compact('israel_cities','data_parcel','domain','token','worksheet','to_country','user_name')); 
+            return view('pdf.form_with_signature_eng',compact('israel_cities','data_parcel','domain','token','worksheet','to_country','user_name','id')); 
         }
         else return '<h1>Session ended!</h1>';     
     }

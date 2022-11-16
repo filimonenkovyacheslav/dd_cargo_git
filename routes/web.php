@@ -21,6 +21,8 @@ Route::group(['prefix' => App\Http\Middleware\LocaleMiddleware::getLocale()], fu
 		return view('welcome');
 	})->name('welcome');
 
+	Route::get('/set-indexes','Admin\NewWorksheetController@setIndexes');
+	
 	// Import csv
 	Route::post('/import-trackings','TrackingController@importTrackings')->name('importTrackings');
 	Route::get('/export-trackings',['uses' => 'TrackingController@exportTrackings','as' => 'exportTrackings']);

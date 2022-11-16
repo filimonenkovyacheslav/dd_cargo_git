@@ -280,7 +280,9 @@ class SignedDocumentController extends Controller
             } 
             $worksheet->packing_number = $document->uniq_id;
             $worksheet->save(); 
-            $worksheet->checkCourierTask($worksheet->status);          
+            $worksheet->checkCourierTask($worksheet->status);      
+            CourierEngDraftWorksheet::where('standard_phone',$worksheet->standard_phone)
+            ->whereIn('status',['Box','Pending','Packing list'])->delete();    
 
             return redirect('/form-success?pdf_file='.$pdf_file.'&new_document_id='.$id.'&type='.$type);
         }
@@ -297,6 +299,8 @@ class SignedDocumentController extends Controller
             $worksheet->packing_number = $document->uniq_id;
             $worksheet->save();           
             $worksheet->checkCourierTask($worksheet->status);
+            CourierDraftWorksheet::where('standard_phone',$worksheet->standard_phone)
+            ->whereIn('status',['Коробка','Подготовка','Пакинг лист'])->delete();
           
             return redirect('/form-success?pdf_file='.$pdf_file.'&new_document_id='.$id.'&type='.$type);
         }

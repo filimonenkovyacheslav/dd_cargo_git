@@ -806,7 +806,7 @@ class CourierDraftController extends AdminController
 		}			
 
 		foreach($fields as $field){
-			if ($field !== 'created_at' && $field !== 'id') {
+			if ($field !== 'created_at' && $field !== 'id' && $field !== 'index_number') {
 				$new_worksheet->$field = $courier_draft_worksheet->$field;
 			}			
 		}
@@ -819,6 +819,7 @@ class CourierDraftController extends AdminController
 
 		$temp = rtrim($courier_draft_worksheet->package_content, ";");
 		$content_arr = explode(";",$temp);
+		$new_worksheet->setIndexNumber();
 				
 		if ($content_arr[0]) {
 			

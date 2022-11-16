@@ -62,6 +62,7 @@
 								<select class="form-control" id="table_columns" name="table_columns">
 									<option value="" selected="selected"></option>
 									<option value="id">Id</option>
+									<option value="index_number">№</option>
 									<option value="site_name">Сайт</option>
 									<option value="packing_number">Packing No.</option>
 									<option value="date">Дата</option>
@@ -154,6 +155,9 @@
 						<label class="checkbox-operations-change">Выберите колонку:
 							<select class="form-control" id="tracking-columns" name="tracking-columns">
 								<option value="" selected="selected"></option>
+								@can('update-user')
+								<option value="index_number">№</option>
+								@endcan
 								<option value="site_name">Сайт</option>
 
 								@can('update-user')
@@ -253,6 +257,7 @@
 								<thead>
 									<tr>
 										<th>V</th>
+										<th>№</th>
 										<th>Id</th>
 										<th>№ пакинг-листа</th>
 										<th>Сайт</th>
@@ -405,6 +410,9 @@
 											<input type="hidden" name="old_color[]" value="{{$row->background}}">
 											<input type="checkbox" name="row_id[]" value="{{ $row->id }}">
 										</td>	
+										<td class="@can('update-user')allowed-update @endcan" title="{{$row->index_number}}">
+											<div data-name="index_number" data-id="{{ $row->id }}" class="div-22">{{$row->index_number}}</div>
+										</td>
 										<td title="{{$row->id}}">
 											<div class="div-22">{{$row->id}}</div>
 										</td>	
@@ -634,6 +642,9 @@
 										<td class="td-checkbox">
 											<input type="hidden" name="old_color[]" value="{{$row->background}}">
 											<input type="checkbox" name="row_id[]" value="{{ $row->id }}">
+										</td>
+										<td class="@can('update-user')allowed-update @endcan" title="{{$row->index_number}}">
+											<div data-name="index_number" data-id="{{ $row->id }}" class="div-22">{{$row->index_number}}</div>
 										</td>
 										<td title="{{$row->id}}">
 											<div class="div-22">{{$row->id}}</div>

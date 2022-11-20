@@ -72,9 +72,9 @@ Route::group(['prefix' => App\Http\Middleware\LocaleMiddleware::getLocale()], fu
 
 	Route::post('/parcel-form', 'FrontController@newParcelAdd')->name('newParcelAdd');	
 
-	Route::get('/parcel-form-old', 'FrontController@parcelFormOld')->name('parcelFormOld');
+	Route::get('/parcel-form-prior', 'FrontController@parcelFormOld')->name('parcelFormOld');
 
-	Route::post('/parcel-form-old', 'FrontController@newParcelAdd')->name('newParcelAdd');	
+	Route::post('/parcel-form-prior', 'FrontController@newParcelAdd')->name('newParcelAdd');	
 
 	Route::post('/check-phone',['uses' => 'FrontController@checkPhone','as' => 'checkPhone']);
 
@@ -92,9 +92,9 @@ Route::group(['prefix' => App\Http\Middleware\LocaleMiddleware::getLocale()], fu
 
 	Route::post('/phil-ind-parcel-form', 'FrontController@philIndParcelAdd')->name('philIndParcelAdd');
 
-	Route::get('/phil-ind-parcel-form-old', 'FrontController@philIndParcelFormOld')->name('philIndParcelFormOld');
+	Route::get('/phil-ind-parcel-form-prior', 'FrontController@philIndParcelFormOld')->name('philIndParcelFormOld');
 
-	Route::post('/phil-ind-parcel-form-old', 'FrontController@philIndParcelAdd')->name('philIndParcelAdd');
+	Route::post('/phil-ind-parcel-form-prior', 'FrontController@philIndParcelAdd')->name('philIndParcelAdd');
 
 	Route::get('/form-for-adding-eng', 'FrontController@showFormEng')->name('showFormEng');
 

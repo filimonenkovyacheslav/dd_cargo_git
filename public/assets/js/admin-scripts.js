@@ -555,6 +555,7 @@ if (checkboxGroup) {
 }
 
 
+const couriersArrP = JSON.parse(couriersArr)
 // new worksheet
 $('#tracking-columns').change((e)=>{
     const thisVal = $(e.target).val();
@@ -680,10 +681,9 @@ $('#tracking-columns').change((e)=>{
             </select>
             `)
     }
-    else if(thisVal === 'courier'){
-        couriersArr = JSON.parse(couriersArr)
+    else if(thisVal === 'courier'){       
         let html = '<select class="form-control" id="courier" name="courier">'
-        for (const property in couriersArr) {
+        for (const property in couriersArrP) {
             html += '<option value="'+property+'">'+property+'</option>';
         }
         html += '</select>'
@@ -1185,9 +1185,8 @@ $('#phil-ind-tracking-columns').change((e)=>{
             `)
     }
     else if (thisVal === 'courier') {      
-        couriersArr = JSON.parse(couriersArr)
         let html = '<select class="form-control" id="courier" name="courier">'
-        for (const property in couriersArr) {
+        for (const property in couriersArrP) {
             html += '<option value="'+property+'">'+property+'</option>';
         }
         html += '</select>' 

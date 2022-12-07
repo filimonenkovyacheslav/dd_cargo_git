@@ -63,6 +63,7 @@ Route::get('/get-from-temp-table/{id}', 'SignedDocumentController@getFromTempTab
 Route::post('/add-signed-ru-form', 'SignedDocumentController@addSignedRuForm')->name('addSignedRuForm');
 Route::post('/add-signed-eng-form', 'SignedDocumentController@addSignedEngForm')->name('addSignedEngForm');
 Route::post('/signature-page', 'SignedDocumentController@setSignature')->name('setSignature');
+Route::post('/check-temp-table', 'SignedDocumentController@checkTempTable')->name('checkTempTable');
 Route::post('/form-update-after-cancel', 'SignedDocumentController@formUpdateAfterCancel')->name('formUpdateAfterCancel');
 Route::post('/check-phone-api',['uses' => 'SignedDocumentController@checkPhoneApi','as' => 'checkPhoneApi']);
 Route::post('/phil-ind-check-phone-api',['uses' => 'SignedDocumentController@philIndCheckPhoneApi','as' => 'philIndCheckPhoneApi']);

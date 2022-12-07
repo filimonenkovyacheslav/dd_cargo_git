@@ -217,7 +217,7 @@ function philIndAnswer(elem) {
 	}
 }
 
-
+if (phoneExist === undefined) var phoneExist = null
 if (phoneExist) {
 	$('.ru-modal-2').click();
 	$('.eng-modal-2').click();
@@ -533,8 +533,25 @@ function cancelDisabled(){
 	$('.new-form .form-send-parcel button[type="submit"]').show();
 	$('#form_cancel_disabled').val('true');
 }*/
+function checkTempTable(){
+	const sessionToken = $('[name="session_token"]').val()
+	$.ajax({
+        type:'POST',
+        url:checkTempTableUrl,
+        headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
+        data: {"session_token":sessionToken},
+        success:function(data){
+            if (data === 'true') return true
+            else return false             
+        },
+        error: function (msg){
+            alert('Error')
+        }
+    });
+}
 
-if ($('.new-form .form-send-parcel input').length > 0) {
+
+if ($('.new-form .form-send-parcel input').length > 0 && checkTempTable()) {
 	getSignedValue()
 
 	setInterval(()=>{

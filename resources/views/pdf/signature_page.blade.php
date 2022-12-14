@@ -96,6 +96,10 @@
     }); 
     
 </script>
+@elseif ($cancel)
+<script type="text/javascript">
+    document.getElementById("saveSigned").disabled = false 
+</script>
 @else
 <script type="text/javascript">
     document.getElementById("saveSigned").disabled = true 

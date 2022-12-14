@@ -479,6 +479,9 @@
                 const quantity = document.querySelector('[name="other_quantity_'+num+'"]');
 
                 if (content.value && !(quantity.value)) {
+                    trueInput = true;
+                    alert('Заполните кол-во !');
+                    return false;
                 }
                 else if(!(content.value) && quantity.value){
                     trueInput = true;

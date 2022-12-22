@@ -21,11 +21,13 @@
 </div> -->
 <div class="content mt-3">
 	<div class="animated fadeIn">
+		@can('update-post')
 		<div class="row">
 			<div class="col-md-12">
 				<a href="{{ route('exportExcelNew') }}" style="margin-bottom: 20px;" class="btn btn-success btn-move">Экспорт в Excel</a>
 			</div>
 		</div>
+		@endcan
 		<div class="row">
 			<div class="col-md-12">
 				<div class="card">
@@ -54,6 +56,8 @@
 					<a class="btn btn-primary btn-move btn-update-status" onclick="updateStatus(this)">Обновить статусы</a>
 					@endif
 					@endcan
+
+					@can('update-post')
 
 					<div class="btn-move-wrapper" style="display:flex">
 						<form action="{{ route('newWorksheetFilter') }}" method="GET" id="form-worksheet-table-filter" enctype="multipart/form-data">
@@ -123,6 +127,8 @@
 							<button type="button" id="table_filter_button" style="margin-left:35px" class="btn btn-default">Искать</button>
 						</form>
 					</div>
+
+					@endcan
 
 					@can('editDraft')
 					
@@ -404,6 +410,12 @@
 									@foreach($new_worksheet_obj as $row)
 
 									@if(!in_array($user->role, $viewer_arr))
+
+									@php	
+									$this_page = (isset($_GET["page"])) ? (int)$_GET["page"] : 1;
+									if($user->role === 'viewer' && $this_page < 280)
+										continue;
+									@endphp
 
 									<tr class="{{$row->background}}">
 										<td class="td-checkbox">

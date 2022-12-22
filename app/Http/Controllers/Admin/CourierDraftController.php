@@ -32,10 +32,13 @@ class CourierDraftController extends AdminController
         if ($request->input('for_active')) {
         	$courier_draft_worksheet_obj = CourierDraftWorksheet::where('in_trash',false)->where('tracking_main','<>',null)
         	->orWhere('status','Забрать')
+        	->orderBy('index_number')
         	->paginate(10);
         }
         else{
-        	$courier_draft_worksheet_obj = CourierDraftWorksheet::where('in_trash',false)->paginate(10);
+        	$courier_draft_worksheet_obj = CourierDraftWorksheet::where('in_trash',false)
+        	->orderBy('index_number')
+        	->paginate(10);
         }
         $data = $request->all();   
         $user = Auth::user();
@@ -351,6 +354,17 @@ class CourierDraftController extends AdminController
     				}	   								
     			}
 
+    			if ($column !== 'index_number') {
+    				CourierDraftWorksheet::whereIn('id', $row_arr)
+    				->update([
+    					$column => $value_by
+    				]); 
+    			}   			
+    			elseif ((int)$value_by > 0 && count($row_arr) === 1) {
+    				$worksheet = CourierDraftWorksheet::find($row_arr[0]);
+    				$worksheet->reIndex((int)$value_by);       	
+    			}
+
     			for ($i=0; $i < count($row_arr); $i++) { 
     				$worksheet = CourierDraftWorksheet::where('id',$row_arr[$i])->first();
     				$this->toUpdatesArchive($request,$worksheet);
@@ -590,10 +604,13 @@ class CourierDraftController extends AdminController
         		->orWhere([
         			[$request->table_columns, 'like', '%'.$search.'%'],
         			['status','Забрать']
-        		])->paginate(10);
+        		])
+        		->orderBy('index_number')
+        		->paginate(10);
         	}
         	else{
         		$courier_draft_worksheet_obj = CourierDraftWorksheet::where('in_trash',false)->where($request->table_columns, 'like', '%'.$search.'%')
+        		->orderBy('index_number')
         		->paginate(10);
         	}        	
         }
@@ -1027,5 +1044,14 @@ class CourierDraftController extends AdminController
 		return Excel::download(new CourierDraftWorksheetExport, 'CourierDraftWorksheetExport.xlsx');
 
 	}
+
+
+    public function setIndexes()
+    {
+    	$worksheets = CourierDraftWorksheet::all();
+    	foreach ($worksheets as $item) {
+    		$item->setIndexNumber();
+    	}
+    }
 
 }

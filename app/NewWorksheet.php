@@ -253,7 +253,15 @@ class NewWorksheet extends BaseModel
         $number = 1;       
         $old = NewWorksheet::where('index_number', $index)->first();
         if ($old) {
-            $old->index_number = $index+1;
+            if ($this->index_number < $index) {
+                $old->index_number = $index-1;
+            }
+            elseif ($this->index_number > $index) {
+                $old->index_number = $index+1;
+            }
+            elseif ($this->index_number === $index) {
+                return false;
+            }
             $old->save();
         }       
         $this->index_number = $index;

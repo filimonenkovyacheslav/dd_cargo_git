@@ -124,4 +124,47 @@ class CourierDraftWorksheet extends BaseModel
         if ($document) return $document->uniq_id;
         else return null;
     }
+
+
+    public function setIndexNumber()
+    {
+        $max = 0;
+        if(!$this->index_number){
+            $max = CourierDraftWorksheet::max('index_number');
+            $max++;
+            $this->index_number = $max;
+            $this->save();
+        }
+        return $max;
+    } 
+
+
+    public function reIndex($index)
+    {
+        $number = 1;       
+        $old = CourierDraftWorksheet::where('index_number', $index)->first();
+        if ($old) {
+            if ($this->index_number < $index) {
+                $old->index_number = $index-1;
+            }
+            elseif ($this->index_number > $index) {
+                $old->index_number = $index+1;
+            }
+            elseif ($this->index_number === $index) {
+                return false;
+            }
+            $old->save();
+        }       
+        $this->index_number = $index;
+        $this->save();        
+        $worksheets = CourierDraftWorksheet::orderBy('index_number')->get();
+        
+        foreach ($worksheets as $item) {
+            if ($item->index_number !== $index) {
+                $item->index_number = $number;
+                $item->save();               
+            } 
+            $number++;
+        }
+    }
 }

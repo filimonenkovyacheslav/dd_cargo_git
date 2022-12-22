@@ -298,7 +298,8 @@ class SignedDocumentController extends Controller
                 $this->signedToUpdatesArchive($worksheet,$user_name,$document->uniq_id);
             } 
             $worksheet->packing_number = $document->uniq_id;
-            $worksheet->save();           
+            $worksheet->save();   
+            $worksheet->setIndexNumber();        
             $worksheet->checkCourierTask($worksheet->status);
             CourierDraftWorksheet::where('standard_phone',$worksheet->standard_phone)
             ->whereIn('status',['Коробка','Подготовка','Пакинг лист'])->delete();

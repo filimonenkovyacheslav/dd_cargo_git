@@ -135,6 +135,15 @@ class CourierDraftWorksheet extends BaseModel
             $this->index_number = $max;
             $this->save();
         }
+
+        $worksheets = CourierDraftWorksheet::orderBy('index_number')->get();
+        $number = 1;
+        foreach ($worksheets as $item) {
+            $item->index_number = $number;
+            $item->save();               
+            $number++;
+        }
+        
         return $max;
     } 
 

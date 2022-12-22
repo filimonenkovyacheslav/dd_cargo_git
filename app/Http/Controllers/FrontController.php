@@ -130,6 +130,7 @@ class FrontController extends AdminController
         }
 
         $new_worksheet->in_trash = false;
+        $new_worksheet->setIndexNumber();
         if (in_array($new_worksheet->sender_city, array_keys($this->israel_cities))) {
             $new_worksheet->shipper_region = $this->israel_cities[$new_worksheet->sender_city];
         }        
@@ -501,6 +502,7 @@ class FrontController extends AdminController
             }
 
             $new_worksheet->in_trash = false;
+            $new_worksheet->setIndexNumber();
             if (in_array($new_worksheet->sender_city, array_keys($this->israel_cities))) {
                 $new_worksheet->shipper_region = $this->israel_cities[$new_worksheet->sender_city];
             }

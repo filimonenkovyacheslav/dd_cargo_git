@@ -139,7 +139,8 @@ class NewWorksheet extends BaseModel
                 $draft->$field = $this->$field;
             }           
         }
-        $draft->in_trash = false;                   
+        $draft->in_trash = false;       
+        $draft->setIndexNumber();            
 
         if ($draft->save())
         {           

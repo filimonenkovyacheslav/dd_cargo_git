@@ -741,6 +741,7 @@ class CourierDraftController extends AdminController
     		} 
 
     		$new_worksheet = CourierDraftWorksheet::find($new_id);
+    		$new_worksheet->setIndexNumber();
     		$new_worksheet->checkCourierTask($new_worksheet->status);
 
     		$packing = PackingSea::where('work_sheet_id',$id)->get();
@@ -886,7 +887,8 @@ class CourierDraftController extends AdminController
     		]);					
 			
 			CourierDraftWorksheet::where('id', $id)->delete();
-
+			$draft = CourierDraftWorksheet::first();
+			$draft->setIndexNumber();
 			$new_worksheet->checkCourierTask($new_worksheet->status);			
 			
 			if (!$admin)

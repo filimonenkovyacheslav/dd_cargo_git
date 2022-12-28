@@ -249,22 +249,29 @@ class NewWorksheet extends BaseModel
     } 
 
 
-    public function reIndex($index)
+    public function reIndex($index, $courier = false)
     {
         $number = 1;       
         $old = NewWorksheet::where('index_number', $index)->first();
-        if ($old) {
-            if ($this->index_number < $index) {
-                $old->index_number = $index-1;
-            }
-            elseif ($this->index_number > $index) {
-                $old->index_number = $index+1;
-            }
-            elseif ($this->index_number === $index) {
-                return false;
-            }
+        if (!$courier) {
+            if ($old) {
+                if ($this->index_number < $index) {
+                    $old->index_number = $index-1;
+                }
+                elseif ($this->index_number > $index) {
+                    $old->index_number = $index+1;
+                }
+                elseif ($this->index_number === $index) {
+                    return false;
+                }
+                $old->save();
+            } 
+        }
+        elseif ($old){
+            $old->index_number = $index+1;
             $old->save();
-        }       
+        }
+
         $this->index_number = $index;
         $this->save();        
         $worksheets = NewWorksheet::orderBy('index_number')->get();

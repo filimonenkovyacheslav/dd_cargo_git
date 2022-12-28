@@ -498,7 +498,7 @@ class BaseController extends AdminController
 
                     // Activate PDF
                     if (!$old_tracking && $worksheet->getLastDocUniq()) {
-                        app('App\Http\Controllers\Admin\CourierDraftController')->courierDraftActivate($worksheet->id, true);
+                        app('App\Http\Controllers\Admin\CourierDraftController')->courierDraftActivate($worksheet->id, true, true);
                     }
 
                     break;

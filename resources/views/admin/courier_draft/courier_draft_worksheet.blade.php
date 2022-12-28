@@ -346,8 +346,13 @@
 
 									@if(!in_array($user->role, $viewer_arr))
 
-									@php									
-									$emergence_date = Date('Y-m-d', strtotime('-1 days'));
+									@php
+									$today = date("H:i:s"); 
+									if ($today > "08:00:00")
+										$emergence_date = Date('Y-m-d', strtotime('-1 days'));
+									else									
+										$emergence_date = Date('Y-m-d', strtotime('-2 days'));
+									
 									if($user->role === 'viewer' && $row->date > $emergence_date)
 										continue;
 									@endphp

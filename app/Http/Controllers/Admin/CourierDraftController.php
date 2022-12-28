@@ -810,7 +810,7 @@ class CourierDraftController extends AdminController
     }
 
 
-    public function courierDraftActivate($id, $admin = false)
+    public function courierDraftActivate($id, $admin = false, $courier = false)
 	{
 		$courier_draft_worksheet = CourierDraftWorksheet::find($id);		
 		$new_worksheet = new NewWorksheet();
@@ -837,7 +837,11 @@ class CourierDraftController extends AdminController
 
 		$temp = rtrim($courier_draft_worksheet->package_content, ";");
 		$content_arr = explode(";",$temp);
-		$new_worksheet->setIndexNumber();
+		if (!$courier)
+			$new_worksheet->setIndexNumber();
+		else{
+			$new_worksheet->reIndex(100, true);
+		}
 				
 		if ($content_arr[0]) {
 			

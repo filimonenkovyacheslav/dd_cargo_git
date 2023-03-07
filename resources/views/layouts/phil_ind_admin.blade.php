@@ -184,6 +184,10 @@
                         <a href="{{route('generalSearchShow')}}"><i class="menu-icon fa fa-book "></i> General Search</a>
                     </li> 
                     @endcan 
+
+                    <li>
+                        <a href="{{route('trackingLists')}}"><i class="menu-icon fa fa-book "></i> Tracking Lists</a>
+                    </li>
                 
                 </ul>
             </div><!-- /.navbar-collapse -->

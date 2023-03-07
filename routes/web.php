@@ -23,6 +23,12 @@ Route::group(['prefix' => App\Http\Middleware\LocaleMiddleware::getLocale()], fu
 
 	Route::get('/set-indexes','Admin\NewWorksheetController@setIndexes');
 	Route::get('/set-draft-indexes','Admin\CourierDraftController@setIndexes');
+
+	// Tracking Lists	
+	Route::get('/tracking-lists',['uses' => 'Admin\TrackingListController@index','as' => 'trackingLists']);
+	Route::get('/tracking-lists-filter',['uses' => 'Admin\TrackingListController@trackingListFilter','as' => 'trackingListFilter']);
+	Route::post('/tracking-lists',['uses' => 'Admin\TrackingListController@destroy','as' => 'trackingListDelete']);
+	Route::post('/tracking-lists-export',['uses' => 'Admin\TrackingListController@exportTrackingList','as' => 'exportTrackingList']);
 	
 	// Import csv
 	Route::post('/import-trackings','TrackingController@importTrackings')->name('importTrackings');
@@ -167,7 +173,7 @@ Route::get('/home', 'HomeController@index')->name('home');
 *  Admin
 */
 Route::group(['prefix' => 'admin','middleware' => 'auth'],function() {	
-
+	
 	// General Search	
 	Route::get('/general-search',['uses' => 'Admin\AdminController@generalSearchShow','as' => 'generalSearchShow']);
 

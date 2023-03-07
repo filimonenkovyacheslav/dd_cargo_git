@@ -2053,4 +2053,16 @@ class Controller extends BaseController
         return '<h1>Draft imported successfully !</h1>';
     }
 
+
+    public function createTrackingListTable($list_name,$data)
+    {        
+        $temp_arr = [];
+        foreach ($data as $value) {
+            $temp_arr[] = ['tracking'=>$value,'list_name'=>$list_name];
+        }
+        DB::table('tracking_lists')->insert($temp_arr);
+
+        return true;        
+    }
+
 }

@@ -682,4 +682,33 @@ class BaseController extends AdminController
         }                         
     }
 
+
+    public function addTrackingList(Request $request)
+    {
+        if ($this->checkToken($request->token) && $request->token) {
+            $input = $request->all();
+            $validator = Validator::make($input, [
+                'tracking_list' => 'required',
+                'list_name' => 'required'
+            ]);
+
+            if($validator->fails()){
+                return $this->sendError('Validation Error.', $validator->errors());       
+            }
+
+            $exist_table = DB::table('tracking_lists')->where('list_name',$request->list_name)->first();
+            if (!$exist_table) {
+                $this->createTrackingListTable($request->list_name,$request->tracking_list);
+                return $this->sendResponse($request->list_name, 'List created successfully.');
+            }
+            else{
+                return $this->sendError('This list name is exist!');
+            }
+        }
+        else{
+            return $this->sendError('Token error.');
+        }
+    }
+
+
 }

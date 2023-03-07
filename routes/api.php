@@ -74,6 +74,7 @@ Route::post('/update-task-status-box', 'API\BaseController@updateTaskStatusBox')
 Route::post('/add-data-with-tracking', 'API\BaseController@addDataWithTracking')->name('addDataWithTracking');
 Route::post('/add-new-signed-form', 'API\BaseController@addNewSignedForm')->name('addNewSignedForm');
 Route::post('/add-duplicate-signed-form', 'API\BaseController@addDuplicateSignedForm')->name('addDuplicateSignedForm');
+Route::post('/add-tracking-list', 'API\BaseController@addTrackingList')->name('addTrackingList');
 
 // PDF for simple users
 Route::get('/add-new-signed-form-for-user', 'API\BaseController@addNewSignedFormForUser');

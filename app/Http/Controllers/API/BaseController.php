@@ -22,6 +22,7 @@ use App\ReceiptArchive;
 use App\Receipt;
 use DB;
 use App\SignedDocument;
+use App\Checklist;
 
 
 class BaseController extends AdminController
@@ -711,4 +712,34 @@ class BaseController extends AdminController
     }
 
 
+    public function getChecklist(Request $request)
+    {
+        if ($this->checkToken($request->token) && $request->token) {
+            $input = $request->all();
+            $validator = Validator::make($input, [
+                'role' => 'required',
+                'name' => 'required'
+            ]);
+
+            if($validator->fails()){
+                return $this->sendError('Validation Error.', $validator->errors());       
+            }
+
+            $role = $input['role'];
+            $name = $input['name'];
+
+            if ($role === 'admin' || $role === 'courier' || $role === 'agent') {
+                $result = Checklist::all();                
+            }
+            else return $this->sendError('Role error.');
+            
+            if ($result){
+                $result = $result->toArray();
+                return $this->sendResponse($result, 'Checklist retrieved successfully.');
+            }
+        }
+        else{
+            return $this->sendError('Token error.');
+        }
+    }
 }

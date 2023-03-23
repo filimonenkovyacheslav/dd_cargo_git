@@ -729,7 +729,7 @@ class BaseController extends AdminController
             $name = $input['name'];
 
             if ($role === 'admin' || $role === 'courier' || $role === 'agent') {
-                $result = Checklist::all();                
+                $result = Checklist::get();                
             }
             else return $this->sendError('Role error.');
             

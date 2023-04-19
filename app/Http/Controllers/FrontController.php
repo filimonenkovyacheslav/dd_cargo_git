@@ -447,7 +447,10 @@ class FrontController extends AdminController
                     $new_worksheet->$field = $request->input('first_name').' '.$request->input('last_name');
                 }
                 else if($field === 'site_name'){
-                    $new_worksheet->$field = 'For';
+                    if (str_contains($request->input('url_name'), 'forward'))
+                        $new_worksheet->$field = 'ORE';
+                    else
+                        $new_worksheet->$field = 'For';
                 }
                 else if($field === 'recipient_name'){
                     $new_worksheet->$field = $request->input('recipient_first_name').' '.$request->input('recipient_last_name');
@@ -1363,27 +1366,32 @@ class FrontController extends AdminController
     {       
         if ($request->input('url_name')) {
 
+            if (str_contains($request->input('url_name'), 'forward'))
+                $site_name = 'ORE';
+            else
+                $site_name = 'For';
+
             if ($request->input('draft')) {
                 $data = CourierDraftWorksheet::where([
                     ['standard_phone', 'like', '%'.$request->input('sender_phone').'%'],
-                    ['site_name', '=', 'For']
+                    ['site_name', '=', $site_name]
                 ])->get()->last();
             }
             else{
                 $data = NewWorksheet::where([
                     ['sender_phone',$request->input('sender_phone')],
-                    ['site_name', '=', 'For']
+                    ['site_name', '=', $site_name]
                 ])
                 ->orWhere([
                     ['standard_phone', 'like', '%'.$request->input('sender_phone').'%'],
-                    ['site_name', '=', 'For']
+                    ['site_name', '=', $site_name]
                 ])
                 ->get()->last();
 
                 if (!$data) {
                     $data = CourierDraftWorksheet::where([
                         ['standard_phone', 'like', '%'.$request->input('sender_phone').'%'],
-                        ['site_name', '=', 'For']
+                        ['site_name', '=', $site_name]
                     ])->get()->last();
                 }
             }

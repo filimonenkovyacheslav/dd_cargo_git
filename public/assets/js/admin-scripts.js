@@ -624,9 +624,9 @@ $('#tracking-columns').change((e)=>{
         $('[name="recipient_country"]').remove()
         $('.value-by-tracking').append(`
             <select class="form-control" id="site_name" name="site_name">
-               <option value="DD-C">DD-C</option>
-                    
+               <option value="DD-C">DD-C</option>                  
                <option value="For">For</option>
+               <option value="ORE">ORE</option>
                     
             </select>
             `)

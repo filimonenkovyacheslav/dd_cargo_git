@@ -175,6 +175,7 @@
 								@endcan
 								
 								<option value="direction">Направление</option>
+								<option value="tariff">Тариф</option>
 								<option value="status">Статус</option>
 								
 								@can('update-user')
@@ -393,7 +394,7 @@
 										<td class="@can('editDraft')allowed-update @endcan" title="{{$row->direction}}">
 											<div class="div-3">{{$row->direction}}</div>
 										</td>
-										<td class="@can('editDraft')allowed-update @endcan @if($row->getLastDocUniq())pdf-file @endif" title="{{$row->tariff}}">
+										<td class="@can('editDraft')allowed-update @endcan" title="{{$row->tariff}}">
 											<div data-name="tariff" data-id="{{ $row->id }}" class="div-2">{{$row->tariff}}</div>
 										</td>
 										<td class="@can('editDraft')allowed-update @endcan" title="{{$row->status}}">
@@ -599,7 +600,7 @@
 										<td class="@can('editDraft')allowed-update @endcan" title="{{$row->direction}}">
 											<div class="div-3">{{$row->direction}}</div>
 										</td>
-										<td class="@can('editDraft')allowed-update @endcan @if($row->getLastDocUniq())pdf-file @endif" title="{{$row->tariff}}">
+										<td class="@can('editDraft')allowed-update @endcan" title="{{$row->tariff}}">
 											<div data-name="tariff" data-id="{{ $row->id }}" class="div-2">{{$row->tariff}}</div>
 										</td>
 										<td class="@can('editDraft')allowed-update @endcan" title="{{$row->status}}">

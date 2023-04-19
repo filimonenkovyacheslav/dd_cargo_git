@@ -741,4 +741,16 @@ class BaseController extends AdminController
             return $this->sendError('Token error.');
         }
     }
+
+
+    public function newRuParcelAdd(Request $request)
+    {
+        app('App\Http\Controllers\FrontController')->newParcelAdd($request);
+    }
+
+
+    public function getRuTracking(Request $request)
+    {
+        
+    }
 }

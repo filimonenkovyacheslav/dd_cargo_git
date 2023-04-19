@@ -81,9 +81,5 @@ Route::get('/get-checklist', 'API\BaseController@getChecklist')->name('getCheckl
 Route::get('/add-new-signed-form-for-user', 'API\BaseController@addNewSignedFormForUser');
 Route::get('/add-new-signed-form-for-user-eng', 'API\BaseController@addNewSignedFormForUserEng');
 
-// New ru forms
-Route::post('/tracking-ru-form', 'API\BaseController@getRuTracking');
-Route::post('/parcel-ru-form', 'API\BaseController@newRuParcelAdd');
-
 // Crone
 Route::get('/ru-postal-tracking-cron', 'RuPostalTrackingController@cronScript')->name('cronScript');

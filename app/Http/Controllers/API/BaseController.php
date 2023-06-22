@@ -741,4 +741,35 @@ class BaseController extends AdminController
             return $this->sendError('Token error.');
         }
     }
+
+
+    public function addNewReceipt(Request $request)
+    {
+        if ($this->checkToken($request->token) && $request->token) {
+            $input = $request->all();
+            $validator = Validator::make($input, [
+                'id' => 'required',
+                'senderPhone' => 'required',
+                'senderName' => 'required',
+                'quantity' => 'required',
+                'amount' => 'required'
+            ]);
+
+            if($validator->fails()){
+                return $this->sendError('Validation Error.', $validator->errors());       
+            }
+
+            $task = CourierTask::find($input['id']);
+            if ($task) {
+                $this->createNewReceipt($input);
+                return $this->sendResponse($task->toArray(), 'Receipt added successfully.');
+            }
+            else{
+                return $this->sendError('Task id error.');
+            }           
+        }
+        else{
+            return $this->sendError('Token error.');
+        }
+    }
 }

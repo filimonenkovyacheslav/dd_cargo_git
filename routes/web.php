@@ -175,6 +175,11 @@ Route::get('/home', 'HomeController@index')->name('home');
 *  Admin
 */
 Route::group(['prefix' => 'admin','middleware' => 'auth'],function() {	
+
+	// New Receipts
+	Route::get('/new-receipts',['uses' => 'Admin\AdminController@showNewReceipts','as' => 'generalSearchShow']);
+
+	Route::get('/download-new-receipt',['uses' => 'Admin\AdminController@downloadNewReceipt','as' => 'downloadNewReceipt']);
 	
 	// General Search	
 	Route::get('/general-search',['uses' => 'Admin\AdminController@generalSearchShow','as' => 'generalSearchShow']);

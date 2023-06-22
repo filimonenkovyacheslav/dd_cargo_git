@@ -16,6 +16,7 @@ use App\Exports\ReceiptExport;
 use App\ReceiptArchive;
 use DB;
 use Excel;
+use PDF;
 
 class AdminController extends Controller
 {
@@ -1547,4 +1548,93 @@ class AdminController extends Controller
 		return redirect()->to(session('this_previous_url'))->with('status', 'Строка успешно удалена!');
 	}
 
+
+	public function showNewReceipts()
+	{
+		$title = 'RECEIPTS';
+		$new_receipts = DB::table('new_receipts')->get();		
+		
+		return view('admin.new_receipts.new_receipts', compact('title', 'new_receipts'));
+	}
+
+
+	public function createNewReceipt($receipt)
+	{
+		$phone = str_replace('+', '', $receipt['senderPhone']);
+		$date = date('Y-m-d');
+		$name = str_replace('-', '_', $date).'_'.$phone;
+		$link = $this->savePdfReceipt($receipt, $name, $date);
+		
+		if (!Schema::hasTable('new_receipts')){
+			Schema::create('new_receipts', function (Blueprint $table) {
+				$table->increments('id');
+				$table->string('name')->nullable();
+				$table->string('link')->nullable();			
+				$table->timestamps();
+			});
+		}
+		else{
+			DB::table('new_receipts')->insert([
+				'name'=>$name,
+				'link'=>$link,
+				'created_at'=>$date
+			]);
+		}		
+		
+		return $name;
+	}
+
+
+	/**
+    *  Create pdf file
+    */
+    public function pdfviewReceipt($receipt, $name, $date)
+    {       
+        return view('pdf.pdfview_receipt',compact('receipt','name','date'));
+    }
+
+
+    public function savePdfReceipt($receipt, $name, $date)
+    {
+        $folderPath = $this->checkDirectory('receipts'.date("Y_m"));       
+        $file_name = $name.'.pdf';
+        $pdf = PDF::loadView('pdf.pdfview_receipt',compact('receipt','name','date'));
+        $pdf->save($folderPath.$file_name);
+
+        return $folderPath.$file_name;
+    }
+
+
+    public function sendSms()
+    {
+    	if ($this->getDomainRule() !== 'forward') {
+            
+        }
+        elseif($this->getDomainRule() === 'forward'){
+            
+        }
+    }
+
+	
+	public function downloadNewReceipt()
+	{
+		$document = SignedDocument::find($id);
+        if (!$document && $api) $document = SignedDocument::where('uniq_id',$id)->first();
+        $worksheet = $document->getWorksheet();
+        $tracking = $worksheet->tracking_main;
+        $cancel = null;
+
+        if (!$document->screen_ru_form) {
+            if ($this->getDomainRule() !== 'forward') {
+                $pdf = PDF::loadView('pdf.pdfview',compact('worksheet','document','tracking','cancel'));
+            }
+            elseif($this->getDomainRule() === 'forward'){
+                $pdf = PDF::loadView('pdf.pdfview_forward',compact('worksheet','document','tracking','cancel'));
+            }
+        }
+        else        
+            $pdf = PDF::loadView('pdf.pdfview_ru',compact('worksheet','document','tracking','cancel'));
+        
+        return $pdf->download($document->uniq_id.'.pdf');
+	}
 }

@@ -13,10 +13,7 @@
 		border: 2px solid black;
 		text-align: center;
 		vertical-align: middle;
-	}
-	table img{
-		width:200px;
-		height:100px;
+		width:400px;
 	}
 </style>
 <center style="font-family: 'DejaVu Sans'">

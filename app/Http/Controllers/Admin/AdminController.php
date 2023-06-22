@@ -1614,26 +1614,16 @@ class AdminController extends Controller
         }
     }
 
-	
-	public function downloadNewReceipt()
-	{
-		$document = SignedDocument::find($id);
-        if (!$document && $api) $document = SignedDocument::where('uniq_id',$id)->first();
-        $worksheet = $document->getWorksheet();
-        $tracking = $worksheet->tracking_main;
-        $cancel = null;
 
-        if (!$document->screen_ru_form) {
-            if ($this->getDomainRule() !== 'forward') {
-                $pdf = PDF::loadView('pdf.pdfview',compact('worksheet','document','tracking','cancel'));
-            }
-            elseif($this->getDomainRule() === 'forward'){
-                $pdf = PDF::loadView('pdf.pdfview_forward',compact('worksheet','document','tracking','cancel'));
-            }
-        }
-        else        
-            $pdf = PDF::loadView('pdf.pdfview_ru',compact('worksheet','document','tracking','cancel'));
-        
-        return $pdf->download($document->uniq_id.'.pdf');
+    public function downloadTest()
+    {
+    	return response()->download(DB::table('new_receipts')->first()->link);
+    }
+
+	
+	public function downloadNewReceipt($receipt, $name, $date)
+	{      
+        $pdf = PDF::loadView('pdf.pdfview_receipt',compact('receipt','name','date'));        
+        return $pdf->download($name.'.pdf');
 	}
 }

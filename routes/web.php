@@ -179,7 +179,7 @@ Route::group(['prefix' => 'admin','middleware' => 'auth'],function() {
 	// New Receipts
 	Route::get('/new-receipts',['uses' => 'Admin\AdminController@showNewReceipts','as' => 'generalSearchShow']);
 
-	Route::get('/download-new-receipt',['uses' => 'Admin\AdminController@downloadNewReceipt','as' => 'downloadNewReceipt']);
+	Route::get('/download-new-receipt',['uses' => 'Admin\AdminController@downloadTest','as' => 'downloadTest']);
 	
 	// General Search	
 	Route::get('/general-search',['uses' => 'Admin\AdminController@generalSearchShow','as' => 'generalSearchShow']);

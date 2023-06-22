@@ -1579,8 +1579,7 @@ class AdminController extends Controller
 			'link'=>$link,
 			'created_at'=>$date
 		]);
-		
-		
+				
 		return $name;
 	}
 
@@ -1596,7 +1595,7 @@ class AdminController extends Controller
 
     public function savePdfReceipt($receipt, $name, $date)
     {
-        $folderPath = $this->checkDirectory('receipts/'.date("Y_m").'/');       
+        $folderPath = $this->checkDirectory('receipts/'.date("Y_m"));       
         $file_name = $name.'.pdf';
         $pdf = PDF::loadView('pdf.pdfview_receipt',compact('receipt','name','date'));
         $pdf->save($folderPath.$file_name);

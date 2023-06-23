@@ -83,7 +83,7 @@
 
 									<tr>
 										<td class="td-button">
-											<a class="btn btn-primary" href="{{ url('/download-new-receipt/').$row->id }}">Download</a>
+											<a class="btn btn-primary" href="{{ url('/download-new-receipt').'/'.$row->id }}">Download</a>
 										</td>
 										<td title="{{$row->name}}">
 											<div style="width:250px">{{$row->name}}</div>

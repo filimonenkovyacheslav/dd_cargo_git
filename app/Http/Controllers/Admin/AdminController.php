@@ -1552,10 +1552,52 @@ class AdminController extends Controller
 	public function showNewReceipts()
 	{
 		$title = 'RECEIPTS';
-		$new_receipts = DB::table('new_receipts')->get();		
-		
+		if (Schema::hasTable('new_receipts'))
+			$new_receipts = DB::table('new_receipts')->paginate(10);
+		else
+			return redirect()->to(url('/admin'));			
 		return view('admin.new_receipts.new_receipts', compact('title', 'new_receipts'));
 	}
+
+
+	public function newReceiptsFilter(Request $request)
+    {
+        $title = 'New Receipts Filter';
+        $search = $request->table_filter_value;
+        $filter_arr = [];
+        $attributes = DB::table('new_receipts')->first()->attributesToArray();
+
+        $id_arr = [];
+        $new_arr = [];      
+
+        if ($request->table_columns) {
+            $new_receipts = DB::table('new_receipts')->where($request->table_columns, 'like', '%'.$search.'%')->paginate(10);
+        }
+        else{
+            foreach($attributes as $key => $value)
+            {
+                if ($key !== 'updated_at') {
+                    $sheet = DB::table('new_receipts')->where($key, 'like', '%'.$search.'%')->get()->first();
+                    if ($sheet) {                       
+                        $temp_arr = DB::table('new_receipts')->where($key, 'like', '%'.$search.'%')->get();
+                        $new_arr = $temp_arr->filter(function ($item, $k) use($id_arr) {
+                            if (!in_array($item->id, $id_arr)) { 
+                                $id_arr[] = $item->id;                                
+                                return $item;                       
+                            }                                                   
+                        });                     
+                        $filter_arr[] = $new_arr;                                   
+                    }
+                }               
+            }
+
+            return view('admin.new_receipts.new_receipts_find', compact('title','filter_arr'));       
+        }
+        
+        $data = $request->all();             
+        
+        return view('admin.new_receipts.new_receipts', compact('title','new_receipts','data'));
+    }
 
 
 	public function createNewReceipt($receipt)
@@ -1603,27 +1645,10 @@ class AdminController extends Controller
         return $folderPath.$file_name;
     }
 
-
-    public function sendSms()
-    {
-    	if ($this->getDomainRule() !== 'forward') {
-            
-        }
-        elseif($this->getDomainRule() === 'forward'){
-            
-        }
-    }
-
-
-    public function downloadTest()
-    {
-    	return response()->download(DB::table('new_receipts')->first()->link);
-    }
-
 	
-	public function downloadNewReceipt($receipt, $name, $date)
-	{      
-        $pdf = PDF::loadView('pdf.pdfview_receipt',compact('receipt','name','date'));        
-        return $pdf->download($name.'.pdf');
+	public function downloadNewReceipt($id)
+	{   
+		$item = DB::table('new_receipts')->find($id);
+        return response()->download($item->link);
 	}
 }

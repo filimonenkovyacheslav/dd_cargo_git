@@ -640,7 +640,7 @@ class Controller extends BaseController
     protected function checkReceipt($id, $receipt_id, $which_admin, $tracking_main, $receipt_number = null, $old_tracking = null)
     {
         $message = '';
-        $receipt = Receipt::where('tracking_main',$tracking_main)->first();
+        /*$receipt = Receipt::where('tracking_main',$tracking_main)->first();
         $update_date = Date('Y-m-d', strtotime('+4 days'));
 
         if ($receipt_id == null) {
@@ -711,7 +711,7 @@ class Controller extends BaseController
                 ];
                 ReceiptArchive::create($archive);
             }
-        }      
+        }  */    
         
         return $message;
     }
@@ -2075,6 +2075,17 @@ class Controller extends BaseController
         DB::table('tracking_lists')->insert($temp_arr);
 
         return true;        
+    }
+
+
+    public function sendSms()
+    {
+        if ($this->getDomainRule() !== 'forward') {
+            
+        }
+        elseif($this->getDomainRule() === 'forward'){
+            
+        }
     }
 
 }

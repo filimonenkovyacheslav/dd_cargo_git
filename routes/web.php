@@ -24,6 +24,9 @@ Route::group(['prefix' => App\Http\Middleware\LocaleMiddleware::getLocale()], fu
 	Route::get('/set-indexes','Admin\NewWorksheetController@setIndexes');
 	Route::get('/set-draft-indexes','Admin\CourierDraftController@setIndexes');
 
+	// New Receipt
+	Route::get('/download-new-receipt/{id}',['uses' => 'Admin\AdminController@downloadNewReceipt','as' => 'downloadNewReceipt']);
+
 	// Tracking Lists	
 	Route::get('/tracking-lists',['uses' => 'Admin\TrackingListController@index','as' => 'trackingLists']);
 	Route::get('/tracking-lists-filter',['uses' => 'Admin\TrackingListController@trackingListFilter','as' => 'trackingListFilter']);
@@ -177,10 +180,10 @@ Route::get('/home', 'HomeController@index')->name('home');
 Route::group(['prefix' => 'admin','middleware' => 'auth'],function() {	
 
 	// New Receipts
-	Route::get('/new-receipts',['uses' => 'Admin\AdminController@showNewReceipts','as' => 'generalSearchShow']);
+	Route::get('/new-receipts',['uses' => 'Admin\AdminController@showNewReceipts','as' => 'showNewReceipts']);
 
-	Route::get('/download-new-receipt',['uses' => 'Admin\AdminController@downloadTest','as' => 'downloadTest']);
-	
+	Route::get('/new-receipts-filter',['uses' => 'Admin\AdminController@newReceiptsFilter','as' => 'newReceiptsFilter']);
+		
 	// General Search	
 	Route::get('/general-search',['uses' => 'Admin\AdminController@generalSearchShow','as' => 'generalSearchShow']);
 

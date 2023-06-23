@@ -1565,7 +1565,7 @@ class AdminController extends Controller
         $title = 'New Receipts Filter';
         $search = $request->table_filter_value;
         $filter_arr = [];
-        $attributes = DB::table('new_receipts')->first()->toArray();
+        $attributes = DB::table('new_receipts')->first();
 
         $id_arr = [];
         $new_arr = [];      

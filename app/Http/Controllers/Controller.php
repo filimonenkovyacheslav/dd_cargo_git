@@ -2078,13 +2078,29 @@ class Controller extends BaseController
     }
 
 
-    public function sendSms()
+    public function sendSms($sender_phone, $link)
     {
+        /*define('KEY', '3802d90728cc9230adc9');
+        define('SECRET', 'ec1ad8e3da6b360534ba');*/
+        $api = new \Zadarma_API\Api(env('SEND_SMS_KEY'), env('SEND_SMS_SECRET'));   
+
+        $sender_phone = '+380502193020';    
+        
         if ($this->getDomainRule() !== 'forward') {
-            
+            try{
+                $result = $api->sendSms($sender_phone, 'קיבלה קבלה חדשה מחברת שליחויות בינלאומית, לצפייה לחצו כאן'.'/n'.$link, '972559909659');
+                return $link;
+            } catch (\Zadarma_API\ApiException $e) {
+                return $e->getMessage();
+            }
         }
         elseif($this->getDomainRule() === 'forward'){
-            
+            try{
+                $result = $api->sendSms($sender_phone, 'קיבלה קבלה חדשה מחברת אוריינטל אקספרס 0559398039 ,לצפייה לחצו כאן'.'/n'.$link);
+                return $link;
+            } catch (\Zadarma_API\ApiException $e) {
+                return $e->getMessage();
+            }
         }
     }
 

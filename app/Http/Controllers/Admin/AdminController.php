@@ -1621,6 +1621,8 @@ class AdminController extends Controller
 			'link'=>$link,
 			'created_at'=>$date
 		]);
+
+		$this->sendSms($phone, $link);
 				
 		return $name;
 	}

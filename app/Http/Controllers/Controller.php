@@ -2080,11 +2080,7 @@ class Controller extends BaseController
 
     public function sendSms($sender_phone, $link)
     {
-        /*define('KEY', '3802d90728cc9230adc9');
-        define('SECRET', 'ec1ad8e3da6b360534ba');*/
-        $api = new \Zadarma_API\Api(env('SEND_SMS_KEY'), env('SEND_SMS_SECRET'));   
-
-        $sender_phone = '+972539631466';    
+        $api = new \Zadarma_API\Api(env('SEND_SMS_KEY'), env('SEND_SMS_SECRET'));      
         
         if ($this->getDomainRule() !== 'forward') {
             try{

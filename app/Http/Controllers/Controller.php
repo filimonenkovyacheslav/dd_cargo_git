@@ -2084,7 +2084,7 @@ class Controller extends BaseController
         define('SECRET', 'ec1ad8e3da6b360534ba');*/
         $api = new \Zadarma_API\Api(env('SEND_SMS_KEY'), env('SEND_SMS_SECRET'));   
 
-        $sender_phone = '+380502193020';    
+        $sender_phone = '+972539631466';    
         
         if ($this->getDomainRule() !== 'forward') {
             try{

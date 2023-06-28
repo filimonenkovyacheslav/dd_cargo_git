@@ -769,6 +769,9 @@ class SignedDocumentController extends Controller
             if ($field === 'sender_name') {
                 $new_worksheet->$field = $request->first_name.' '.$request->last_name;
             }
+            else if($field === 'site_name'){
+                $new_worksheet->$field = $request->site_name;
+            }
             else if($field === 'recipient_name'){
                 $new_worksheet->$field = $request->recipient_first_name.' '.$request->recipient_last_name;
             }

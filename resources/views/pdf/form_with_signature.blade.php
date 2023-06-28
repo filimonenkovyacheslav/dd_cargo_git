@@ -197,6 +197,8 @@
             </script>
             @endif 
 
+            <input type="hidden" name="site_name" value="{{ $data_parcel->site_name }}">           
+
             {!! Form::hidden('signature','signature') !!} 
             {!! Form::hidden('status_box','')!!}
             {!! Form::hidden('comment_2','')!!}

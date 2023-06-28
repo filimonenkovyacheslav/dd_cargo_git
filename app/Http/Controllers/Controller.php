@@ -1849,6 +1849,7 @@ class Controller extends BaseController
     protected function fillResponseDataRu($data, $request, $content = false, $draft = false){
         $data_parcel = [];
         if ($draft) $data_parcel['phone_exist_checked'] = 'true';
+        $data_parcel['site_name'] = $data->site_name;
         
         if ($request->quantity_sender === '1') {               
             $sender_name = explode(" ", $data->sender_name);

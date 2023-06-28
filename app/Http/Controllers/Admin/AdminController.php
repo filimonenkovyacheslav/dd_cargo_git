@@ -1622,7 +1622,10 @@ class AdminController extends Controller
 			'created_at'=>$date
 		]);
 
-		$this->sendSms($phone, $link);
+		$last_id = DB::getPdo()->lastInsertId();
+		$download = url('/download-new-receipt').'/'.$last_id;
+
+		$this->sendSms($phone, $download);
 				
 		return $name;
 	}

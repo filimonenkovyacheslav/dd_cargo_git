@@ -2088,7 +2088,7 @@ class Controller extends BaseController
         
         if ($this->getDomainRule() !== 'forward') {
             try{
-                $result = $api->sendSms($sender_phone, 'קיבלה קבלה חדשה מחברת שליחויות בינלאומית, לצפייה לחצו כאן'.'/n'.$link, '972559909659');
+                $result = $api->sendSms($sender_phone, 'קיבלה קבלה חדשה מחברת שליחויות בינלאומית, לצפייה לחצו כאן'.' '.$link, '972559909659');
                 return $link;
             } catch (\Zadarma_API\ApiException $e) {
                 return $e->getMessage();
@@ -2096,7 +2096,7 @@ class Controller extends BaseController
         }
         elseif($this->getDomainRule() === 'forward'){
             try{
-                $result = $api->sendSms($sender_phone, 'קיבלה קבלה חדשה מחברת אוריינטל אקספרס 0559398039 ,לצפייה לחצו כאן'.'/n'.$link);
+                $result = $api->sendSms($sender_phone, 'קיבלה קבלה חדשה מחברת אוריינטל אקספרס 0559398039 ,לצפייה לחצו כאן'.' '.$link);
                 return $link;
             } catch (\Zadarma_API\ApiException $e) {
                 return $e->getMessage();

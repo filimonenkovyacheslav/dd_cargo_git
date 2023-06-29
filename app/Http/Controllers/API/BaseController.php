@@ -760,7 +760,7 @@ class BaseController extends AdminController
             }
 
             $this->createNewReceipt($input);
-            return $this->sendResponse($task->toArray(), 'Receipt added successfully.');         
+            return $this->sendResponse($input, 'Receipt added successfully.');         
         }
         else{
             return $this->sendError('Token error.');

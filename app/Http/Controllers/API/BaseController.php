@@ -745,25 +745,20 @@ class BaseController extends AdminController
 
     public function addNewReceipt(Request $request)
     {
-        if ($this->checkToken($request->token) && $request->token) {
-            $input = $request->all();
-            $validator = Validator::make($input, [
-                'id' => 'required',
-                'senderPhone' => 'required',
-                'senderName' => 'required',
-                'quantity' => 'required',
-                'amount' => 'required'
-            ]);
+        $input = $request->all();
+        $validator = Validator::make($input, [
+            'id' => 'required',
+            'senderPhone' => 'required',
+            'senderName' => 'required',
+            'quantity' => 'required',
+            'amount' => 'required'
+        ]);
 
-            if($validator->fails()){
-                return $this->sendError('Validation Error.', $validator->errors());       
-            }
+        if($validator->fails()){
+            return $this->sendError('Validation Error.', $validator->errors());       
+        }
 
-            $this->createNewReceipt($input);
-            return $this->sendResponse($input, 'Receipt added successfully.');         
-        }
-        else{
-            return $this->sendError('Token error.');
-        }
+        $this->createNewReceipt($input);
+        return $this->sendResponse($input, 'Receipt added successfully.');         
     }
 }

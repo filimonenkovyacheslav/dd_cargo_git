@@ -1552,16 +1552,17 @@ class AdminController extends Controller
 	public function showNewReceipts()
 	{
 		$title = 'RECEIPTS';
+		$new_receipts = null;
 		if (Schema::hasTable('new_receipts'))
 			$new_receipts = DB::table('new_receipts')->paginate(10);
-		else
-			return redirect()->to(url('/admin'));			
+			
 		return view('admin.new_receipts.new_receipts', compact('title', 'new_receipts'));
 	}
 
 
 	public function newReceiptsFilter(Request $request)
     {
+    	if (!Schema::hasTable('new_receipts')) return redirect()->to(session('this_previous_url'))->with('status-error', 'There’s nothing!');
         $title = 'New Receipts Filter';
         $search = $request->table_filter_value;
         $filter_arr = [];

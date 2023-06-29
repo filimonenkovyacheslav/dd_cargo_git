@@ -234,6 +234,8 @@ Route::group(['prefix' => 'admin','middleware' => 'auth'],function() {
 
 	Route::get('/trash-activate/{id}',['uses' => 'Admin\TrashController@fromTrash','as' => 'fromTrash']);
 
+	Route::get('/trash-delete/{id}',['uses' => 'Admin\TrashController@deleteFromTrash','as' => 'deleteFromTrash']);
+
 	// Log of deleted orders
 	Route::get('/logs',['uses' => 'Admin\DeletedLogController@index','as' => 'adminLog']);
 

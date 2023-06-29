@@ -98,9 +98,9 @@
 								</tbody>
 							</table>
 
-							@if(isset($data))
+							@if(isset($data) && isset($new_receipts))
 							{{ $new_receipts->appends($data)->links() }}
-							@else
+							@elseif(isset($new_receipts))
 							{{ $new_receipts->links() }}
 							@endif							
 						

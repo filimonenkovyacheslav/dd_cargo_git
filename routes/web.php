@@ -98,6 +98,8 @@ Route::group(['prefix' => App\Http\Middleware\LocaleMiddleware::getLocale()], fu
 
 	Route::post('/tracking-form', 'FrontController@getTracking')->name('getTracking');
 
+	Route::get('/tracking-ru-form', 'FrontController@trackingRuForm')->name('trackingRuForm');
+
 	Route::get('/china-parcel-form', 'FrontController@chinaParcelForm')->name('chinaParcelForm');
 
 	Route::post('/china-parcel-form', 'FrontController@chinaParcelAdd')->name('chinaParcelAdd');

@@ -21,7 +21,7 @@
 	table{
 		font-size: 10px;
 		border-collapse: collapse;
-		border: 2px solid black;
+		border: 2px solid black;		
 		vertical-align: middle;
 		width:400px;
 	}
@@ -35,21 +35,20 @@
 			</th>
 		</tr>	
 		<tr>
-			<th colspan="2" style="font-size:14px;text-align: center;">
-				®UNION LOGISTIC
-			</th>
-		</tr>
-		<tr>
 			<th colspan="2" style="text-align: center;">
-				התחיה 7 כפר סבא 0559909659
+				 הראשונים 13 פתח תקווה Oriental Express 
 			</th>
 		</tr>
 		<tr>			
-			<th>שם לקוח</th>
+			<th>נתקבל מ</th>
 			<td>{{ $receipt['senderName'] }}</td>
 		</tr>
 		<tr>			
-			<th>מספר חבילות</th>
+			<th>נתובת</th>
+			<td></td>
+		</tr>		
+		<tr>			
+			<th>מספר משלוחים</th>
 			<td>{{ $receipt['quantity'] }}</td>
 		</tr>
 		<tr>			
@@ -66,6 +65,7 @@
 
 </body>
 </html>
+
 
 
 

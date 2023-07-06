@@ -16,7 +16,7 @@ use App\Exports\ReceiptExport;
 use App\ReceiptArchive;
 use DB;
 use Excel;
-use PDF;
+use ArPDF;
 
 class AdminController extends Controller
 {
@@ -1633,11 +1633,16 @@ class AdminController extends Controller
 
 
 	/**
-    *  Create pdf file
+    *  Create test pdf file
     */
-    public function pdfviewReceipt($receipt, $name, $date)
-    {       
-        return view('pdf.pdfview_receipt',compact('receipt','name','date'));
+    public function testPDF()
+    {  
+    	$receipt = ['senderName'=>'senderName','quantity'=>'quantity','amount'=>'amount'];
+    	$name = 'test_pdf';
+    	$date = date("Ymd");
+    	$filename = 'receipts_'.date("YmdHis").'.pdf';
+    	$pdf = ArPDF::loadView('pdf.pdfview_receipt', compact('receipt','name','date'));
+        return $pdf->stream($filename);
     }
 
 
@@ -1645,7 +1650,13 @@ class AdminController extends Controller
     {
         $folderPath = $this->checkDirectory('receipts_'.date("Y_m"));       
         $file_name = $name.'.pdf';
-        $pdf = PDF::loadView('pdf.pdfview_receipt',compact('receipt','name','date'));
+        if ($this->getDomainRule() !== 'forward') {
+            $pdf = ArPDF::loadView('pdf.pdfview_receipt',compact('receipt','name','date'));
+        }
+        elseif($this->getDomainRule() === 'forward'){
+            $pdf = ArPDF::loadView('pdf.pdfview_receipt_eng',compact('receipt','name','date'));
+        }
+        
         $pdf->save($folderPath.$file_name);
 
         return $folderPath.$file_name;

@@ -21,6 +21,8 @@ Route::group(['prefix' => App\Http\Middleware\LocaleMiddleware::getLocale()], fu
 		return view('welcome');
 	})->name('welcome');
 
+	Route::get('/test-pdf','Admin\AdminController@testPDF');
+
 	Route::get('/set-indexes','Admin\NewWorksheetController@setIndexes');
 	Route::get('/set-draft-indexes','Admin\CourierDraftController@setIndexes');
 

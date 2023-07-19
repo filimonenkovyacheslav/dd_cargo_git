@@ -1604,15 +1604,19 @@ class AdminController extends Controller
 	public function createNewReceipt($receipt)
 	{
 		$phone = str_replace('+', '', $receipt['senderPhone']);
+		$tracking = $receipt['tracking'];
 		$date = date('Y-m-d');
-		$name = str_replace('-', '_', $date).'_'.$phone;
+		$name = str_replace('-', '_', $date).'_'.$tracking;
 		$link = $this->savePdfReceipt($receipt, $name, $date);
 		
 		if (!Schema::hasTable('new_receipts')){
 			Schema::create('new_receipts', function (Blueprint $table) {
 				$table->increments('id');
 				$table->string('name')->nullable();
-				$table->string('link')->nullable();			
+				$table->string('link')->nullable();
+				$table->string('sender_name')->nullable();
+				$table->string('quantity')->nullable();	
+				$table->string('amount')->nullable();		
 				$table->timestamps();
 			});
 		}
@@ -1620,13 +1624,16 @@ class AdminController extends Controller
 		DB::table('new_receipts')->insert([
 			'name'=>$name,
 			'link'=>$link,
+			'sender_name'=>$receipt['senderName'],
+			'quantity'=>$receipt['quantity'],
+			'amount'=>$receipt['amount'],
 			'created_at'=>$date
 		]);
 
 		$last_id = DB::getPdo()->lastInsertId();
-		$download = url('/download-new-receipt').'/'.$last_id;
+		$show = url('/show-new-receipt').'/'.$last_id;
 
-		$this->sendSms($phone, $download);
+		//$this->sendSms($phone, $show);
 				
 		return $name;
 	}
@@ -1637,11 +1644,11 @@ class AdminController extends Controller
     */
     public function testPDF()
     {  
-    	$receipt = ['senderName'=>'senderName','quantity'=>'quantity','amount'=>'amount'];
+    	$receipt = ['senderName'=>'Sender Name','quantity'=>'3','amount'=>'370'];
     	$name = 'test_pdf';
-    	$date = date("Ymd");
+    	$date = date("Y-m-d");
     	$filename = 'receipts_'.date("YmdHis").'.pdf';
-    	$pdf = ArPDF::loadView('pdf.pdfview_receipt', compact('receipt','name','date'));
+    	$pdf = ArPDF::loadView('pdf.pdfview_receipt', compact('receipt','date'));
         return $pdf->stream($filename);
     }
 
@@ -1651,10 +1658,10 @@ class AdminController extends Controller
         $folderPath = $this->checkDirectory('receipts_'.date("Y_m"));       
         $file_name = $name.'.pdf';
         if ($this->getDomainRule() !== 'forward') {
-            $pdf = ArPDF::loadView('pdf.pdfview_receipt',compact('receipt','name','date'));
+            $pdf = ArPDF::loadView('pdf.pdfview_receipt',compact('receipt','date'));
         }
         elseif($this->getDomainRule() === 'forward'){
-            $pdf = ArPDF::loadView('pdf.pdfview_receipt_eng',compact('receipt','name','date'));
+            $pdf = ArPDF::loadView('pdf.pdfview_receipt_eng',compact('receipt','date'));
         }
         
         $pdf->save($folderPath.$file_name);
@@ -1667,5 +1674,28 @@ class AdminController extends Controller
 	{   
 		$item = DB::table('new_receipts')->find($id);
         return response()->download($item->link);
-	}
+    }
+
+
+    public function showNewReceipt($id)
+    {   
+    	$receipt = [];
+    	$item = DB::table('new_receipts')->find($id);
+    	if ($item) {
+    		$receipt['senderName'] = $item->sender_name;
+    		$receipt['quantity'] = $item->quantity;
+    		$receipt['amount'] = $item->amount;
+    		$date = $item->created_at;
+    		$file_name = $item->name.'.pdf';
+    		if ($this->getDomainRule() !== 'forward') {
+    			$pdf = ArPDF::loadView('pdf.pdfview_receipt',compact('receipt','date'));
+    		}
+    		elseif($this->getDomainRule() === 'forward'){
+    			$pdf = ArPDF::loadView('pdf.pdfview_receipt_eng',compact('receipt','date'));
+    		}
+    		return $pdf->stream($filename);
+    	} 
+    	else
+    		return 'There is nothing!';   	
+    }
 }

@@ -1693,7 +1693,7 @@ class AdminController extends Controller
     		elseif($this->getDomainRule() === 'forward'){
     			$pdf = ArPDF::loadView('pdf.pdfview_receipt_eng',compact('receipt','date'));
     		}
-    		return $pdf->stream($filename);
+    		return $pdf->stream($file_name);
     	} 
     	else
     		return 'There is nothing!';   	

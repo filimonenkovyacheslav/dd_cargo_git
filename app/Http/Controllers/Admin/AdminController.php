@@ -17,6 +17,7 @@ use App\ReceiptArchive;
 use DB;
 use Excel;
 use ArPDF;
+use Response;
 
 class AdminController extends Controller
 {
@@ -1681,6 +1682,10 @@ class AdminController extends Controller
     {   
     	$receipt = [];
     	$item = DB::table('new_receipts')->find($id);
+    	return Response::make(file_get_contents($item->link), 200, [
+    		'Content-Type' => 'application/pdf',
+    		'Content-Disposition' => 'inline; filename="'.$item->name.'.pdf'.'"'
+    	]);
     	if ($item) {
     		$receipt['senderName'] = $item->sender_name;
     		$receipt['quantity'] = $item->quantity;

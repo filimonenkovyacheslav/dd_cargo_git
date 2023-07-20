@@ -17,6 +17,7 @@ use App\ReceiptArchive;
 use DB;
 use Excel;
 use ArPDF;
+use Spatie\PdfToImage\Pdf;
 
 class AdminController extends Controller
 {

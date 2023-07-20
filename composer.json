@@ -19,6 +19,7 @@
         "maatwebsite/excel": "^3.1",
         "mtownsend/xml-to-array": "^2.0",
         "niklasravnsborg/laravel-pdf": "^4.1",
+        "spatie/pdf-to-image": "^1.2",
         "zadarma/user-api-v1": "^1.1"
     },
     "require-dev": {

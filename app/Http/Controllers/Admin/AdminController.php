@@ -17,7 +17,6 @@ use App\ReceiptArchive;
 use DB;
 use Excel;
 use ArPDF;
-use Response;
 
 class AdminController extends Controller
 {
@@ -1674,31 +1673,23 @@ class AdminController extends Controller
 	public function downloadNewReceipt($id)
 	{   
 		$item = DB::table('new_receipts')->find($id);
-        return response()->download($item->link);
+        
+        if ($item) {
+    		return response()->download($item->link);
+    	} 
+    	else
+    		return 'There is nothing!'; 
     }
 
 
     public function showNewReceipt($id)
     {   
-    	$receipt = [];
     	$item = DB::table('new_receipts')->find($id);
-    	return Response::make(file_get_contents($item->link), 200, [
-    		'Content-Type' => 'application/pdf',
-    		'Content-Disposition' => 'inline; filename="'.$item->name.'.pdf'.'"'
-    	]);
     	if ($item) {
-    		$receipt['senderName'] = $item->sender_name;
-    		$receipt['quantity'] = $item->quantity;
-    		$receipt['amount'] = $item->amount;
-    		$date = $item->created_at;
-    		$file_name = $item->name.'.pdf';
-    		if ($this->getDomainRule() !== 'forward') {
-    			$pdf = ArPDF::loadView('pdf.pdfview_receipt',compact('receipt','date'));
-    		}
-    		elseif($this->getDomainRule() === 'forward'){
-    			$pdf = ArPDF::loadView('pdf.pdfview_receipt_eng',compact('receipt','date'));
-    		}
-    		return $pdf->stream($file_name);
+    		$pdf = new Spatie\PdfToImage\Pdf($item->link);
+    		$path = explode(".", $item->link);
+    		$pdf->saveImage($path[0]."jpg");
+    		return response()->download($path[0]."jpg");
     	} 
     	else
     		return 'There is nothing!';   	

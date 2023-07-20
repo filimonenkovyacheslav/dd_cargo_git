@@ -17,7 +17,7 @@ use App\ReceiptArchive;
 use DB;
 use Excel;
 use ArPDF;
-use Spatie\PdfToImage\Pdf;
+
 
 class AdminController extends Controller
 {
@@ -1688,7 +1688,7 @@ class AdminController extends Controller
     	$item = DB::table('new_receipts')->find($id);
     	if ($item) {
     		$link = realpath($item->link);
-    		$pdf = new Spatie\PdfToImage\Pdf($link);
+    		$pdf = new \Spatie\PdfToImage\Pdf($link);
     		$path = explode(".", $link);
     		$pdf->saveImage($path[0].".jpg");
     		return response()->download($path[0].".jpg");

@@ -1687,8 +1687,9 @@ class AdminController extends Controller
     {   
     	$item = DB::table('new_receipts')->find($id);
     	if ($item) {
-    		$pdf = new Spatie\PdfToImage\Pdf($item->link);
-    		$path = explode(".", $item->link);
+    		$link = realpath($item->link);
+    		$pdf = new Spatie\PdfToImage\Pdf($link);
+    		$path = explode(".", $link);
     		$pdf->saveImage($path[0].".jpg");
     		return response()->download($path[0].".jpg");
     	} 

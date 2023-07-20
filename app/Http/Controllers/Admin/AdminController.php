@@ -1689,8 +1689,8 @@ class AdminController extends Controller
     	if ($item) {
     		$pdf = new Spatie\PdfToImage\Pdf($item->link);
     		$path = explode(".", $item->link);
-    		$pdf->saveImage($path[0]."jpg");
-    		return response()->download($path[0]."jpg");
+    		$pdf->saveImage($path[0].".jpg");
+    		return response()->download($path[0].".jpg");
     	} 
     	else
     		return 'There is nothing!';   	

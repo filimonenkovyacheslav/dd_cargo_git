@@ -1632,9 +1632,9 @@ class AdminController extends Controller
 		]);
 
 		$last_id = DB::getPdo()->lastInsertId();
-		$show = url('/show-new-receipt').'/'.$last_id;
+		$jpg = url('/download-jpg-new-receipt').'/'.$last_id;
 
-		//$this->sendSms($phone, $show);
+		$this->sendSms($phone, $jpg);
 				
 		return $name;
 	}
@@ -1683,7 +1683,7 @@ class AdminController extends Controller
     }
 
 
-    public function showNewReceipt($id)
+    public function downloadJpgNewReceipt($id)
     {   
     	$item = DB::table('new_receipts')->find($id);
     	if ($item) {

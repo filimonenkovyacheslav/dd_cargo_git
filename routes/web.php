@@ -29,7 +29,7 @@ Route::group(['prefix' => App\Http\Middleware\LocaleMiddleware::getLocale()], fu
 	// New Receipt
 	Route::get('/download-new-receipt/{id}',['uses' => 'Admin\AdminController@downloadNewReceipt','as' => 'downloadNewReceipt']);
 	Route::get('/send-sms',['uses' => 'Controller@sendSms','as' => 'sendSms']);
-	Route::get('/show-new-receipt/{id}',['uses' => 'Admin\AdminController@showNewReceipt','as' => 'showNewReceipt']);
+	Route::get('/download-jpg-new-receipt/{id}',['uses' => 'Admin\AdminController@downloadJpgNewReceipt','as' => 'downloadJpgNewReceipt']);
 
 	// Tracking Lists	
 	Route::get('/tracking-lists',['uses' => 'Admin\TrackingListController@index','as' => 'trackingLists']);

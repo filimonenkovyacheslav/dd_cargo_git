@@ -729,7 +729,7 @@ class BaseController extends AdminController
             $name = $input['name'];
 
             if ($role === 'admin' || $role === 'courier' || $role === 'agent') {
-                $result = Checklist::pluck('tracking_main');                
+                $result = Checklist::all()->toArray();                
             }
             else return $this->sendError('Role error.');
             

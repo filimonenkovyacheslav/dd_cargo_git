@@ -1689,7 +1689,7 @@ class AdminController extends Controller
     	if ($item) {
     		$link = realpath($item->link);
     		$pdf = new \Spatie\PdfToImage\Pdf($link);
-    		$path = explode(".", $link);
+    		$path = explode(".pdf", $link);
     		$pdf->saveImage($path[0].".jpg");
     		return response()->download($path[0].".jpg");
     	} 

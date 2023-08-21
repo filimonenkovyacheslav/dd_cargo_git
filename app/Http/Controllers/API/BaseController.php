@@ -581,7 +581,10 @@ class BaseController extends AdminController
                 $link = ($input['which_admin'] === 'ru') ? '/form-with-signature/' : '/form-with-signature-eng/';
                 $result = app('App\Http\Controllers\SignedDocumentController')->createTempTable($request);
                 if ($result) {
-                    $link .= '0/'.$result.'/'.$user->name;
+                    if ($input['id']) 
+                        $link .= $input['id'].'/'.$result.'/'.$user->name;
+                    else
+                        $link .= '0/'.$result.'/'.$user->name;
                     return $this->sendResponse(compact('link'), 'Link created successfully.');
                 }               
             }

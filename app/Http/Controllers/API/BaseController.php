@@ -581,8 +581,14 @@ class BaseController extends AdminController
                 $link = ($input['which_admin'] === 'ru') ? '/form-with-signature/' : '/form-with-signature-eng/';
                 $result = app('App\Http\Controllers\SignedDocumentController')->createTempTable($request);
                 if ($result) {
-                    if ($input['id']) 
-                        $link .= $input['id'].'/'.$result.'/'.$user->name;
+                    if ($input['id']) {
+                        $task = CourierTask::find($input['id']);
+                        if ($task) {
+                            $worksheet = $task->getWorksheet();
+                            $link .= $worksheet->id.'/'.$result.'/'.$user->name;
+                        }
+                        else return $this->sendError('Task id error.');
+                    }
                     else
                         $link .= '0/'.$result.'/'.$user->name;
                     return $this->sendResponse(compact('link'), 'Link created successfully.');

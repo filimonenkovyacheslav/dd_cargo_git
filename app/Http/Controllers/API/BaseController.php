@@ -585,7 +585,7 @@ class BaseController extends AdminController
                         $task = CourierTask::find($input['id']);
                         if ($task) {
                             $worksheet = $task->getWorksheet();
-                            $link .= $worksheet->id.'/'.$result.'/'.$user->name;
+                            $link .= $worksheet->id.'/'.$result.'/'.$user->name.'?quantity_sender=1&quantity_recipient=1&api=true';
                         }
                         else return $this->sendError('Task id error.');
                     }

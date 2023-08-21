@@ -747,7 +747,6 @@ class BaseController extends AdminController
     {
         $input = $request->all();
         $validator = Validator::make($input, [
-            'id' => 'required',
             'senderPhone' => 'required',
             'senderName' => 'required',
             'quantity' => 'required',

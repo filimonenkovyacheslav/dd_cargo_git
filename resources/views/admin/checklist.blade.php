@@ -90,7 +90,7 @@
 
 						<tr>
 							<td title="{{$row->tracking_main}}">
-								<div class="div-3">{{$row->tracking_main}}</div>
+								<div class="div-4">{{$row->tracking_main}}</div>
 							</td>  
 							<td title="{{$row->value}}">
 								<div class="div-invoice">{{$row->value}}</div>

@@ -482,7 +482,7 @@
                 }
             }
             else{
-                if (!document.querySelector('input[name="shipper_city"]').value){
+                if (!document.querySelector('[name="shipper_city"]').value){
                     alert('The city field is required !');
                     return false;
                 }

@@ -197,6 +197,7 @@
                             <li><a href="{{route('trackingLists')}}"> Tracking Lists </a></li>
                             <li><a href="{{route('checklist')}}"> Checklist </a></li>
                             <li><a href="{{route('checksHistory')}}"> История </a></li>
+                            <li><a href="{{route('showFullStatusParcel')}}"> Full Status Parcel </a></li>
                         </ul>
                     </li>
                 

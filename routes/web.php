@@ -22,7 +22,14 @@ Route::group(['prefix' => App\Http\Middleware\LocaleMiddleware::getLocale()], fu
 	})->name('welcome');
 
 	Route::get('/test-pdf','Admin\AdminController@testPDF');
+	
+	// Full Status Parcel
+	Route::get('/full-status-parcel', function () {
+		return view('full_status_parcel_form');
+	})->name('fullStatusParcelForm');
+	Route::post('/full-status-parcel','Admin\FullStatusParcelController@getFullStatusParcel')->name('getFullStatusParcel');
 
+	// Set Indexes
 	Route::get('/set-indexes','Admin\NewWorksheetController@setIndexes');
 	Route::get('/set-draft-indexes','Admin\CourierDraftController@setIndexes');
 
@@ -121,13 +128,19 @@ Route::middleware('auth')->group(function () {
 	Route::get('/checks-history',['uses' => 'ChecklistController@checksHistory','as' => 'checksHistory']);
 	Route::post('/checks-history',['uses' => 'ChecklistController@destroy','as' => 'checksHistoryDelete']);
 	Route::post('/checks-history-export',['uses' => 'ChecklistController@exportChecksHistory','as' => 'exportChecksHistory']);
+	Route::post('/import-checklist','ChecklistController@importChecklist')->name('importChecklist');
 	
 	// Import csv
 	Route::post('/import-trackings','TrackingController@importTrackings')->name('importTrackings');
 	Route::get('/export-trackings',['uses' => 'TrackingController@exportTrackings','as' => 'exportTrackings']);
 	Route::post('/import-trackings-eng','TrackingController@importTrackingsEng')->name('importTrackingsEng');
 	Route::get('/export-trackings-eng',['uses' => 'TrackingController@exportTrackingsEng','as' => 'exportTrackingsEng']);
-	Route::post('/import-checklist','ChecklistController@importChecklist')->name('importChecklist');
+	
+	// Full Status Parcel
+	Route::get('/show-full-status-parcel','Admin\FullStatusParcelController@showFullStatusParcel')->name('showFullStatusParcel');
+	Route::get('/export-full-status-parcel','Admin\FullStatusParcelController@exportFullStatusParcel')->name('exportFullStatusParcel');
+	Route::post('/import-full-status-parcel','Admin\FullStatusParcelController@importFullStatusParcel')->name('importFullStatusParcel');
+
 });
 
 // Альтернатива php artisan storage:link

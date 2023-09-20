@@ -77,6 +77,8 @@ Route::post('/add-duplicate-signed-form', 'API\BaseController@addDuplicateSigned
 Route::post('/add-tracking-list', 'API\BaseController@addTrackingList')->name('addTrackingList');
 Route::get('/get-checklist', 'API\BaseController@getChecklist')->name('getChecklist');
 Route::post('/add-new-receipt', 'API\BaseController@addNewReceipt')->name('addNewReceipt');
+Route::get('/get-tracking-list-names', 'API\BaseController@getTrackingListNames')->name('getTrackingListNames');
+Route::post('/add-checks-history', 'API\BaseController@addChecksHistory')->name('addChecksHistory');
 
 // PDF for simple users
 Route::get('/add-new-signed-form-for-user', 'API\BaseController@addNewSignedFormForUser');

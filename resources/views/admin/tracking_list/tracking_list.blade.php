@@ -71,8 +71,7 @@
 								<thead>
 									<tr>
 										<th>Action</th>
-										<th>List name</th>
-										<th>Tracking No.</th>				
+										<th>List name</th>			
 									</tr>
 
 								</thead>
@@ -102,10 +101,7 @@
 										</td>
 										<td title="{{$row->list_name}}">
 											<div style="width:250px">{{$row->list_name}}</div>
-										</td>
-										<td title="{{$row->tracking}}">
-											<div class="div-4">{{$row->tracking}}</div>
-										</td>                                                  
+										</td>                                                 
 									</tr>
 
 									@endforeach

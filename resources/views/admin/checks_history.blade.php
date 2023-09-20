@@ -43,27 +43,6 @@
 					@php
 						session(['this_previous_url' => url()->full()]);
 					@endphp
-
-					<div class="btn-move-wrapper" style="display:flex">
-						<form action="{{ route('trackingListFilter') }}" method="GET" id="form-worksheet-table-filter" enctype="multipart/form-data">
-							@csrf
-							<label class="table_columns" style="margin: 0 15px">Choose column:
-								<select class="form-control" id="table_columns" name="table_columns">
-									<option value="" selected="selected"></option>
-									<option value="list_name">List name</option>
-									<option value="tracking">Tracking No.</option>                
-								</select>
-							</label>
-							<label>Filter:
-								<input type="search" name="table_filter_value" class="form-control form-control-sm">
-							</label>
-
-							<input type="hidden" name="for_active">
-							
-							<button type="submit" id="table_filter_button" style="margin-left:30px" class="btn btn-default">Search</button>
-						</form>
-					
-					</div>
 					
 					<div class="card-body new-worksheet">
 						<div class="table-container">
@@ -71,29 +50,19 @@
 								<thead>
 									<tr>
 										<th>Action</th>
-										<th>List name</th>				
+										<th>List name</th>			
 									</tr>
 
 								</thead>
 								<tbody>
 
-									@php
-									$id_arr = [];
-									@endphp
-
-									@if(isset($filter_arr))
-									@for($i=0; $i < count($filter_arr); $i++)
-									@foreach($filter_arr[$i] as $row)
-
-									@if (!in_array($row->id, $id_arr))
-									@php
-									$id_arr[] = $row->id;
-									@endphp
+									@if(isset($checks_history))
+									@foreach($checks_history as $row)
 
 									<tr>
 										<td class="td-button">
 
-											<form class="form-horizontal" action="{{ route('exportTrackingList') }}" method="POST">
+											<form class="form-horizontal" action="{{ route('exportChecksHistory') }}" method="POST">
 												@csrf	
 												<input type="hidden" name="list_name" value="{{$row->list_name}}">
 												<button class="btn btn-primary" type="submit">Export</button>
@@ -101,7 +70,7 @@
 
 											@can('editPost')
 											
-											{!! Form::open(['url'=>route('trackingListDelete'),'onsubmit' => 'return ConfirmDelete()', 'class'=>'form-horizontal','method' => 'POST']) !!}
+											{!! Form::open(['url'=>route('checksHistoryDelete'),'onsubmit' => 'return ConfirmDelete()', 'class'=>'form-horizontal','method' => 'POST']) !!}
 											{!! Form::hidden('action',$row->list_name) !!}
 											{!! Form::button('Remove all list',['class'=>'btn btn-danger','type'=>'submit']) !!}
 											{!! Form::close() !!}
@@ -114,9 +83,7 @@
 										</td>                                                 
 									</tr>
 
-									@endif
 									@endforeach
-									@endfor
 									@endif
 								</tbody>
 							</table>						

@@ -196,6 +196,7 @@
                         <ul class="dropdown-menu">
                             <li><a href="{{route('trackingLists')}}"> Tracking Lists </a></li>
                             <li><a href="{{route('checklist')}}"> Checklist </a></li>
+                            <li><a href="{{route('checksHistory')}}"> История </a></li>
                         </ul>
                     </li>
                 

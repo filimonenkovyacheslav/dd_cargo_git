@@ -23,6 +23,7 @@ use App\Receipt;
 use DB;
 use App\SignedDocument;
 use App\Checklist;
+use App\TrackingList;
 
 
 class BaseController extends AdminController
@@ -706,13 +707,38 @@ class BaseController extends AdminController
                 return $this->sendError('Validation Error.', $validator->errors());       
             }
 
-            $exist_table = DB::table('tracking_lists')->where('list_name',$request->list_name)->first();
-            if (!$exist_table) {
-                $this->createTrackingListTable($request->list_name,$request->tracking_list);
-                return $this->sendResponse($request->list_name, 'List created successfully.');
+            $this->createTrackingListTable($request->list_name,$request->tracking_list);
+            return $this->sendResponse($request->list_name, 'List created successfully.');
+        }
+        else{
+            return $this->sendError('Token error.');
+        }
+    }
+
+
+    public function getTrackingListNames(Request $request)
+    {
+        if ($this->checkToken($request->token) && $request->token) {
+            $input = $request->all();
+            $validator = Validator::make($input, [
+                'role' => 'required',
+                'name' => 'required'
+            ]);
+
+            if($validator->fails()){
+                return $this->sendError('Validation Error.', $validator->errors());       
             }
-            else{
-                return $this->sendError('This list name is exist!');
+
+            $role = $input['role'];
+            $name = $input['name'];
+
+            if ($role === 'admin' || $role === 'courier' || $role === 'agent') {
+                $result = TrackingList::pluck('list_name')->unique()->toArray();                
+            }
+            else return $this->sendError('Role error.');
+            
+            if ($result){
+                return $this->sendResponse($result, 'Tracking List Names retrieved successfully.');
             }
         }
         else{
@@ -745,6 +771,47 @@ class BaseController extends AdminController
             if ($result){
                 return $this->sendResponse($result, 'Checklist retrieved successfully.');
             }
+        }
+        else{
+            return $this->sendError('Token error.');
+        }
+    }
+
+
+    public function addChecksHistory(Request $request)
+    {
+        if ($this->checkToken($request->token) && $request->token) {
+            $input = $request->all();
+            $validator = Validator::make($input, [
+                'tracking' => 'required',
+                'value' => 'required'
+            ]);
+
+            if($validator->fails()){
+                return $this->sendError('Validation Error.', $validator->errors());       
+            }
+
+            $update_date = Date('Y-m-d H:i', strtotime('+3 houers'));
+            $result = DB::table('checks_history')->where('list_name','>',$update_date)->first();
+            
+            if ($result) {
+                $last = DB::table('checks_history')->orderBy('list_name', 'DESC')->first();
+                DB::table('checks_history')->insert([
+                    'tracking' => $request->tracking,
+                    'list_name' => $last->list_name,
+                    'value' => $request->value,
+                    'created_at' => date('Y-m-d H:i:s')
+                ]);
+            } else{
+                DB::table('checks_history')->insert([
+                    'tracking' => $request->tracking,
+                    'list_name' => date('Y-m-d H:i'),
+                    'value' => $request->value,
+                    'created_at' => date('Y-m-d H:i:s')
+                ]);
+            }            
+
+            return $this->sendResponse($request->tracking, 'List created successfully.');
         }
         else{
             return $this->sendError('Token error.');

@@ -8,11 +8,14 @@ use Illuminate\Database\Schema\Blueprint;
 use App\Imports\ChecklistImport;
 use App\Checklist;
 use Excel;
+use DB;
+use App\Exports\DataExport;
 
 class ChecklistController extends Controller
 {
     public function index()
     {
+        $update_date = Date('Y-m-d H:i', strtotime('+3 houers'));
         $title = 'Checklist';
         $checklist_obj = Checklist::paginate(10);
         return view('admin.checklist', compact('title','checklist_obj'));
@@ -49,6 +52,28 @@ class ChecklistController extends Controller
         } else {
             return redirect()->to(session('this_previous_url'))->with('status-error', 'File did not upload!');
         }
+    }
+
+
+    public function checksHistory()
+    {
+        $title = 'История';
+        $checks_history = DB::table('checks_history')->select('list_name')->groupBy('list_name')->get();
+        return view('admin.checks_history', compact('title','checks_history'));
+    }
+
+
+    public function exportChecksHistory(Request $request)
+    {
+        return Excel::download(new DataExport('checks_history',$request->list_name), 'checks_history_'.$request->list_name.'.csv');
+    }
+
+
+    public function destroy(Request $request)
+    {
+        $list_name = $request->action;
+        DB::table('checks_history')->where('list_name', $list_name)->delete();
+        return redirect()->to(session('this_previous_url'))->with('status', 'List deleted successfully!');
     }
 
 }

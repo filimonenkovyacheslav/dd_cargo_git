@@ -2073,8 +2073,17 @@ class Controller extends BaseController
         foreach ($data as $value) {
             $temp_arr[] = ['tracking'=>$value,'list_name'=>$list_name];
         }
-        DB::table('tracking_lists')->insert($temp_arr);
+        $result = DB::table('tracking_lists')
+        ->where([
+            ['tracking',$temp_arr[0]['tracking']],
+            ['list_name',$temp_arr[0]['list_name']]
+        ])
+        ->first();
 
+        if (!$result) {
+            DB::table('tracking_lists')->insert($temp_arr);
+        }
+        
         return true;        
     }
 

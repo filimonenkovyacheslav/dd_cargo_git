@@ -7,13 +7,14 @@ use Illuminate\Http\Request;
 use App\TrackingList;
 use App\Exports\TrackingListExport;
 use Excel;
+use DB;
 
 class TrackingListController extends AdminController
 {
     public function index()
     {
-        $title = 'Tracking lists';
-        $tracking_list_obj = TrackingList::paginate(10);
+        $title = 'Tracking lists';      
+        $tracking_list_obj = DB::table('tracking_lists')->select('list_name')->groupBy('list_name')->paginate(10);
         return view('admin.tracking_list.tracking_list', compact('title','tracking_list_obj'));
     }
 

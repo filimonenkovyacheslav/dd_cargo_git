@@ -2,23 +2,37 @@
 
 @section('content')
 
+<style type="text/css">
+	input[name="get_tracking"]::placeholder {
+		color: black;
+		font-weight: bold;
+		opacity: 1; /* Firefox */
+	}
+
+	::-ms-input-placeholder { /* Edge 12 -18 */
+		color: black;
+	}
+
+	.tracking-form button[type="submit"]:hover{
+		background-color: #0050ff;
+	}
+</style>
+
 	<section class="app-content page-bg">
 		<div class="container">
 			<div class="tracking-form">
-				<h2>חבילות לישראל | parcels to Israel | посилки до Ізраїлю | посылки в Израиль</h2>
-				<h2>חבילות מישראל | parcels from Israel | посилки з Ізраїлю | посылки из Израиля</h2> 
 
 				{!! Form::open(['url'=>route('getFullStatusParcel'), 'class'=>'form-horizontal','method' => 'POST']) !!}
 
                 <div class="form-group">
                     <div class="row">
                         <div class="col-md-6">
-                            {!! Form::text('get_tracking',old('get_tracking'),['class' => 'form-control', 'placeholder' => __('tracking.parcel_num'), 'required'])!!}
+                            <input type="text" name="get_tracking" class="form-control" placeholder="{{__('tracking.parcel_num')}}" required>
                         </div>
                     </div>
                 </div>
 
-                {!! Form::button(__('tracking.track_parcel'),['class'=>'btn','type'=>'submit']) !!}
+                {!! Form::button(__('tracking.track_parcel'),['class'=>'btn btn-primary','type'=>'submit']) !!}
 
                 <h1 class="tracking-result">Полный статус посылки:</h1>
 

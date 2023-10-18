@@ -51,7 +51,8 @@
 		<div class="row">
 			<div class="card" style="margin:15px">	
 				<div class="card-header">
-					<strong class="card-title">Full Status Parcel</strong>
+					<strong class="card-title">Link to Full Status Parcel: </strong>
+					<a href="{{route('fullStatusParcelForm')}}" class="card-title">{{route('fullStatusParcelForm')}}</a>
 				</div>
 				<div style="display:flex">
 

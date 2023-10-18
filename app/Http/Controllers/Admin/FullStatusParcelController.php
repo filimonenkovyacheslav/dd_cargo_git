@@ -31,14 +31,21 @@ class FullStatusParcelController extends AdminController
     {
         if ($request->hasFile('import_file')) {
             $file = $request->file('import_file');
-            $import = new DataImport('full_status_parcel');            
+            $import = new DataImport('full_status_parcel');     
+            
+            $array = Excel::toArray($import, $file); 
+            $result = $import->checkRows($array[0][0]);
+            if (!$result) {
+                return redirect()->to(session('this_previous_url'))->with('status-error', 'Fields "tracking_main" and "value" are required!');  
+            }
+
+            DB::table('full_status_parcel')->delete();       
+            
             Excel::import($import, $file);
             $result = $import->getRowCount();
 
-            if (!$result) {
-                return redirect()->to(session('this_previous_url'))->with('status-error', 'Fields "tracking_main" and "value" are required!');  
-            }   
-            elseif ($result === -1) {
+               
+            if ($result === -1) {
                 return redirect()->to(session('this_previous_url'))->with('status-error', 'Error! Unknown column found!');
             }
             else {

@@ -833,7 +833,14 @@ class BaseController extends AdminController
             return $this->sendError('Validation Error.', $validator->errors());       
         }
 
-        $this->createNewReceipt($input);
-        return $this->sendResponse($input, 'Receipt added successfully.');         
+        $jpg = $this->createNewReceipt($input);
+        if ($this->getDomainRule() !== 'forward') {
+            $text = 'קיבלה קבלה חדשה מחברת שליחויות בינלאומית, לצפייה לחצו כאן'.' '.$jpg;
+        }
+        elseif($this->getDomainRule() === 'forward'){
+            $text = 'קיבלה קבלה חדשה מחברת אוריינטל אקספרס 0559398039 ,לצפייה לחצו כאן'.' '.$jpg;
+        }
+        
+        return $this->sendResponse($text, 'Receipt added successfully.');        
     }
 }

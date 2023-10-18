@@ -2090,12 +2090,12 @@ class Controller extends BaseController
 
     public function sendSms($sender_phone, $link)
     {
-        $api = new \Zadarma_API\Api(env('SEND_SMS_KEY'), env('SEND_SMS_SECRET'));      
+        $api = new \Zadarma_API\Api(env('SEND_SMS_KEY'), env('SEND_SMS_SECRET'));             
         
         if ($this->getDomainRule() !== 'forward') {
             try{
                 $result = $api->sendSms($sender_phone, 'קיבלה קבלה חדשה מחברת שליחויות בינלאומית, לצפייה לחצו כאן'.' '.$link);
-                return $link;
+                return $result;
             } catch (\Zadarma_API\ApiException $e) {
                 return $e->getMessage();
             }
@@ -2103,7 +2103,7 @@ class Controller extends BaseController
         elseif($this->getDomainRule() === 'forward'){
             try{
                 $result = $api->sendSms($sender_phone, 'קיבלה קבלה חדשה מחברת אוריינטל אקספרס 0559398039 ,לצפייה לחצו כאן'.' '.$link);
-                return $link;
+                return $result;
             } catch (\Zadarma_API\ApiException $e) {
                 return $e->getMessage();
             }

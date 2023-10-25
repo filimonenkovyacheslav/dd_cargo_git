@@ -413,6 +413,7 @@ class SignedDocumentController extends Controller
         $document = SignedDocument::find($request->document_id);
         $result = $document->updateWorksheet($request);
         //$this->deleteTempTable($request->session_token);
+        //dd([$request,$document]);
         
         if ($result) {
 

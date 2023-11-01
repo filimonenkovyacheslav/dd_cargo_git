@@ -14,7 +14,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        $couriers_arr = User::whereIn('role',['courier','agent'])->pluck('email')->toArray();
+        $couriers_arr = User::whereIn('role',['courier','agent','courier_1','courier_2','courier_3','courier_4','courier_5','courier_6','courier_7'])->pluck('email')->toArray();
         $temp = [];
         for ($i=0; $i < count($couriers_arr); $i++) { 
             $t = explode('@', $couriers_arr[$i])[0];

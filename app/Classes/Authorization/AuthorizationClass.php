@@ -180,6 +180,27 @@ class AuthorizationClass extends Authorization
 			'courier' => [
 				'editCourierTasks'
 			],
+			'courier_1' => [
+				'editCourierTasks'
+			],
+			'courier_2' => [
+				'editCourierTasks'
+			],
+			'courier_3' => [
+				'editCourierTasks'
+			],
+			'courier_4' => [
+				'editCourierTasks'
+			],
+			'courier_5' => [
+				'editCourierTasks'
+			],
+			'courier_6' => [
+				'editCourierTasks'
+			],
+			'courier_7' => [
+				'editCourierTasks'
+			],
 			'viewer_eng' => [
 				'eng-view-post',
 			],			

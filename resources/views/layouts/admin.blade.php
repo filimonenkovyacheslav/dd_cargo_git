@@ -150,12 +150,6 @@
                         <a href="{{route('frontPages')}}"><i class="menu-icon fa fa-book "></i> Страницы сайта </a>
                     </li>
 
-                    @can('china-view-post')
-                    <li>
-                        <a href="{{route('adminChinaIndex')}}"><i class="menu-icon fa fa-book "></i> China admin </a>
-                    </li> 
-                    @endcan   
-
                     @can('eng-view-post')
                     <li>
                         <a href="{{route('adminPhilIndIndex')}}"><i class="menu-icon fa fa-book "></i> Philippines India admin </a>
@@ -209,6 +203,10 @@
                             <li><a href="{{route('checksHistory')}}"> История </a></li>
                             <li><a href="{{route('showFullStatusParcel')}}"> Full Status Parcel </a></li>
                         </ul>
+                    </li> 
+
+                    <li>
+                        <a href="{{route('adminArchive')}}"><i class="menu-icon fa fa-book "></i> Archive</a>
                     </li> 
                 
                 </ul>               

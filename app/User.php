@@ -29,7 +29,8 @@ class User extends Authenticatable
 
 
     public function isAdmin(){
-        if($this->role === 'admin' || $this->role === 'office_1' || $this->role === 'office_ru' || $this->role === 'warehouse' || $this->role === 'office_agent_ru' || $this->role === 'courier')
+        $courier_arr = array('courier', 'courier_1', 'courier_2', 'courier_3', 'courier_4', 'courier_5', 'courier_6', 'courier_7');
+        if($this->role === 'admin' || $this->role === 'office_1' || $this->role === 'office_ru' || $this->role === 'warehouse' || $this->role === 'office_agent_ru' || in_array($this->role, $courier_arr))
         {
             return true;
         } else{

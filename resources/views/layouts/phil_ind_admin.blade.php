@@ -144,13 +144,7 @@
                     <li>
                         <a href="{{route('adminIndex')}}"><i class="menu-icon fa fa-book "></i> Russian admin </a>
                     </li>
-                    @endcan  
-
-                    @can('china-view-post')
-                    <li>
-                        <a href="{{route('adminChinaIndex')}}"><i class="menu-icon fa fa-book "></i> China admin </a>
-                    </li>
-                    @endcan      
+                    @endcan     
 
                     @can('editCourierTasks')
                     <li>
@@ -200,6 +194,10 @@
                             <li><a href="{{route('showFullStatusParcel')}}"> Full Status Parcel </a></li>
                         </ul>
                     </li>
+
+                    <li>
+                        <a href="{{route('adminArchive')}}"><i class="menu-icon fa fa-book "></i> Archive</a>
+                    </li> 
                 
                 </ul>
             </div><!-- /.navbar-collapse -->

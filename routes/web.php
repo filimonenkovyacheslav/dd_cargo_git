@@ -205,6 +205,13 @@ Route::get('/home', 'HomeController@index')->name('home');
 */
 Route::group(['prefix' => 'admin','middleware' => 'auth'],function() {	
 
+	// Archive
+	Route::get('/archive',['uses' => 'Admin\ArchiveController@index','as' => 'adminArchive']);
+
+	Route::post('/to-archive',['uses' => 'Admin\ArchiveController@toArchive','as' => 'toArchive']);
+
+	Route::get('/archive-filter',['uses' => 'Admin\ArchiveController@archiveFilter','as' => 'archiveFilter']);
+
 	// New Receipts
 	Route::get('/new-receipts',['uses' => 'Admin\AdminController@showNewReceipts','as' => 'showNewReceipts']);
 

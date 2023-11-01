@@ -778,7 +778,7 @@ class SignedDocumentController extends Controller
             }
             else if($field === 'courier'){
                 $user = User::where('name',$request->user_name)->first();
-                $role_arr = ['agent','courier'];
+                $role_arr = ['agent','courier', 'courier_1', 'courier_2', 'courier_3', 'courier_4', 'courier_5', 'courier_6', 'courier_7'];
                 if ($user && in_array($user->role, $role_arr)) {
                     $user_name = explode('@', $user->email)[0];
                     $new_worksheet->$field = $user_name;
@@ -1061,7 +1061,7 @@ class SignedDocumentController extends Controller
             }
             else if($field === 'courier'){
                 $user = User::where('name',$request->user_name)->first();
-                $role_arr = ['agent','courier'];
+                $role_arr = ['agent','courier', 'courier_1', 'courier_2', 'courier_3', 'courier_4', 'courier_5', 'courier_6', 'courier_7'];
                 if ($user && in_array($user->role, $role_arr)) {
                     $user_name = explode('@', $user->email)[0];
                     $worksheet->$field = $user_name;

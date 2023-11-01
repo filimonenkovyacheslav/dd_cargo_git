@@ -1847,3 +1847,11 @@ $('table td.allowed-update.pdf-file').not('.td-checkbox, .td-button').click((e)=
             `)       
     }   
 })
+
+// Archive
+$('#import-data-button').click((e)=>{
+    $('#import-data').click()
+    $('#importDataModal').addClass('show')
+    $('#importDataModal').removeAttr('aria-hidden')
+    $('body').addClass('modal-open')
+})

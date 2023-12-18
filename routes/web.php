@@ -80,6 +80,10 @@ Route::group(['prefix' => App\Http\Middleware\LocaleMiddleware::getLocale()], fu
 	
 	Route::get('/parcel-form', 'FrontController@parcelForm')->name('parcelForm');
 
+	Route::get('/parcel-form-gcs', 'FrontController@parcelFormGcs')->name('parcelFormGcs');
+
+	Route::get('/phil-ind-parcel-form-gcs', 'FrontController@parcelFormEngGcs')->name('parcelFormEngGcs');
+
 	Route::post('/parcel-form', 'FrontController@newParcelAdd')->name('newParcelAdd');	
 
 	Route::get('/parcel-form-prior', 'FrontController@parcelFormOld')->name('parcelFormOld');
@@ -95,6 +99,14 @@ Route::group(['prefix' => App\Http\Middleware\LocaleMiddleware::getLocale()], fu
 	Route::post('/tracking-form', 'FrontController@getTracking')->name('getTracking');
 
 	Route::get('/tracking-ru-form', 'FrontController@trackingRuForm')->name('trackingRuForm');
+
+	Route::get('/tracking-ru-form-gcs', function () {
+		return view('tracking_ru_form_gcs');
+	})->name('trackingRuFormGcs');
+
+	Route::get('/tracking-form-gcs', function () {
+		return view('tracking_form_gcs');
+	})->name('trackingFormGcs');
 
 	Route::get('/china-parcel-form', 'FrontController@chinaParcelForm')->name('chinaParcelForm');
 
@@ -211,6 +223,20 @@ Route::group(['prefix' => 'admin','middleware' => 'auth'],function() {
 	Route::post('/to-archive',['uses' => 'Admin\ArchiveController@toArchive','as' => 'toArchive']);
 
 	Route::get('/archive-filter',['uses' => 'Admin\ArchiveController@archiveFilter','as' => 'archiveFilter']);
+
+	Route::post('/to-archive-remove-files',['uses' => 'Admin\ArchiveController@toArchiveRemoveFiles','as' => 'toArchiveRemoveFiles']);
+
+	Route::post('/to-archive-remove-data',['uses' => 'Admin\ArchiveController@toArchiveRemoveData','as' => 'toArchiveRemoveData']);
+
+	Route::post('/to-archive-remove-temp-data',['uses' => 'Admin\ArchiveController@toArchiveRemoveTempData','as' => 'toArchiveRemoveTempData']);
+
+	Route::post('/to-repeat-download-files',['uses' => 'Admin\ArchiveController@toRepeatDownloadFiles','as' => 'toRepeatDownloadFiles']);
+
+	Route::post('/to-repeat-import',['uses' => 'Admin\ArchiveController@toRepeatImport','as' => 'toRepeatImport']);
+
+	Route::get('/export-archive',['uses' => 'Admin\ArchiveController@exportArchive','as' => 'exportArchive']);
+
+	Route::post('/delete-from-archive',['uses' => 'Admin\ArchiveController@deleteFromArchive','as' => 'deleteFromArchive']);
 
 	// New Receipts
 	Route::get('/new-receipts',['uses' => 'Admin\AdminController@showNewReceipts','as' => 'showNewReceipts']);

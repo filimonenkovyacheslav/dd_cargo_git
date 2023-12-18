@@ -631,7 +631,7 @@ $('#tracking-columns').change((e)=>{
                <option value="DD-C">DD-C</option>                  
                <option value="For">For</option>
                <option value="ORE">ORE</option>
-                    
+               <option value="GCS">GCS</option>     
             </select>
             `)
     }

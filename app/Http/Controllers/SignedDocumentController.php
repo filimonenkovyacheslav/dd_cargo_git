@@ -18,6 +18,7 @@ use PDF;
 use DB;
 use Auth;
 use App\User;
+use App\Archive;
 
 
 class SignedDocumentController extends Controller
@@ -1172,6 +1173,8 @@ class SignedDocumentController extends Controller
         if (!$request->shipper_phone) {
             $request = $this->contentToObj($request);
         }
+
+        $user_name = $request->user_name;
         
         if (isset($request->draft)) {
             $data = CourierEngDraftWorksheet::where('standard_phone', 'like', '%'.$request->shipper_phone.'%')->get()->last();
@@ -1183,6 +1186,12 @@ class SignedDocumentController extends Controller
 
             if (!$data) {
                 $data = CourierEngDraftWorksheet::where('standard_phone', 'like', '%'.$request->shipper_phone.'%')->get()->last();
+            }
+
+            if (!$data) {
+                $archive_data = Archive::where([
+                    ['standard_phone', 'like', '%'.$request->shipper_phone.'%']
+                ])->get()->last();
             }
         }
         
@@ -1196,10 +1205,16 @@ class SignedDocumentController extends Controller
             $data_parcel = $this->fillResponseDataEng($data, $request, false, true);
             $data_parcel = json_encode($data_parcel);
 
-            return redirect('/form-with-signature-eng/'.$id.'/'.$token.'?data_parcel='.$data_parcel);
+            return redirect('/form-with-signature-eng/'.$id.'/'.$token.'/'.$user_name.'?data_parcel='.$data_parcel);
+        }
+        elseif ($archive_data) {
+            $data_parcel = $this->fillResponseDataArchiveEng($archive_data, $request, true);
+            $data_parcel = json_encode($data_parcel);
+
+            return redirect('/form-with-signature-eng/'.$id.'/'.$token.'/'.$user_name.'?data_parcel='.$data_parcel);
         }
         else{
-            return redirect('/form-with-signature-eng/'.$id.'/'.$token.'?no_phone='.$message);
+            return redirect('/form-with-signature-eng/'.$id.'/'.$token.'/'.$user_name.'?no_phone='.$message);
         }        
     }
 
@@ -1209,6 +1224,8 @@ class SignedDocumentController extends Controller
         if (!$request->sender_phone) {
             $request = $this->contentToObj($request);
         }
+
+        $user_name = $request->user_name;
 
         if (isset($request->draft)) {
             $data = CourierDraftWorksheet::where([
@@ -1229,6 +1246,12 @@ class SignedDocumentController extends Controller
                     ['standard_phone', 'like', '%'.$request->sender_phone.'%']
                 ])->get()->last();
             }
+
+            if (!$data) {
+                $archive_data = Archive::where([
+                    ['standard_phone', 'like', '%'.$request->sender_phone.'%']
+                ])->get()->last();
+            }
         }
 
         $message = 'Данный номер телефона в системе отсутствует';
@@ -1240,10 +1263,16 @@ class SignedDocumentController extends Controller
             $data_parcel = $this->fillResponseDataRu($data, $request, false, true);
             $data_parcel = json_encode($data_parcel);
 
-            return redirect('/form-with-signature/'.$id.'/'.$token.'?data_parcel='.$data_parcel);
+            return redirect('/form-with-signature/'.$id.'/'.$token.'/'.$user_name.'?data_parcel='.$data_parcel);
+        }
+        elseif ($archive_data) {
+            $data_parcel = $this->fillResponseDataArchiveRu($archive_data, $request, true);
+            $data_parcel = json_encode($data_parcel);
+
+            return redirect('/form-with-signature/'.$id.'/'.$token.'/'.$user_name.'?data_parcel='.$data_parcel);
         }
         else{
-            return redirect('/form-with-signature/'.$id.'/'.$token.'?no_phone='.$message);
+            return redirect('/form-with-signature/'.$id.'/'.$token.'/'.$user_name.'?no_phone='.$message);
         }        
     }
 

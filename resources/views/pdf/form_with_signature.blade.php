@@ -75,6 +75,11 @@
                                             {!! Form::text('sender_phone',old('sender_phone'),['class' => 'form-control', 'placeholder' => 'Phone*', 'required'])!!}
                                             {!! Form::hidden('quantity_sender')!!}
                                             {!! Form::hidden('quantity_recipient')!!}
+                                            @if (isset($user_name))  
+                                            {!! Form::hidden('user_name',$user_name) !!} 
+                                            @else
+                                            {!! Form::hidden('user_name','') !!}
+                                            @endif
                                         </div>
                                         <div class="col-md-6">
                                             {!! Form::button('Отправить',['class'=>'btn btn-success','type'=>'submit']) !!}
@@ -117,6 +122,11 @@
                                             {!! Form::hidden('quantity_sender')!!}
                                             {!! Form::hidden('quantity_recipient')!!}
                                             {!! Form::hidden('draft','draft')!!}
+                                            @if (isset($user_name))  
+                                            {!! Form::hidden('user_name',$user_name) !!} 
+                                            @else
+                                            {!! Form::hidden('user_name','') !!}
+                                            @endif
                                         </div>
                                         <div class="col-md-6">
                                             {!! Form::button('Отправить',['class'=>'btn btn-success','type'=>'submit']) !!}

@@ -15,6 +15,7 @@ use App\Http\Controllers\Admin\AdminController;
 use App\CourierDraftWorksheet;
 use App\CourierEngDraftWorksheet;
 use DB;
+use App\Archive;
 
 
 class FrontController extends AdminController
@@ -447,7 +448,9 @@ class FrontController extends AdminController
                     $new_worksheet->$field = $request->input('first_name').' '.$request->input('last_name');
                 }
                 else if($field === 'site_name'){
-                    if (str_contains($request->input('url_name'), 'forward'))
+                    if ($request->new_site === 'gcs-deliveries.com')
+                        $new_worksheet->$field = 'GCS';
+                    elseif (str_contains($request->input('url_name'), 'forward'))
                         $new_worksheet->$field = 'ORE';
                     else
                         $new_worksheet->$field = 'For';
@@ -792,6 +795,7 @@ class FrontController extends AdminController
         $message_arr['en'] = '';
         $message_arr['he'] = '';
         $message_arr['ua'] = '';
+        $message = '';
 
         $update_status_date = NewWorksheet::where('update_status_date','=', date('Y-m-d'))->get()->count();
         
@@ -891,7 +895,8 @@ class FrontController extends AdminController
                 }
             }
             $message_arr['ua'] = '';
-        }         
+            $message = $message_arr['en'];
+        }                
         
         return redirect()->route('trackingForm')
         ->with( 'message_ru', $message_arr['ru'] )
@@ -900,6 +905,73 @@ class FrontController extends AdminController
         ->with( 'message_ua', $message_arr['ua'] )
         ->with( 'not_found', 'not_found' )
         ->with( 'update_status_date', $update_status_date );        
+    }
+
+
+    public function getForwardTrackingEng(Request $request)
+    {
+        $tracking = $request->get_tracking;
+        $message_arr['ru'] = '';
+        $message_arr['en'] = '';
+        $message_arr['he'] = '';
+        $message_arr['ua'] = '';
+        $message = '';
+
+        if (stripos($tracking, 'T') !== false){
+            if (stripos($tracking, 'T-') === false) {
+                $tracking = preg_replace("/[^0-9]/", '', $tracking);
+                $tracking = 'T-'.$tracking;
+            }
+        }
+
+        $row = DB::table('phil_ind_worksheet')
+        ->select('status','status_he','status_ru')
+        ->where('tracking_main', '=', $tracking)
+        ->get();   
+
+        if (!$row->count())
+            $row = DB::table('courier_eng_draft_worksheet')
+        ->select('status','status_he','status_ru')
+        ->where('tracking_main', '=', $tracking)
+        ->get(); 
+
+        if (!$row->count())
+            $row = DB::table('phil_ind_worksheet')
+        ->select('status','status_he','status_ru')
+        ->where('packing_number', '=', $tracking)
+        ->get();  
+
+        if (!$row->count())
+            $row = DB::table('courier_eng_draft_worksheet')
+        ->select('status','status_he','status_ru')
+        ->where('packing_number', '=', $tracking)
+        ->get(); 
+
+        if ($row->count()) {
+            foreach ($row as $val) {
+                if ($val->status) {
+                    $message_arr['ru'] = $val->status_ru;
+                }
+                if ($val->status) {
+                    $message_arr['en'] = $val->status;
+                }
+                if ($val->status) {
+                    $message_arr['he'] = $val->status_he;
+                }
+            }
+        }
+        $message_arr['ua'] = '';
+        $message = $message_arr['en'];
+
+        if ($request->url_name) {
+            if ($message) {
+                return redirect($request->url_name.'?message='.$message);
+            }
+            else
+                return redirect($request->url_name.'?err_message=Not found');
+        } 
+        else
+            return redirect()->back();
     }
 
 
@@ -1035,6 +1107,26 @@ class FrontController extends AdminController
         $message = $this->__philIndParcelAdd($request);
         return redirect()->route('philIndParcelForm')->with('status', $message['message']);
     }
+
+
+    public function forwardParcelAddEng(Request $request)
+    {
+        $parcels_qty = (int)$request->parcels_qty;
+        $message = '';
+        if (!$request->phone_exist_checked) {
+            $message = $this->checkExistPhone($request,'courier_eng_draft_worksheet');
+            if ($message) {
+                return redirect($request->url_name.'?phone_exist='.$message.'&phone_number='.$request->input('standard_phone'));
+            }
+        }  
+        else{
+            $message = $this->__philIndParcelAdd($request);
+            return redirect($request->url_name.'?message='.$message);
+        }     
+        
+        $message = $this->__philIndParcelAdd($request);
+        return redirect($request->url_name.'?message='.$message);
+    }
     
 
     private function __philIndParcelAdd($request)
@@ -1148,7 +1240,10 @@ class FrontController extends AdminController
             $message['message'] = 'Saving error !';
         }
 
-        return $message;        
+        if ($request->url_name) 
+            return $message['message'];
+        else
+            return $message;        
     }
 
 
@@ -1339,6 +1434,13 @@ class FrontController extends AdminController
                     ['site_name', '=', 'DD-C']
                 ])->get()->last();
             }
+
+            if (!$data) {
+                $archive_data = Archive::where([
+                    ['standard_phone', 'like', '%'.$request->sender_phone.'%'],
+                    ['site_name', '=', 'DD-C']
+                ])->get()->last();
+            }
         }
         
         $message = 'Данный номер телефона в системе отсутствует';
@@ -1356,6 +1458,16 @@ class FrontController extends AdminController
             return redirect()->route('parcelForm', ['data_parcel' => $data_parcel])->with('add_parcel', $add_parcel)->with('data_parcel', json_encode($data_parcel));
             
         }
+        elseif ($archive_data) {
+            if ($request->draft) {
+                $data_parcel = $this->fillResponseDataArchiveRu($archive_data, $request, true);
+            }
+            else{
+                $data_parcel = $this->fillResponseDataArchiveRu($archive_data, $request);
+            }
+
+            return redirect()->route('parcelForm', ['data_parcel' => $data_parcel])->with('add_parcel', $add_parcel)->with('data_parcel', json_encode($data_parcel));
+        }
         else{
             return redirect()->route('parcelForm')->with('no_phone', $message);            
         }        
@@ -1366,8 +1478,10 @@ class FrontController extends AdminController
     {       
         if ($request->input('url_name')) {
 
-            if (str_contains($request->input('url_name'), 'forward'))
-                $site_name = 'ORE';
+            if ($request->new_site === 'gcs-deliveries.com')
+                $site_name = 'GCS';
+            elseif (str_contains($request->input('url_name'), 'forward'))
+                $site_name = 'ORE';            
             else
                 $site_name = 'For';
 
@@ -1394,6 +1508,13 @@ class FrontController extends AdminController
                         ['site_name', '=', $site_name]
                     ])->get()->last();
                 }
+
+                if (!$data) {
+                    $archive_data = Archive::where([
+                        ['standard_phone', 'like', '%'.$request->sender_phone.'%'],
+                        ['site_name', '=', $site_name]
+                    ])->get()->last();
+                }
             }
 
             $message = 'Данный номер телефона в системе отсутствует';
@@ -1403,8 +1524,6 @@ class FrontController extends AdminController
             else{
                 $data_parcel = '?';
             }
-
-            //dd($data);
 
             if ($data) {
                 if ($request->input('quantity_sender') === '1') {
@@ -1458,10 +1577,107 @@ class FrontController extends AdminController
                 }
                 return redirect($request->input('url_name').$data_parcel);
             }
+            elseif ($archive_data) {
+                if ($request->input('quantity_sender') === '1') {
+                    $sender_name = explode(" ", $archive_data->shipper_name);
+                    if (count($sender_name) > 1) {
+                        $data_parcel .= 'first_name='. $sender_name[0].'&';
+                        $data_parcel .= 'last_name='. $sender_name[1].'&';
+                    }
+                    elseif (count($sender_name) == 1) {
+                        $data_parcel .= 'first_name='. $sender_name[0].'&';
+                        $data_parcel .= 'last_name=&';
+                    }
+                    else{
+                        $data_parcel .= 'first_name=&';
+                        $data_parcel .= 'last_name=&';
+                    }
+                    $data_parcel .= 'sender_address='. $archive_data->shipper_address.'&';
+                    $data_parcel .= 'sender_city='. $archive_data->shipper_city.'&';
+                    $data_parcel .= 'sender_country='. $archive_data->shipper_country.'&';
+                    $data_parcel .= 'standard_phone=%2B'. ltrim($archive_data->standard_phone, " \+").'&';
+                    $data_parcel .= 'sender_phone='. $archive_data->shipper_phone.'&';
+                    $data_parcel .= 'sender_passport='.  $archive_data->passport_number.'&';
+                }
+                if ($request->input('quantity_recipient') === '1') {
+                    $recipient_name = explode(" ", $archive_data->consignee_name);
+                    if (count($recipient_name) > 1) {
+                        $data_parcel .= 'recipient_first_name='. $consignee_name[0].'&';
+                        $data_parcel .= 'recipient_last_name='. $consignee_name[1].'&';
+                    }
+                    elseif (count($recipient_name) == 1) {
+                        $data_parcel .= 'recipient_first_name='. $consignee_name[0].'&';
+                        $data_parcel .= 'recipient_last_name=&';
+                    }
+                    else{
+                        $data_parcel .= 'recipient_first_name=&';
+                        $data_parcel .= 'recipient_last_name=&';
+                    }
+                    $data_parcel .= 'recipient_street='.  $archive_data->recipient_street.'&';
+                    $data_parcel .= 'recipient_house='. $archive_data->house_name.'&';
+                    $data_parcel .= 'recipient_room='.  $archive_data->recipient_room.'&';
+                    $data_parcel .= 'recipient_postcode='. $archive_data->post_office.'&';
+                    $data_parcel .= 'recipient_country='. $archive_data->consignee_country.'&';
+                    $data_parcel .= 'recipient_phone='. $archive_data->consignee_phone.'&';
+                    $data_parcel .= 'recipient_passport='.  $archive_data->consignee_id.'&';
+                    $data_parcel .= 'body='. $archive_data->body.'&';
+                    $data_parcel .= 'region='.  $archive_data->region;
+                }
+                return redirect($request->input('url_name').$data_parcel);
+            }
             else{
                 return redirect($request->input('url_name').'?err_message='.$message);
             }  
         }
+    }
+
+
+    public function forwardCheckPhoneEng(Request $request)
+    {
+        if (!$request->url_name) return redirect()->back();
+        
+        $data = PhilIndWorksheet::where('shipper_phone',$request->shipper_phone)
+        ->orWhere('standard_phone', 'like', '%'.$request->shipper_phone.'%')
+        ->get()->last();
+
+        if (!$data) {
+            $data = CourierEngDraftWorksheet::where('standard_phone', 'like', '%'.$request->shipper_phone.'%')->get()->last();
+        }
+
+        if (!$data) {
+            $archive_data = Archive::where([
+                ['standard_phone', 'like', '%'.$request->shipper_phone.'%']
+            ])->get()->last();
+        }
+        
+        $message = 'This phone number is not available in the system';
+        $add_parcel = 'true';
+        $data_parcel = [];
+
+        if ($data) {
+            if ($request->draft) {
+                $data_parcel = $this->fillResponseDataEng($data, $request, false, true);
+            }
+            else{
+                $data_parcel = $this->fillResponseDataEng($data, $request);
+            }
+
+            return redirect($request->url_name.'?'.http_build_query($data_parcel));
+            
+        }
+        elseif ($archive_data) {
+            if ($request->draft) {
+                $data_parcel = $this->fillResponseDataArchiveEng($archive_data, $request, false, true);
+            }
+            else{
+                $data_parcel = $this->fillResponseDataArchiveEng($archive_data, $request);
+            }
+
+            return redirect($request->url_name.'?'.http_build_query($data_parcel));
+        }
+        else{
+            return redirect($request->url_name.'?err_message='.$message);
+        }  
     }
 
 
@@ -1478,6 +1694,12 @@ class FrontController extends AdminController
             if (!$data) {
                 $data = CourierEngDraftWorksheet::where('standard_phone', 'like', '%'.$request->shipper_phone.'%')->get()->last();
             }
+
+            if (!$data) {
+                $archive_data = Archive::where([
+                    ['standard_phone', 'like', '%'.$request->shipper_phone.'%']
+                ])->get()->last();
+            }
         }
         
         $message = 'This phone number is not available in the system';
@@ -1490,6 +1712,16 @@ class FrontController extends AdminController
             }
             else{
                 $data_parcel = $this->fillResponseDataEng($data, $request);
+            }
+
+            return redirect()->route('philIndParcelForm', ['data_parcel' => $data_parcel])->with('add_parcel', $add_parcel)->with('data_parcel', json_encode($data_parcel));
+        }
+        elseif ($archive_data) {
+            if ($request->draft) {
+                $data_parcel = $this->fillResponseDataArchiveEng($archive_data, $request, false, true);
+            }
+            else{
+                $data_parcel = $this->fillResponseDataArchiveEng($archive_data, $request);
             }
 
             return redirect()->route('philIndParcelForm', ['data_parcel' => $data_parcel])->with('add_parcel', $add_parcel)->with('data_parcel', json_encode($data_parcel));

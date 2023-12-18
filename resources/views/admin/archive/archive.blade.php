@@ -23,15 +23,16 @@
 
 <div class="content mt-3">
 	<div class="animated fadeIn">
-		@can('editPost')
+		
 		<div class="row">
 			<div class="col-md-12">
+				@can('update-user')
 				<a id="import-data-button" style="margin-bottom: 20px;" class="btn btn-primary">Import Data</a>
-				<a href="" style="margin-bottom: 20px;" class="btn btn-success">Export to Excel</a>
+				@endcan
+				<a href="{{ route('exportArchive') }}" style="margin-bottom: 20px;" class="btn btn-success">Export to Excel</a>
 			</div>
 		</div>		
-		@endcan
-		
+				
 		<div class="row">
 			<div class="col-md-12">
 				<div class="card">
@@ -64,6 +65,7 @@
 									<option value="direction">Direction</option>
 									<option value="status">Status</option>
 									<option value="status_date">Status Date</option>
+									<option value="order_date">Order Date</option>
 									<option value="tracking_main">Main Tracking number</option>
 									<option value="tracking_local">Local tracking number</option>
 									<option value="pallet_number">Pallet number</option>
@@ -126,6 +128,7 @@
 										<th>Tariff</th>
 										<th>Status</th>
 										<th>Status Date</th>
+										<th>Order Date</th>
 										<th>Partner</th>
 										<th>Main Tracking number</th> 
 										<th>Parcels qty</th>
@@ -216,6 +219,9 @@
 										</td>
 										<td title="{{$row->status_date}}">
 											<div class="div-3">{{$row->status_date}}</div>
+										</td>
+										<td title="{{$row->order_date}}">
+											<div class="div-3">{{$row->order_date}}</div>
 										</td>
 										<td title="{{$row->partner}}">
 											<div class="div-3">{{$row->partner}}</div>
@@ -373,6 +379,23 @@
 				</div>
 			</div><!-- .col-md-12 -->
 		</div><!-- .row -->		
+
+		@can('update-user')
+		<div class="row">
+			<div class="col-md-12">
+				<form action="{{ route('deleteFromArchive') }}" method="POST">
+					@csrf
+					<label class="control-label">Date from which the data will be deleted
+						<input class="form-control" type="date" name="from_date" required>
+					</label>
+					<label class="control-label">Date by which the data will be deleted
+						<input class="form-control" type="date" name="to_date" required>
+					</label>
+					<button type="submit" onclick="return ConfirmDelete()" style="font-size:.8rem" class="btn btn-danger">Delete archive</button>
+				</form>
+			</div>
+		</div>		
+		@endcan
 		
 	</div><!-- .animated -->
 </div><!-- .content -->
@@ -389,7 +412,7 @@
 					<span aria-hidden="true">&times;</span>
 				</button>
 			</div>
-			<form action="{{ route('toArchive') }}" method="POST">
+			<form id="download-form" action="{{ route('toArchive') }}" method="POST">
 				@csrf
 				<div class="modal-body">
 					<div class="form-group">
@@ -405,11 +428,64 @@
 					</div>					
 				</div>
 				<div class="modal-footer">
-					<button type="submit" class="btn btn-primary" style="font-size:.8rem">Import</button>
+					<button id="download-btn" type="submit" class="btn btn-primary" style="font-size:.8rem" <?=($temp_archive_data)?'disabled':''?>>Download packing lists and Create archive</button>
+				</div>
+			</form>
+
+			<form action="{{ route('toRepeatDownloadFiles') }}" method="POST">
+				@csrf
+				<div class="modal-footer">
+					<button type="submit" class="btn btn-success" style="font-size:.8rem" <?=(!$temp_archive_data)?'disabled':''?>>Repeat the last download</button>
+				</div>
+			</form>
+
+			<form action="{{ route('toRepeatImport') }}" method="POST">
+				@csrf
+				<div class="modal-footer">
+					<button type="submit" class="btn btn-success" style="font-size:.8rem" <?=(!$temp_archive_data)?'disabled':''?>>Repeated record to archive</button>
+				</div>
+			</form>
+
+			<form action="{{ route('toArchiveRemoveFiles') }}" method="POST">
+				@csrf
+				<div class="modal-footer">
+					<button type="submit" onclick="return ConfirmDelete()" class="btn btn-danger" style="font-size:.8rem" <?=(!$temp_archive_data)?'disabled':''?>>Remove temporary files</button>
+				</div>
+			</form>
+
+			<form action="{{ route('toArchiveRemoveData') }}" method="POST">
+				@csrf
+				<div class="modal-footer">
+					<button type="submit" onclick="return ConfirmDelete()" class="btn btn-danger" style="font-size:.8rem" <?=(!$temp_archive_data)?'disabled':''?>>Remove old data</button>
+				</div>
+			</form>
+
+			<form action="{{ route('toArchiveRemoveTempData') }}" method="POST">
+				@csrf
+				<div class="modal-footer">
+					<button type="submit" onclick="return ConfirmDelete()" class="btn btn-danger" style="font-size:.8rem" <?=(!$temp_archive_data)?'disabled':''?>>Remove archive cache</button>
 				</div>
 			</form>
 		</div>
 	</div>
+
+	<script type="text/javascript">
+		document.getElementById("download-form").addEventListener("submit", ()=>{
+			document.getElementById("download-btn").disabled = true;
+			setTimeout(()=>{
+				location.reload()
+			}, 5000)		
+		});
+		
+		function ConfirmDelete()
+		{
+			var x = confirm("Are you sure you want to delete?");
+			if (x)
+				return true;
+			else
+				return false;
+		}
+	</script>
 </div>
 <!-- End Modal -->
 

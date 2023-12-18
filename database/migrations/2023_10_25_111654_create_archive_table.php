@@ -23,6 +23,7 @@ class CreateArchiveTable extends Migration
             $table->string('tariff', 20)->nullable();
             $table->string('status')->nullable();    
             $table->string('status_date', 20)->nullable(); 
+            $table->string('order_date')->nullable();
             $table->string('partner', 20)->nullable();     
             $table->string('tracking_main')->nullable();
             $table->string('parcels_qty')->default('1');

@@ -45,10 +45,14 @@ Route::post('/add-courier-data', 'API\BaseController@addCourierData')->name('add
 // get shipment qty by batch number
 Route::get('/get-shipment-qty-by-batch-number', 'API\BaseController@getShipmentQtyByBatchNumber')->name('getShipmentQtyByBatchNumber');
 
-// https://union-il.com/
+// https://union-il.com/ https://www.forward-post.com/
 Route::get('/forward-parcel-form', 'FrontController@forwardParcelAdd')->name('forwardParcelAdd');
 Route::get('/forward-tracking-form', 'FrontController@getForwardTracking')->name('getForwardTracking');
 Route::get('/forward-check-phone', 'FrontController@forwardCheckPhone')->name('forwardCheckPhone');
+
+Route::get('/forward-parcel-form-eng', 'FrontController@forwardParcelAddEng')->name('forwardParcelAddEng');
+Route::get('/forward-tracking-form-eng', 'FrontController@getForwardTrackingEng')->name('getForwardTrackingEng');
+Route::get('/forward-check-phone-eng', 'FrontController@forwardCheckPhoneEng')->name('forwardCheckPhoneEng');
 
 // Check phone in draft
 Route::post('/parcel-form-check', 'FrontController@checkAvailabilityPhone');
@@ -83,6 +87,9 @@ Route::post('/add-checks-history', 'API\BaseController@addChecksHistory')->name(
 // PDF for simple users
 Route::get('/add-new-signed-form-for-user', 'API\BaseController@addNewSignedFormForUser');
 Route::get('/add-new-signed-form-for-user-eng', 'API\BaseController@addNewSignedFormForUserEng');
+
+// Zip
+Route::get('/download-zip','ZipController@downloadZipPdf')->name('downloadZipPdf');
 
 // Crone
 Route::get('/ru-postal-tracking-cron', 'RuPostalTrackingController@cronScript')->name('cronScript');

@@ -5,18 +5,15 @@ namespace App;
 use Illuminate\Database\Eloquent\Model;
 use App\NewWorksheet;
 use App\PhilIndWorksheet;
-use App\NewPacking;
-use App\Invoice;
-use App\Manifest;
-use App\PackingEngNew;
-use App\ReceiptArchive;
-use App\CourierTask;
+use DB;
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Database\Schema\Blueprint;
 
 
 class Archive extends BaseModel
 {   
     protected $table = 'archive';
-    protected $fillable = ['tracking_main', 'status', 'status_date', 'status_ru', 'status_he', 'operator','date','direction','tracking_local','pallet_number','comments_1','comments_2','shipper_name', 'shipper_city','passport_number','return_date','shipper_address','standard_phone','shipper_phone','shipper_id','consignee_name','house_name','post_office','district','state_pincode','consignee_address','consignee_phone','consignee_id','shipped_items','shipment_val','courier','delivery_date_comments','weight','width','height','length','volume_weight','lot','payment_date_comments','amount_payment','status_date','shipper_country','consignee_country','parcels_qty','site_name','tariff','partner','region','body','recipient_street','quantity_things','status_ua','recipient_room','table_name','worksheet_id'];
+    protected $fillable = ['tracking_main', 'status', 'status_date', 'status_ru', 'status_he', 'operator','date','direction','tracking_local','pallet_number','comments_1','comments_2','shipper_name', 'shipper_city','passport_number','return_date','shipper_address','standard_phone','shipper_phone','shipper_id','consignee_name','house_name','post_office','district','state_pincode','consignee_address','consignee_phone','consignee_id','shipped_items','shipment_val','courier','delivery_date_comments','weight','width','height','length','volume_weight','lot','payment_date_comments','amount_payment','status_date','shipper_country','consignee_country','parcels_qty','site_name','tariff','partner','region','body','recipient_street','quantity_things','status_ua','recipient_room','table_name','worksheet_id','order_date'];
 
 
     /**
@@ -31,32 +28,48 @@ class Archive extends BaseModel
 
         switch($table) {
             case 'new_worksheet';
-                $id_arr = NewWorksheet::where([
-                    ['order_date',null],
-                    ['date','<',$date]
+                $id_arr = NewWorksheet::where([                   
+                    ['order_date','<>',null],
+                    [DB::raw("STR_TO_DATE(order_date, '%Y-%m-%d')"),'<=',$date]
                 ])
                 ->orWhere([
-                    ['order_date','<>',null],
-                    ['order_date','<',$date]
+                    [DB::raw("STR_TO_DATE(date, '%Y-%m-%d')"),'<=',$date]
+                ])
+                ->orWhere([
+                    [DB::raw("STR_TO_DATE(date, '%Y.%m.%d')"),'<=',$date]
                 ])
                 ->pluck('id')->toArray();
                 break;
             case 'phil_ind_worksheet';
-                $id_arr = PhilIndWorksheet::where([
-                    ['order_date',null],
-                    ['date','<',$date]
+                $id_arr = PhilIndWorksheet::where([                    
+                    ['order_date','<>',null],
+                    [DB::raw("STR_TO_DATE(order_date, '%Y-%m-%d')"),'<=',$date]
                 ])
                 ->orWhere([
-                    ['order_date','<>',null],
-                    ['order_date','<',$date]
+                    [DB::raw("STR_TO_DATE(date, '%Y-%m-%d')"),'<=',$date]
+                ])
+                ->orWhere([
+                    [DB::raw("STR_TO_DATE(date, '%Y.%m.%d')"),'<=',$date]
                 ])
                 ->pluck('id')->toArray();
                 break;      
             default:
             break;
         }
-//dd($id_arr);
         
+        for ($i=0; $i < count($id_arr); $i++) { 
+            $new_archive = new Archive();
+            $this->__createArchive($table, $new_archive, $id_arr[$i]);
+        }
+        return $id_arr;                                         
+    }
+
+
+    /**
+    * Create archive.
+    */
+    public function repeatCreateArchive($table, $id_arr)
+    {
         for ($i=0; $i < count($id_arr); $i++) { 
             $new_archive = new Archive();
             $this->__createArchive($table, $new_archive, $id_arr[$i]);
@@ -142,6 +155,7 @@ class Archive extends BaseModel
         $new_archive->direction = $worksheet->direction;
         $new_archive->status = $worksheet->status;
         $new_archive->status_date = $worksheet->status_date;
+        $new_archive->order_date = $worksheet->order_date;
         $new_archive->tracking_main = $worksheet->tracking_main;
         $new_archive->tracking_local = $worksheet->tracking_local;
         $new_archive->pallet_number = $worksheet->pallet_number;
@@ -160,24 +174,67 @@ class Archive extends BaseModel
     }
 
 
-    public function removeСompletely($id, $table)
-    {                   
-        switch($table) {
-            case 'new_worksheet';
-                NewWorksheet::find($id)->delete();
-                NewPacking::where('work_sheet_id', $id)->delete();
-                Invoice::where('work_sheet_id', $id)->delete();
-                Manifest::where('work_sheet_id', $id)->delete();
-                ReceiptArchive::where('worksheet_id', $id)->delete();
-                break;
-            case 'phil_ind_worksheet';
-                PhilIndWorksheet::find($id)->delete();
-                PackingEngNew::where('work_sheet_id', $id)->delete();
-                ReceiptArchive::where('worksheet_id', $id)->delete();
-                break;     
-            default:
-                break;
-        }
+    public function createTempArchiveDataTable($archive_ids,$archive_table,$files_folder)
+    {
+        if (!Schema::hasTable('temp_archive_table')) {
+            Schema::create('temp_archive_table', function (Blueprint $table) {
+                $table->increments('id');
+                $table->text('archive_ids');
+                $table->string('archive_table');
+                $table->string('files_folder')->nullable();
+                $table->timestamps();
+            });
+            DB::table('temp_archive_table')->insert([
+                'archive_ids'=>json_encode($archive_ids),
+                'archive_table'=>$archive_table,
+                'files_folder'=>$files_folder
+            ]); 
+            return true;
+        } 
+        else return false;
     }
 
+
+    public function getTempArchiveDataTable()
+    {
+        if (Schema::hasTable('temp_archive_table')) {            
+            return DB::table('temp_archive_table')->first();
+        } 
+        else return false;
+    }
+
+
+    public function deleteTempArchiveDataTable()
+    {
+        if (Schema::hasTable('temp_archive_table')) {
+            Schema::dropIfExists('temp_archive_table'); 
+            return true;
+        } 
+        else return false;
+    }
+
+
+    public function deleteArchive($from_date, $to_date)
+    {
+        $result = Archive::where([                   
+            ['order_date','<>',null],
+            [DB::raw("STR_TO_DATE(order_date, '%Y-%m-%d')"),'<=',$to_date],
+            [DB::raw("STR_TO_DATE(order_date, '%Y-%m-%d')"),'>=',$from_date]
+        ])
+        ->orWhere([                   
+            [DB::raw("STR_TO_DATE(date, '%Y-%m-%d')"),'<=',$to_date],
+            [DB::raw("STR_TO_DATE(date, '%Y-%m-%d')"),'>=',$from_date]
+        ])
+        ->orWhere([
+            [DB::raw("STR_TO_DATE(date, '%Y.%m.%d')"),'<=',$to_date],
+            [DB::raw("STR_TO_DATE(date, '%Y.%m.%d')"),'>=',$from_date]
+        ])
+        ->pluck('id')->toArray();
+
+        if ($result) {
+            Archive::whereIn('id',$result)->delete();
+        }
+
+        return $result;
+    }
 }

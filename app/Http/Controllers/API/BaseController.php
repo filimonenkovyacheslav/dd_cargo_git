@@ -847,7 +847,21 @@ class BaseController extends AdminController
             $text = 'קיבלה קבלה חדשה מחברת שליחויות בינלאומית, לצפייה לחצו כאן'.' '.$jpg;
         }
         elseif($this->getDomainRule() === 'forward'){
-            $text = 'קיבלה קבלה חדשה מחברת אוריינטל אקספרס 0559398039 ,לצפייה לחצו כאן'.' '.$jpg;
+            if (isset($input['country']) && $input['country']) {
+                $country = $input['country'];
+            }
+            else {
+                $result = PhilIndWorksheet::where('tracking_main',$input['tracking'])->first();
+                $country = $result ? $result->consignee_country : '';
+            }
+
+            if ($country === 'India') {
+                $text = 'קיבלה קבלה חדשה מחברת דזי.סי.אס.דיליברי 0559912684 ,לצפייה לחצו כאן'.' '.$jpg;
+            }
+            else{
+                $text = 'קיבלה קבלה חדשה מחברת אוריינטל אקספרס 0559398039 ,לצפייה לחצו כאן'.' '.$jpg;
+            }
+            
         }
         
         return $this->sendResponse($text, 'Receipt added successfully.');        

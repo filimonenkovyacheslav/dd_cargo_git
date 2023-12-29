@@ -341,7 +341,7 @@ class Controller extends BaseController
 
     protected function getDomainRule()
     {
-        $domain = $_SERVER['SERVER_NAME'];
+        $domain = url()->current();
         if (strripos($domain, 'forward-post') !== false) return 'forward';
         else return 'ddcargos';
     }
@@ -362,7 +362,8 @@ class Controller extends BaseController
                     $pdf = PDF::loadView('pdf.pdfview',compact('worksheet','document','tracking','cancel'));
                 }
                 elseif($this->getDomainRule() === 'forward'){
-                    $pdf = PDF::loadView('pdf.pdfview_forward',compact('worksheet','document','tracking','cancel'));
+                    $brand = $worksheet->consignee_country !== 'India' ? 'ORIENTAL EXPRESS' : 'GCS-DELIVERIES';
+                    $pdf = PDF::loadView('pdf.pdfview_forward',compact('worksheet','document','tracking','cancel','brand'));
                 }
             }
             else{

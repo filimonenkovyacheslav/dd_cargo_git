@@ -1607,9 +1607,21 @@ class AdminController extends Controller
 	{
 		$phone = str_replace('+', '', $receipt['senderPhone']);
 		$tracking = $receipt['tracking'];
+		
+		$country = '';
+		if($this->getDomainRule() === 'forward'){
+			if (isset($receipt['country']) && $receipt['country']) {
+				$country = $receipt['country'];
+			}
+			else {
+				$result = PhilIndWorksheet::where('tracking_main',$tracking)->first();
+				$country = $result ? $result->consignee_country : '';
+			}
+		}
+		
 		$date = date('Y-m-d');
 		$name = str_replace('-', '_', $date).'_'.$tracking;
-		$link = $this->savePdfReceipt($receipt, $name, $date);
+		$link = $this->savePdfReceipt($receipt, $name, $date, $country);
 		
 		if (!Schema::hasTable('new_receipts')){
 			Schema::create('new_receipts', function (Blueprint $table) {
@@ -1653,7 +1665,7 @@ class AdminController extends Controller
     }
 
 
-    public function savePdfReceipt($receipt, $name, $date)
+    public function savePdfReceipt($receipt, $name, $date, $country)
     {
         $folderPath = $this->checkDirectory('receipts_'.date("Y_m"));       
         $file_name = $name.'.pdf';
@@ -1661,7 +1673,12 @@ class AdminController extends Controller
             $pdf = ArPDF::loadView('pdf.pdfview_receipt',compact('receipt','date'));
         }
         elseif($this->getDomainRule() === 'forward'){
-            $pdf = ArPDF::loadView('pdf.pdfview_receipt_eng',compact('receipt','date'));
+        	if ($country === 'India') {
+        		$pdf = ArPDF::loadView('pdf.pdfview_receipt_eng_ind',compact('receipt','date'));
+        	}
+        	else{
+        		$pdf = ArPDF::loadView('pdf.pdfview_receipt_eng',compact('receipt','date'));
+        	}            
         }
         
         $pdf->save($folderPath.$file_name);
